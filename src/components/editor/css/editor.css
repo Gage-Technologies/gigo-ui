@@ -1,0 +1,34 @@
+.overflow-guard {
+    border-radius: 10px;
+}
+
+.yaml-editor {
+    border-radius: 10px;
+}
+
+.monaco-editor {
+    border-radius: 10px;
+    box-shadow: 0 1px 3px -3px rgba(0,0,0,0.3),0 1px 3px 0 rgba(0,0,0,0.3),0 3px 9px 0 rgba(0,0,0,0.3);
+}
+
+.slider {
+    border-radius: 4px;
+}
+
+.minimap-decorations-layer {
+    border-radius: 10px;
+}
+
+.editor-widget {
+    border-radius: 10px;
+    box-shadow: 0 6px 3px -3px rgba(0,0,0,0.3),0 1px 3px 0 rgba(0,0,0,0.3),0 3px 9px 0 rgba(0,0,0,0.3);
+}
+
+.editor-widget . {
+    border-radius: 10px;
+    box-shadow: 0 6px 3px -3px rgba(0,0,0,0.3),0 1px 3px 0 rgba(0,0,0,0.3),0 3px 9px 0 rgba(0,0,0,0.3);
+}
+
+.monaco-editor .find-widget .monaco-sash {
+    background-color: transparent !important;
+}

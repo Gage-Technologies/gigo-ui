@@ -1,0 +1,94 @@
+/* 2048 */
+@keyframes pop {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes appear {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.arcade-2048-tile.new {
+    transition: none;
+    opacity: 0;
+    animation: appear 200ms ease 100ms;
+    animation-fill-mode: forwards;
+}
+
+.arcade-2048-tile.merged .arcade-2048-tile-inner {
+    z-index: 4;
+    width: 100%;
+    height: 100%;
+    background-color: inherit;
+    border-radius: inherit;
+    animation: pop 100ms ease 100ms;
+    animation-fill-mode: backwards;
+}
+
+.arcade-2048-tile {
+    transition: transform 100ms ease-in-out, background-color 50ms ease 200ms, color 50ms ease 200ms;
+    z-index: 3;
+}
+
+.arcade-2048-tile, .arcade-2048-tile-background {
+    position: absolute;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 101px;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    cursor: default;
+    font-weight: 700;
+    border-radius: 5px;
+}
+
+.arcade-2048-tile-background {
+    background-color: #9B9B9B;
+    z-index: 2;
+}
+
+.arcade-2048-score {
+    font-size: 2.2rem;
+}
+
+.arcade-2048-sidecol {
+    position: absolute;
+    left: max(4vw, 10px);
+    top: calc(120px + (100vh - 120px) / 2 - 12rem / 2);
+    height: 12rem;
+    width: 10rem;
+}
+
+.arcade-2048-game {
+    /*position: absolute;*/
+    /*margin-top: 20px;*/
+    /*transform-origin: top left;*/
+    transform-origin: top;
+    border-radius: 5px;
+    background: #1D1D1B;
+    z-index: 1;
+}
+
+.arcade-2048-title {
+    margin-top: 10px;
+}
+
+.arcade-2048-title-inner {
+    padding: 0 15px;
+    line-height: 38px;
+    vertical-align: middle;
+}

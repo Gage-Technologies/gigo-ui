@@ -1,0 +1,61 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-gigoui-dev-64457-authRole",
+      "UnauthRoleArn": "arn:aws:iam::371235087415:role/amplify-gigoui-dev-64457-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::371235087415:role/amplify-gigoui-dev-64457-authRole",
+      "Region": "us-west-1",
+      "DeploymentBucketName": "amplify-gigoui-dev-64457-deployment",
+      "UnauthRoleName": "amplify-gigoui-dev-64457-unauthRole",
+      "StackName": "amplify-gigoui-dev-64457",
+      "StackId": "arn:aws:cloudformation:us-west-1:371235087415:stack/amplify-gigoui-dev-64457/ff7bf310-3a97-11ee-a692-061f67b3c699",
+      "AmplifyAppId": "dkykzytbsm7bz"
+    }
+  },
+  "prod": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-gigoui-prod-64722-authRole",
+      "UnauthRoleArn": "arn:aws:iam::371235087415:role/amplify-gigoui-prod-64722-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::371235087415:role/amplify-gigoui-prod-64722-authRole",
+      "Region": "us-west-1",
+      "DeploymentBucketName": "amplify-gigoui-prod-64722-deployment",
+      "UnauthRoleName": "amplify-gigoui-prod-64722-unauthRole",
+      "StackName": "amplify-gigoui-prod-64722",
+      "StackId": "arn:aws:cloudformation:us-west-1:371235087415:stack/amplify-gigoui-prod-64722/558c1d70-3a98-11ee-b9d4-06981a881177",
+      "AmplifyAppId": "dkykzytbsm7bz"
+    },
+    "categories": {
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "dkykzytbsm7bz",
+          "type": "manual"
+        }
+      }
+    }
+  },
+  "prodtwo": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-gigoui-prodtwo-92635-authRole",
+      "UnauthRoleArn": "arn:aws:iam::371235087415:role/amplify-gigoui-prodtwo-92635-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::371235087415:role/amplify-gigoui-prodtwo-92635-authRole",
+      "Region": "us-west-1",
+      "DeploymentBucketName": "amplify-gigoui-prodtwo-92635-deployment",
+      "UnauthRoleName": "amplify-gigoui-prodtwo-92635-unauthRole",
+      "StackName": "amplify-gigoui-prodtwo-92635",
+      "StackId": "arn:aws:cloudformation:us-west-1:371235087415:stack/amplify-gigoui-prodtwo-92635/3499cc30-5a1d-11ee-be04-02257a0d0423",
+      "AmplifyAppId": "dkykzytbsm7bz"
+    },
+    "categories": {
+      "hosting": {
+        "amplifyhosting": {
+          "appId": "dkykzytbsm7bz",
+          "type": "manual"
+        },
+        "S3AndCloudFront": {}
+      },
+      "auth": {
+        "gigouie8c62ef0": {}
+      }
+    }
+  }
+}

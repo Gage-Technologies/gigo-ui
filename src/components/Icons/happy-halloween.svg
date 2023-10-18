@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="383.46106mm"
+   height="248.21747mm"
+   viewBox="0 0 383.46107 248.21747"
+   version="1.1"
+   id="svg19202"
+   xmlns="http://www.w3.org/2000/svg"
+>
+  <defs
+     id="defs19199">
+    <filter
+       style="color-interpolation-filters:sRGB"
+       id="filter19512"
+       x="-0.18429227"
+       y="-0.21843591"
+       width="1.3685845"
+       height="1.4368718">
+      <feGaussianBlur
+         stdDeviation="14.6514 15.7227"
+         result="blur"
+         id="feGaussianBlur19510" />
+    </filter>
+  </defs>
+  <g
+     id="layer1"
+     transform="translate(112.00819,-9.7005805)">
+    <ellipse
+       style="fill:#f9af1c;fill-opacity:1;stroke:none;stroke-width:1.45685"
+       id="path19228-2"
+       cx="86.728249"
+       cy="133.45529"
+       rx="120.53455"
+       ry="106.90585" />
+    <ellipse
+       style="fill:#ffe88b;fill-opacity:1;stroke:none;stroke-width:1.165;filter:url(#filter19512)"
+       id="path19228"
+       cx="87.259247"
+       cy="-133.80931"
+       rx="95.40107"
+       ry="86.37426"
+       transform="scale(1,-1)" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:35.7062px;line-height:1.25;font-family:sans-serif;fill:#210835;fill-opacity:1;stroke:none;stroke-width:0.371939"
+       x="-58.405972"
+       y="137.50879"
+       id="text20942-5"
+       transform="matrix(0.91985763,-0.46299468,0.43658063,0.86737933,0,0)"><tspan
+         id="tspan20940-4"
+         style="font-style:italic;font-variant:normal;font-weight:500;font-stretch:normal;font-size:35.7062px;font-family:Z003;-inkscape-font-specification:'Z003 Medium Italic';fill:#210835;fill-opacity:1;stroke-width:0.371939"
+         x="-58.405972"
+         y="137.50879">Happy</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:35.7062px;line-height:1.25;font-family:sans-serif;fill:#210835;fill-opacity:1;stroke:none;stroke-width:0.371939"
+       x="-37.734341"
+       y="183.9859"
+       id="text20942-2"
+       transform="matrix(0.91985762,-0.46299468,0.43658063,0.86737934,0,0)"><tspan
+         id="tspan20940-2"
+         style="font-style:italic;font-variant:normal;font-weight:500;font-stretch:normal;font-size:35.7062px;font-family:Z003;-inkscape-font-specification:'Z003 Medium Italic';fill:#210835;fill-opacity:1;stroke-width:0.371939"
+         x="-37.734341"
+         y="183.9859">Halloween</tspan></text>
+    <path
+       style="color:#000000;fill:#2b2a2a;fill-opacity:1;stroke-width:0.515644;-inkscape-stroke:none"
+       d="m -26.164471,193.98739 c 18.8366335,5.22872 43.686502,-4.49707 65.549137,-3.8842 226.097624,6.33812 79.078854,13.50529 79.078854,19.33554 0,5.83026 -67.373246,29.2047 -107.771181,16.18782 -32.424955,-10.44786 -99.37343,-5.66389 -99.37343,-5.66389 -12.914109,-0.73605 -23.327099,-4.69367 -23.327099,-10.52393 0,-5.83025 61.98315,-22.07462 85.843719,-15.45134 z"
+       id="rect48043" />
+    <path
+       style="color:#000000;fill:#2b2a2a;fill-opacity:1;stroke-width:0.445803;-inkscape-stroke:none"
+       d="m 207.28863,41.453151 c -14.07951,5.22872 -32.65365,-4.49707 -48.99497,-3.8842 -168.997605,6.33812 -59.107814,13.50529 -59.107814,19.33554 0,5.83026 50.358414,29.2047 80.554014,16.18782 24.23617,-10.44786 74.27708,-5.66389 74.27708,-5.66389 9.6527,-0.73605 17.43594,-4.69367 17.43594,-10.52393 0,-5.83025 -46.32957,-22.07462 -64.16425,-15.45134 z"
+       id="rect48043-7" />
+  </g>
+</svg>

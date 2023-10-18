@@ -1,0 +1,17 @@
+User-agent: Googlebot
+Disallow:
+
+User-agent: Bingbot
+Disallow:
+
+User-agent: Bravebot
+Disallow:
+
+User-agent: YouBot
+Disallow:
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: *
+Disallow: /

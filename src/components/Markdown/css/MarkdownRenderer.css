@@ -1,0 +1,7 @@
+.markdown-body {
+    --markdown-radius: 3px;
+    --markdown-font: Papyrus, serif;
+    --markdown-text: #333;
+    --markdown-title: hotpink;
+    --markdown-line-height: 2;
+}

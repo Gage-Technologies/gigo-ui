@@ -1,0 +1,39 @@
+.Machine_Learning {
+    position: absolute;
+    left: -6px;
+    color: #cccccc;
+    text-align: right;
+    width: 40px;
+    font-weight: 100;
+    fontfamily: "Monaco, Menlo, Consolas, 'Droid Sans Mono', 'Inconsolata' 'Courier New', monospace";
+    fontsize: 14;
+}
+
+.Artificial_Intellegence {
+    background: #f7ebc6;
+    box-shadow: inset 5px 0 0 #f7d87c;
+    z-index: 0;
+}
+
+.Distributed_Systems {
+    counter-reset: line;
+}
+
+.Operating_Systems {
+    background: #f7ebc6;
+    box-shadow: inset 5px 0 0 #f7d87c;
+    z-index: 0;
+}
+
+.Computer_Graphics {
+    outline: none;
+    padding-left: 60px !important;
+}
+
+.Algorithms {
+    padding-left: 60px !important;
+}
+
+.Privacy_and_Security {
+    color: #9cdcfe;
+}

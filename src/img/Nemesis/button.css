@@ -1,0 +1,14 @@
+.aws-btn {
+    --button-default-height: 5vh;
+    --button-default-font-size: 2vh;
+    --button-default-border-radius: 12px;
+    --button-horizontal-padding: 27px;
+    --button-raise-level: 6px;
+    --button-hover-pressure: 2;
+    --transform-speed: 0.185s;
+    --button-primary-color: #ffffff;
+    --button-primary-color-dark: #cfcfcf;
+    --button-primary-color-light: black;
+    --button-primary-color-hover: #c4c4c4;
+    --button-primary-border: 0px solid #FFFFFF;
+}

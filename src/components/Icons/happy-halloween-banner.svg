@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="435.05716mm"
+   height="99.117996mm"
+   viewBox="0 0 435.05716 99.117996"
+   version="1.1"
+   id="svg5"
+   xmlns="http://www.w3.org/2000/svg"
+>
+  <defs
+     id="defs2" />
+  <g
+     id="layer1"
+     transform="translate(122.48151,-41.771152)">
+    <path
+       style="color:#000000;fill:#dc7027;fill-opacity:1;stroke-width:0.264583;-inkscape-stroke:none"
+       d="m -122.48151,65.488675 h 88.498211 v 75.400475 h -88.498211 c 22.00671,-23.78614 24.226267,-48.783741 0,-75.400475 z"
+       id="rect1191" />
+    <path
+       style="color:#000000;fill:#dc7027;fill-opacity:1;stroke-width:0.264583;-inkscape-stroke:none"
+       d="m 312.57565,65.488679 h -88.49821 v 75.400471 h 88.49821 c -22.00671,-23.78614 -24.22627,-48.783737 0,-75.400471 z"
+       id="rect1191-6" />
+    <rect
+       style="fill:#fe9800;fill-opacity:1;stroke-width:0.264583"
+       id="rect1118"
+       width="318.94754"
+       height="72.214546"
+       x="-64.426697"
+       y="41.771152" />
+    <path
+       style="color:#000000;fill:#9d4f1b;fill-opacity:1;stroke-width:0.264583;-inkscape-stroke:none"
+       d="m -64.426697,113.9857 h 30.443398 v 26.90345 h -10e-7 z"
+       id="rect1465" />
+    <path
+       style="color:#000000;fill:#9d4f1b;fill-opacity:1;stroke-width:0.264583;-inkscape-stroke:none"
+       d="m 254.52084,113.9857 h -30.4434 v 26.90345 0 z"
+       id="rect1465-7" />
+    <text
+       xml:space="preserve"
+       style="font-size:44.068px;line-height:1.25;font-family:Z003;-inkscape-font-specification:Z003;stroke-width:1.1017"
+       x="-54.596905"
+       y="92.057808"
+       id="text6859"
+       transform="scale(1.0606489,0.9428191)"><tspan
+         id="tspan6857"
+         style="stroke-width:1.1017"
+         x="-54.596905"
+         y="92.057808">Happy Halloween</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:43.9963px;line-height:1.25;font-family:Z003;-inkscape-font-specification:Z003;fill:#120d17;fill-opacity:1;stroke-width:1.0999"
+       x="-53.279694"
+       y="91.166176"
+       id="text6859-56"
+       transform="scale(1.0623782,0.94128435)"><tspan
+         id="tspan6857-2"
+         style="fill:#120d17;fill-opacity:1;stroke-width:1.0999"
+         x="-53.279694"
+         y="91.166176">Happy Halloween</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:44.068px;line-height:1.25;font-family:Z003;-inkscape-font-specification:Z003;fill:#9b3300;fill-opacity:1;stroke-width:1.1017"
+       x="-52.481495"
+       y="90.031662"
+       id="text6859-5"
+       transform="scale(1.0606489,0.9428191)"><tspan
+         id="tspan6857-3"
+         style="fill:#9b3300;fill-opacity:1;stroke-width:1.1017"
+         x="-52.481495"
+         y="90.031662">Happy Halloween</tspan></text>
+  </g>
+</svg>
