@@ -1,7 +1,8 @@
 
 
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {RootState} from '../../app/store';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { RootState } from '../../app/store';
+import { initialState } from '../../components/Stripe/StateContext/reducer';
 
 export interface TutorialState {
     all: boolean,
@@ -159,74 +160,74 @@ export const authSlice = createSlice({
                 state.expiration = update.payload.expiration
             }
 
-            if (update.payload.userName !== null){
+            if (update.payload.userName !== null) {
                 state.userName = update.payload.userName
             }
 
-            if (update.payload.email!== null){
+            if (update.payload.email !== null) {
                 state.email = update.payload.email
             }
 
-            if (update.payload.phone!== null){
+            if (update.payload.phone !== null) {
                 state.phone = update.payload.phone
             }
 
-            if (update.payload.thumbnail !== null){
+            if (update.payload.thumbnail !== null) {
                 state.thumbnail = update.payload.thumbnail
             }
-            if (update.payload.backgroundColor!== null){
+            if (update.payload.backgroundColor !== null) {
                 state.backgroundColor = update.payload.backgroundColor
             }
 
-            if (update.payload.backgroundRenderInFront!== null){
+            if (update.payload.backgroundRenderInFront !== null) {
                 state.backgroundRenderInFront = update.payload.backgroundRenderInFront
             }
 
-            if (update.payload.backgroundName!== null){
+            if (update.payload.backgroundName !== null) {
                 state.backgroundName = update.payload.backgroundName
             }
 
-            if (update.payload.exclusiveContent!== null){
+            if (update.payload.exclusiveContent !== null) {
                 state.exclusiveContent = update.payload.exclusiveContent
             }
-            if (update.payload.exclusiveAgreement!== null){
+            if (update.payload.exclusiveAgreement !== null) {
                 state.exclusiveAgreement = update.payload.exclusiveAgreement
             }
 
-            if (update.payload.tutorialState!== null){
+            if (update.payload.tutorialState !== null) {
                 state.tutorialState = update.payload.tutorialState
             }
 
-            if (update.payload.tutorialState!== null){
+            if (update.payload.tutorialState !== null) {
                 state.tutorialState = update.payload.tutorialState
             }
         },
     }
 });
 
-export const {updateAuthState} = authSlice.actions;
+export const { updateAuthState } = authSlice.actions;
 
 // The function below is called a selector and allows us to select a value from
 // the state. Selectors can also be defined inline where they're used instead of
 // in the slice file. For example: `useSelector((state: RootState) => state.counter.value)`
-export const selectAuthState = (state: RootState) => state.auth;
-export const selectAuthStateAuth = (state: RootState) => state.auth.authenticated;
-export const selectAuthStateToken = (state: RootState) => state.auth.token;
-export const selectAuthStateId = (state: RootState) => state.auth.id;
-export const selectAuthStateRole = (state: RootState) => state.auth.role;
-export const selectAuthStateTier = (state: RootState) => state.auth.tier;
-export const selectAuthStateRank = (state: RootState) => state.auth.rank;
-export const selectAuthStateCoffee = (state: RootState) => state.auth.coffee;
-export const selectAuthStateExpiration = (state: RootState) => state.auth.expiration;
-export const selectAuthStateUserName = (state: RootState) => state.auth.userName;
-export const selectAuthStateEmail = (state: RootState) => state.auth.email;
-export const selectAuthStatePhone = (state: RootState) => state.auth.phone;
-export const selectAuthStateThumbnail = (state: RootState) => state.auth.thumbnail;
-export const selectAuthStateColorPalette = (state: RootState) => state.auth.backgroundColor;
-export const selectAuthStateRenderInFront = (state: RootState) => state.auth.backgroundRenderInFront;
-export const selectAuthStateBackgroundName = (state: RootState) => state.auth.backgroundName;
-export const selectAuthStateExclusiveContent = (state: RootState) => state.auth.exclusiveContent
-export const selectAuthStateExclusiveAgreement = (state: RootState) => state.auth.exclusiveAgreement
-export const selectAuthStateTutorialState = (state: RootState) => state.auth.tutorialState
+export const selectAuthState = (state: RootState) => state.auth ? state.auth : initialAuthState;
+export const selectAuthStateAuth = (state: RootState) => state.auth.authenticated ? state.auth.authenticated : initialAuthState.authenticated;
+export const selectAuthStateToken = (state: RootState) => state.auth.token ? state.auth.token : initialAuthState.token;
+export const selectAuthStateId = (state: RootState) => state.auth.id ? state.auth.id : initialAuthState.id;
+export const selectAuthStateRole = (state: RootState) => state.auth.role ? state.auth.role : initialAuthState.role;
+export const selectAuthStateTier = (state: RootState) => state.auth.tier ? state.auth.tier : initialAuthState.tier;
+export const selectAuthStateRank = (state: RootState) => state.auth.rank ? state.auth.rank : initialAuthState.rank;
+export const selectAuthStateCoffee = (state: RootState) => state.auth.coffee ? state.auth.coffee : initialAuthState.coffee;
+export const selectAuthStateExpiration = (state: RootState) => state.auth.expiration ? state.auth.expiration : initialAuthState.expiration;
+export const selectAuthStateUserName = (state: RootState) => state.auth.userName ? state.auth.userName : initialAuthState.userName;
+export const selectAuthStateEmail = (state: RootState) => state.auth.email ? state.auth.email : initialAuthState.email;
+export const selectAuthStatePhone = (state: RootState) => state.auth.phone ? state.auth.phone : initialAuthState.phone;
+export const selectAuthStateThumbnail = (state: RootState) => state.auth.thumbnail ? state.auth.thumbnail : initialAuthState.thumbnail;
+export const selectAuthStateColorPalette = (state: RootState) => state.auth.backgroundColor ? state.auth.backgroundColor : initialAuthState.backgroundColor;
+export const selectAuthStateRenderInFront = (state: RootState) => state.auth.backgroundRenderInFront ? state.auth.backgroundRenderInFront : initialAuthState.backgroundRenderInFront;
+export const selectAuthStateBackgroundName = (state: RootState) => state.auth.backgroundName ? state.auth.backgroundName : initialAuthState.backgroundName;
+export const selectAuthStateExclusiveContent = (state: RootState) => state.auth.exclusiveContent ? state.auth.exclusiveContent : initialAuthState.exclusiveContent;
+export const selectAuthStateExclusiveAgreement = (state: RootState) => state.auth.exclusiveAgreement ? state.auth.exclusiveAgreement : initialAuthState.exclusiveAgreement;
+export const selectAuthStateTutorialState = (state: RootState) => state.auth.tutorialState ? state.auth.tutorialState : initialAuthState.tutorialState;
 
 export default authSlice.reducer;

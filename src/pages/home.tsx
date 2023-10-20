@@ -88,7 +88,7 @@ function Home() {
         loggedIn = true
     }
 
-    const tutorialState = useAppSelector(selectAuthStateTutorialState)
+    const tutorialState = useAppSelector(selectAuthStateTutorialState);
     const [runTutorial, setRunTutorial] = React.useState(!tutorialState.home && loggedIn)
 
     // this enables us to push tutorial restarts from the app wrapper down into this page
