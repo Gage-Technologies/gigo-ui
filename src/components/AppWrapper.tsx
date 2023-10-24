@@ -1071,7 +1071,9 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 onClose={handleClose}
                             >
                                 <MenuItem onClick={handleProfile}>Profile</MenuItem>
-                                <MenuItem onClick={handleSettings}>Account Settings</MenuItem>
+                                {window.innerWidth > 1000 ? (
+                                    <MenuItem onClick={handleSettings}>Account Settings</MenuItem>
+                                ) : null}
                                 <MenuItem onClick={async () => {
                                     await handleLogout()
                                 }}>Logout</MenuItem>

@@ -1025,7 +1025,7 @@ function AttemptPage() {
                             disabled={closedState}
                             onClick={() => setConfirm(true)}
                         >
-                            {closedState ? "Attempt Closed" : "Close Attempt"}
+                            {closedState ? "Attempt Published" : "Publish Attempt"}
                         </Button>
                     ) : (
                         <StyledDiv style={{height: "35px", width: "100px", borderRadius: 2}}/>
