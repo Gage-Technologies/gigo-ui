@@ -1,5 +1,5 @@
 import * as React from "react";
-import {ElementType, useEffect, useState} from "react";
+import {ElementType, useCallback, useEffect, useState} from "react";
 import {
     Box,
     Button,
@@ -18,7 +18,7 @@ import {
     Typography
 } from "@mui/material";
 import {getAllTokens} from "../theme";
-import {useParams} from "react-router";
+import {useLocation, useParams} from "react-router";
 import call from "../services/api-call";
 import {Workspace, WorkspaceInitFailure} from "../models/workspace";
 import config from "../config";
@@ -44,6 +44,7 @@ import LaunchPadRocketIcon from "../components/Icons/launch-pad-rocket";
 import LaunchPadIcon from "../components/Icons/LaunchPad";
 import LottieAnimation from "../components/LottieAnimation";
 import * as animationData from "../img/launch-pad-smoke.json";
+import {useGlobalWebSocket} from "../services/websocket";
 // @ts-ignore
 import * as animationDataStopped from "../img/launch-page-stopped.json";
 import Lottie from "react-lottie";
@@ -56,6 +57,7 @@ import CardTutorial from "../components/CardTutorial";
 import {setCache, deleteCache, clearCache, selectCacheState} from '../reducers/pageCache/pageCache';
 import {useSelector} from "react-redux";
 import {selectAppWrapperChatOpen, selectAppWrapperSidebarOpen} from "../reducers/appWrapper/appWrapper";
+import * as wsModels from "../models/websocket";
 
 
 interface InitialStatusMessage {
@@ -98,6 +100,9 @@ const WorkspacePage = () => {
 
     // initialize to true if editor mode is on
     const [showIframe, setShowIframe] = useState<boolean>(query.get("editor") === "true");
+    const [showDesktopIframe, setShowDesktopIframe] = useState<string | null>(query.get("desktop"));
+
+    console.log("showDesktopIframe:", showDesktopIframe);
 
     let navigate = useNavigate();
 
@@ -115,15 +120,12 @@ const WorkspacePage = () => {
     const [workspaceError, setWorkspaceError] = React.useState<WorkspaceInitFailure | null>(null);
     const workspaceRef = React.useRef<Workspace | null>(workspace);
     let [workspaceUrl, setWorkspaceUrl] = React.useState<string | null>(null);
-    const workspaceUrlRef = React.useRef<string | null>(workspaceUrl);
     let [codeSource, setCodeSource] = React.useState<CodeSource | null>(null);
-    const codeSourceRef = React.useRef<CodeSource | null>(codeSource);
-    let interval = React.useRef<NodeJS.Timer | null>(null);
+    let isVNCRef = React.useRef<boolean>(false);
 
     let [expiration, setExpiration] = React.useState<number | null>(null);
     const [highestScore, setHighestScore] = React.useState<number | null>(0);
 
-    const [messageHistory, setMessageHistory] = React.useState<Workspace | null>(null);
     const [xpPopup, setXpPopup] = React.useState(false)
     const [xpData, setXpData] = React.useState(null)
 
@@ -253,18 +255,91 @@ const WorkspacePage = () => {
 
     let [loadingWorkspaceTransition, setLoadingWorkspaceTransition] = React.useState<boolean>(false);
 
-    let websocketRoot = config.rootPath.replace("https://", "wss://").replace("http://", "ws://");
-    const {sendMessage, lastMessage, lastJsonMessage, readyState} = useWebSocket(
-        `${websocketRoot}/api/workspace/ws/${id}`, {
-            // Will attempt to reconnect on all close events, such as server shutting down
-            shouldReconnect: (closeEvent) => true,
-            onClose: () => console.log(messageHistory),
-            onError: (error) => console.log("Socket error: ", error),
-            onOpen: (event: WebSocketEventMap['open']) => console.log("Socket open"),
-            onMessage: (event: WebSocketEventMap['message']) => {
-                handleWsMessage(event)
-            },
-        });
+    /**
+     * Handles a single workspace message
+     * @param message Websocket event message
+     * @returns
+     */
+    const handleWsMessage = useCallback((message: wsModels.WsMessage<any>) => {
+        // attempt to parse json message
+        let jsonMessage: Object | null = null
+        try {
+            jsonMessage = message.payload;
+        } catch (e) {
+            console.log("websocket json decode error: ", e);
+            return
+        }
+
+        if (jsonMessage === null) {
+            console.log("unexpected null message")
+            return
+        }
+
+        // create variable to hold the workspace
+        let workspace: Workspace;
+
+        // handle initial state message
+        if ("code_source" in jsonMessage) {
+            let msg = jsonMessage as InitialStatusMessage;
+            setWorkspaceUrl(msg.workspace_url)
+            setCodeSource(msg.code_source)
+            workspace = msg.workspace
+        } else {
+            let msg = jsonMessage as InitialStatusMessage;
+            workspace = msg.workspace as Workspace
+        }
+
+        // conditionally mark workspace transition as not loading if it is currently set
+        // and we just changed the workspace state since we are now confident the transition
+        // occurred
+        if (workspaceRef.current?.state !== workspace.state) {
+            setLoadingWorkspaceTransition(false)
+        }
+
+        console.log("workspace error found: ", workspace.state)
+
+        // handle workspace failure
+        if (workspace.init_failure !== null && workspace.init_failure.stderr !== "" && workspace.state === 5) {
+
+            setWorkspaceError(workspace.init_failure)
+        } else {
+            setWorkspaceError(null)
+        }
+
+        // handle status updates
+        setWorkspace(workspace)
+
+        // update isVNC ref
+        isVNCRef.current = workspace.is_vnc
+
+        // calculate the updated expiratoion time
+        calculateExpiration(workspace)
+    }, [workspace, workspaceError, workspaceUrl, codeSource, expiration, highestScore, loadingWorkspaceTransition, stepIndex]);
+
+    let globalWs = useGlobalWebSocket();
+    globalWs.registerCallback(wsModels.WsMessageType.WorkspaceStatusUpdate, `workspace:status:${id}`, handleWsMessage);
+
+    useEffect(() => {
+        // generate a random alphanumeric id
+        let seqId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        globalWs.sendWebsocketMessage({
+            sequence_id: seqId,
+            type: wsModels.WsMessageType.SubscribeWorkspace,
+            payload: {
+                workspace_id: id,
+            }
+        }, null)
+
+        return () => {
+            globalWs.sendWebsocketMessage({
+                sequence_id: seqId,
+                type: wsModels.WsMessageType.UnsubscribeWorkspace,
+                payload: {
+                    workspace_id: id,
+                }
+            }, null)
+        }
+    }, [])
 
     /**
      * Calculates the unix time of the workspace expiration in milliseconds
@@ -318,78 +393,6 @@ const WorkspacePage = () => {
 
         }
     },[])
-
-
-
-
-
-    /**
-     * Handles a single workspace message
-     * @param message Websocket event message
-     * @returns
-     */
-    const handleWsMessage = (message: WebSocketEventMap['message']) => {
-        // handle ping or initial connect
-        if (message.type === 'ping') {
-            console.log("ping")
-            sendMessage('pong');
-            return
-        }
-        if (message.data === 'Socket connected successfully') {
-            console.log("Socket connected successfully");
-            return
-        }
-
-        // attempt to parse json message
-        let jsonMessage: Object | null = null
-        try {
-            jsonMessage = JSON.parse(message.data.trim());
-        } catch (e) {
-            console.log("websocket json decode error: ", e);
-            return
-        }
-
-        if (jsonMessage === null) {
-            console.log("unexpected null message")
-            return
-        }
-
-        // create variable to hold the workspace
-        let wk: Workspace;
-
-        // handle initial state message
-        if ("code_source" in jsonMessage) {
-            let msg = jsonMessage as InitialStatusMessage;
-            setWorkspaceUrl(msg.workspace_url)
-            setCodeSource(msg.code_source)
-            setMessageHistory(msg.workspace)
-            wk = msg.workspace
-        } else {
-            wk = jsonMessage as Workspace
-        }
-
-        // conditionally mark workspace transition as not loading if it is currently set
-        // and we just changed the workspace state since we are now confident the transition
-        // occurred
-        if (workspaceRef.current?.state !== wk.state) {
-            setLoadingWorkspaceTransition(false)
-        }
-
-        // handle workspace failure
-        if (wk.init_failure !== null && wk.init_failure.stderr !== "" && wk.state === 5) {
-            setWorkspaceError(wk.init_failure)
-        } else {
-            setWorkspaceError(null)
-        }
-
-        // handle status updates
-        setLastWorkspace(JSON.parse(JSON.stringify(workspace)))
-        setWorkspace(wk)
-        setMessageHistory(wk)
-
-        // calculate the updated expiratoion time
-        calculateExpiration(wk)
-    }
 
     useEffect(() => {
         console.log('workspaceError after set:', workspaceError);
@@ -822,9 +825,15 @@ const WorkspacePage = () => {
     const handleMouseDown = (event: any) => {
         switch (event.button) {
             case 0:  // Left click
+                console.log("vnc: ", isVNCRef.current)
                 setShowIframe(true);
                 // update the current page url to set the query string
                 window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true");
+                if (isVNCRef.current) {
+                    setShowDesktopIframe("none")
+                    window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=none");
+                }
+
                 window.location.reload();
                 break;
             case 1:  // Middle click
@@ -840,6 +849,7 @@ const WorkspacePage = () => {
         // Callback to run when workspace.state changes
         if (workspace !== null && workspace.state !== null && workspace.state !== 1 && showIframe) {
             setShowIframe(false);
+            setShowDesktopIframe("none")
             window.history.replaceState({}, "", window.location.href.split("?")[0] + "");
             window.location.reload();
         }
@@ -1568,7 +1578,7 @@ const WorkspacePage = () => {
             //         window.location.href = config.coderPath + workspaceUrl;
             //     }
             // }}
-            onMouseDown={handleMouseDown}
+            onMouseDown={(e: any) => handleMouseDown(e)}
             type="primary"
             style={{
                 marginBottom: '20px',
@@ -1962,6 +1972,85 @@ const WorkspacePage = () => {
         )
     }, [xpData])
 
+    console.log("workspace url: ", workspaceUrl)
+
+    const convertEditorUrlToDesktop = (url: any): string => {
+        const regex = /^(\/editor\/\d+\/\d+-\w+)(\/.+)?(\?.+)?$/;
+        const match = url.match(regex);
+
+        if (match) {
+            return match[1].replace('/editor/', '/desktop/');
+        }
+
+        console.log("workspace url2: ", url)
+
+
+        return "Invalid URL"; // or throw an error, or return the original URL, based on your needs
+    };
+
+    let useRef = React.useRef
+
+    const leftPanelRef = useRef<HTMLDivElement>(null);
+    const rightPanelRef = useRef<HTMLDivElement>(null);
+    const dragBarRef = useRef<HTMLDivElement>(null);
+    const sensitivity = 1.05; // Increase or decrease this value to control sensitivity
+
+    useEffect(() => {
+        const handleMouseDown = (e: MouseEvent) => {
+            const originalLeftWidth = leftPanelRef.current?.offsetWidth || 0;
+
+            const handleMouseMove = (moveEvent: MouseEvent) => {
+                const delta = (moveEvent.clientX - e.clientX) * sensitivity;
+                const newLeftWidth = originalLeftWidth + delta;
+
+                // Apply the new width
+                if (leftPanelRef.current && rightPanelRef.current) {
+                    leftPanelRef.current.style.flex = `0 0 ${newLeftWidth}px`;
+                    rightPanelRef.current.style.flex = `1 1 calc(100% - ${newLeftWidth}px)`;
+                }
+            };
+
+            const handleMouseUp = () => {
+                console.log("handleMouseUp");
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+            };
+
+            // Attach mousemove and mouseup listeners to the document
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+        };
+
+        // Attach the listener to the drag bar
+        if (dragBarRef.current) {
+            dragBarRef.current.addEventListener('mousedown', handleMouseDown);
+        }
+
+        return () => {
+            // Cleanup if component unmounts
+            if (dragBarRef.current) {
+                dragBarRef.current.removeEventListener('mousedown', handleMouseDown);
+            }
+        };
+    }, []);
+
+
+    const location = useLocation();
+    useEffect(() => {
+        console.log("location: ", location);
+
+        // Check if the URL contains the phrase "popped-out"
+        if ((location.pathname.includes('popped-out') || location.search.includes('popped-out')) && workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") {
+            console.log("popped-out: ", location.pathname);
+            // Execute your callback function
+            window.open(config.coderPath + convertEditorUrlToDesktop(workspaceUrl), '_blank')
+            window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=none");
+            window.location.reload();
+        }else{
+            console.log("not popped-out: ", workspaceUrl);
+        }
+    }, [location.pathname, location.search, workspaceUrl]);
+        // @ts-ignore
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
@@ -2066,80 +2155,137 @@ const WorkspacePage = () => {
                         },
                     ]}
                 />
-                {showIframe ? (
-                    <div style={{overflow: "hidden"}}>
-                        {
-                            (workspaceUrl !== null && workspaceUrl!== undefined && workspaceUrl!== "")? (
+                {showIframe && showDesktopIframe === "side" ? (
+
+                    <div style={{ display: 'flex', overflow: 'hidden' }}>
+                        <div ref={leftPanelRef} style={{ flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
+                            {/* Left iframe content */}
+                            {(workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") ? (
                                 <iframe
                                     src={workspaceUrl}
-                                    width="100%"  // Your desired width
+                                    width="100%"
                                     height={`${window.innerHeight - 35}`}
-                                    style={{ border: "none"}}
+                                    style={{ border: "none" }}
                                     title="Workspace"
-                                    ref={iframeRef}
+
                                 >
                                     Your browser does not support iframes.
                                 </iframe>
                             ) : (
                                 <div>
-                                    <ThreeDots/>
+                                    <ThreeDots />
                                 </div>
-                            )
-                        }
-                    </div>
-                ) : (
-                    <>
-                        <div style={{position: 'relative', height: '8vh', width: '100vw'}}>
-                            <Typography
-                                component={"div"}
-                                variant={"h4"}
-                                sx={{
-                                    position: "absolute",
-                                    top: "70%",
-                                    left:
-                                        sidebarOpen ?
-                                                aspectRatio === "21:9" ? "20%" : "23%"
-                                        : chatOpen ?
-                                                aspectRatio === "21:9" ? "18%" : "20%"
-                                        :
-                                                aspectRatio === "21:9" ? "24%" : "28%",
-                                    transform: "translate(-50%, -50%)",
-                                    zIndex: 2,
-                                    color: theme.palette.text.primary,
-
-                                }}
-                            >
-                                {"Launch Pad"}
-                            </Typography>
-                            <Typography
-                                component={"div"}
-                                variant={"h4"}
-                                sx={{
-                                    position: "absolute",
-                                    top: "70%",
-                                    left: sidebarOpen ?
-                                        aspectRatio === "21:9" ? "20.1%" : "23.1%"
-                                        : chatOpen ?
-                                            aspectRatio === "21:9" ? "18.1%" : "20.1%"
-                                            :
-                                            aspectRatio === "21:9" ? "24.1%" : "28.1%",
-                                    transform: "translate(-50%, -50%)",
-                                    zIndex: 1,
-                                    color: theme.palette.primary.dark,
-                                }}
-                            >
-                                {"Launch Pad"}
-                            </Typography>
+                            )}
                         </div>
 
-                        {/*<div style={{display: "flex", width: "100%"}}>*/}
-                        {/*    {renderStatusBar()}*/}
+                        {/*<div ref={dragBarRef}*/}
+                        {/*     className="drag-bar"*/}
+                        {/*     style={{width: '40px', opacity: '0.5', visibility: 'hidden', backgroundColor: 'transparent'}}*/}
+                        {/*>*/}
+                        <div
+                            ref={dragBarRef}
+                            className="drag-bar"
+                            style={{
+                                cursor: 'ew-resize',
+                                backgroundImage: `radial-gradient(circle, ${hexToRGBA(theme.palette.primary.contrastText, 1)} 1px, ${hexToRGBA(theme.palette.primary.main, 1)} 1px)`,
+                                backgroundSize: '10px 10px',
+                                width: '20px'
+                            }}
+                        />
                         {/*</div>*/}
-                        <div style={{display: "flex", justifyContent: "center", width: "100%"}}>
-                            {renderBody()}
+                        <div ref={rightPanelRef} style={{ flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
+                            {(workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") ? (
+                                <iframe
+                                    src={convertEditorUrlToDesktop(workspaceUrl)}
+                                    width="100%"
+                                    height={`${window.innerHeight - 35}`}
+                                    style={{ border: "none" }}
+                                    title="Workspace"
+
+                                >
+                                    Your browser does not support iframes.
+                                </iframe>
+                            ) : (
+                                <div>
+                                    <ThreeDots />
+                                </div>
+                            )}
                         </div>
-                    </>
-            )}
+                    </div>
+
+                ) : showIframe ? (
+                    <div style={{overflow: "hidden"}}>
+                        {(workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") ? (
+                            <iframe
+                                src={workspaceUrl}
+                                width="100%" // Your desired width
+                                height={`${window.innerHeight - 35}`}
+                                style={{border: "none"}}
+                                title="Workspace"
+                                ref={iframeRef}
+                            >
+                                Your browser does not support iframes.
+                            </iframe>
+                        ) : (
+                            <div>
+                                <ThreeDots/>
+                            </div>
+                        )}
+                    </div>
+
+                    ) : (
+                        <>
+                            <div style={{position: 'relative', height: '8vh', width: '100vw'}}>
+                                <Typography
+                                    component={"div"}
+                                    variant={"h4"}
+                                    sx={{
+                                        position: "absolute",
+                                        top: "70%",
+                                        left:
+                                            sidebarOpen ?
+                                                    aspectRatio === "21:9" ? "20%" : "23%"
+                                            : chatOpen ?
+                                                    aspectRatio === "21:9" ? "18%" : "20%"
+                                            :
+                                                    aspectRatio === "21:9" ? "24%" : "28%",
+                                        transform: "translate(-50%, -50%)",
+                                        zIndex: 2,
+                                        color: theme.palette.text.primary,
+
+                                    }}
+                                >
+                                    {"Launch Pad"}
+                                </Typography>
+                                <Typography
+                                    component={"div"}
+                                    variant={"h4"}
+                                    sx={{
+                                        position: "absolute",
+                                        top: "70%",
+                                        left: sidebarOpen ?
+                                            aspectRatio === "21:9" ? "20.1%" : "23.1%"
+                                            : chatOpen ?
+                                                aspectRatio === "21:9" ? "18.1%" : "20.1%"
+                                                :
+                                                aspectRatio === "21:9" ? "24.1%" : "28.1%",
+                                        transform: "translate(-50%, -50%)",
+                                        zIndex: 1,
+                                        color: theme.palette.primary.dark,
+                                    }}
+                                >
+                                    {"Launch Pad"}
+                                </Typography>
+                            </div>
+
+                            {/*<div style={{display: "flex", width: "100%"}}>*/}
+                            {/*    {renderStatusBar()}*/}
+                            {/*</div>*/}
+                            <div style={{display: "flex", justifyContent: "center", width: "100%"}}>
+                                {renderBody()}
+                            </div>
+                        </>
+                    )}
             {xpPopup ? (xpPopupMemo) : null}
             </CssBaseline>
         </ThemeProvider>

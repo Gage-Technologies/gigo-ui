@@ -34,7 +34,7 @@ import {
     Icon,
     ListItemButton,
     Menu, Modal,
-    PaletteMode, TextField,
+    PaletteMode, Paper, TextField,
     ThemeProvider,
     Tooltip,
 } from "@mui/material";
@@ -96,6 +96,13 @@ import {useParams} from "react-router";
 import CloseIcon from "@material-ui/icons/Close";
 import {clearChatState} from "../reducers/chat/chat";
 import {clearMessageCache} from "../reducers/chat/cache";
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import StopIcon from '@mui/icons-material/Stop';
+import DesktopWindowsIcon from '@mui/icons-material/DesktopWindows';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
+import DesktopAccessDisabledIcon from '@mui/icons-material/DesktopAccessDisabled';
+import QueuePlayNextIcon from '@mui/icons-material/QueuePlayNext';
 
 
 interface IProps {
@@ -164,6 +171,8 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     const [notifications, setNotifications] = React.useState<Notification[]>([]);
     const [notificationCount, setNotificationCount] = React.useState<number>(0);
     const [showReferPopup, setShowReferPopup] = React.useState(false)
+    const [isOpen, setIsOpen] = React.useState(false);
+    const toggleButtonRef = React.useRef(null);
 
     const styles = {
         regular: {
@@ -839,10 +848,16 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         window.history.replaceState({}, '', url.toString());
     };
 
+
+
+
+
     const renderWorkspaceAppBar = () => {
         let toolbarStyles = JSON.parse(JSON.stringify(holidayStyle));
         toolbarStyles.height = "32px"
         toolbarStyles.minHeight = "32px !important"
+
+
 
         return (
             <AppBar
@@ -895,26 +910,107 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
 
                     {loggedIn ? (
                         <>
-                            <Button
-                                variant={"outlined"}
-                                color={"error"}
+                            <div style={{
+                                position: 'fixed',
+                                top: 0,
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                zIndex: 1000,
+                            }}>
+                                <Tooltip title="Open DevSpace Controls">
 
-                                onClick={async () => {
-                                    window.history.replaceState({}, "", window.location.href.split("?")[0]);
-                                    // removeEditorQueryParam()
-                                    window.location.reload()
-                                }} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: 'auto', height: '25px', left: '70% ', color: "error", fontSize: '13px' }}>
-                                Go Back
-                            </Button>
-                            <Button
-                                variant={"outlined"}
-                                style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '10%', height: '25px', left: '52% ', color: "error", fontSize: '13px' }}
-                                color={"warning"}
-                                onClick={() => stopWorkspace()}
-                            >
-                                {"Stop Workspace"}
-                            </Button>
-                        </>
+                                    <IconButton ref={toggleButtonRef} onClick={() => setIsOpen(!isOpen)}>
+
+                                        <SettingsApplicationsIcon />
+                                    </IconButton>
+                                </Tooltip>
+
+                                {isOpen && (
+                                    <Paper elevation={3} style={{
+                                        padding: '8px',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        position: 'absolute',
+                                        top: '70%',
+                                        left: "50%",
+                                        transform: 'translate(-50%, 0)',
+                                        width: 'auto',
+                                    }}>
+                                        <Tooltip title="Go Back">
+                                            <IconButton color="error" onClick={async () => {
+                                                window.history.replaceState({}, "", window.location.href.split("?")[0]);
+                                                window.location.reload();
+                                            }}>
+                                                <ArrowBackIcon />
+                                            </IconButton>
+                                        </Tooltip>
+
+                                        <Tooltip title="Stop Workspace">
+                                            <IconButton color="warning" onClick={() => stopWorkspace()}>
+                                                <StopIcon />
+                                            </IconButton>
+                                        </Tooltip>
+
+                                        {
+                                            window.location.pathname.startsWith("/launchpad/") ? (
+                                                new URLSearchParams(window.location.search).get("desktop") === "none" ? (
+                                                <>
+                                                    <Tooltip title="View Desktop">
+                                                        <IconButton color="success" onClick={async () => {
+                                                            window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=side");
+                                                            window.location.reload();
+                                                        }}>
+                                                            <DesktopWindowsIcon/>
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                    <Tooltip title="Open Desktop In New Tab">
+                                                        <IconButton color="success" onClick={async () => {
+                                                            window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=popped-out");
+                                                            window.location.reload();
+                                                        }}>
+                                                            <QueuePlayNextIcon/>
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </>
+                                                ) : new URLSearchParams(window.location.search).get("desktop") === "side" ? (
+                                                <>
+                                                        <Tooltip title="Close Desktop">
+                                                            <IconButton color="error" onClick={async () => {
+                                                                window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=none");
+                                                                window.location.reload();
+                                                            }}>
+                                                                <DesktopAccessDisabledIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                        <Tooltip title="Open Desktop In New Tab">
+                                                            <IconButton color="success" onClick={async () => {
+                                                                window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=popped-out");
+                                                                window.location.reload();
+                                                            }}>
+                                                                <QueuePlayNextIcon/>
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                </>
+                                                ) : new URLSearchParams(window.location.search).get("desktop") === "popped-out" ? (
+                                                    <>
+                                                        <Tooltip title="View Desktop">
+                                                            <IconButton color="success" onClick={async () => {
+                                                                window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=side");
+                                                                window.location.reload();
+                                                            }}>
+                                                                <DesktopWindowsIcon/>
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    </>
+                                                ): null
+                                            ) : null
+                                        }
+                                    </Paper>
+                                )}
+                            </div>
+
+
+                </>
                     ) : (
                         <Button onClick={async () => {
                             navigate("/signup")

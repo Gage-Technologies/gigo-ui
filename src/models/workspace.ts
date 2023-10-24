@@ -23,6 +23,7 @@ export interface Workspace {
     init_state: number;
     init_state_string: string;
     init_failure: WorkspaceInitFailure | null;
+    is_vnc: boolean;
 }
 
 export interface WorkspaceConfig {
