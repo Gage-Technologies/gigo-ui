@@ -705,7 +705,7 @@ function AttemptPage() {
         return (
             <div style={{display: "flex", width: "80vw", height: "63vh"}}>
                 {attempt !== null ? (
-                    <CodeDisplayEditor repoId={attempt !== null ? attempt.repo_id : 0} references={"main"} filepath={""} width={"77vw"}              height={"73vh"} style={{display: "contents", flexDirection: "row", width: "75vw"}} projectName={attempt !== null ? attempt.post_title : ""}/>
+                    <CodeDisplayEditor repoId={attempt !== null ? attempt.repo_id : 0} references={"main"} filepath={""} width={"75vw"}              height={"73vh"} style={{display: "contents", flexDirection: "row", width: "75vw"}} projectName={attempt !== null ? attempt.post_title : ""}/>
                 ) : (<ThreeDots/>)}
                 {/*<Editor theme={theme}/>*/}
             </div>
@@ -1224,10 +1224,12 @@ function AttemptPage() {
                         </div>
                     )}
                     <div>
-                        <div style={{display: "flex", justifyContent: "center", paddingTop: "2%"}}>
+                        <div style={{display: "flex", justifyContent: "center", paddingTop: "1%"}}>
                             {mainTabHtml()}
                         </div>
                     </div>
+                    {/* add a 10vh buffer at the end of the page */}
+                    <div style={{height: "10vh"}}/>
                 </CssBaseline>
             </ThemeProvider>
         </div>

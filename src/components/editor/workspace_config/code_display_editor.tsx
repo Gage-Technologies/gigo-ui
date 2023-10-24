@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, PaletteMode} from "@mui/material";
+import {Button, createTheme, PaletteMode} from "@mui/material";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import {useEffect, useState} from "react";
 import {DefaultWorkspaceConfig} from "../../../models/workspace";
@@ -12,6 +12,10 @@ import Sidebar from "../../EditorComponents/Sidebar";
 import Text from "../../EditorComponents/Text";
 import {initialAuthStateUpdate, updateAuthState} from "../../../reducers/auth/auth";
 import {useNavigate} from "react-router-dom";
+import MarkdownRenderer from "../../Markdown/MarkdownRenderer";
+import {getAllTokens} from "../../../theme";
+import Scrollbars from "react-custom-scrollbars";
+import {ThreeDots} from "react-loading-icons";
 
 export interface Code_display_editor {
     style?: object;
@@ -26,15 +30,18 @@ export interface Code_display_editor {
 function CodeDisplayEditor(props: Code_display_editor) {
     let userPref = localStorage.getItem('theme')
     const [mode, _] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
+    const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
     const [allFiles, setAllFiles] = React.useState([])
     const [fileName, setFileName] = useState("")
     const [chosenFile, setChosenFile] = useState([])
+    const [loading, setLoading] = useState(false)
 
     const monaco = useMonaco();
 
     let navigate = useNavigate();
 
     const apiLoad = async () => {
+        setLoading(true)
         let res = await call(
             "/api/project/getProjectCode",
             "post",
@@ -50,80 +57,87 @@ function CodeDisplayEditor(props: Code_display_editor) {
         if (res !== undefined && res["message"] !== undefined){
             setAllFiles(res["message"]);
             setFileName(res["message"][0]["name"])
-            setChosenFile(res["message"][0])
+            const index = res["message"].findIndex((item: { name: string; }) => item.name === "README.md");
+
+            if (index !== -1) {
+                setChosenFile(res["message"][index]);
+            } else {
+                setChosenFile(res["message"][4]);
+            }
+
         }
+        setLoading(false)
     }
 
     const findLangauge = (name :string) => {
         let textArray = name.split(".")
         let determinate = textArray[1]
         switch (determinate) {
-            case "tx":
-                return "TypeScript"
-            case "js":
-                return "JavaScript"
-            case "tsx":
-                return "TypeScript"
-            case "jsx":
-                return "JavaScript"
-            case "css":
-                return "CSS"
-            case "less":
-                return "LESS"
-            case "scss":
-                return "SCSS"
-            case "json":
-                return "JSON"
-            case "html":
-                return "HTML"
-            case "xml":
-                return "XML"
-            case "PHP":
-                return "PHP"
-            case "cs":
-                return "C#"
-            case ".c":
-                return "C++"
-            case "cshtml":
-                return "Razor"
-            case "md":
-                return "Markdown"
-            case "dif":
-                return "Diff"
-            case "java":
-                return "Java"
-            case "vb":
-                return "VB"
-            case "litcoffee":
-                return "CoffeeScript"
-            case "handlebars":
-                return "Handlebars"
-            case "bat":
-                return "Batch"
-            case "pug":
-                return "Pug"
-            case "fs":
-                return "F#"
-            case "lua":
-                return "Lua"
-            case "ps1":
-                return "Powershell"
-            case "py":
-                return "Python"
-            case "rb":
-                return "Ruby"
-            case "scss":
-                return "SASS"
-            case "r":
-                return "R"
-            case "h":
-                return "Objective-C"
-            case "go":
-                return "Go"
-            case "yaml":
-                return "yaml"
+            // Languages with rich IntelliSense and validation
+            case 'ts':
+                return 'typescript';
+            case 'js':
+                return 'javascript';
+            case 'css':
+                return 'css';
+            case 'less':
+                return 'less';
+            case 'scss':
+                return 'scss';
+            case 'json':
+                return 'json';
+            case 'html':
+                return 'html';
+
+            // Languages with only basic syntax colorization
+            case 'xml':
+                return 'xml';
+            case 'php':
+                return 'php';
+            case 'cs':
+                return 'csharp';
+            case 'cpp':
+            case 'cxx':
+            case 'cc':
+                return 'cpp';
+            case 'cshtml':
+                return 'razor';
+            case 'md':
+            case 'markdown':
+                return 'markdown';
+            case 'diff':
+                return 'diff';
+            case 'java':
+                return 'java';
+            case 'vb':
+                return 'vb';
+            case 'coffee':
+                return 'coffeescript';
+            case 'hbs':
+                return 'handlebars';
+            case 'bat':
+                return 'batch';
+            case 'pug':
+                return 'pug';
+            case 'fs':
+            case 'fsharp':
+                return 'fsharp';
+            case 'lua':
+                return 'lua';
+            case 'ps1':
+                return 'powershell';
+            case 'py':
+                return 'python';
+            case 'rb':
+                return 'ruby';
+            case 'sass':
+                return 'sass';
+            case 'r':
+                return 'r';
+            case 'm':
+                return 'objective-c';
             default:
-                return "markdown"
+                return 'plaintext';
         }
     }
 
@@ -148,47 +162,68 @@ function CodeDisplayEditor(props: Code_display_editor) {
         setChosenFile(file)
     }
 
-
+    //@ts-ignore
+    const isMarkdown = chosenFile["name"]
+        //@ts-ignore
+        ? findLangauge(chosenFile["name"]).toLowerCase() === "markdown"
+        : false;
 
     return (
         <div style={props.style}>
-            {/*{files.map((file) => {*/}
-            {/*    return (*/}
-            {/*        <button disabled={*/}
-            {/*            //@ts-ignore*/}
-            {/*            chosenFile["name"] === file["name"]} onClick={() => setChosenFile(file)}>{*/}
-            {/*            //@ts-ignore*/}
-            {/*            file["name"]}</button>*/}
-            {/*    )*/}
-            {/*})}*/}
             <div style={{width: "50%", display: "flex", height: "73vh"}}>
                 <Sidebar selectedFile={chosenFile} handleFileSelect={handleCurrentFileSideBar} projectNames={props.projectName} files={allFiles} repoId={props.repoId}/>
             </div>
-            {/*<div style={{*/}
-            {/*    width: "74%",*/}
-            {/*    height: "100%",*/}
-            {/*    borderRadius: 5*/}
-            {/*}} id={"text"}>*/}
-            {/*    <div style={{overflow: "auto", width: "100%", height: "100%"}}>*/}
-            {/*        <Text files={allFiles} selectedFile={chosenFile} handleCloseFile={handleCloseFile}*/}
-            {/*              handleClickFile={handleClickFile}></Text>*/}
-            {/*    </div>*/}
-            {/*</div>*/}
-            <Editor
-                options={{readOnly: true}}
-                height={props.height}
-                width={"115vw"}
-                path={
-                //@ts-ignore
-                chosenFile["name"]}
-                value={
-                //@ts-ignore
-                chosenFile["content"]}
-                //@ts-ignore
-                language={chosenFile["name"] !== undefined ? findLangauge(chosenFile["name"]).toLowerCase() : ""}
-                theme={mode === "light" ? "gigo-default-light" : "gigo-default-dark"}
-                className={"yaml-editor"}
-            />
+            {
+                isMarkdown
+                    ? (
+                        <Scrollbars
+                            style={{
+                                height: props.height,
+                                width: "121vw",
+                                border: `1px solid ${theme.palette.primary.contrastText}`,
+                                borderRadius: 5,
+                            }}
+                            renderThumbVertical={({ style, ...props }) =>
+                                <div {...props}
+                                     style={{
+                                         ...style,
+                                         backgroundColor: theme.palette.primary.contrastText,
+                                         borderRadius: 10
+                                     }}
+                                />
+                            }
+                        >
+                            {/*@ts-ignore*/}
+                            <MarkdownRenderer markdown={chosenFile["content"]} style={{
+                                height: props.height,
+                                width: "60vw",
+                                overflowWrap: "break-word",
+                                padding: "2em 3em",
+                            }}/>
+                        </Scrollbars>
+                    )
+                    : (
+                        loading ? (
+                                <ThreeDots/>
+                        ) : (
+                            <Editor
+                                options={{readOnly: true}}
+                                height={props.height}
+                                width={"115vw"}
+                                path={
+                                    //@ts-ignore
+                                    chosenFile["name"]}
+                                value={
+                                    //@ts-ignore
+                                    chosenFile["content"]}
+                                //@ts-ignore
+                                language={chosenFile["name"] !== undefined ? findLangauge(chosenFile["name"]).toLowerCase() : ""}
+                                theme={mode === "light" ? "gigo-default-light" : "gigo-default-dark"}
+                                className={"yaml-editor"}
+                            />
+                        )
+                    )
+            }
         </div>
     )
 }

@@ -3768,11 +3768,11 @@ function Challenge() {
                             </Box>
                         </div>
                     ) : (
-                        <div />
+                        <></>
                     )}
                 </div>
-                {/* add a 20px buffer at the end of the page */}
-                <div style={{height: "20px"}}/>
+                {/* add a 10vh buffer at the end of the page */}
+                <div style={{height: "10vh"}}/>
             </>
         )
     }
@@ -4105,8 +4105,8 @@ function Challenge() {
                         <div />
                     )}
                 </div>
-                {/* add a 20px buffer at the end of the page */}
-                <div style={{height: "20px"}}/>
+                {/* add a 10vh buffer at the end of the page */}
+                <div style={{height: "10vh"}}/>
             </>
         )
     }

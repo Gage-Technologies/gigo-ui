@@ -157,6 +157,26 @@ function Folder({children, name, padding, filepath, repoId, handleFileSelect, se
 
     //className={'flex items-center cursor-pointer hover:bg-zinc-700 ' + padding}
 
+    function extractNumber(name: string): number {
+        const match = name.match(/\d+/);
+        return match ? parseInt(match[0], 10) : 0
+    }
+
+    // organize the source code alphabetically first, then numerically
+    folderData.sort((a, b) => {
+        // @ts-ignore
+        const prefixA = a.name.replace(/\d+/g, '');
+        // @ts-ignore
+        const prefixB = b.name.replace(/\d+/g, '');
+
+        if (prefixA < prefixB) return -1;
+        if (prefixA > prefixB) return 1;
+
+        // @ts-ignore
+        return extractNumber(a.name) - extractNumber(b.name);
+    });
+
+
     return (
         <div className=''>
             <div style={{
@@ -184,7 +204,7 @@ function Folder({children, name, padding, filepath, repoId, handleFileSelect, se
                         </ButtonBase>
                     </div>
                 }
-                <span style={{fontSize: "large", fontWeight: "normal"}}>{nameElement}</span>
+                <span style={{fontSize: "small", fontWeight: "normal"}}>{nameElement}</span>
             </div>
             <div
                 style={isOpen ? {height: "auto", overflow: "hidden"} : {height: 0, overflow: "hidden"}}>
@@ -271,13 +291,14 @@ function Files({selectedFile, handleFileSelect, projectName, files, repoId}: Fil
             paddingRight: "10px"
         }}>
             <div style={{display: "flex", flexDirection: "row", justifyContent: "start", alignItems: "center"}}>
-                <h1 style={{fontSize: "medium"}}>{projectName.toUpperCase()}</h1>
+                <h1 style={{fontSize: "medium", marginLeft: "10px"}}>{"Project Files"}</h1>
             </div>
             <Tree>
                 {files.map((file) => {
                     return (
                         <div style={{
                             paddingBottom: "2.5px",
+                            fontSize: "small"
                         }}>
                             {
                                 //@ts-ignore
