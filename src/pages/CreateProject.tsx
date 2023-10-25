@@ -951,7 +951,7 @@ function CreateProject() {
             setGenLimitReached(true)
             swal(
                 "Generation Limit Reached",
-                "Sorry, but you have reached the image generation limit for this project."
+                "You've generated too many images... Cool off for 5 minutes or create a project to generate more images."
             );
             return false
         }
