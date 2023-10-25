@@ -209,7 +209,7 @@ function CodeDisplayEditor(props: Code_display_editor) {
                             <Editor
                                 options={{readOnly: true}}
                                 height={props.height}
-                                width={"115vw"}
+                                width={"121vw"}
                                 path={
                                     //@ts-ignore
                                     chosenFile["name"]}
@@ -220,6 +220,15 @@ function CodeDisplayEditor(props: Code_display_editor) {
                                 language={chosenFile["name"] !== undefined ? findLangauge(chosenFile["name"]).toLowerCase() : ""}
                                 theme={mode === "light" ? "gigo-default-light" : "gigo-default-dark"}
                                 className={"yaml-editor"}
+                                wrapperProps={{
+                                    style: {
+                                      border: `1px solid ${theme.palette.primary.contrastText}`,
+                                      boxSizing: 'border-box',
+                                      width: "121vw",
+                                      height: props.height, 
+                                      borderRadius: 5,                                     
+                                    }
+                                  }}
                             />
                         )
                     )
