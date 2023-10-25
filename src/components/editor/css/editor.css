@@ -1,16 +1,15 @@
 .overflow-guard {
-    border-radius: 10px;
+    border-radius: 5px;
 }
 
 .yaml-editor {
-    border-radius: 10px;
+    border-radius: 5px;
     height: 100%;
     width: 100%;
 }
 
 .monaco-editor {
-    border-radius: 10px;
-    box-shadow: 0 1px 3px -3px rgba(0,0,0,0.3),0 1px 3px 0 rgba(0,0,0,0.3),0 3px 9px 0 rgba(0,0,0,0.3);
+    border-radius: 5px;
 }
 
 .slider {
@@ -18,16 +17,16 @@
 }
 
 .minimap-decorations-layer {
-    border-radius: 10px;
+    border-radius: 5px;
 }
 
 .editor-widget {
-    border-radius: 10px;
+    border-radius: 5px;
     box-shadow: 0 6px 3px -3px rgba(0,0,0,0.3),0 1px 3px 0 rgba(0,0,0,0.3),0 3px 9px 0 rgba(0,0,0,0.3);
 }
 
 .editor-widget . {
-    border-radius: 10px;
+    border-radius: 5px;
     box-shadow: 0 6px 3px -3px rgba(0,0,0,0.3),0 1px 3px 0 rgba(0,0,0,0.3),0 3px 9px 0 rgba(0,0,0,0.3);
 }
 
