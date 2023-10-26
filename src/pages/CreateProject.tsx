@@ -1,5 +1,5 @@
 import * as React from "react";
-import {SyntheticEvent, useEffect} from "react";
+import { SyntheticEvent, useEffect } from "react";
 import {
     Autocomplete,
     Box,
@@ -27,9 +27,9 @@ import {
     Tooltip,
     Typography
 } from "@mui/material";
-import {getAllTokens} from "../theme";
+import { getAllTokens } from "../theme";
 import darkImageUploadIcon from "../img/dark_image_upload2.svg";
-import {useAppDispatch, useAppSelector} from "../app/hooks";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
 import ReactGA from "react-ga4";
 import {
     clearProjectState,
@@ -53,14 +53,14 @@ import {
     selectWorkspaceConfig,
     updateCreateProjectState
 } from "../reducers/createProject/createProject";
-import {programmingLanguages} from "../services/vars";
-import {TaskAlt} from "@mui/icons-material";
+import { programmingLanguages } from "../services/vars";
+import { TaskAlt } from "@mui/icons-material";
 import call from "../services/api-call";
 import config from "../config";
-import {LoadingButton} from "@mui/lab";
+import { LoadingButton } from "@mui/lab";
 import Post from "../models/post";
-import {useNavigate} from "react-router-dom";
-import {DefaultWorkspaceConfig, Workspace, WorkspaceConfig} from "../models/workspace";
+import { useNavigate } from "react-router-dom";
+import { DefaultWorkspaceConfig, Workspace, WorkspaceConfig } from "../models/workspace";
 import {
     initialAuthStateUpdate,
     selectAuthStateRole,
@@ -268,6 +268,7 @@ function CreateProject() {
     const [genImageId, setGenImageId] = React.useState<string>("");
     const [imageGenLoad, setImageGenLoad] = React.useState<boolean>(false)
     const [genLimitReached, setGenLimitReached] = React.useState<boolean>(false);
+    const [genLimitTimeout, setGenLimitTimeout] = React.useState<NodeJS.Timeout>()
 
     const [visibility, setVisibility] = React.useState(false)
     const [showPopupConnect, setShowPopupConnect] = React.useState(false)
@@ -949,6 +950,18 @@ function CreateProject() {
         // handle generation count failure
         if (res !== undefined && res["message"] !== undefined && res["message"] === "User has already reached the generation limit") {
             setGenLimitReached(true)
+            // clear existing timeout if it exists
+            if (genLimitTimeout)
+                clearTimeout(genLimitTimeout)
+            // create timeout to unset genlimitreached after 5 mintues
+            setGenLimitTimeout(
+                setTimeout(() => {
+                    if (genLimitTimeout)
+                        clearTimeout(genLimitTimeout)
+                    setGenLimitReached(false)
+                    setGenLimitTimeout(undefined)
+                }, 300000)
+            )
             swal(
                 "Generation Limit Reached",
                 "You've generated too many images... Cool off for 5 minutes or create a project to generate more images."
@@ -982,34 +995,34 @@ function CreateProject() {
 
         fetch(config.rootPath + "/api/project/tempGenImage/" + id, {
             credentials: 'include'  // Include cookies
-          })
-          .then(response => response.blob())
-          .then(blob => {
-            // create reader to format image into a base64 string
-            const reader = new FileReader();
-            // configure callback for reader once the file has been read
-            reader.onloadend = (e) => {
-                // ensure that the target and result are not null
-                if (e.target === null || e.target.result === null) {
-                    return
-                }
+        })
+            .then(response => response.blob())
+            .then(blob => {
+                // create reader to format image into a base64 string
+                const reader = new FileReader();
+                // configure callback for reader once the file has been read
+                reader.onloadend = (e) => {
+                    // ensure that the target and result are not null
+                    if (e.target === null || e.target.result === null) {
+                        return
+                    }
 
-                // exclude ArrayBuffer case for typescript (it won't ever be an ArrayBuffer though)
-                if (typeof e.target.result !== "string") {
-                    return
-                }
+                    // exclude ArrayBuffer case for typescript (it won't ever be an ArrayBuffer though)
+                    if (typeof e.target.result !== "string") {
+                        return
+                    }
 
-                // send data url to image src
-                setThumbnail(e.target.result);
+                    // send data url to image src
+                    setThumbnail(e.target.result);
+                    setImageGenLoad(false)
+                }
+                reader.readAsDataURL(blob);
+            })
+            .catch(error => {
+                // fallback on browser loading
+                setThumbnail(config.rootPath + "/api/project/tempGenImage/" + id)
                 setImageGenLoad(false)
-            }
-            reader.readAsDataURL(blob);
-          })
-          .catch(error => {
-            // fallback on browser loading
-            setThumbnail(config.rootPath + "/api/project/tempGenImage/" + id)
-            setImageGenLoad(false)
-          });
+            });
 
         setGenImageId(id)
 
@@ -1033,7 +1046,7 @@ function CreateProject() {
         }
 
         // clone the file so we don't read the same one we're going to upload
-        let clonedFile = new File([file], file.name, {type: file.type});
+        let clonedFile = new File([file], file.name, { type: file.type });
 
         // create file reader
         const reader = new FileReader();
@@ -1122,7 +1135,7 @@ function CreateProject() {
                         defaultValue={prompt}
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
-                        inputProps={{maxLength: 120, minLength: 3}}
+                        inputProps={{ maxLength: 120, minLength: 3 }}
                         helperText={prompt.length > 119 ? 'Character limit reached' : promptError}
                         error={prompt.length > 119 || prompt === "" || prompt.length < 3}
                     />
@@ -1161,7 +1174,7 @@ function CreateProject() {
                         mt: 1
                     }}
                 >
-                    <InfoOutlinedIcon sx={{height: 14, width: 14}}/> Learn more about Challenge Types
+                    <InfoOutlinedIcon sx={{ height: 14, width: 14 }} /> Learn more about Challenge Types
                 </Typography>
                 <Popover
                     id="challenge-type-explanation-popup"
@@ -1207,7 +1220,7 @@ function CreateProject() {
                                 >
                                     Interactive
                                 </strong>
-                                <br/>
+                                <br />
                                 <div style={{
                                     fontSize: 12,
                                     textOverflow: "wrap"
@@ -1227,7 +1240,7 @@ function CreateProject() {
                                 >
                                     Playground
                                 </strong>
-                                <br/>
+                                <br />
                                 <div style={{
                                     fontSize: 12,
                                     textOverflow: "wrap"
@@ -1246,7 +1259,7 @@ function CreateProject() {
                                 >
                                     Casual
                                 </strong>
-                                <br/>
+                                <br />
                                 <div style={{
                                     fontSize: 12,
                                     textOverflow: "wrap"
@@ -1266,7 +1279,7 @@ function CreateProject() {
                                 >
                                     Competitive
                                 </strong>
-                                <br/>
+                                <br />
                                 <div style={{
                                     fontSize: 12,
                                     textOverflow: "wrap"
@@ -1306,7 +1319,7 @@ function CreateProject() {
                         mt: 1
                     }}
                 >
-                    <InfoOutlinedIcon sx={{height: 14, width: 14}}/> Learn more about Renowns
+                    <InfoOutlinedIcon sx={{ height: 14, width: 14 }} /> Learn more about Renowns
                 </Typography>
                 <Popover
                     id="tier-explanation-popup"
@@ -1353,7 +1366,7 @@ function CreateProject() {
                                     >
                                         Renown 1
                                     </strong>
-                                    <br/>
+                                    <br />
                                     <div style={{
                                         fontSize: 12,
                                         textOverflow: "wrap"
@@ -1374,7 +1387,7 @@ function CreateProject() {
                                     >
                                         Renown 4
                                     </strong>
-                                    <br/>
+                                    <br />
                                     <div style={{
                                         fontSize: 12,
                                         textOverflow: "wrap"
@@ -1394,7 +1407,7 @@ function CreateProject() {
                                     >
                                         Renown 7
                                     </strong>
-                                    <br/>
+                                    <br />
                                     <div style={{
                                         fontSize: 12,
                                         textOverflow: "wrap"
@@ -1416,7 +1429,7 @@ function CreateProject() {
                                     >
                                         Renown 10
                                     </strong>
-                                    <br/>
+                                    <br />
                                     <div style={{
                                         fontSize: 12,
                                         textOverflow: "wrap"
@@ -1460,7 +1473,7 @@ function CreateProject() {
                         mt: 1
                     }}
                 >
-                    <InfoOutlinedIcon sx={{height: 14, width: 14}}/> Learn more about Languages
+                    <InfoOutlinedIcon sx={{ height: 14, width: 14 }} /> Learn more about Languages
                 </Typography>
                 <Popover
                     id="lang-explanation-popup"
@@ -1527,7 +1540,7 @@ function CreateProject() {
                         mt: 1
                     }}
                 >
-                    <InfoOutlinedIcon sx={{height: 14, width: 14}}/> Learn more about Tags
+                    <InfoOutlinedIcon sx={{ height: 14, width: 14 }} /> Learn more about Tags
                 </Typography>
                 <Popover
                     id="tags-explanation-popup"
@@ -1589,7 +1602,7 @@ function CreateProject() {
                         mt: 1
                     }}
                 >
-                    <InfoOutlinedIcon sx={{height: 14, width: 14}}/> Learn more about Exclusive Content's Descriptions
+                    <InfoOutlinedIcon sx={{ height: 14, width: 14 }} /> Learn more about Exclusive Content's Descriptions
                 </Typography>
                 <Popover
                     id="exclusive-description-popup"
@@ -1648,7 +1661,7 @@ function CreateProject() {
                         mt: 1
                     }}
                 >
-                    <InfoOutlinedIcon sx={{height: 14, width: 14}}/> Learn more about Evaluation
+                    <InfoOutlinedIcon sx={{ height: 14, width: 14 }} /> Learn more about Evaluation
                 </Typography>
                 <Popover
                     id="eval-explanation-popup"
@@ -1710,7 +1723,7 @@ function CreateProject() {
                         mt: 1
                     }}
                 >
-                    <InfoOutlinedIcon sx={{height: 14, width: 14}}/> Learn more about Price
+                    <InfoOutlinedIcon sx={{ height: 14, width: 14 }} /> Learn more about Price
                 </Typography>
                 <Popover
                     id="eval-explanation-popup"
@@ -1773,7 +1786,7 @@ function CreateProject() {
                         mt: 1
                     }}
                 >
-                    <InfoOutlinedIcon sx={{height: 14, width: 14}}/> Learn more about Workspace Config Templates
+                    <InfoOutlinedIcon sx={{ height: 14, width: 14 }} /> Learn more about Workspace Config Templates
                 </Typography>
                 <Popover
                     id="ws-cfg-explanation-popup"
@@ -1840,7 +1853,7 @@ function CreateProject() {
                         mt: 1
                     }}
                 >
-                    <InfoOutlinedIcon sx={{height: 14, width: 14}}/> Learn more about Private projects
+                    <InfoOutlinedIcon sx={{ height: 14, width: 14 }} /> Learn more about Private projects
                 </Typography>
                 <Popover
                     id="visibility-explanation-popup"
@@ -1984,7 +1997,7 @@ function CreateProject() {
                                 </div>
                             </Tooltip>
                         </Grid>
-                    ) : (<div/>)}
+                    ) : (<div />)}
                     <Grid item xs={"auto"}>
                         <Tooltip title={
                             (project !== null) ?
@@ -2060,8 +2073,8 @@ function CreateProject() {
                     paddingTop: "20px",
                 }}>
                     <div
-                        style={{display: "flex", flexDirection: "row", width: "100%", justifyContent: "space-between"}}>
-                        <div style={{width: "50%"}}>
+                        style={{ display: "flex", flexDirection: "row", width: "100%", justifyContent: "space-between" }}>
+                        <div style={{ width: "50%" }}>
                             <TextField
                                 disabled={changeLock}
                                 id={"exclusiveDescription"}
@@ -2098,14 +2111,14 @@ function CreateProject() {
                             />
                             {renderExclusiveDescriptionPopover()}
                         </div>
-                        <div style={{display: "flex", flexDirection: "column", width: "45%"}}>
+                        <div style={{ display: "flex", flexDirection: "column", width: "45%" }}>
                             <div>
                                 <div>Price</div>
                                 <Grid item xs={12}>
                                     <Slider
                                         aria-label="Always visible"
                                         defaultValue={0}
-                                        style={{height: "15px", width: "55%"}}
+                                        style={{ height: "15px", width: "55%" }}
                                         className={"price"}
                                         value={createProjectForm.price === null ? 0 : createProjectForm.price}
                                         valueLabelDisplay={"auto"}
@@ -2213,9 +2226,9 @@ function CreateProject() {
                                     height: "43vh"
                                 }}
                             >
-                                <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
-                                    {createProjectForm.thumbnail == null || createProjectForm.thumbnail == "" ? (
-                                        <h5 style={{color: "grey"}}>Upload Image</h5>
+                                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                                    {thumbnail == null || thumbnail == "" ? (
+                                        <h5 style={{ color: "grey" }}>Upload Image</h5>
                                     ) : null}
                                     <img
                                         key={thumbnail}
@@ -2279,7 +2292,7 @@ function CreateProject() {
                         </Tooltip>
                     </Grid>
                     <Grid item xs={12}>
-                        <Tooltip title="Note : Only 3 images may be generated">
+                        <Tooltip title="Generate up to 10 images per 5m">
                             <Button
                                 variant={`text`}
                                 color={"primary"}
@@ -2335,18 +2348,18 @@ function CreateProject() {
                         />
                     </Grid>
                     <Grid item xs={12}>
-                        <div style={{display: "flex", flexDirection: "row"}}>
+                        <div style={{ display: "flex", flexDirection: "row" }}>
                             <Typography>Public</Typography>
                             <Switch value={visibility} checked={visibility} disabled={status.toString() !== "1"}
-                                    onClick={() => {
-                                        // copy initial state
-                                        let updateState = Object.assign({}, initialCreateProjectStateUpdate);
-                                        // update description in state update
-                                        updateState.visibility = !visibility;
-                                        // execute state update
-                                        updateFormState(updateState)
-                                        setVisibility(!visibility)
-                                    }}/>
+                                onClick={() => {
+                                    // copy initial state
+                                    let updateState = Object.assign({}, initialCreateProjectStateUpdate);
+                                    // update description in state update
+                                    updateState.visibility = !visibility;
+                                    // execute state update
+                                    updateFormState(updateState)
+                                    setVisibility(!visibility)
+                                }} />
                             <Typography>Private</Typography>
                         </div>
                         {renderVisibilityExplanationPopover()}
@@ -2377,8 +2390,8 @@ function CreateProject() {
     let renderEvaluationSection = () => {
         return (
             <div>
-                <Grid container spacing={{xs: 2, sm: 6, md: 12}} justifyContent={"center"} alignItems={"center"}
-                      sx={{paddingTop: "5vh"}}>
+                <Grid container spacing={{ xs: 2, sm: 6, md: 12 }} justifyContent={"center"} alignItems={"center"}
+                    sx={{ paddingTop: "5vh" }}>
                     <Grid item>
                         <TextField
                             disabled={changeLock}
@@ -2394,7 +2407,7 @@ function CreateProject() {
                             maxRows={15}
                             sx={stepIndex === 10 ? {
                                 width: "30vw", zIndex: "600000"
-                            } : {width: "30vw"}}
+                            } : { width: "30vw" }}
                             value={createProjectForm.evaluation}
                             onChange={(e) => {
                                 // copy initial state
@@ -2435,13 +2448,13 @@ function CreateProject() {
     let renderChallengeDetailsSection = () => {
         return (
             <div>
-                <Grid container spacing={{xs: 2, sm: 6, md: 12}} justifyContent="space-evenly" sx={{
+                <Grid container spacing={{ xs: 2, sm: 6, md: 12 }} justifyContent="space-evenly" sx={{
                     flexGrow: 1,
                     paddingTop: "5vh",
                 }}>
                     <Grid item xs={"auto"}>
-                        <FormControl sx={stepIndex >= 3 && stepIndex <= 8 ? {zIndex: "600000"} : {}}
-                                     className={'challenge'}>
+                        <FormControl sx={stepIndex >= 3 && stepIndex <= 8 ? { zIndex: "600000" } : {}}
+                            className={'challenge'}>
                             <InputLabel id={"challengeTypeInputLabel"}>Challenge Type</InputLabel>
                             <Select
                                 disabled={changeLock}
@@ -2481,11 +2494,11 @@ function CreateProject() {
                                 </MenuItem>
                             </Select>
                         </FormControl>
-                        <br/>
+                        <br />
                         {renderChallengeTypeExplanationPopover()}
                     </Grid>
                     <Grid item xs={"auto"}>
-                        <FormControl sx={stepIndex === 9 ? {zIndex: "600000"} : {}} className={"renown"}>
+                        <FormControl sx={stepIndex === 9 ? { zIndex: "600000" } : {}} className={"renown"}>
                             <InputLabel id={"tierInputLabel"}>Challenge Renown</InputLabel>
                             <Select
                                 disabled={changeLock}
@@ -2568,7 +2581,7 @@ function CreateProject() {
                             }}
                             value={createProjectForm.languages === null ? [] : createProjectForm.languages}
                             renderInput={(params) => (
-                                <TextField {...params} label="Languages" placeholder="Languages"/>
+                                <TextField {...params} label="Languages" placeholder="Languages" />
                             )}
                             sx={{
                                 width: "30vw",
@@ -2603,7 +2616,7 @@ function CreateProject() {
                                 return option._id === value._id;
                             }}
                             renderInput={(params) => (
-                                <TextField {...params} label="Challenge Tags" placeholder="Challenge Tags"/>
+                                <TextField {...params} label="Challenge Tags" placeholder="Challenge Tags" />
                             )}
                             onInputChange={(e) => {
                                 handleTagSearch(e)
@@ -2822,7 +2835,7 @@ function CreateProject() {
                             return option._id === value._id;
                         }}
                         renderInput={(params) => (
-                            <TextField {...params} label="Template Tags" placeholder="Template Tags"/>
+                            <TextField {...params} label="Template Tags" placeholder="Template Tags" />
                         )}
                         onInputChange={(e) => {
                             handleTagSearch(e)
@@ -2906,7 +2919,7 @@ function CreateProject() {
                         }}
                         value={createProjectForm.workspaceConfig.languages === null ? [] : createProjectForm.workspaceConfig.languages}
                         renderInput={(params) => (
-                            <TextField {...params} label="Template Languages" placeholder="Template Languages"/>
+                            <TextField {...params} label="Template Languages" placeholder="Template Languages" />
                         )}
                         sx={{
                             width: "20vw",
@@ -3013,7 +3026,7 @@ function CreateProject() {
                             }}
                             renderInput={(params) => (
                                 <TextField {...params} label="Workspace Config Templates"
-                                           placeholder="Workspace Config Templates"/>
+                                    placeholder="Workspace Config Templates" />
                             )}
                             onInputChange={(e) => {
                                 handleWorkspaceConfigSearch(e)
@@ -3035,7 +3048,7 @@ function CreateProject() {
                             sx={stepIndex === 12 ? {
                                 width: "20vw",
                                 zIndex: "6000000"
-                            } : {width: "20vw"}} className={'workspace_config'}
+                            } : { width: "20vw" }} className={'workspace_config'}
                         />
                         {renderWsConfigTemplateExplanationPopover()}
                     </Grid>
@@ -3107,19 +3120,19 @@ function CreateProject() {
         return (
             <div>
                 <Typography component={"div"} variant={"h3"}
-                            sx={{width: "100%", display: "flex", justifyContent: "center", paddingTop: "12vh"}}>
+                    sx={{ width: "100%", display: "flex", justifyContent: "center", paddingTop: "12vh" }}>
                     Challenge Created!
                 </Typography>
                 {xpData !== null && xpData !== undefined ? (<XpPopup oldXP={
                     //@ts-ignore
                     (xpData["xp_update"]["old_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]} levelUp={
-                    //@ts-ignore
-                    xpData["level_up_reward"] === null ? false : true} homePage={false} popupClose={null} maxXP={100}
-                                                                     newXP={(xpData["xp_update"]["new_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]}
-                                                                     nextLevel={xpData["xp_update"]["next_level"]}
-                                                                     gainedXP={xpData["xp_update"]["new_xp"] - xpData["xp_update"]["old_xp"]}
-                                                                     reward={xpData["level_up_reward"]}
-                                                                     renown={xpData["xp_update"]["current_renown"]}/>) : null}
+                        //@ts-ignore
+                        xpData["level_up_reward"] === null ? false : true} homePage={false} popupClose={null} maxXP={100}
+                    newXP={(xpData["xp_update"]["new_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]}
+                    nextLevel={xpData["xp_update"]["next_level"]}
+                    gainedXP={xpData["xp_update"]["new_xp"] - xpData["xp_update"]["old_xp"]}
+                    reward={xpData["level_up_reward"]}
+                    renown={xpData["xp_update"]["current_renown"]} />) : null}
                 <Grid container spacing={12} justifyContent="space-evenly" sx={{
                     flexGrow: 1,
                     paddingTop: "29vh",
@@ -3208,7 +3221,7 @@ function CreateProject() {
     // initialize tags if there are no values
     if (tagOptions.length === 0 && !bsTags) {
         setBsTags(true)
-        handleTagSearch({target: {value: ""}})
+        handleTagSearch({ target: { value: "" } })
     }
 
     const tutorialCallback = async (step: number, reverse: boolean) => {
@@ -3300,16 +3313,16 @@ function CreateProject() {
                 />
                 <Card sx={styles.card}>
                     <Typography component={"div"} variant={"h5"}
-                                sx={{
-                                    width: "100%",
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    paddingTop: "10px"
-                                }}>
+                        sx={{
+                            width: "100%",
+                            display: "flex",
+                            justifyContent: "center",
+                            paddingTop: "10px"
+                        }}>
                         Create Project
                     </Typography>
                     <Modal open={showPopupConnect} onClose={() => setShowPopupConnect(false)}
-                           style={{display: 'flex', justifyContent: "center", alignItems: "center"}}>
+                        style={{ display: 'flex', justifyContent: "center", alignItems: "center" }}>
                         <Box
                             sx={{
                                 width: "40vw",
@@ -3326,12 +3339,12 @@ function CreateProject() {
                             }}
                         >
                             <div
-                                style={{width: "80%", height: "70%", display: "flex", justifyContent: "center", alignItems: "center"}}>
+                                style={{ width: "80%", height: "70%", display: "flex", justifyContent: "center", alignItems: "center" }}>
                                 <h4>You cannot make exclusive content without creating a connected account. Would you
                                     like to continue to connected account setup?</h4>
                             </div>
                             <div
-                                style={{display: "flex", flexDirection: "row", width: "100%", justifyContent: "center"}}>
+                                style={{ display: "flex", flexDirection: "row", width: "100%", justifyContent: "center" }}>
                                 <Button onClick={() => window.location.replace(
                                     //@ts-ignore
                                     connectedAccountLink)}>

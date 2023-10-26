@@ -38,10 +38,6 @@ function Sidebar({selectedFile, handleFileSelect, projectNames, files, repoId}: 
 
     }
 
-
-
-
-
     return (
         <Scrollbars
             style={{

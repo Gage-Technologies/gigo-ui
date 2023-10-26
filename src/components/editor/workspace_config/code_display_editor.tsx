@@ -1,8 +1,8 @@
 import * as React from "react";
-import {Button, createTheme, PaletteMode} from "@mui/material";
+import { Box, Button, CircularProgress, createTheme, PaletteMode } from "@mui/material";
 import Editor, { useMonaco } from "@monaco-editor/react";
-import {useEffect, useState} from "react";
-import {DefaultWorkspaceConfig} from "../../../models/workspace";
+import { useEffect, useState } from "react";
+import { DefaultWorkspaceConfig } from "../../../models/workspace";
 import darkEditorTheme from "../themes/GitHub Dark.json"
 import lightEditorTheme from "../themes/GitHub.json"
 import "../css/editor.css"
@@ -10,12 +10,12 @@ import call from "../../../services/api-call";
 import config from "../../../config";
 import Sidebar from "../../EditorComponents/Sidebar";
 import Text from "../../EditorComponents/Text";
-import {initialAuthStateUpdate, updateAuthState} from "../../../reducers/auth/auth";
-import {useNavigate} from "react-router-dom";
+import { initialAuthStateUpdate, updateAuthState } from "../../../reducers/auth/auth";
+import { useNavigate } from "react-router-dom";
 import MarkdownRenderer from "../../Markdown/MarkdownRenderer";
-import {getAllTokens} from "../../../theme";
+import { getAllTokens } from "../../../theme";
 import Scrollbars from "react-custom-scrollbars";
-import {ThreeDots} from "react-loading-icons";
+import { ThreeDots } from "react-loading-icons";
 
 export interface Code_display_editor {
     style?: object;
@@ -40,6 +40,25 @@ function CodeDisplayEditor(props: Code_display_editor) {
 
     let navigate = useNavigate();
 
+    const selectFile = async (file: any) => {
+        if (file["content"] === undefined || file["content"] === null || file["content"] === "" || true) {
+            let res = await call(
+                "/api/project/getProjectFiles",
+                "post",
+                null,
+                null,
+                null,
+                // @ts-ignore
+                { repo_id: props.repoId, ref: props.references, filepath: file["path"] },
+                null,
+                config.rootPath
+            )
+            file = { ...file, content: res["message"]["content"] };
+        }
+
+        setChosenFile(file)
+    }
+
     const apiLoad = async () => {
         setLoading(true)
         let res = await call(
@@ -49,27 +68,29 @@ function CodeDisplayEditor(props: Code_display_editor) {
             null,
             null,
             // @ts-ignore
-            {repo_id: props.repoId, ref: props.references, filepath: props.filepath},
+            { repo_id: props.repoId, ref: props.references, filepath: props.filepath },
             null,
             config.rootPath
         )
 
-        if (res !== undefined && res["message"] !== undefined){
+        if (res !== undefined && res["message"] !== undefined) {
             setAllFiles(res["message"]);
             setFileName(res["message"][0]["name"])
-            const index = res["message"].findIndex((item: { name: string; }) => item.name === "README.md");
+            let index = res["message"].findIndex((item: { name: string; }) => item.name === "README.md");
 
             if (index !== -1) {
-                setChosenFile(res["message"][index]);
+                await selectFile(res["message"][index]);
             } else {
-                setChosenFile(res["message"][4]);
+                // determine the first file that is not hidden and is not in a hidden directory
+                index = res["message"].findIndex((item: { name: string; }) => !item.name.startsWith('.'));
+                await selectFile(res["message"][index]);
             }
 
         }
         setLoading(false)
     }
 
-    const findLangauge = (name :string) => {
+    const findLangauge = (name: string) => {
         let textArray = name.split(".")
         let determinate = textArray[1]
         switch (determinate) {
@@ -136,6 +157,35 @@ function CodeDisplayEditor(props: Code_display_editor) {
                 return 'r';
             case 'm':
                 return 'objective-c';
+            case 'go':
+                return 'go';
+            case 'sql':
+                return 'sql';
+            case 'swift':
+                return 'swift';
+            case 'sh':
+                return 'shell';
+            case 'yml':
+            case 'yaml':
+                return 'yaml';
+            case 'rs':
+                return 'rust';
+            case 'clj':
+                return 'clojure';
+            case 'kt':
+                return 'kotlin';
+            case 'pl':
+                return 'perl';
+            case 'hs':
+                return 'haskell';
+            case 'erl':
+                return 'erlang';
+            case 'elixir':
+                return 'elixir';
+            case 'elm':
+                return 'elm';
+            case 'dart':
+                return 'dart';
             default:
                 return 'plaintext';
         }
@@ -154,12 +204,7 @@ function CodeDisplayEditor(props: Code_display_editor) {
     }, [monaco, mode]);
 
     const handleCurrentFileSideBar = (file: any) => {
-        // let arr = new Set(allFiles)
-        // //@ts-ignore
-        // arr.add(file)
-        // //@ts-ignore
-        // setAllFiles(arr)
-        setChosenFile(file)
+        selectFile(file)
     }
 
     //@ts-ignore
@@ -170,12 +215,17 @@ function CodeDisplayEditor(props: Code_display_editor) {
 
     return (
         <div style={props.style}>
-            <div style={{width: "50%", display: "flex", height: "73vh"}}>
-                <Sidebar selectedFile={chosenFile} handleFileSelect={handleCurrentFileSideBar} projectNames={props.projectName} files={allFiles} repoId={props.repoId}/>
+            <div style={{ width: "50%", display: "flex", height: "73vh" }}>
+                <Sidebar
+                    selectedFile={chosenFile}
+                    handleFileSelect={handleCurrentFileSideBar}
+                    projectNames={props.projectName}
+                    files={allFiles}
+                    repoId={props.repoId}
+                />
             </div>
             {
-                isMarkdown
-                    ? (
+                isMarkdown ? (
                         <Scrollbars
                             style={{
                                 height: props.height,
@@ -185,11 +235,11 @@ function CodeDisplayEditor(props: Code_display_editor) {
                             }}
                             renderThumbVertical={({ style, ...props }) =>
                                 <div {...props}
-                                     style={{
-                                         ...style,
-                                         backgroundColor: theme.palette.primary.contrastText,
-                                         borderRadius: 10
-                                     }}
+                                    style={{
+                                        ...style,
+                                        backgroundColor: theme.palette.primary.contrastText,
+                                        borderRadius: 10
+                                    }}
                                 />
                             }
                         >
@@ -199,15 +249,34 @@ function CodeDisplayEditor(props: Code_display_editor) {
                                 width: "60vw",
                                 overflowWrap: "break-word",
                                 padding: "2em 3em",
-                            }}/>
+                            }} />
                         </Scrollbars>
                     )
                     : (
                         loading ? (
-                                <ThreeDots/>
+                            <Box
+                                sx={{
+                                    border: `1px solid ${theme.palette.primary.contrastText}`,
+                                    boxSizing: 'border-box',
+                                    width: "121vw",
+                                    height: props.height,
+                                    borderRadius: "5px",
+                                }}
+                            >
+                                <CircularProgress
+                                    color="inherit"
+                                    sx={{
+                                        // center the spinner in the middle of the Box
+                                        position: 'absolute',
+                                        top: '52vh',
+                                        left: '59vw',
+                                        transform: 'translate(-50%, -50%)'
+                                    }}
+                                />
+                            </Box>
                         ) : (
                             <Editor
-                                options={{readOnly: true}}
+                                options={{ readOnly: true }}
                                 height={props.height}
                                 width={"121vw"}
                                 path={
@@ -222,13 +291,13 @@ function CodeDisplayEditor(props: Code_display_editor) {
                                 className={"yaml-editor"}
                                 wrapperProps={{
                                     style: {
-                                      border: `1px solid ${theme.palette.primary.contrastText}`,
-                                      boxSizing: 'border-box',
-                                      width: "121vw",
-                                      height: props.height, 
-                                      borderRadius: 5,                                     
+                                        border: `1px solid ${theme.palette.primary.contrastText}`,
+                                        boxSizing: 'border-box',
+                                        width: "121vw",
+                                        height: props.height,
+                                        borderRadius: 5,
                                     }
-                                  }}
+                                }}
                             />
                         )
                     )
