@@ -161,7 +161,7 @@ function Challenge() {
 
     const embedded = queryParams.has('embed') && queryParams.get('embed') === 'true';
 
-    const [mainTab, setMainTab] = React.useState("project")
+    const [mainTab, setMainTab] = React.useState(window.location.hash.replace('#', '') !== "" ? window.location.hash.replace('#', '') : "project")
 
     const [searchText, setSearchText] = React.useState("")
 
@@ -2866,15 +2866,25 @@ function Challenge() {
     }
 
     const mainTabHtml = () => {
+        let renderFunc = mainTabProject
+        if (mainTab === "source") {
+            renderFunc = mainTabSource
+        } else if (mainTab === "edit") {
+            renderFunc = mainTabEdit
+        } else if (mainTab === "discussions") {
+            renderFunc = mainTabDiscussions
+        }
+
         return (
             <div style={{width: "80vw"}}>
-                {mainTab === "project" ? mainTabProject() : mainTab === "source" ? mainTabSource() : mainTab === "edit" ? mainTabEdit() : mainTabDiscussions()}
+                {renderFunc()}
             </div>
         )
     }
 
     const handleTabChange = (newValue: string) => {
         setMainTab(newValue);
+        window.location.hash = "#"+newValue
         if (newValue === "discussions") {
             getDiscussions().then(r => console.log(r))
             console.log("run: ", runTutorial)

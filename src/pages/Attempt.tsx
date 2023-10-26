@@ -77,7 +77,7 @@ function AttemptPage() {
 
     const [mode, _] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
         const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
-    const [mainTab, setMainTab] = React.useState("project")
+    const [mainTab, setMainTab] = React.useState(window.location.hash.replace('#', '') !== "" ? window.location.hash.replace('#', '') : "project")
     const [minorTab, setMinorTab] = React.useState("overview")
     const [loading, setLoading] = React.useState(true)
     const userId = useAppSelector(selectAuthStateId);
@@ -394,9 +394,16 @@ function AttemptPage() {
     }
 
     const mainTabHtml = () => {
+        let renderFunc = mainTabProject
+        if (mainTab === "source") {
+            renderFunc = mainTabSource
+        } else if (mainTab === "edit") {
+            renderFunc = mainTabEdit
+        }
+
         return (
             <div style={{width: "80vw"}}>
-                {mainTab === "project" ? mainTabProject() : mainTab === "source" ? mainTabSource() : mainTab === "edit" ? mainTabEdit() : mainTabDiscussions()}
+                {renderFunc()}
             </div>
         )
     }
@@ -923,6 +930,7 @@ function AttemptPage() {
 
     const handleTabChange = (newValue: string) => {
         setMainTab(newValue);
+        window.location.hash = "#"+newValue
         if (newValue ==="edit") {
             getConfig()
         }
