@@ -45,6 +45,7 @@ interface IProps {
     backgroundName: string | null;
     backgroundPalette: string | null;
     backgroundRender: boolean | null;
+    description: string;
 }
 
 export default function AttemptsCard(props: IProps) {
@@ -67,7 +68,7 @@ export default function AttemptsCard(props: IProps) {
                 }}
             >
                 <Grid container alignItems="center" spacing={2}>
-                    <Grid item xs={4} container alignItems="center">
+                    <Grid item xs={3} container alignItems="center">
                         <UserIcon
                             userTier={props.userTier}
                             userThumb={props.userThumb}
@@ -79,10 +80,12 @@ export default function AttemptsCard(props: IProps) {
                         />
                         <UserName>{props.attemptUser}</UserName>
                     </Grid>
-                    <Grid item xs={4} container alignItems="center" justifyContent="center">
-                        <TimeText>{props.attemptTime.split("T")[0]}</TimeText>
+                    <Grid item xs={8} container alignItems="left" justifyContent="left">
+                        <Typography style={{ textAlign: 'justify', alignItems: 'left' }}>
+                            {props.description}
+                        </Typography>
                     </Grid>
-                    <Grid item xs={4} container alignItems="center" justifyContent="flex-end">
+                    <Grid item xs={1} container alignItems="center" justifyContent="flex-end">
                         {isSuccess ? (
                             <Tooltip title={"Successful Attempt!"}>
                                 <SuccessIcon />
@@ -109,4 +112,5 @@ AttemptsCard.defaultProps = {
     attemptLines: "",
     attemptPercentage: "",
     userTier: "",
+    description: "",
 };

@@ -931,9 +931,13 @@ function Challenge() {
 
     const attemptTab = () => {
         return (
-            <div style={{overflowY: "auto", maxHeight: "65vh", width: "50vw"}}>
+            <div style={{overflowY: "auto", width: "50vw"}}>
+                <Typography variant={"h5"} style={{textAlign: "center", fontWeight: "bold", paddingBottom: "10px", paddingTop: "10px"}}>
+                    check out the attempts made on this project!
+                </Typography>
                 {attempt.length > 0 ? (
                     attempt.map((attempts) => {
+                        console.log("attempts: ", attempts)
                         return (
                             <div style={{paddingBottom: "10px"}}>
                                 <ButtonBase onClick={() => navigate("/attempt/" + attempts["_id"])}>
@@ -946,8 +950,9 @@ function Challenge() {
                                               backgroundName={attempts["name"]}
                                               backgroundPalette={attempts["color_palette"]}
                                               backgroundRender={attempts["render_in_front"]}
-                                              width={"45vw"}
+                                              width={"50vw"}
                                               height={"auto"}
+                                              description={attempts["description"]}
                                 />
                                 </ButtonBase>
                             </div>
