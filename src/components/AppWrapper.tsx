@@ -1136,86 +1136,84 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                         </Button>
                         <TopSearchBar />
                         {loggedIn ? (
-                        <>
-                            <Button
-                                size={"small"}
-                                aria-label="account of current user"
-                                onClick={handleMenu}
-                                variant="text"
-                                style={{position: "absolute", right: 0}}
-                            >
-                                <UserIcon
-                                    userId={authState.id}
-                                    userTier={authState.tier}
-                                    userThumb={config.rootPath + thumbnail}
-                                    size={40}
-                                    backgroundName={authState.backgroundName}
-                                    backgroundPalette={authState.backgroundColor}
-                                    backgroundRender={authState.backgroundRenderInFront}
-                                    profileButton={false}
-                                    pro={authState.role.toString() === "1"}
-                                />
-                            </Button>
-                            <Menu
-                                id="menu-appbar"
-                                anchorOrigin={{
-                                    vertical: "top",
-                                    horizontal: "right",
-                                }}
-                                keepMounted
-                                open={Boolean(anchorEl)}
-                                onClose={handleClose}
-                            >
-                                <MenuItem onClick={handleProfile}>Profile</MenuItem>
-                                {window.innerWidth > 1000 ? (
-                                    <MenuItem onClick={handleSettings}>Account Settings</MenuItem>
-                                ) : null}
-                                <MenuItem onClick={async () => {
-                                    await handleLogout()
-                                }}>Logout</MenuItem>
-                                <MenuItem onClick={() => setShowReferPopup(true)}>Refer A Friend</MenuItem>
-                            </Menu>
-                            <Modal open={showReferPopup} onClose={() => setShowReferPopup(false)}>
-                                <Box
-                                    sx={{
-                                        width: "90vw",
-                                        height: "40vh",
-                                        justifyContent: "center",
-                                        marginLeft: "5vw",
-                                        marginTop: "30vh",
-                                        outlineColor: "black",
-                                        borderRadius: 1,
-                                        boxShadow: "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px 6px 0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
-                                        backgroundColor: theme.palette.background.default,
-                                    }}
-                                >
-                                    <Button onClick={() => setShowReferPopup(false)}>
-                                        <CloseIcon/>
-                                    </Button>
-                                    <div style={{width: "100%", display: "flex", alignItems: "center", flexDirection: "column"}}>
-                                        <h3>Refer a Friend.</h3>
-                                        <h4>Give a Month, Get a Month.</h4>
-                                        <div style={{display: "flex", width: "100%", flexDirection: "row", justifyContent: "center"}}>
-                                            <h5 style={{outline: "solid gray", borderRadius: "5px", padding: "8px"}} id={"url-mobile"}>{referralLink.length > 20 ? referralLink.slice(0,20) + "..." : referralLink}</h5>
-                                            <Button onClick={() => copyToClipboard()}>
-                                                <ContentCopyIcon/>
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </Box>
-                            </Modal>
-                        </>
-                            ) : (
                                 <>
                                     <Button
                                         size={"small"}
-                                        aria-label="login-signup"
+                                        aria-label="account of current user"
                                         onClick={handleMenu}
                                         variant="text"
-                                        style={{position: "absolute", right: 0, width: "5%"}}
+                                        style={{position: "absolute", right: 0}}
+                                    >
+                                        <UserIcon
+                                            userId={authState.id}
+                                            userTier={authState.tier}
+                                            userThumb={config.rootPath + thumbnail}
+                                            size={40}
+                                            backgroundName={authState.backgroundName}
+                                            backgroundPalette={authState.backgroundColor}
+                                            backgroundRender={authState.backgroundRenderInFront}
+                                            profileButton={false}
+                                            pro={authState.role.toString() === "1"}
+                                        />
+                                    </Button>
+                                    <Menu
+                                        id="menu-appbar"
+                                        anchorOrigin={{
+                                            vertical: "top",
+                                            horizontal: "right",
+                                        }}
+                                        keepMounted
+                                        open={Boolean(anchorEl)}
+                                        onClose={handleClose}
+                                    >
+                                        <MenuItem onClick={handleProfile}>Profile</MenuItem>
+                                        {window.innerWidth > 1000 ? (
+                                            <MenuItem onClick={handleSettings}>Account Settings</MenuItem>
+                                        ) : null}
+                                        <MenuItem onClick={async () => {
+                                            await handleLogout()
+                                        }}>Logout</MenuItem>
+                                        <MenuItem onClick={() => setShowReferPopup(true)}>Refer A Friend</MenuItem>
+                                    </Menu>
+                                    <Modal open={showReferPopup} onClose={() => setShowReferPopup(false)}>
+                                        <Box
+                                            sx={{
+                                                width: "90vw",
+                                                height: "40vh",
+                                                justifyContent: "center",
+                                                marginLeft: "5vw",
+                                                marginTop: "30vh",
+                                                outlineColor: "black",
+                                                borderRadius: 1,
+                                                boxShadow: "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px 6px 0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
+                                                backgroundColor: theme.palette.background.default,
+                                            }}
+                                        >
+                                            <Button onClick={() => setShowReferPopup(false)}>
+                                                <CloseIcon/>
+                                            </Button>
+                                            <div style={{width: "100%", display: "flex", alignItems: "center", flexDirection: "column"}}>
+                                                <h3>Refer a Friend.</h3>
+                                                <h4>Give a Month, Get a Month.</h4>
+                                                <div style={{display: "flex", width: "100%", flexDirection: "row", justifyContent: "center"}}>
+                                                    <h5 style={{outline: "solid gray", borderRadius: "5px", padding: "8px"}} id={"url-mobile"}>{referralLink.length > 20 ? referralLink.slice(0,20) + "..." : referralLink}</h5>
+                                                    <Button onClick={() => copyToClipboard()}>
+                                                        <ContentCopyIcon/>
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </Box>
+                                    </Modal>
+                                </>
+                            ) : (
+                                <>
+                                    <IconButton
+                                        aria-label="login-signup"
+                                        onClick={handleMenu}
+                                        sx={{position: "absolute", right: "15px", width: "48px", height: "48px"}}
                                     >
                                         <LoginIcon/>
-                                    </Button>
+                                    </IconButton>
                                     <Menu
                                         id="menu-appbar"
                                         anchorOrigin={{
@@ -1293,7 +1291,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', height: '60px', overflow: 'hidden' }}>
                                     <IconButton color="inherit" onClick={() => {
                                         let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
-                                        appWrapperState.chatOpen = true
+                                        appWrapperState.chatOpen = !rightOpen
                                         dispatch(updateAppWrapper(appWrapperState));
                                     }}>
                                         <ChatBubbleOutline style={{ color: theme.palette.text.primary, fontSize: 25 }} />

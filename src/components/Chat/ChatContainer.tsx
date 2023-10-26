@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import ChatMessage from "./ChatMessage";
 import {
     alpha,
@@ -6,6 +6,7 @@ import {
     Box,
     Button,
     Card,
+    CircularProgress,
     createTheme,
     Grid,
     IconButton,
@@ -25,17 +26,17 @@ import {
     Tooltip,
     Typography
 } from '@mui/material';
-import {getAllTokens, themeHelpers} from "../../theme";
-import {ArrowDownward, Delete, EmojiEmotions, Gif} from "@material-ui/icons";
+import { getAllTokens, themeHelpers } from "../../theme";
+import { ArrowDownward, Delete, EmojiEmotions, Gif } from "@material-ui/icons";
 import Tenor from "../Tenor";
 import Emoji from "../Emoji";
 import config from "../../config";
 import * as models from "../../models/chat";
-import {GetChatsParams} from "../../models/chat";
+import { GetChatsParams } from "../../models/chat";
 import * as wsModels from "../../models/websocket";
 import call from "../../services/api-call";
 import swal from "sweetalert";
-import {useAppDispatch, useAppSelector} from '../../app/hooks';
+import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import {
     selectAuthState,
     selectAuthStateId,
@@ -44,11 +45,11 @@ import {
 } from '../../reducers/auth/auth';
 import ld from 'lodash';
 import MoonLoader from 'react-spinners/MoonLoader';
-import {useGlobalWebSocket} from '../../services/websocket';
-import {selectCacheState, setCache} from "../../reducers/pageCache/pageCache";
-import {selectMessageCacheState, setMessageCache} from "../../reducers/chat/cache";
-import {initialChatStateUpdate, selectChatState, updateChatState} from "../../reducers/chat/chat";
-import {useParams} from "react-router";
+import { useGlobalWebSocket } from '../../services/websocket';
+import { selectCacheState, setCache } from "../../reducers/pageCache/pageCache";
+import { selectMessageCacheState, setMessageCache } from "../../reducers/chat/cache";
+import { initialChatStateUpdate, selectChatState, updateChatState } from "../../reducers/chat/chat";
+import { useParams } from "react-router";
 import {
     differenceInHours,
     differenceInMinutes,
@@ -62,7 +63,7 @@ import {
 } from 'date-fns';
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
-import {ArrowForward, Check, Close, VolumeOff, VolumeUp} from '@mui/icons-material';
+import { ArrowForward, Check, Close, VolumeOff, VolumeUp } from '@mui/icons-material';
 import User from '../../models/user';
 import UserIcon from '../UserIcon';
 import renown1 from "../../img/renown/renown1.svg"
@@ -75,10 +76,10 @@ import renown7 from "../../img/renown/renown7.svg"
 import renown8 from "../../img/renown/renown8.svg"
 import renown9 from "../../img/renown/renown9.svg"
 import renown10 from "../../img/renown/renown10.svg"
-import {LoadingButton} from "@mui/lab";
+import { LoadingButton } from "@mui/lab";
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import {Snackbar} from "@material-ui/core";
-import Slide, {SlideProps} from '@mui/material/Slide';
+import { Snackbar } from "@material-ui/core";
+import Slide, { SlideProps } from '@mui/material/Slide';
 import ReactDOM from "react-dom";
 import {
     initialAppWrapperStateUpdate,
@@ -90,7 +91,7 @@ import Menu from "@mui/material/Menu";
 type TransitionProps = Omit<SlideProps, 'direction'>;
 
 function TransitionLeft(props: TransitionProps) {
-    return <Slide {...props} direction="left"/>;
+    return <Slide {...props} direction="left" />;
 }
 
 const handleRenownCheck = (renown: number) => {
@@ -265,11 +266,12 @@ export default function ChatContainer() {
     const [loadingNewChat, setLoadingNewChat] = useState(false);
     const [noMoreData, setNoMoreData] = useState(false); // State variable to track whether there is more data to load
     const [autoScrolling, setAutoScrolling] = useState(true); // State variable to track whether the user is auto scrolling
+    const [sendingMessage, setSendingMessage] = useState(false);
 
     const containerEndRef = React.useRef<HTMLDivElement>(null);
     const listContainerRef = React.useRef<HTMLDivElement>(null); // Ref for the list container
     const messageInputContainerRef = React.useRef<HTMLInputElement>(null); // Ref for the message input container
-    const scrollRef = React.useRef({prevScrollHeight: 0, prevScrollTop: 0});
+    const scrollRef = React.useRef({ prevScrollHeight: 0, prevScrollTop: 0 });
 
     const [selectedTab, setSelectedTab] = React.useState(persistedState.selectedTab);
     const [privateChatView, setPrivateChatView] = React.useState(persistedState.privateChatView);
@@ -308,7 +310,7 @@ export default function ChatContainer() {
             return;
         }
         let iv = inputValue.split("@");
-        let renderEverythingOption = iv.length > 1 && "everyone".startsWith(iv[iv.length-1])
+        let renderEverythingOption = iv.length > 1 && "everyone".startsWith(iv[iv.length - 1])
         if (renderEverythingOption && mentionOptionIndex === 0) {
             const currentRef = listItemRefs.current.get("everyone");
             currentRef?.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'start' });
@@ -523,7 +525,7 @@ export default function ChatContainer() {
         setChatSelectionRightClickAnchorEl(null);
     };
 
-    let {id} = useParams();
+    let { id } = useParams();
 
 
     // debounce for dispatch calls
@@ -787,10 +789,14 @@ export default function ChatContainer() {
         });
     }
 
-    const handleSendMessage = ld.debounce((content: string | null = null) => {
+    const handleSendMessage = ld.debounce((content: string | null = null, manual: boolean = true) => {
         let m = JSON.parse(JSON.stringify(messages));
         // generate a random alphanumeric id
         let id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
+        if (content === null) {
+            content = inputValue;
+        }
 
         m.push({
             _id: id,
@@ -798,19 +804,23 @@ export default function ChatContainer() {
             author_id: authorId,
             author: authorName,
             author_renown: authorRenown,
-            message: (content !== null) ? content : inputValue,
+            message: content,
             created_at: new Date(),
             revision: 0,
             type: models.ChatMessageType.ChatMessageTypeInsecure
         });
         m = preProcessMessages(m);
         setMessages(m);
+        if (manual) {
+            setInputValue(''); // Clear the input field
+            setSendingMessage(false);
+        }
         let wsMsg: wsModels.WsMessage<any> = {
             sequence_id: id,
             type: wsModels.WsMessageType.NewOutgoingChatMessage,
             payload: {
                 chat_id: chat._id,
-                content: (content !== null) ? content : inputValue,
+                content: content,
                 message_type: models.ChatMessageType.ChatMessageTypeInsecure,
             }
         };
@@ -854,8 +864,7 @@ export default function ChatContainer() {
             // alert the user
             swal("Failed To Send Message", "We lost the message in transit. It's like the USPS but more high tech! Sorry about that!");
         });
-        setInputValue(''); // Clear the input field
-    }, 1000);
+    }, 100);
 
     const addEmoji = (emoji: any) => {
         if ('native' in emoji) {
@@ -864,7 +873,7 @@ export default function ChatContainer() {
     };
 
     const sendGif = (gif: string) => {
-        handleSendMessage(gif);
+        handleSendMessage(gif, false);
         setShowGifPicker(false);
     }
 
@@ -884,9 +893,12 @@ export default function ChatContainer() {
                 getNextMessageBlock(false); // Call the function to get the next block of messages
             }
 
+            // set scroll threshold for desktop and mobile
+            let scrollThresholdDesktop = window.innerWidth > 1000 ? 100 : 80;
+
             // Determine if the user has scrolled up
-            const scrolledUp = container.scrollTop < container.scrollHeight - container.clientHeight - 100;
-            const shouldShowJumpToBottom = container.scrollTop < container.scrollHeight - container.clientHeight - 100;
+            const scrolledUp = container.scrollTop < container.scrollHeight - container.clientHeight - scrollThresholdDesktop;
+            const shouldShowJumpToBottom = container.scrollTop < container.scrollHeight - container.clientHeight - scrollThresholdDesktop;
 
             // Update userScrolledUp based on scroll position
             setUserScrolledUp(scrolledUp);
@@ -992,7 +1004,7 @@ export default function ChatContainer() {
                 }
             });
 
-            observer.observe(container, {childList: true, subtree: true});
+            observer.observe(container, { childList: true, subtree: true });
             return () => observer.disconnect();
         }
     }, [listContainerRef.current]);
@@ -1045,7 +1057,7 @@ export default function ChatContainer() {
         }
 
         // Container width
-        const containerWidth = 300;
+        const containerWidth = window.innerWidth > 1000 ? 300 : window.innerWidth;
         // Space between tabs
         const space = 10;
         // Calculate the width of each tab
@@ -1055,7 +1067,7 @@ export default function ChatContainer() {
             <Paper
                 sx={{
                     position: 'fixed',
-                    top: '64px',
+                    top: window.innerWidth > 1000 ? '64px' : '56px',
                     height: '48px',
                     zIndex: 1000,
                     width: `${containerWidth}px`,
@@ -1103,320 +1115,332 @@ export default function ChatContainer() {
 
     const messageInputMemo = React.useMemo(() => {
         let iv = inputValue.split("@");
-        let renderEverythingOption = iv.length > 1 && "everyone".startsWith(iv[iv.length-1])
+        let renderEverythingOption = iv.length > 1 && "everyone".startsWith(iv[iv.length - 1])
 
         return (
-        <>
-            <TextField
-                ref={messageInputContainerRef}
-                fullWidth
-                variant="outlined"
-                value={inputValue}
-                onChange={(e) => {
-                    setInputValue(e.target.value);
-                    const container = listContainerRef.current;
+            <>
+                <TextField
+                    ref={messageInputContainerRef}
+                    fullWidth
+                    variant="outlined"
+                    value={inputValue}
+                    disabled={sendingMessage}
+                    onChange={(e) => {
+                        setInputValue(e.target.value);
+                        const container = listContainerRef.current;
 
-                    // Show user popper if the last word is starting with "@" and there is no space after the word
-                    let parts = e.target.value.split("@");
-                    if (parts.length > 1 && !parts[parts.length - 1].includes(" ") && parts[parts.length - 1] != "everyone") {
-                        setMentionSelectionPopperOpen(true);
+                        // Show user popper if the last word is starting with "@" and there is no space after the word
+                        let parts = e.target.value.split("@");
+                        if (parts.length > 1 && !parts[parts.length - 1].includes(" ") && parts[parts.length - 1] != "everyone") {
+                            setMentionSelectionPopperOpen(true);
 
-                        // Extract search term after "@"
-                        if (chat.type === models.ChatType.ChatTypeGlobal ||
-                            chat.type === models.ChatType.ChatTypeRegional ||
-                            chat.type === models.ChatType.ChatTypeChallenge) {
-                            searchChatUsersPublic(parts[parts.length - 1]);
+                            // Extract search term after "@"
+                            if (chat.type === models.ChatType.ChatTypeGlobal ||
+                                chat.type === models.ChatType.ChatTypeRegional ||
+                                chat.type === models.ChatType.ChatTypeChallenge) {
+                                searchChatUsersPublic(parts[parts.length - 1]);
+                            } else {
+                                searchChatUsers(parts[parts.length - 1]);
+                            }
                         } else {
-                            searchChatUsers(parts[parts.length - 1]);
+                            setMentionSelectionPopperOpen(false);
+                            setMentionOptionIndex(null);
                         }
-                    } else {
-                        setMentionSelectionPopperOpen(false);
-                        setMentionOptionIndex(null);
-                    }
-                }}
-                placeholder="Type a message..."
-                multiline // Support for multi-line content
-                maxRows={10} // Maximum number of rows before scrolling
-                minRows={1} // Minimum number of rows before scrolling
-                onKeyDown={(e) => {
-                    if (mentionSelectionPopperOpen) {
-                        if (e.key === 'ArrowDown') {
-                            e.preventDefault();
-                            setMentionOptionIndex(prev => (prev === null || prev >= mentionSearchOptions.length - 1) ? 0 : prev + 1);
-                        }
-                        if (e.key === 'ArrowUp') {
-                            e.preventDefault();
-                            setMentionOptionIndex(prev => (prev === null || prev <= 0) ? mentionSearchOptions.length - 1 : prev - 1);
-                        }
-                        if (e.key === 'Enter') {
-                            e.preventDefault();
-                            if (mentionOptionIndex !== null) {
-                                if (renderEverythingOption && mentionOptionIndex === 0) {
-                                    setInputValue(inputValue.substring(0, inputValue.lastIndexOf("@") + 1) + "everyone ");
-                                } else {
-                                    const selectedOption = mentionSearchOptions[mentionOptionIndex + (renderEverythingOption ? -1 : 0)];
-                                    setInputValue(inputValue.substring(0, inputValue.lastIndexOf("@") + 1) + selectedOption.user_name + " ");
-                                }
-                                setMentionSelectionPopperOpen(false);
-                                setMentionOptionIndex(null);
-                            }
-                        }
-                    } else {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            if (inputValue.length <= 2000 && inputValue.length > 0) {
-                                handleSendMessage();
-                                scrollToBottom();
-                            }
-                        }
-                        if (e.key === 'Tab') {
-                            e.preventDefault();
-                            setInputValue(inputValue + '    ');
-                        }
-                    }
-                }}
-                error={inputValue.length > 2000} // Set error state if input exceeds 2000 characters
-                helperText={inputValue.length > 2000 ? `${inputValue.length}/2000` : ''} // Display error message
-                InputProps={{
-                    inputProps: {
-                        style: {
-                            paddingRight: "50px"
-                        }
-                    },
-                    sx: {
-                        fontSize: '0.8rem',
-                    },
-                    endAdornment: (
-                        <InputAdornment position="end">
-                            {
-                                window.innerWidth > 1000
-                                    ? (
-                                        <div style={{position: 'absolute', bottom: '6px', right: '8px'}}>
-                                            <IconButton
-                                                onClick={() => setShowEmojiPicker(!showEmojiPicker)} // Toggle Emoji picker
-                                                sx={{
-                                                    fontSize: '0.8rem',
-                                                    padding: '0', // Remove padding
-                                                    minWidth: 'auto', // Remove minimum width
-                                                    lineHeight: '1', // Adjust line height
-                                                }}
-                                            >
-                                                <EmojiEmotions/>
-                                            </IconButton>
-                                            <IconButton
-                                                onClick={() => setShowGifPicker(!showGifPicker)} // Toggle GIF picker
-                                                disabled={inputValue.length > 2000} // Disable button if input exceeds 2000 characters
-                                            >
-                                                <Gif/> {/* GIF icon */}
-                                            </IconButton>
-                                        </div>
-                                    )
-                                    :
-                                    <></>
-                            }
-                        </InputAdornment>
-                    ),
-                }}
-                sx={{
-                    mb: 1, // Add margin bottom
-                }}
-            />
-            <Popper
-                open={mentionSelectionPopperOpen && mentionSearchOptions.length > 0}
-                anchorEl={messageInputContainerRef.current}
-                placement="right-start"
-                sx={{
-                    zIndex: 6000,
-                }}
-                modifiers={[
-                    {
-                        name: 'offset',
-                        options: {
-                            offset: [0, 20],  // x, y offset
-                        },
-                    },
-                ]}
-            >
-                <Box
-                    sx={{
-                        position: "sticky",
-                        top: 0,
-                        zIndex: 1,
-                        // @ts-ignore
-                        backgroundColor: theme.palette.background.chat,
-                        padding: theme.spacing(1),
-                        borderRadius: "10px",
-                        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.3);",
                     }}
+                    placeholder="Type a message..."
+                    multiline // Support for multi-line content
+                    maxRows={10} // Maximum number of rows before scrolling
+                    minRows={1} // Minimum number of rows before scrolling
+                    onKeyDown={(e) => {
+                        if (mentionSelectionPopperOpen) {
+                            if (e.key === 'ArrowDown') {
+                                e.preventDefault();
+                                setMentionOptionIndex(prev => (prev === null || prev >= mentionSearchOptions.length - 1) ? 0 : prev + 1);
+                            }
+                            if (e.key === 'ArrowUp') {
+                                e.preventDefault();
+                                setMentionOptionIndex(prev => (prev === null || prev <= 0) ? mentionSearchOptions.length - 1 : prev - 1);
+                            }
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                if (mentionOptionIndex !== null) {
+                                    if (renderEverythingOption && mentionOptionIndex === 0) {
+                                        setInputValue(inputValue.substring(0, inputValue.lastIndexOf("@") + 1) + "everyone ");
+                                    } else {
+                                        const selectedOption = mentionSearchOptions[mentionOptionIndex + (renderEverythingOption ? -1 : 0)];
+                                        setInputValue(inputValue.substring(0, inputValue.lastIndexOf("@") + 1) + selectedOption.user_name + " ");
+                                    }
+                                    setMentionSelectionPopperOpen(false);
+                                    setMentionOptionIndex(null);
+                                }
+                            }
+                        } else {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                if (inputValue.length <= 2000 && inputValue.length > 0) {
+                                    setSendingMessage(true);
+                                    handleSendMessage();
+                                    scrollToBottom();
+                                }
+                            }
+                            if (e.key === 'Tab') {
+                                e.preventDefault();
+                                setInputValue(inputValue + '    ');
+                            }
+                        }
+                    }}
+                    error={inputValue.length > 2000} // Set error state if input exceeds 2000 characters
+                    helperText={inputValue.length > 2000 ? `${inputValue.length}/2000` : ''} // Display error message
+                    InputProps={{
+                        inputProps: {
+                            style: {
+                                paddingRight: "50px"
+                            }
+                        },
+                        sx: {
+                            fontSize: '0.8rem',
+                        },
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                {
+                                    window.innerWidth > 1000
+                                        ? sendingMessage ? (
+                                            <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
+                                                <CircularProgress
+                                                    color='primary'
+                                                    size={20}
+                                                />
+                                            </div>
+                                        )
+                                            :
+                                            (
+                                                <div style={{ position: 'absolute', bottom: '6px', right: '8px' }}>
+                                                    <IconButton
+                                                        onClick={() => setShowEmojiPicker(!showEmojiPicker)} // Toggle Emoji picker
+                                                        sx={{
+                                                            fontSize: '0.8rem',
+                                                            padding: '0', // Remove padding
+                                                            minWidth: 'auto', // Remove minimum width
+                                                            lineHeight: '1', // Adjust line height
+                                                        }}
+                                                    >
+                                                        <EmojiEmotions />
+                                                    </IconButton>
+                                                    <IconButton
+                                                        onClick={() => setShowGifPicker(!showGifPicker)} // Toggle GIF picker
+                                                        disabled={inputValue.length > 2000} // Disable button if input exceeds 2000 characters
+                                                    >
+                                                        <Gif /> {/* GIF icon */}
+                                                    </IconButton>
+                                                </div>
+                                            )
+                                        :
+                                        <></>
+                                }
+                            </InputAdornment>
+                        ),
+                    }}
+                    sx={{
+                        mb: window.innerWidth > 1000 ? 1 : "50px", // Add margin bottom
+                    }}
+                />
+                <Popper
+                    open={mentionSelectionPopperOpen && mentionSearchOptions.length > 0}
+                    anchorEl={messageInputContainerRef.current}
+                    placement="right-start"
+                    sx={{
+                        zIndex: 6000,
+                    }}
+                    modifiers={[
+                        {
+                            name: 'offset',
+                            options: {
+                                offset: [0, 20],  // x, y offset
+                            },
+                        },
+                    ]}
                 >
-                    <Card
+                    <Box
                         sx={{
-                            backgroundColor: 'transparent',
-                            backgroundImage: 'none',
-                            boxShadow: 'none',
-                            maxHeight: "200px",
-                            overflowY: "auto",
+                            position: "sticky",
+                            top: 0,
+                            zIndex: 1,
+                            // @ts-ignore
+                            backgroundColor: theme.palette.background.chat,
+                            padding: theme.spacing(1),
+                            borderRadius: "10px",
+                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.3);",
                         }}
                     >
-                        <List>
-                            {renderEverythingOption && (
-                                <ListItem
-                                    ref={(el) => listItemRefs.current.set("everyone", el)}
-                                    style={{
-                                        paddingBottom: '10px',
-                                        paddingLeft: '10px',
-                                        marginLeft: "auto",
-                                        marginRight: "auto",
-                                    }}
-                                >
-                                    <Card sx={{
-                                        display: 'flex',
-                                        textAlign: "left",
-                                        width: "99%",
-                                        height: 50,
-                                        border: 1,
-                                        borderColor: theme.palette.secondary.main + "75",
-                                        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1);",
-                                        backgroundImage: "none",
-                                        cursor: 'pointer',
-                                        backgroundColor: mentionOptionIndex === 0 ? theme.palette.secondary.main + "25" : 'transparent',
-                                        '&:hover': {
-                                            backgroundColor: theme.palette.secondary.main + "25",
-                                        }
-                                    }}>
-                                        <Button
-                                            sx={{
-                                                width: "100%",
-                                                fontSize: "10px",
-                                                fontWeight: "light",
-                                                textTransform: "none",
-                                                whiteSpace: "nowrap",
-                                            }}
-                                            onClick={async () => {
-                                                // merge the username into the input value
-                                                let inputValueCopy = inputValue;
-
-                                                // find the last @
-                                                let lastAt = inputValueCopy.lastIndexOf("@");
-                                                if (lastAt === -1) {
-                                                    return;
-                                                }
-
-                                                // replace all of the text after the last @ with the username
-                                                inputValueCopy = inputValueCopy.substring(0, lastAt + 1) + "everyone ";
-                                                setInputValue(inputValueCopy);
-                                                setMentionSelectionPopperOpen(false);
-                                            }}
-                                        >
-                                            <Typography variant={"h6"} sx={{textTransform: "none"}}>
-                                                @everyone
-                                            </Typography>
-                                        </Button>
-                                    </Card>
-                                </ListItem>
-                            )}
-                            {mentionSearchOptions.sort((a, b) => {
-                                // sort by user_name
-                                return a.user_name.toLowerCase().localeCompare(b.user_name.toLowerCase());
-                            }).map((option, index) => (
-                                <ListItem
-                                    ref={(el) => listItemRefs.current.set(option._id, el)}
-                                    style={{
-                                        paddingBottom: '10px',
-                                        paddingLeft: '10px',
-                                        marginLeft: "auto",
-                                        marginRight: "auto",
-                                    }}
-                                >
-                                    <Card sx={{
-                                        display: 'flex',
-                                        textAlign: "left",
-                                        width: "99%",
-                                        height: 50,
-                                        border: 1,
-                                        borderColor: theme.palette.secondary.main + "75",
-                                        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1);",
-                                        backgroundImage: "none",
-                                        cursor: 'pointer',
-                                        backgroundColor: mentionOptionIndex === index + (renderEverythingOption ? 1 : 0) ? theme.palette.secondary.main + "25" : 'transparent',
-                                        '&:hover': {
-                                            backgroundColor: theme.palette.secondary.main + "25",
-                                        }
-                                    }}>
-                                        <Button
-                                            sx={{width: "100%"}}
-                                            onClick={async () => {
-                                                // merge the username into the input value
-                                                let inputValueCopy = inputValue;
-
-                                                // find the last @
-                                                let lastAt = inputValueCopy.lastIndexOf("@");
-                                                if (lastAt === -1) {
-                                                    return;
-                                                }
-
-                                                // replace all of the text after the last @ with the username
-                                                inputValueCopy = inputValueCopy.substring(0, lastAt + 1) + option.user_name + " ";
-                                                setInputValue(inputValueCopy);
-                                                setMentionSelectionPopperOpen(false);
-                                            }}
-                                        >
-                                            <div
-                                                style={{display: "flex", flexDirection: "row", width: "95%", justifyContent: "left"}}>
-                                                <div style={{marginTop: "2px"}}>
-                                                    <UserIcon
-                                                        userId={option._id}
-                                                        userTier={option.user_rank}
-                                                        userThumb={config.rootPath + option.pfp_path}
-                                                        backgroundName={option.name}
-                                                        backgroundPalette={option.color_palette}
-                                                        backgroundRender={option.render_in_front}
-                                                        pro={option.user_status.toString() === "1"}
-                                                        size={30}
-                                                        imageTop={2}
-                                                        profileButton={false}
-
-                                                    />
-                                                </div>
-                                                <Typography variant="h5" component="div" sx={{
-                                                    ml: 1,
-                                                    marginTop: "2px",
-                                                    mr: 2,
-                                                    fontSize: 16,
+                        <Card
+                            sx={{
+                                backgroundColor: 'transparent',
+                                backgroundImage: 'none',
+                                boxShadow: 'none',
+                                maxHeight: "200px",
+                                overflowY: "auto",
+                            }}
+                        >
+                            <List>
+                                {renderEverythingOption && (
+                                    <ListItem
+                                        ref={(el) => listItemRefs.current.set("everyone", el)}
+                                        style={{
+                                            paddingBottom: '10px',
+                                            paddingLeft: '10px',
+                                            marginLeft: "auto",
+                                            marginRight: "auto",
+                                        }}
+                                    >
+                                        <Card sx={{
+                                            display: 'flex',
+                                            textAlign: "left",
+                                            width: "99%",
+                                            height: 50,
+                                            border: 1,
+                                            borderColor: theme.palette.secondary.main + "75",
+                                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1);",
+                                            backgroundImage: "none",
+                                            cursor: 'pointer',
+                                            backgroundColor: mentionOptionIndex === 0 ? theme.palette.secondary.main + "25" : 'transparent',
+                                            '&:hover': {
+                                                backgroundColor: theme.palette.secondary.main + "25",
+                                            }
+                                        }}>
+                                            <Button
+                                                sx={{
+                                                    width: "100%",
+                                                    fontSize: "10px",
+                                                    fontWeight: "light",
+                                                    textTransform: "none",
                                                     whiteSpace: "nowrap",
-                                                    overflow: "hidden",
-                                                    textOverflow: "ellipsis",
-                                                }}>
-                                                    {option.user_name}
-                                                </Typography>
-                                            </div>
-                                            <Tooltip
-                                                title={`Renown ${
-                                                    //@ts-ignore
-                                                    option.tier + 1}`}
+                                                }}
+                                                onClick={async () => {
+                                                    // merge the username into the input value
+                                                    let inputValueCopy = inputValue;
+
+                                                    // find the last @
+                                                    let lastAt = inputValueCopy.lastIndexOf("@");
+                                                    if (lastAt === -1) {
+                                                        return;
+                                                    }
+
+                                                    // replace all of the text after the last @ with the username
+                                                    inputValueCopy = inputValueCopy.substring(0, lastAt + 1) + "everyone ";
+                                                    setInputValue(inputValueCopy);
+                                                    setMentionSelectionPopperOpen(false);
+                                                }}
                                             >
-                                                <img
-                                                    style={{
-                                                        height: "99%",
-                                                        width: "auto",
-                                                        opacity: "0.85",
+                                                <Typography variant={"h6"} sx={{ textTransform: "none" }}>
+                                                    @everyone
+                                                </Typography>
+                                            </Button>
+                                        </Card>
+                                    </ListItem>
+                                )}
+                                {mentionSearchOptions.sort((a, b) => {
+                                    // sort by user_name
+                                    return a.user_name.toLowerCase().localeCompare(b.user_name.toLowerCase());
+                                }).map((option, index) => (
+                                    <ListItem
+                                        ref={(el) => listItemRefs.current.set(option._id, el)}
+                                        style={{
+                                            paddingBottom: '10px',
+                                            paddingLeft: '10px',
+                                            marginLeft: "auto",
+                                            marginRight: "auto",
+                                        }}
+                                    >
+                                        <Card sx={{
+                                            display: 'flex',
+                                            textAlign: "left",
+                                            width: "99%",
+                                            height: 50,
+                                            border: 1,
+                                            borderColor: theme.palette.secondary.main + "75",
+                                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1);",
+                                            backgroundImage: "none",
+                                            cursor: 'pointer',
+                                            backgroundColor: mentionOptionIndex === index + (renderEverythingOption ? 1 : 0) ? theme.palette.secondary.main + "25" : 'transparent',
+                                            '&:hover': {
+                                                backgroundColor: theme.palette.secondary.main + "25",
+                                            }
+                                        }}>
+                                            <Button
+                                                sx={{ width: "100%" }}
+                                                onClick={async () => {
+                                                    // merge the username into the input value
+                                                    let inputValueCopy = inputValue;
+
+                                                    // find the last @
+                                                    let lastAt = inputValueCopy.lastIndexOf("@");
+                                                    if (lastAt === -1) {
+                                                        return;
+                                                    }
+
+                                                    // replace all of the text after the last @ with the username
+                                                    inputValueCopy = inputValueCopy.substring(0, lastAt + 1) + option.user_name + " ";
+                                                    setInputValue(inputValueCopy);
+                                                    setMentionSelectionPopperOpen(false);
+                                                }}
+                                            >
+                                                <div
+                                                    style={{ display: "flex", flexDirection: "row", width: "95%", justifyContent: "left" }}>
+                                                    <div style={{ marginTop: "2px" }}>
+                                                        <UserIcon
+                                                            userId={option._id}
+                                                            userTier={option.user_rank}
+                                                            userThumb={config.rootPath + option.pfp_path}
+                                                            backgroundName={option.name}
+                                                            backgroundPalette={option.color_palette}
+                                                            backgroundRender={option.render_in_front}
+                                                            pro={option.user_status.toString() === "1"}
+                                                            size={30}
+                                                            imageTop={2}
+                                                            profileButton={false}
+
+                                                        />
+                                                    </div>
+                                                    <Typography variant="h5" component="div" sx={{
+                                                        ml: 1,
+                                                        marginTop: "2px",
+                                                        mr: 2,
+                                                        fontSize: 16,
+                                                        whiteSpace: "nowrap",
                                                         overflow: "hidden",
-                                                    }}
-                                                    src={handleRenownCheck(
+                                                        textOverflow: "ellipsis",
+                                                    }}>
+                                                        {option.user_name}
+                                                    </Typography>
+                                                </div>
+                                                <Tooltip
+                                                    title={`Renown ${
                                                         //@ts-ignore
-                                                        option.tier)}
-                                                />
-                                            </Tooltip>
-                                        </Button>
-                                    </Card>
-                                </ListItem>
-                            ))}
-                        </List>
-                    </Card>
-                </Box>
-            </Popper>
-        </>
-    )}, [inputValue, showEmojiPicker, showGifPicker, mentionSearchOptions, mentionSelectionPopperOpen, mentionOptionIndex]);
+                                                        option.tier + 1}`}
+                                                >
+                                                    <img
+                                                        style={{
+                                                            height: "99%",
+                                                            width: "auto",
+                                                            opacity: "0.85",
+                                                            overflow: "hidden",
+                                                        }}
+                                                        src={handleRenownCheck(
+                                                            //@ts-ignore
+                                                            option.tier)}
+                                                    />
+                                                </Tooltip>
+                                            </Button>
+                                        </Card>
+                                    </ListItem>
+                                ))}
+                            </List>
+                        </Card>
+                    </Box>
+                </Popper>
+            </>
+        )
+    }, [inputValue, showEmojiPicker, showGifPicker, mentionSearchOptions, mentionSelectionPopperOpen, mentionOptionIndex]);
 
     const chatMessageMemo = React.useMemo(() => {
         return messages.map((message) => (
@@ -1437,7 +1461,7 @@ export default function ChatContainer() {
     const renderChatView = () => {
         return (
             <>
-                <List style={{flexGrow: 1, marginTop: '70px', marginBottom: '88px'}}>
+                <List style={{ flexGrow: 1, marginTop: '70px', marginBottom: '88px' }}>
                     {/* Show a spinner (MoonLoader from react-spinners) when we are loading new data */}
                     {loadingMessages && (
                         <div
@@ -1448,7 +1472,7 @@ export default function ChatContainer() {
                                 width: "100%",
                             }}
                         >
-                            <MoonLoader color={theme.palette.primary.main} loading={true} size={18}/>
+                            <MoonLoader color={theme.palette.primary.main} loading={true} size={18} />
                         </div>
                     )}
                     {chatMessageMemo}
@@ -1459,14 +1483,14 @@ export default function ChatContainer() {
                             onClick={scrollToBottom}
                             style={{
                                 position: 'fixed',
-                                bottom: '108px',
+                                bottom: window.innerWidth > 1000 ? '108px' : '172px',
                                 right: '20px',
                                 backgroundColor: theme.palette.background.default, // Match the background color
                                 color: theme.palette.text.primary, // Match the text color
                                 boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)' // Add a subtle shadow
                             }}
                         >
-                            <ArrowDownward/>
+                            <ArrowDownward />
                         </IconButton>
                     </Tooltip>
                 )}
@@ -1486,7 +1510,7 @@ export default function ChatContainer() {
                                 boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)' // Add a subtle shadow
                             }}
                         >
-                            <ArrowForward/>
+                            <ArrowForward />
                         </IconButton>
                     </Tooltip>
                 )}
@@ -1509,9 +1533,9 @@ export default function ChatContainer() {
                                 ?
                                 <>
                                     <Emoji open={showEmojiPicker} closeCallback={() => setShowEmojiPicker(false)}
-                                           onEmojiSelect={addEmoji}/>
+                                        onEmojiSelect={addEmoji} />
                                     <Tenor open={showGifPicker} closeCallback={() => setShowGifPicker(false)}
-                                           addGif={sendGif}/>
+                                        addGif={sendGif} />
                                 </>
                                 :
                                 <></>
@@ -1698,7 +1722,7 @@ export default function ChatContainer() {
             }}
         >
             <SearchIconWrapper>
-                <SearchIcon/>
+                <SearchIcon />
             </SearchIconWrapper>
             <form onSubmit={(e) => handleFriendSearchInputChange(e as any)}>
                 <StyledInputBase
@@ -1791,7 +1815,7 @@ export default function ChatContainer() {
             const now = new Date();
 
             // Within the last minute
-            if (isWithinInterval(date, {start: subMinutes(now, 1), end: now})) {
+            if (isWithinInterval(date, { start: subMinutes(now, 1), end: now })) {
                 return 'now';
             }
 
@@ -1804,11 +1828,11 @@ export default function ChatContainer() {
                 return `${differenceInMinutes(now, date)}m`;
             }
             // Within the last week
-            else if (isWithinInterval(date, {start: subDays(now, 7), end: now})) {
+            else if (isWithinInterval(date, { start: subDays(now, 7), end: now })) {
                 return format(date, 'EEE');
             }
             // Within the last year
-            else if (isWithinInterval(date, {start: subYears(now, 1), end: now})) {
+            else if (isWithinInterval(date, { start: subYears(now, 1), end: now })) {
                 return format(date, 'MMM d');
             }
             // Older than a year
@@ -1833,7 +1857,7 @@ export default function ChatContainer() {
                         marginTop: "64px"
                     }}
                 >
-                    <MoonLoader color={theme.palette.primary.main} loading={true} size={18}/>
+                    <MoonLoader color={theme.palette.primary.main} loading={true} size={18} />
                 </div>
             )
         }
@@ -1869,9 +1893,9 @@ export default function ChatContainer() {
                                         color={"success"}
                                         size="small"
                                         loading={chatDeleteLoading}
-                                        sx={{marginRight: '16px'}}
+                                        sx={{ marginRight: '16px' }}
                                     >
-                                        <Check fontSize="inherit"/>
+                                        <Check fontSize="inherit" />
                                     </LoadingButton>
                                 </Tooltip>
                                 <Tooltip title="Cancel Delete">
@@ -1885,7 +1909,7 @@ export default function ChatContainer() {
                                         size="small"
                                         loading={chatDeleteLoading}
                                     >
-                                        <Close fontSize="inherit"/>
+                                        <Close fontSize="inherit" />
                                     </LoadingButton>
                                 </Tooltip>
                             </>
@@ -1898,9 +1922,9 @@ export default function ChatContainer() {
                                         color={"error"}
                                         size="small"
                                         loading={chatDeleteLoading}
-                                        sx={{marginRight: '16px'}}
+                                        sx={{ marginRight: '16px' }}
                                     >
-                                        <Delete fontSize="inherit"/>
+                                        <Delete fontSize="inherit" />
                                     </LoadingButton>
                                 </Tooltip>
                                 {chatEdit && chatEdit.muted ? (
@@ -1912,7 +1936,7 @@ export default function ChatContainer() {
                                             color={"primary"}
                                             loading={chatMuteLoading}
                                         >
-                                            <VolumeUp fontSize="inherit"/>
+                                            <VolumeUp fontSize="inherit" />
                                         </LoadingButton>
                                     </Tooltip>
                                 ) : (
@@ -1924,7 +1948,7 @@ export default function ChatContainer() {
                                             color={"primary"}
                                             loading={chatMuteLoading}
                                         >
-                                            <VolumeOff fontSize="inherit"/>
+                                            <VolumeOff fontSize="inherit" />
                                         </LoadingButton>
                                     </Tooltip>
                                 )
@@ -1933,11 +1957,11 @@ export default function ChatContainer() {
                         )}
                     </Box>
                 </Menu>
-                <List style={{flexGrow: 1, marginTop: '40px'}}>
+                <List style={{ flexGrow: 1, marginTop: '40px' }}>
                     <ListItem>
                         <Button
                             variant="outlined"
-                            endIcon={<AddIcon/>}
+                            endIcon={<AddIcon />}
                             onClick={(e) => {
                                 handleNewChatClick(e);
                                 searchFriends(friendNameQuery);
@@ -1979,25 +2003,25 @@ export default function ChatContainer() {
                             >
                                 {friendSearchMemo}
                                 <Grid container spacing={1}
-                                      sx={{
-                                          marginLeft: "auto",
-                                          marginRight: "auto",
-                                          maxWidth: "320px",
-                                      }}
+                                    sx={{
+                                        marginLeft: "auto",
+                                        marginRight: "auto",
+                                        maxWidth: "320px",
+                                    }}
                                 >
                                     {newChatSelectedFriends.map((friend) => {
                                         return (
                                             <Grid item xs={3}>
                                                 <Tooltip title={friend.user_name + " - Click to Remove"}>
                                                     <Button variant="text"
-                                                            onClick={() => {
-                                                                let z = JSON.parse(JSON.stringify(newChatSelectedFriends));
-                                                                let index = z.findIndex((e: User) => e._id === friend._id);
-                                                                if (index !== -1) {
-                                                                    z.splice(index, 1);
-                                                                    setNewChatSelectedFriends(z);
-                                                                }
-                                                            }}
+                                                        onClick={() => {
+                                                            let z = JSON.parse(JSON.stringify(newChatSelectedFriends));
+                                                            let index = z.findIndex((e: User) => e._id === friend._id);
+                                                            if (index !== -1) {
+                                                                z.splice(index, 1);
+                                                                setNewChatSelectedFriends(z);
+                                                            }
+                                                        }}
                                                     >
                                                         <UserIcon
                                                             userId={friend._id}
@@ -2060,7 +2084,7 @@ export default function ChatContainer() {
                                                     }
                                                 }}>
                                                     <Button
-                                                        sx={{width: "100%"}}
+                                                        sx={{ width: "100%" }}
                                                         onClick={async () => {
                                                             let z = JSON.parse(JSON.stringify(newChatSelectedFriends));
                                                             z.push(option);
@@ -2068,7 +2092,7 @@ export default function ChatContainer() {
                                                         }}
                                                     >
                                                         <div
-                                                            style={{display: "flex", flexDirection: "row", width: "95%", justifyContent: "left"}}>
+                                                            style={{ display: "flex", flexDirection: "row", width: "95%", justifyContent: "left" }}>
                                                             <div>
                                                                 <UserIcon
                                                                     userId={option._id}
@@ -2248,7 +2272,7 @@ export default function ChatContainer() {
                                                 error={newChatName.length > 20}
                                                 helperText={newChatName.length > 15 ? `${newChatName.length}/20` : ""}
                                                 InputProps={{
-                                                    style: {fontSize: '12px', height: '30px'},
+                                                    style: { fontSize: '12px', height: '30px' },
                                                 }}
                                             />
                                         ) : (
@@ -2300,8 +2324,8 @@ export default function ChatContainer() {
                                     justifyContent="center"
                                     alignItems={
                                         chat.last_read_message === null ||
-                                        chat.last_message === null ||
-                                        compareMessageIDs(chat.last_read_message, chat.last_message) < 0 ?
+                                            chat.last_message === null ||
+                                            compareMessageIDs(chat.last_read_message, chat.last_message) < 0 ?
                                             "flex-end" :
                                             "center"
                                     }
@@ -2311,7 +2335,7 @@ export default function ChatContainer() {
                                     <Grid item xs="auto">
                                         <Tooltip
                                             title={chat.last_message_time ? humanReadableDate(new Date(chat.last_message_time)) : ''}>
-                                            <Typography variant="caption" color="textSecondary" sx={{fontSize: '10px'}}>
+                                            <Typography variant="caption" color="textSecondary" sx={{ fontSize: '10px' }}>
                                                 {chat.last_message_time ? formatChatDate(new Date(chat.last_message_time)) : ''}
                                             </Typography>
                                         </Tooltip>
@@ -2600,8 +2624,8 @@ export default function ChatContainer() {
                         onClose={closeNotification}
                         autoHideDuration={3000}
                         key={"chat-notification"}
-                        anchorOrigin={{vertical: 'top', horizontal: 'right'}}
-                        style={{position: "fixed", width: "fit-content", top: '80px', right: chatOpen ? '340px' : '40px'}}
+                        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                        style={{ position: "fixed", width: "fit-content", top: '80px', right: chatOpen ? '340px' : '40px' }}
                     >
                         {renderNotificationContent()}
                     </Snackbar>
@@ -2629,7 +2653,7 @@ export default function ChatContainer() {
                 >
                     {renderTopBar()}
                     {renderView()}
-                    <div ref={containerEndRef}/>
+                    <div ref={containerEndRef} />
                 </Paper>
             )}
         </>
