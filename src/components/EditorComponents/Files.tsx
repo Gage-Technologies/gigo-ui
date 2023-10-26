@@ -277,6 +277,8 @@ function Files({ selectedFile, handleFileSelect, projectName, files, repoId }: F
     // Update the theme only if the mode changes
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
 
+    console.log("files: ", files)
+
     return (
         <div style={{
             display: "flex",
@@ -291,7 +293,7 @@ function Files({ selectedFile, handleFileSelect, projectName, files, repoId }: F
                 <h1 style={{ fontSize: "medium", marginLeft: "10px" }}>{"Project Files"}</h1>
             </div>
             <Tree>
-                {files.map((file) => {
+                {(files && files.length > 0) && files.map((file) => {
                     return (
                         <div style={{
                             paddingBottom: "2.5px",

@@ -16,6 +16,7 @@ import MarkdownRenderer from "../../Markdown/MarkdownRenderer";
 import { getAllTokens } from "../../../theme";
 import Scrollbars from "react-custom-scrollbars";
 import { ThreeDots } from "react-loading-icons";
+import { PropaneTankSharp } from "@mui/icons-material";
 
 export interface Code_display_editor {
     style?: object;
@@ -41,7 +42,10 @@ function CodeDisplayEditor(props: Code_display_editor) {
     let navigate = useNavigate();
 
     const selectFile = async (file: any) => {
-        if (file["content"] === undefined || file["content"] === null || file["content"] === "" || true) {
+        if (!props.repoId || props.repoId === "" || !props.references || props.references === "")
+            return
+
+        if (file["content"] === undefined || file["content"] === null || file["content"] === "") {
             let res = await call(
                 "/api/project/getProjectFiles",
                 "post",
@@ -60,6 +64,11 @@ function CodeDisplayEditor(props: Code_display_editor) {
     }
 
     const apiLoad = async () => {
+        console.log("props: ", props)
+
+        if (!props.repoId || props.repoId === "" || !props.references || props.references === "")
+            return
+
         setLoading(true)
         let res = await call(
             "/api/project/getProjectCode",
@@ -197,14 +206,16 @@ function CodeDisplayEditor(props: Code_display_editor) {
             monaco.editor.defineTheme("gigo-default-dark", darkEditorTheme)
             monaco.editor.setTheme(mode === "light" ? "gigo-default-light" : "gigo-default-dark")
         }
-
-        if (allFiles.length === 0) {
-            apiLoad()
-        }
     }, [monaco, mode]);
 
+    useEffect(() => { 
+        apiLoad()
+    }, [props.references, props.repoId]);
+
     const handleCurrentFileSideBar = (file: any) => {
+        setLoading(true)
         selectFile(file)
+        setLoading(false)
     }
 
     //@ts-ignore
@@ -212,6 +223,9 @@ function CodeDisplayEditor(props: Code_display_editor) {
         //@ts-ignore
         ? findLangauge(chosenFile["name"]).toLowerCase() === "markdown"
         : false;
+
+    if (!props.repoId || props.repoId === "" || !props.references || props.references === "")
+        return null
 
     return (
         <div style={props.style}>
@@ -226,32 +240,32 @@ function CodeDisplayEditor(props: Code_display_editor) {
             </div>
             {
                 isMarkdown ? (
-                        <Scrollbars
-                            style={{
-                                height: props.height,
-                                width: "121vw",
-                                border: `1px solid ${theme.palette.primary.contrastText}`,
-                                borderRadius: 5,
-                            }}
-                            renderThumbVertical={({ style, ...props }) =>
-                                <div {...props}
-                                    style={{
-                                        ...style,
-                                        backgroundColor: theme.palette.primary.contrastText,
-                                        borderRadius: 10
-                                    }}
-                                />
-                            }
-                        >
-                            {/*@ts-ignore*/}
-                            <MarkdownRenderer markdown={chosenFile["content"]} style={{
-                                height: props.height,
-                                width: "60vw",
-                                overflowWrap: "break-word",
-                                padding: "2em 3em",
-                            }} />
-                        </Scrollbars>
-                    )
+                    <Scrollbars
+                        style={{
+                            height: props.height,
+                            width: "121vw",
+                            border: `1px solid ${theme.palette.primary.contrastText}`,
+                            borderRadius: 5,
+                        }}
+                        renderThumbVertical={({ style, ...props }) =>
+                            <div {...props}
+                                style={{
+                                    ...style,
+                                    backgroundColor: theme.palette.primary.contrastText,
+                                    borderRadius: 10
+                                }}
+                            />
+                        }
+                    >
+                        {/*@ts-ignore*/}
+                        <MarkdownRenderer markdown={chosenFile["content"]} style={{
+                            height: props.height,
+                            width: "60vw",
+                            overflowWrap: "break-word",
+                            padding: "2em 3em",
+                        }} />
+                    </Scrollbars>
+                )
                     : (
                         loading ? (
                             <Box
