@@ -318,6 +318,7 @@ export default function TopSearchBar(props: IProps) {
 
         dispatch(updateSearchParamsState(state));
 
+        // fire search
         if (triggerSearch) {
             search(searchUpdate);
         }
@@ -417,6 +418,9 @@ export default function TopSearchBar(props: IProps) {
         navigate("/search?"+urlParams)
 
     }
+
+    const [hasOptionBeenSelected, setHasOptionBeenSelected] = React.useState(false);
+
     const [sinceDate, setSinceDate] = React.useState("")
     const [untilDate, setUntilDate] = React.useState("")
     const [advOpen, setAdvOpen] = React.useState(false)
@@ -535,8 +539,39 @@ export default function TopSearchBar(props: IProps) {
         // execute state update
         updateSearchState(updateState)
 
-        // fire search
-        search()
+    }
+
+    const handleSelect = async (e : any) => {
+        if (!hasOptionBeenSelected) {
+            let updateState = Object.assign({}, initialSearchStateUpdate);
+            if (e !== null){
+                updateState.query = e.target.value
+                if (e) {
+                    // update attempts in state update
+                    updateState.query = e.target.value
+                }
+            }
+            // update attempts in state updat
+
+            // ensure that a field is set for query
+            if (updateState.query === undefined || updateState.query === null) {
+                updateState.query = ""
+            }
+
+            if (searchParams.tags !== undefined && searchParams.tags !== null && searchParams.tags.length > 0) {
+                updateState.tags = [];
+                // @ts-ignore
+                searchParams.tags.forEach((tag) => {updateState.tags.push(tag)})
+            }
+
+
+            // execute state update
+            updateSearchState(updateState)
+
+            // fire search
+            search()
+            setHasOptionBeenSelected(true);
+        }
     }
 
     const search = async (overrideParams: SearchParamsState | null = null) => {
@@ -1695,7 +1730,7 @@ export default function TopSearchBar(props: IProps) {
                                 handleSearchSubmit(e)
                             }}
                             onSelect={(e) => {
-                                handleSearchSubmit(e)
+                                handleSelect(e)
                             }}
                             value={(searchParams.query !== undefined && searchParams.query.length > 0) ? searchParams.query : null}
                             style={{
@@ -1888,7 +1923,7 @@ export default function TopSearchBar(props: IProps) {
                                 handleSearchSubmit(e)
                             }}
                             onSelect={(e) => {
-                                handleSearchSubmit(e)
+                                handleSelect(e)
                             }}
                             value={(searchParams.query !== undefined && searchParams.query.length > 0) ? searchParams.query : null}
                             style={{
