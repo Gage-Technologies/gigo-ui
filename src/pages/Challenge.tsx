@@ -1388,16 +1388,18 @@ function Challenge() {
                                         onError={handleError}
                                         alt={"project thumbnail"}
                                     />
-                                    <Button
-                                        onClick={() => setEditImage(true)}
-                                        style={{
-                                            position: 'absolute',
-                                            top: 0,
-                                            right: 0
-                                        }}
-                                    >
-                                        <EditIcon/>
-                                    </Button>
+                                    {project !== null && userId === project["author_id"] ? (
+                                        <Button
+                                            onClick={() => setEditImage(true)}
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                right: 0
+                                            }}
+                                        >
+                                            <EditIcon/>
+                                        </Button>
+                                    ) : null}
                                 </div>
                                 <Modal
                                     aria-labelledby="transition-modal-title"
@@ -4363,11 +4365,11 @@ function Challenge() {
                             )}
                         </div>
                     )}
-                    {!editTitle && (
+                    {project !== null && userId === project["author_id"] && !editTitle ? (
                         <Button onClick={() => setEditTitle(true)}>
                             <EditIcon/>
                         </Button>
-                    )}
+                    ) : null}
                 </Typography>
                 {project !== null && project["post_type_string"] && (
                     <div>
