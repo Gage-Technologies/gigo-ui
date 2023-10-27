@@ -980,7 +980,7 @@ function AttemptPage() {
     `;
 
     const renderTabButtons = () => {
-        console.log("attempt: ", attempt)
+
         return (
             <>
                 <Grid item sx={1}>
@@ -1144,7 +1144,7 @@ function AttemptPage() {
         )
     }
 
-    console.log("attempt is: ", attempt)
+
 
     return (
         <div>

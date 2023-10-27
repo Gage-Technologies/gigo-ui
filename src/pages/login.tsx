@@ -303,7 +303,7 @@ function Login(this: any) {
     const loginFunction = async () => {
         setLoading(true)
         let auth = await authorize(username, password);
-        console.log("auth: ", auth)
+
         // @ts-ignore
         if (auth["user"] !== undefined) {
             let authState = Object.assign({}, initialAuthStateUpdate)
@@ -669,7 +669,7 @@ function Login(this: any) {
     };
 
 
-    console.log("aspect ratio: ", aspectRatio);
+
 
     // @ts-ignore
     // @ts-ignore
@@ -742,7 +742,7 @@ function useAspectRatio() {
             const width = window.screen.width;
             const height = window.screen.height;
             let divisor = gcd(width, height);
-            console.log("divisor: ", divisor);
+
             // Dividing by GCD and truncating into integers
             let simplifiedWidth = Math.trunc(width / divisor);
             let simplifiedHeight = Math.trunc(height / divisor);
@@ -756,7 +756,7 @@ function useAspectRatio() {
         calculateAspectRatio();
 
         window.addEventListener('resize', calculateAspectRatio);
-        console.log("aspectRatio: ", aspectRatio);
+
 
         return () => {
             window.removeEventListener('resize', calculateAspectRatio);

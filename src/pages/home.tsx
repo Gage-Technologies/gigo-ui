@@ -146,7 +146,7 @@ function Home() {
     const [isFetching, setIsFetching] = useInfiniteScroll(infiniteScrollHandler, true, 1440, stopScroll)
 
     const apiLoad = async () => {
-        console.log("logged in: ", loggedIn)
+
         if ((activeData.length === 0 || recData.length === 0 || followData.length === 0 || topRec.length === 0) && loggedIn) {
             let active = call(
                 "/api/home/active",
@@ -223,7 +223,7 @@ function Home() {
     useEffect(() => {
         let xpLogin = window.sessionStorage.getItem('loginXP')
         setLoading(true)
-        console.log("authenticated: ", authState.authenticated)
+
         if (authState.authenticated !== false){
             apiLoad().then(r => console.log("here: ", r))
         }
@@ -950,7 +950,7 @@ function useAspectRatio() {
             const width = window.screen.width;
             const height = window.screen.height;
             let divisor = gcd(width, height);
-            console.log("divisor: ", divisor);
+
             // Dividing by GCD and truncating into integers
             let simplifiedWidth = Math.trunc(width / divisor);
             let simplifiedHeight = Math.trunc(height / divisor);
@@ -964,7 +964,7 @@ function useAspectRatio() {
         calculateAspectRatio();
 
         window.addEventListener('resize', calculateAspectRatio);
-        console.log("aspectRatio: ", aspectRatio);
+
 
         return () => {
             window.removeEventListener('resize', calculateAspectRatio);

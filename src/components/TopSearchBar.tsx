@@ -448,7 +448,7 @@ export default function TopSearchBar(props: IProps) {
                 (!autoCompleteElement || !isClickWithinElement(event, autoCompleteElement)) &&
                 (!menuElement || !isClickWithinElement(event, menuElement))
             ) {
-                console.log("closing options");
+
                 setOptionsOpen(false);
             }
         };

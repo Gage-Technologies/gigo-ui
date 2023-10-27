@@ -64,7 +64,6 @@ function CodeDisplayEditor(props: Code_display_editor) {
     }
 
     const apiLoad = async () => {
-        console.log("props: ", props)
 
         if (!props.repoId || props.repoId === "" || !props.references || props.references === "")
             return

@@ -1826,7 +1826,7 @@ function useAspectRatio() {
         calculateAspectRatio();
 
         window.addEventListener('resize', calculateAspectRatio);
-        console.log("aspectRatio: ", aspectRatio);
+
 
         return () => {
             window.removeEventListener('resize', calculateAspectRatio);
