@@ -1182,6 +1182,11 @@ export default function ChatContainer() {
                                     handleSendMessage();
                                     scrollToBottom();
                                 }
+
+                                // on mobile close the chat when we send the message
+                                if (window.innerWidth <= 1000 && document.activeElement instanceof HTMLElement) {
+                                    document.activeElement.blur();
+                                }
                             }
                             if (e.key === 'Tab') {
                                 e.preventDefault();
@@ -1461,7 +1466,7 @@ export default function ChatContainer() {
     const renderChatView = () => {
         return (
             <>
-                <List style={{ flexGrow: 1, marginTop: '70px', marginBottom: '88px' }}>
+                <List style={{ flexGrow: 1, marginTop: '70px', marginBottom: window.innerWidth > 1000 ? '88px' : '130px' }}>
                     {/* Show a spinner (MoonLoader from react-spinners) when we are loading new data */}
                     {loadingMessages && (
                         <div
