@@ -132,7 +132,7 @@ const XpPopup = (props: IProps) => {
     }
 
 
-    console.log("renown: ", renown)
+
 
     return (
         <ThemeProvider theme={theme}>

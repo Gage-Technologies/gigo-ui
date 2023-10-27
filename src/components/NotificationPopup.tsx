@@ -151,7 +151,7 @@ const NotificationPopup: React.FC<IProps> = ({
             handleNotificationClose(notifId)
         } else {
             acknowledgeNotification(notifId)
-            console.log("Unknown notification type: " + notificationType)
+
             handleNotificationClose(notifId)
         }
     };

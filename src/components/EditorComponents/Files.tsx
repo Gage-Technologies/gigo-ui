@@ -277,7 +277,7 @@ function Files({ selectedFile, handleFileSelect, projectName, files, repoId }: F
     // Update the theme only if the mode changes
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
 
-    console.log("files: ", files)
+
 
     return (
         <div style={{

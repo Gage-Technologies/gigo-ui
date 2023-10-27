@@ -155,7 +155,7 @@ function Challenge() {
     let {id} = useParams();
     const queryParams = new URLSearchParams(window.location.search)
 
-    console.log("this is the challenge id: ", id)
+
     const dispatch = useAppDispatch();
     const cache = useSelector(selectCacheState);
 
@@ -486,7 +486,7 @@ function Challenge() {
         setAttempt(attemptResponse["attempts"])
         setClosedAttempts(closedAttemptResponse["attempts"])
 
-        console.log("here is attempt", projectResponse["post"])
+
     }
 
     const publishProject = async () => {
@@ -840,7 +840,7 @@ function Challenge() {
     };
 
     const overviewTab = () => {
-        console.log("tutorials: ", projectTutorial)
+
 
         if (window.innerWidth > 1000) {
             if (projectTutorial !== null && project?.post_type === 0) {
@@ -937,7 +937,6 @@ function Challenge() {
                 </Typography>
                 {attempt.length > 0 ? (
                     attempt.map((attempts) => {
-                        console.log("attempts: ", attempts)
                         return (
                             <div style={{paddingBottom: "10px"}}>
                                 <ButtonBase onClick={() => navigate("/attempt/" + attempts["_id"])}>
