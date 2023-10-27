@@ -18,11 +18,11 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import HomeIcon from "@mui/icons-material/Home";
 import FlareIcon from '@mui/icons-material/Flare';
 import Drawer from "@mui/material/Drawer";
-import {styled} from "@mui/material/styles";
-import {useNavigate} from "react-router-dom";
-import {AppBarProps as MuiAppBarProps} from "@mui/material/AppBar/AppBar";
-import {BoxProps as MuiBoxProps} from "@mui/material/Box/Box";
-import {AwesomeButton} from "react-awesome-button";
+import { styled } from "@mui/material/styles";
+import { useNavigate } from "react-router-dom";
+import { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar/AppBar";
+import { BoxProps as MuiBoxProps } from "@mui/material/Box/Box";
+import { AwesomeButton } from "react-awesome-button";
 import 'react-awesome-button/dist/styles.css';
 import premiumImage from "../img/croppedPremium.png"
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
@@ -43,14 +43,14 @@ import FeedIcon from '@mui/icons-material/Feed';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import FolderIcon from '@mui/icons-material/Folder';
 import UserIcon from "./UserIcon";
-import {themeHelpers, getAllTokens, isHoliday} from "../theme";
+import { themeHelpers, getAllTokens, isHoliday } from "../theme";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import TopSearchBar from "./TopSearchBar";
 import call from "../services/api-call";
 import config from "../config";
 import swal from "sweetalert";
-import {useAppDispatch, useAppSelector} from "../app/hooks";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
 import {
     initialAuthStateUpdate,
     selectAuthState,
@@ -60,11 +60,11 @@ import {
     selectAuthStateUserName,
     updateAuthState,
 } from "../reducers/auth/auth";
-import {isChrome} from "react-device-detect";
-import {LocalFireDepartment} from "@mui/icons-material";
-import {Icon as IconifyIcon} from "@iconify/react";
-import {persistStore} from "redux-persist";
-import {store} from "../app/store"
+import { isChrome } from "react-device-detect";
+import { LocalFireDepartment } from "@mui/icons-material";
+import { Icon as IconifyIcon } from "@iconify/react";
+import { persistStore } from "redux-persist";
+import { store } from "../app/store"
 import candycane from "../img/candycane.svg"
 import usflag from "../img/us_flag.svg"
 import Snowfall from "react-snowfall";
@@ -78,9 +78,9 @@ import {
     selectAppWrapperSidebarOpen,
     updateAppWrapper
 } from "../reducers/appWrapper/appWrapper";
-import {clearProjectState} from "../reducers/createProject/createProject";
-import {clearSearchParamsState} from "../reducers/searchParams/searchParams";
-import {clearJourneyFormState} from "../reducers/journeyForm/journeyForm";
+import { clearProjectState } from "../reducers/createProject/createProject";
+import { clearSearchParamsState } from "../reducers/searchParams/searchParams";
+import { clearJourneyFormState } from "../reducers/journeyForm/journeyForm";
 import {
     AccountBoxOutlined,
     BookmarkBorderOutlined, ChatBubbleOutline,
@@ -90,12 +90,12 @@ import {
 } from "@material-ui/icons";
 import Notification from "../models/notification";
 import NotificationPopup from "./NotificationPopup";
-import {clearCache} from "../reducers/pageCache/pageCache";
-import {LoadingButton} from "@mui/lab";
-import {useParams} from "react-router";
+import { clearCache } from "../reducers/pageCache/pageCache";
+import { LoadingButton } from "@mui/lab";
+import { useParams } from "react-router";
 import CloseIcon from "@material-ui/icons/Close";
-import {clearChatState} from "../reducers/chat/chat";
-import {clearMessageCache} from "../reducers/chat/cache";
+import { clearChatState } from "../reducers/chat/chat";
+import { clearMessageCache } from "../reducers/chat/cache";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import StopIcon from '@mui/icons-material/Stop';
 import DesktopWindowsIcon from '@mui/icons-material/DesktopWindows';
@@ -142,7 +142,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         loggedIn &&
         (
             (window.location.pathname === '/home' || window.location.pathname === '/home/' ||
-            window.location.pathname === '' || window.location.pathname === '/') && window.innerWidth > 1000
+                window.location.pathname === '' || window.location.pathname === '/') && window.innerWidth > 1000
         )
     )
 
@@ -223,7 +223,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     }
 
 
-    const DrawerHeader = styled('div')(({theme}) => ({
+    const DrawerHeader = styled('div')(({ theme }) => ({
         display: 'flex',
         alignItems: 'center',
         padding: theme.spacing(0, 1),
@@ -231,7 +231,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         justifyContent: 'flex-end',
     }));
 
-    const DrawerFooter = styled('div')(({theme}) => ({
+    const DrawerFooter = styled('div')(({ theme }) => ({
         display: 'flex',
         alignItems: 'center',
         padding: theme.spacing(0, 1),
@@ -342,7 +342,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         <ContentContainer
             leftOpen={leftOpen || homePageLockedDrawer}
             rightOpen={rightOpen}
-            style={{marginTop: window.location.pathname.startsWith("/launchpad/") && query.get("editor") === "true" ? "28px" : "65px"}}
+            style={{ marginTop: window.location.pathname.startsWith("/launchpad/") && query.get("editor") === "true" ? "28px" : "65px" }}
             id={"contentContainer"}
         >
             {props.children}
@@ -399,7 +399,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
             null,
             null,
             // @ts-ignore
-            {page: stringSplit[3], issue: textFieldRef.current.value},
+            { page: stringSplit[3], issue: textFieldRef.current.value },
             null,
             config.rootPath
         )
@@ -556,7 +556,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         window.history.replaceState({}, "", window.location.href.split("?")[0]);
 
     }
-    ;
+        ;
     const renderTutorialButton = () => {
         if (!(
             window.location.pathname.startsWith('/home') ||
@@ -571,7 +571,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         }
 
         return (
-            <div style={{width: "100%", display: "flex", justifyContent: "center"}}>
+            <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
                 <Tooltip title={"Restart Tutorial. Click to close at any point."}>
                     <Button onClick={() => {
                         let authState = Object.assign({}, initialAuthStateUpdate)
@@ -613,7 +613,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                         // @ts-ignore
                         dispatch(updateAuthState(authState))
                     }}>
-                        <HelpOutlineIcon height={"25"} width={"25"}/>
+                        <HelpOutlineIcon height={"25"} width={"25"} />
                     </Button>
                 </Tooltip>
             </div>
@@ -633,7 +633,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         try {
             await navigator.clipboard.writeText(referralLink);
             console.log('Text copied to clipboard');
-        } catch(err) {
+        } catch (err) {
             console.log('Failed to copy text: ', err);
         }
     }
@@ -664,20 +664,20 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                             edge="start"
                             color="inherit"
                             aria-label="open drawer"
-                            sx={{mr: 2}}
+                            sx={{ mr: 2 }}
                             onClick={() => leftOpen ? handleDrawerClose() : handleDrawerOpen()}
                         >
-                            <MenuIcon style={{color: theme.palette.primary.contrastText}} />
+                            <MenuIcon style={{ color: theme.palette.primary.contrastText }} />
                         </IconButton>
                     ) : (
-                        <div/>
+                        <div />
                     )}
-                    <Button href={"/home"} style={{color: theme.palette.text.primary, zIndex: "600000"}}>
+                    <Button href={"/home"} style={{ color: theme.palette.text.primary, zIndex: "600000" }}>
                         <Box>
-                            <Typography variant="h6" component="span" style={{color: gigoColor}}>
+                            <Typography variant="h6" component="span" style={{ color: gigoColor }}>
                                 GIGO
                             </Typography>
-                            <Typography variant="caption" component="span" style={{fontSize: '8px', marginLeft: '5px', textTransform: 'lowercase', color: gigoColor}}>
+                            <Typography variant="caption" component="span" style={{ fontSize: '8px', marginLeft: '5px', textTransform: 'lowercase', color: gigoColor }}>
                                 [alpha]
                             </Typography>
                         </Box>
@@ -696,7 +696,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                             New accounts get 1 month of Pro!
                         </Button>
                     )}
-                    <Box sx={{flexGrow: 1}}/>
+                    <Box sx={{ flexGrow: 1 }} />
                     {loggedIn ? (
                         <Box>
                             <NotificationPopup
@@ -707,25 +707,25 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                             />
                         </Box>
                     ) : (
-                        <div/>
+                        <div />
                     )}
                     {loggedIn ? (
                         <Box>
                             <Button onClick={async () => {
                                 navigate("/create-challenge")
-                            }} sx={{paddingLeft: "15px", paddingRight: "15px"}} className={'top-menu'}>
+                            }} sx={{ paddingLeft: "15px", paddingRight: "15px" }} className={'top-menu'}>
                                 <Icon>
-                                    <AddIcon style={{color: theme.palette.primary.contrastText}}/>
+                                    <AddIcon style={{ color: theme.palette.primary.contrastText }} />
                                 </Icon>
                                 <Typography component={"div"} variant={"body2"}
-                                            sx={{paddingLeft: "10px", color: theme.palette.primary.contrastText}}>Create Challenge</Typography>
+                                    sx={{ paddingLeft: "10px", color: theme.palette.primary.contrastText }}>Create Challenge</Typography>
                             </Button>
                         </Box>
                     ) : (
-                        <div/>
+                        <div />
                     )}
-                    <div style={{width: "20px"}}/>
-                    <Box sx={{width: "50px"}}/>
+                    <div style={{ width: "20px" }} />
+                    <Box sx={{ width: "50px" }} />
                     {loggedIn ? (
                         <Box sx={{
                             overflow: "hidden",
@@ -736,7 +736,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 onClick={handleMenu}
                                 variant="text"
                             >
-                                <Typography sx={{color: theme.palette.primary.contrastText, mr: 2, textTransform: "none"}}>
+                                <Typography sx={{ color: theme.palette.primary.contrastText, mr: 2, textTransform: "none" }}>
                                     {username}
                                 </Typography>
                                 <UserIcon
@@ -788,15 +788,15 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     }}
                                 >
                                     <Button onClick={() => setShowReferPopup(false)}>
-                                        <CloseIcon/>
+                                        <CloseIcon />
                                     </Button>
-                                    <div style={{width: "100%", display: "flex", alignItems: "center", flexDirection: "column"}}>
+                                    <div style={{ width: "100%", display: "flex", alignItems: "center", flexDirection: "column" }}>
                                         <h3>Refer a Friend.</h3>
                                         <h4>Give a Month, Get a Month.</h4>
-                                        <div style={{display: "flex", width: "100%", flexDirection: "row", justifyContent: "center"}}>
-                                            <h5 style={{outline: "solid gray", borderRadius: "5px", padding: "8px"}} id={"url"}>{referralLink.length > 30 ? referralLink.slice(0,30) + "..." : referralLink}</h5>
+                                        <div style={{ display: "flex", width: "100%", flexDirection: "row", justifyContent: "center" }}>
+                                            <h5 style={{ outline: "solid gray", borderRadius: "5px", padding: "8px" }} id={"url"}>{referralLink.length > 30 ? referralLink.slice(0, 30) + "..." : referralLink}</h5>
                                             <Button onClick={() => copyToClipboard()}>
-                                                <ContentCopyIcon/>
+                                                <ContentCopyIcon />
                                             </Button>
                                         </div>
                                     </div>
@@ -804,7 +804,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                             </Modal>
                         </Box>
                     ) : (
-                        <Box sx={{display: {xs: 'none', md: 'flex'}}}>
+                        <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
                             <Tooltip title={"Login or Create Account!"}>
                                 <Button
                                     size="large"
@@ -882,20 +882,20 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                             edge="start"
                             color="inherit"
                             aria-label="open drawer"
-                            sx={{mr: 2}}
+                            sx={{ mr: 2 }}
                             onClick={() => leftOpen ? handleDrawerClose() : handleDrawerOpen()}
                         >
-                            <MenuIcon style={{color: theme.palette.primary.contrastText}} />
+                            <MenuIcon style={{ color: theme.palette.primary.contrastText }} />
                         </IconButton>
                     ) : (
-                        <div/>
+                        <div />
                     )}
-                    <Button href={"/home"} style={{color: theme.palette.text.primary, zIndex: "600000"}}>
+                    <Button href={"/home"} style={{ color: theme.palette.text.primary, zIndex: "600000" }}>
                         <Box>
-                            <Typography variant="h6" component="span" style={{color: gigoColor}}>
+                            <Typography variant="h6" component="span" style={{ color: gigoColor }}>
                                 GIGO
                             </Typography>
-                            <Typography variant="caption" component="span" style={{fontSize: '8px', marginLeft: '5px', textTransform: 'lowercase', color: gigoColor}}>
+                            <Typography variant="caption" component="span" style={{ fontSize: '8px', marginLeft: '5px', textTransform: 'lowercase', color: gigoColor }}>
                                 [alpha]
                             </Typography>
                         </Box>
@@ -954,26 +954,26 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                         {
                                             window.location.pathname.startsWith("/launchpad/") ? (
                                                 new URLSearchParams(window.location.search).get("desktop") === "none" ? (
-                                                <>
-                                                    <Tooltip title="View Desktop">
-                                                        <IconButton color="success" onClick={async () => {
-                                                            window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=side");
-                                                            window.location.reload();
-                                                        }}>
-                                                            <DesktopWindowsIcon/>
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                    <Tooltip title="Open Desktop In New Tab">
-                                                        <IconButton color="success" onClick={async () => {
-                                                            window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=popped-out");
-                                                            window.location.reload();
-                                                        }}>
-                                                            <QueuePlayNextIcon/>
-                                                        </IconButton>
-                                                    </Tooltip>
-                                                </>
+                                                    <>
+                                                        <Tooltip title="View Desktop">
+                                                            <IconButton color="success" onClick={async () => {
+                                                                window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=side");
+                                                                window.location.reload();
+                                                            }}>
+                                                                <DesktopWindowsIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                        <Tooltip title="Open Desktop In New Tab">
+                                                            <IconButton color="success" onClick={async () => {
+                                                                window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=popped-out");
+                                                                window.location.reload();
+                                                            }}>
+                                                                <QueuePlayNextIcon />
+                                                            </IconButton>
+                                                        </Tooltip>
+                                                    </>
                                                 ) : new URLSearchParams(window.location.search).get("desktop") === "side" ? (
-                                                <>
+                                                    <>
                                                         <Tooltip title="Close Desktop">
                                                             <IconButton color="error" onClick={async () => {
                                                                 window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=none");
@@ -987,10 +987,10 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                                                 window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=popped-out");
                                                                 window.location.reload();
                                                             }}>
-                                                                <QueuePlayNextIcon/>
+                                                                <QueuePlayNextIcon />
                                                             </IconButton>
                                                         </Tooltip>
-                                                </>
+                                                    </>
                                                 ) : new URLSearchParams(window.location.search).get("desktop") === "popped-out" ? (
                                                     <>
                                                         <Tooltip title="View Desktop">
@@ -998,11 +998,11 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                                                 window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=side");
                                                                 window.location.reload();
                                                             }}>
-                                                                <DesktopWindowsIcon/>
+                                                                <DesktopWindowsIcon />
                                                             </IconButton>
                                                         </Tooltip>
                                                     </>
-                                                ): null
+                                                ) : null
                                             ) : null
                                         }
                                     </Paper>
@@ -1010,7 +1010,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                             </div>
 
 
-                </>
+                        </>
                     ) : (
                         <Button onClick={async () => {
                             navigate("/signup")
@@ -1018,10 +1018,10 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                             New accounts get 1 month of Pro!
                         </Button>
                     )}
-                    <Box sx={{flexGrow: 1}}/>
+                    <Box sx={{ flexGrow: 1 }} />
 
-                    <div style={{width: "20px"}}/>
-                    <Box sx={{width: "50px"}}/>
+                    <div style={{ width: "20px" }} />
+                    <Box sx={{ width: "50px" }} />
                     {loggedIn ? (
                         <Box sx={{
                             overflow: "hidden",
@@ -1032,7 +1032,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 onClick={handleMenu}
                                 variant="text"
                             >
-                                <Typography sx={{color: theme.palette.primary.contrastText, mr: 2, textTransform: "none"}}>
+                                <Typography sx={{ color: theme.palette.primary.contrastText, mr: 2, textTransform: "none" }}>
                                     {username}
                                 </Typography>
                                 <UserIcon
@@ -1069,7 +1069,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                             </Menu>
                         </Box>
                     ) : (
-                        <Box sx={{display: {xs: 'none', md: 'flex'}}}>
+                        <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
                             <Tooltip title={"Login or Create Account!"}>
                                 <Button
                                     size="large"
@@ -1124,109 +1124,109 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     <Toolbar
                         sx={holidayStyle}
                     >
-                        <Button href={"/home"} style={{color: theme.palette.text.primary, zIndex: "600000"}}>
+                        <Button href={"/home"} style={{ color: theme.palette.text.primary, zIndex: "600000" }}>
                             <Box>
-                                <Typography variant="h6" component="span" style={{color: gigoColor}}>
+                                <Typography variant="h6" component="span" style={{ color: gigoColor }}>
                                     GIGO
                                 </Typography>
-                                <Typography variant="caption" component="span" style={{fontSize: '8px', marginLeft: '5px', textTransform: 'lowercase', color: gigoColor}}>
+                                <Typography variant="caption" component="span" style={{ fontSize: '8px', marginLeft: '5px', textTransform: 'lowercase', color: gigoColor }}>
                                     [alpha]
                                 </Typography>
                             </Box>
                         </Button>
                         <TopSearchBar />
                         {loggedIn ? (
-                                <>
-                                    <Button
-                                        size={"small"}
-                                        aria-label="account of current user"
-                                        onClick={handleMenu}
-                                        variant="text"
-                                        style={{position: "absolute", right: 0}}
-                                    >
-                                        <UserIcon
-                                            userId={authState.id}
-                                            userTier={authState.tier}
-                                            userThumb={config.rootPath + thumbnail}
-                                            size={40}
-                                            backgroundName={authState.backgroundName}
-                                            backgroundPalette={authState.backgroundColor}
-                                            backgroundRender={authState.backgroundRenderInFront}
-                                            profileButton={false}
-                                            pro={authState.role.toString() === "1"}
-                                        />
-                                    </Button>
-                                    <Menu
-                                        id="menu-appbar"
-                                        anchorOrigin={{
-                                            vertical: "top",
-                                            horizontal: "right",
+                            <>
+                                <Button
+                                    size={"small"}
+                                    aria-label="account of current user"
+                                    onClick={handleMenu}
+                                    variant="text"
+                                    style={{ position: "absolute", right: 0 }}
+                                >
+                                    <UserIcon
+                                        userId={authState.id}
+                                        userTier={authState.tier}
+                                        userThumb={config.rootPath + thumbnail}
+                                        size={40}
+                                        backgroundName={authState.backgroundName}
+                                        backgroundPalette={authState.backgroundColor}
+                                        backgroundRender={authState.backgroundRenderInFront}
+                                        profileButton={false}
+                                        pro={authState.role.toString() === "1"}
+                                    />
+                                </Button>
+                                <Menu
+                                    id="menu-appbar"
+                                    anchorOrigin={{
+                                        vertical: "top",
+                                        horizontal: "right",
+                                    }}
+                                    keepMounted
+                                    open={Boolean(anchorEl)}
+                                    onClose={handleClose}
+                                >
+                                    <MenuItem onClick={handleProfile}>Profile</MenuItem>
+                                    {window.innerWidth > 1000 ? (
+                                        <MenuItem onClick={handleSettings}>Account Settings</MenuItem>
+                                    ) : null}
+                                    <MenuItem onClick={async () => {
+                                        await handleLogout()
+                                    }}>Logout</MenuItem>
+                                    <MenuItem onClick={() => setShowReferPopup(true)}>Refer A Friend</MenuItem>
+                                </Menu>
+                                <Modal open={showReferPopup} onClose={() => setShowReferPopup(false)}>
+                                    <Box
+                                        sx={{
+                                            width: "90vw",
+                                            height: "40vh",
+                                            justifyContent: "center",
+                                            marginLeft: "5vw",
+                                            marginTop: "30vh",
+                                            outlineColor: "black",
+                                            borderRadius: 1,
+                                            boxShadow: "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px 6px 0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
+                                            backgroundColor: theme.palette.background.default,
                                         }}
-                                        keepMounted
-                                        open={Boolean(anchorEl)}
-                                        onClose={handleClose}
                                     >
-                                        <MenuItem onClick={handleProfile}>Profile</MenuItem>
-                                        {window.innerWidth > 1000 ? (
-                                            <MenuItem onClick={handleSettings}>Account Settings</MenuItem>
-                                        ) : null}
-                                        <MenuItem onClick={async () => {
-                                            await handleLogout()
-                                        }}>Logout</MenuItem>
-                                        <MenuItem onClick={() => setShowReferPopup(true)}>Refer A Friend</MenuItem>
-                                    </Menu>
-                                    <Modal open={showReferPopup} onClose={() => setShowReferPopup(false)}>
-                                        <Box
-                                            sx={{
-                                                width: "90vw",
-                                                height: "40vh",
-                                                justifyContent: "center",
-                                                marginLeft: "5vw",
-                                                marginTop: "30vh",
-                                                outlineColor: "black",
-                                                borderRadius: 1,
-                                                boxShadow: "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px 6px 0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
-                                                backgroundColor: theme.palette.background.default,
-                                            }}
-                                        >
-                                            <Button onClick={() => setShowReferPopup(false)}>
-                                                <CloseIcon/>
-                                            </Button>
-                                            <div style={{width: "100%", display: "flex", alignItems: "center", flexDirection: "column"}}>
-                                                <h3>Refer a Friend.</h3>
-                                                <h4>Give a Month, Get a Month.</h4>
-                                                <div style={{display: "flex", width: "100%", flexDirection: "row", justifyContent: "center"}}>
-                                                    <h5 style={{outline: "solid gray", borderRadius: "5px", padding: "8px"}} id={"url-mobile"}>{referralLink.length > 20 ? referralLink.slice(0,20) + "..." : referralLink}</h5>
-                                                    <Button onClick={() => copyToClipboard()}>
-                                                        <ContentCopyIcon/>
-                                                    </Button>
-                                                </div>
+                                        <Button onClick={() => setShowReferPopup(false)}>
+                                            <CloseIcon />
+                                        </Button>
+                                        <div style={{ width: "100%", display: "flex", alignItems: "center", flexDirection: "column" }}>
+                                            <h3>Refer a Friend.</h3>
+                                            <h4>Give a Month, Get a Month.</h4>
+                                            <div style={{ display: "flex", width: "100%", flexDirection: "row", justifyContent: "center" }}>
+                                                <h5 style={{ outline: "solid gray", borderRadius: "5px", padding: "8px" }} id={"url-mobile"}>{referralLink.length > 20 ? referralLink.slice(0, 20) + "..." : referralLink}</h5>
+                                                <Button onClick={() => copyToClipboard()}>
+                                                    <ContentCopyIcon />
+                                                </Button>
                                             </div>
-                                        </Box>
-                                    </Modal>
-                                </>
-                            ) : (
-                                <>
-                                    <IconButton
-                                        aria-label="login-signup"
-                                        onClick={handleMenu}
-                                        sx={{position: "absolute", right: "15px", width: "48px", height: "48px"}}
-                                    >
-                                        <LoginIcon/>
-                                    </IconButton>
-                                    <Menu
-                                        id="menu-appbar"
-                                        anchorOrigin={{
-                                            vertical: "top",
-                                            horizontal: "right",
-                                        }}
-                                        keepMounted
-                                        open={Boolean(anchorEl)}
-                                        onClose={handleClose}>
-                                        <MenuItem onClick={handleCreateAccount}>Create Account</MenuItem>
-                                        <MenuItem onClick={handleLogin}>Login</MenuItem>
-                                    </Menu>
-                                </>
+                                        </div>
+                                    </Box>
+                                </Modal>
+                            </>
+                        ) : (
+                            <>
+                                <IconButton
+                                    aria-label="login-signup"
+                                    onClick={handleMenu}
+                                    sx={{ position: "absolute", right: "15px", width: "48px", height: "48px" }}
+                                >
+                                    <LoginIcon />
+                                </IconButton>
+                                <Menu
+                                    id="menu-appbar"
+                                    anchorOrigin={{
+                                        vertical: "top",
+                                        horizontal: "right",
+                                    }}
+                                    keepMounted
+                                    open={Boolean(anchorEl)}
+                                    onClose={handleClose}>
+                                    <MenuItem onClick={handleCreateAccount}>Create Account</MenuItem>
+                                    <MenuItem onClick={handleLogin}>Login</MenuItem>
+                                </Menu>
+                            </>
                         )}
                     </Toolbar>
                 </AppBar>
@@ -1257,34 +1257,50 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 }}
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', height: '60px', overflow: 'hidden' }}>
-                                    <IconButton color="inherit" href={"/about"}>
+                                    <IconButton color="inherit" href={"/about"} onClick={() => {
+                                        let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
+                                        appWrapperState.chatOpen = false
+                                        dispatch(updateAppWrapper(appWrapperState));
+                                    }}>
                                         <InfoOutlined style={{ color: theme.palette.text.primary, fontSize: 25 }} />
                                     </IconButton>
-                                    <Typography variant="caption" noWrap sx={{marginTop:'-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px'}}>
+                                    <Typography variant="caption" noWrap sx={{ marginTop: '-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px' }}>
                                         About
                                     </Typography>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', height: '60px', overflow: 'hidden' }}>
-                                    <IconButton color="inherit" href={"/following"}>
+                                    <IconButton color="inherit" href={"/following"} onClick={() => {
+                                        let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
+                                        appWrapperState.chatOpen = false
+                                        dispatch(updateAppWrapper(appWrapperState));
+                                    }}>
                                         <BookmarkBorderOutlined style={{ color: theme.palette.text.primary, fontSize: 25 }} />
                                     </IconButton>
-                                    <Typography variant="caption" noWrap sx={{marginTop:'-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px'}}>
+                                    <Typography variant="caption" noWrap sx={{ marginTop: '-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px' }}>
                                         Following
                                     </Typography>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', height: '60px', overflow: 'hidden' }}>
-                                    <IconButton color="inherit" href={"/home"}>
+                                    <IconButton color="inherit" href={"/home"} onClick={() => {
+                                        let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
+                                        appWrapperState.chatOpen = false
+                                        dispatch(updateAppWrapper(appWrapperState));
+                                    }}>
                                         <HomeOutlined style={{ color: theme.palette.text.primary, fontSize: 25 }} />
                                     </IconButton>
-                                    <Typography variant="caption" noWrap sx={{marginTop:'-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px'}}>
+                                    <Typography variant="caption" noWrap sx={{ marginTop: '-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px' }}>
                                         Home
                                     </Typography>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', height: '60px', overflow: 'hidden' }}>
-                                    <IconButton color="inherit" href={"/active"}>
+                                    <IconButton color="inherit" href={"/active"} onClick={() => {
+                                        let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
+                                        appWrapperState.chatOpen = false
+                                        dispatch(updateAppWrapper(appWrapperState));
+                                    }}>
                                         <FolderOutlined style={{ color: theme.palette.text.primary, fontSize: 25 }} />
                                     </IconButton>
-                                    <Typography variant="caption" noWrap sx={{marginTop:'-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px'}}>
+                                    <Typography variant="caption" noWrap sx={{ marginTop: '-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px' }}>
                                         Active
                                     </Typography>
                                 </div>
@@ -1296,7 +1312,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     }}>
                                         <ChatBubbleOutline style={{ color: theme.palette.text.primary, fontSize: 25 }} />
                                     </IconButton>
-                                    <Typography variant="caption" noWrap sx={{marginTop:'-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px'}}>
+                                    <Typography variant="caption" noWrap sx={{ marginTop: '-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px' }}>
                                         Chat
                                     </Typography>
                                 </div>
@@ -1329,19 +1345,19 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                 anchor="left"
                 open={leftOpen || homePageLockedDrawer}
             >
-                <DrawerHeader/>
+                <DrawerHeader />
                 <List>
                     <ListItem disablePadding>
                         <ListItemButton color={"primary"} sx={{
                             borderRadius: 2,
                         }} href={"/home"}>
                             <ListItemIcon>
-                                <HomeIcon style={{color: theme.palette.text.primary,}}/>
+                                <HomeIcon style={{ color: theme.palette.text.primary, }} />
                             </ListItemIcon>
                             <Typography
                                 component={"div"}
                                 variant={"body1"}
-                                sx={{fontSize: "0.8em"}}
+                                sx={{ fontSize: "0.8em" }}
                             >
                                 Home
                             </Typography>
@@ -1352,12 +1368,12 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                             borderRadius: 2,
                         }} href={"/active"}>
                             <ListItemIcon>
-                                <FolderIcon style={{color: theme.palette.text.primary,}}/>
+                                <FolderIcon style={{ color: theme.palette.text.primary, }} />
                             </ListItemIcon>
                             <Typography
                                 component={"div"}
                                 variant={"body1"}
-                                sx={{fontSize: "0.8em"}}
+                                sx={{ fontSize: "0.8em" }}
                             >
                                 Active
                             </Typography>
@@ -1368,12 +1384,12 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                             borderRadius: 2,
                         }} href={"/following"}>
                             <ListItemIcon>
-                                <BookmarkIcon style={{color: theme.palette.text.primary,}}/>
+                                <BookmarkIcon style={{ color: theme.palette.text.primary, }} />
                             </ListItemIcon>
                             <Typography
                                 component={"div"}
                                 variant={"body1"}
-                                sx={{fontSize: "0.8em"}}
+                                sx={{ fontSize: "0.8em" }}
                             >
                                 Following
                             </Typography>
@@ -1384,12 +1400,12 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                             borderRadius: 2,
                         }} href={"/profile"}>
                             <ListItemIcon>
-                                <AccountBoxIcon style={{color: theme.palette.text.primary,}}/>
+                                <AccountBoxIcon style={{ color: theme.palette.text.primary, }} />
                             </ListItemIcon>
                             <Typography
                                 component={"div"}
                                 variant={"body1"}
-                                sx={{fontSize: "0.8em"}}
+                                sx={{ fontSize: "0.8em" }}
                             >
                                 Profile
                             </Typography>
@@ -1400,12 +1416,12 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                             borderRadius: 2,
                         }} href={"/streak"}>
                             <ListItemIcon>
-                                <LocalFireDepartment style={{color: theme.palette.text.primary,}}/>
+                                <LocalFireDepartment style={{ color: theme.palette.text.primary, }} />
                             </ListItemIcon>
                             <Typography
                                 component={"div"}
                                 variant={"body1"}
-                                sx={{fontSize: "0.8em"}}
+                                sx={{ fontSize: "0.8em" }}
                             >
                                 Stats
                             </Typography>
@@ -1433,12 +1449,12 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                             borderRadius: 2,
                         }} href={"/documentation"}>
                             <ListItemIcon>
-                                <FeedIcon style={{color: theme.palette.text.primary,}}/>
+                                <FeedIcon style={{ color: theme.palette.text.primary, }} />
                             </ListItemIcon>
                             <Typography
                                 component={"div"}
                                 variant={"body1"}
-                                sx={{fontSize: "0.8em"}}
+                                sx={{ fontSize: "0.8em" }}
                             >
                                 Docs
                             </Typography>
@@ -1450,12 +1466,12 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                         }} href={"/about"}>
                             <ListItemIcon>
                                 <IconifyIcon icon="mdi:about" color={theme.palette.text.primary} width="25"
-                                             height="25"/>
+                                    height="25" />
                             </ListItemIcon>
                             <Typography
                                 component={"div"}
                                 variant={"body1"}
-                                sx={{fontSize: "0.8em"}}
+                                sx={{ fontSize: "0.8em" }}
                             >
                                 About
                             </Typography>
@@ -1464,21 +1480,22 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
 
                 </List>
                 <DrawerFooter>
-                    <div style={{display: "flex", flexDirection: "column"}}>
+                    <div style={{ display: "flex", flexDirection: "column" }}>
                         {authState.role.toString() === "0" ? (
                             <div>
-                                <div style={{width: "100%", display: "flex", justifyContent: "center"}}>
-                                    <AwesomeButton style={{ width: "100%",
+                                <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+                                    <AwesomeButton style={{
+                                        width: "100%",
                                         '--button-primary-color': theme.palette.primary.main,
                                         '--button-primary-color-dark': theme.palette.primary.dark,
                                         '--button-primary-color-light': theme.palette.text.primary,
                                         '--button-primary-color-hover': theme.palette.primary.main,
                                         fontSize: "14px"
                                     }} type="primary" onPress={() => navigate("/premium")}>
-                                        <img src={premiumImage}/>
+                                        <img src={premiumImage} />
                                     </AwesomeButton>
                                 </div>
-                                <div style={{height: "5vh"}}/>
+                                <div style={{ height: "5vh" }} />
                             </div>
                         ) : null}
                         {renderTutorialButton()}
@@ -1510,13 +1527,13 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     }}
                                 >
                                     <Typography variant="h5"
-                                                component="h2"
-                                                align="center"
-                                                style={{
-                                                    marginTop: "-10px",
-                                                    marginBottom: "10px",
-                                                    color: theme.palette.text.primary,
-                                                }}>
+                                        component="h2"
+                                        align="center"
+                                        style={{
+                                            marginTop: "-10px",
+                                            marginBottom: "10px",
+                                            color: theme.palette.text.primary,
+                                        }}>
                                         Report Issue
                                     </Typography>
                                     <TextField
@@ -1543,13 +1560,13 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 </div>
                             </Box>
                         </Modal>
-                        <div style={{width: "100%", display: "flex", justifyContent: "center"}}>
-                            <Button sx={{ml: 1, mb: 1}} size={"small"} onClick={handleTheme} color="primary" variant="text">
-                                <Typography sx={{textTransform: "capitalize", fontSize: "1.0em", mr: 1}}>
+                        <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+                            <Button sx={{ ml: 1, mb: 1 }} size={"small"} onClick={handleTheme} color="primary" variant="text">
+                                <Typography sx={{ textTransform: "capitalize", fontSize: "1.0em", mr: 1 }}>
                                     {theme.palette.mode} mode
                                 </Typography>
-                                {theme.palette.mode === 'dark' ? <Brightness7Icon/> :
-                                    <Brightness4Icon/>}
+                                {theme.palette.mode === 'dark' ? <Brightness7Icon /> :
+                                    <Brightness4Icon />}
                             </Button>
                         </div>
                     </div>
@@ -1581,22 +1598,22 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                         {
                             window.innerWidth > 1000
                                 ?
-                                    (rightOpen) ?
-                                        (
-                                            <KeyboardDoubleArrowRightIcon
-                                                style={{color: theme.palette.primary.main}}
-                                                fontSize={"large"}
-                                            />
-                                        )
-                                        :
-                                        (
-                                            <KeyboardDoubleArrowLeftIcon
-                                                style={{color: theme.palette.primary.main}}
-                                                fontSize={"large"}
-                                            />
-                                        )
+                                (rightOpen) ?
+                                    (
+                                        <KeyboardDoubleArrowRightIcon
+                                            style={{ color: theme.palette.primary.main }}
+                                            fontSize={"large"}
+                                        />
+                                    )
+                                    :
+                                    (
+                                        <KeyboardDoubleArrowLeftIcon
+                                            style={{ color: theme.palette.primary.main }}
+                                            fontSize={"large"}
+                                        />
+                                    )
                                 :
-                                    <></>
+                                <></>
                         }
                     </Tooltip>
                 </IconButton>
@@ -1619,7 +1636,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     anchor="right"
                     open={rightOpen}
                 >
-                    <DrawerHeader/>
+                    <DrawerHeader />
                     <ChatContainer />
                 </Drawer>
             </>
@@ -1629,7 +1646,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     let appBarRenderer = renderAppBar
     if (window.location.pathname.startsWith("/launchpad/") && query.get("editor") === "true") {
         appBarRenderer = renderWorkspaceAppBar
-    } else if(window.innerWidth < 1000) {
+    } else if (window.innerWidth < 1000) {
         appBarRenderer = mobileAppBar
     }
 
@@ -1637,13 +1654,13 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         <ThemeProvider theme={theme}>
             {holiday === "Christmas"
                 ?
-                <Snowfall/>
+                <Snowfall />
                 :
                 <></>
             }
             {holiday === "New Years"
                 ?
-                <Confetti gravity={0.01} numberOfPieces={100} wind={0.001} colors={['#ad7832', '#dcb468', '#716c6c', '#8e8888']} friction={1}/>
+                <Confetti gravity={0.01} numberOfPieces={100} wind={0.001} colors={['#ad7832', '#dcb468', '#716c6c', '#8e8888']} friction={1} />
                 :
                 <></>
             }
@@ -1655,7 +1672,11 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     {appBarRenderer()}
                     {renderSidebar()}
                     {renderChatSideBar()}
-                    {memoizedChildren}
+                    {
+                        // we only render the children on mobile if the chat bar is not open
+                        !(window.innerWidth <= 1000 && rightOpen) ?
+                            memoizedChildren : null
+                    }
                 </Box>
             </CssBaseline>
         </ThemeProvider>

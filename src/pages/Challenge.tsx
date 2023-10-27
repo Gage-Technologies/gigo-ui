@@ -88,7 +88,7 @@ import UserIcon from "../components/UserIcon";
 import {useDispatch, useSelector} from "react-redux";
 import {selectCacheState} from "../reducers/pageCache/pageCache";
 import styled, {keyframes} from 'styled-components';
-import Person3Icon from "@mui/icons-material/Person3";
+import PersonIcon from "@mui/icons-material/Person";
 import {Helmet, HelmetProvider} from "react-helmet-async";
 import CloseIcon from "@material-ui/icons/Close";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -3690,7 +3690,7 @@ function Challenge() {
                                 height: "auto",
                                 display: "flex",
                                 flexDirection: "row"}}>
-                                <Typography style={{display: "flex", flexDirection: "row", width: "85%"}}>
+                                <Typography sx={{display: "flex", flexDirection: "row", width: "85%", ml: 2}}>
                                     <div>
                                         <UserIcon
                                             userId={project !== null ? project["author_id"] : ""}
@@ -3718,7 +3718,7 @@ function Challenge() {
                                 flexDirection: "row"}}>
                                 <Typography style={{display: "flex", flexDirection: "row", width: "85%"}}>
                                     <div>
-                                        <Person3Icon sx={{width: "50px", height: "50px"}}/>
+                                        <PersonIcon sx={{width: "50px", height: "50px"}}/>
                                     </div>
                                 </Typography>
                                 <StyledDiv style={{height: "24px", width: "40%", marginBottom: "12px", borderRadius: "20px", marginTop: "10px"}}/>
@@ -4052,7 +4052,7 @@ function Challenge() {
                                 flexDirection: "row"}}>
                                 <Typography style={{display: "flex", flexDirection: "row", width: "85%"}}>
                                     <div>
-                                        <Person3Icon sx={{width: "50px", height: "50px"}}/>
+                                        <PersonIcon sx={{width: "50px", height: "50px"}}/>
                                     </div>
                                 </Typography>
                                 <StyledDiv style={{height: "24px", width: "40%", marginBottom: "12px", borderRadius: "20px", marginTop: "10px"}}/>
