@@ -2,41 +2,23 @@ import * as React from "react";
 import {useEffect, useState} from "react";
 import {
     Box, Button,
-    Card,
-    Container,
     createTheme,
     CssBaseline,
-    Grid,
+    Grid, IconButton,
     PaletteMode,
-    ThemeProvider,
+    ThemeProvider, Tooltip,
     Typography
 } from "@mui/material";
 import {getAllTokens} from "../theme";
-import ProjectCard from "../components/ProjectCard";
-import AppWrapper from "../components/AppWrapper";
-import {useAppDispatch, useAppSelector} from "../app/hooks";
-import {initialAuthStateUpdate, selectAuthState, updateAuthState} from "../reducers/auth/auth";
+import {useAppSelector} from "../app/hooks";
 import {useNavigate} from "react-router-dom";
-import call from "../services/api-call";
-import config from "../config";
-import swal from "sweetalert";
-import Lottie from "react-lottie";
-import * as animationData from '../img/85023-no-data.json'
-import Carousel from "../components/Carousel";
-import {ThreeDots} from "react-loading-icons";
-import aboutUsImg from "../img/aboutUsBackground.png"
-import loginImg from "../img/login/login_background.png";
-import {keyframes} from "@emotion/react";
 import AboutPageIcon from "../components/Icons/aboutPage/AboutPage";
-import JourneyPageIcon from "../components/Icons/JourneyPage";
 import {selectAppWrapperChatOpen, selectAppWrapperSidebarOpen} from "../reducers/appWrapper/appWrapper";
-import JourneyPageCampIcon from "../components/Icons/JourneyPageCamp";
-import JourneyPagePumpIcon from "../components/Icons/JourneyPageGasPump";
-import {AwesomeButton} from "react-awesome-button";
 import AboutPageLearnIcon from "../components/Icons/aboutPage/AboutPageLearn";
 import AboutPageEasyIcon from "../components/Icons/aboutPage/AboutPageEasy";
 import AboutPageConnectionIcon from "../components/Icons/aboutPage/AboutPageConnection";
 import AboutPageWorldIcon from "../components/Icons/aboutPage/AboutPageWorld";
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 function About() {
     let userPref = localStorage.getItem('theme')
@@ -71,17 +53,11 @@ function About() {
     const styles = {
         scrollDowns: {
             position: 'fixed',
-            bottom: '5%',
+            bottom: '2vh',
             left: '50%',
             transform: 'translateX(-50%)',
-            textAlign: 'center',
             fontSize: '3em',
             zIndex: 1000,
-            display: isHidden ? 'none' : 'block'
-        },
-        arrow: {
-            fontSize: '2em',
-            animation: 'bounce 2s infinite'
         }
     };
 
@@ -92,7 +68,7 @@ function About() {
                 ? 'calc(95vw - 15vw)'
                 : chatOpen ? 'calc(95vw - 15vw)'
                     : '100vw',
-        height: '90vh', // Set to 100% of viewport height
+        height: '85vh', // Set to 100% of viewport height
         position: 'relative',
         zIndex: 0,
     };
@@ -119,6 +95,8 @@ function About() {
     const backgroundStyles: React.CSSProperties = {
         width: '100%',
         height: '100%',
+        // ensure the image fits the page
+        // objectFit: 'cover',
     };
 
     const [isExpanded, setIsExpanded] = useState(false);
@@ -136,18 +114,52 @@ function About() {
                     <Typography
                         component={"div"}
                         variant={"h2"}
+                        color={theme.palette.text.primary}
                         sx={{
                             position: "absolute",
                             top: '5vh',
                             left: "50%",
                             transform: "translate(-50%, -50%)",
                             zIndex: 99,
-                            color: "white",
 
                         }}
                     >
                         {"Welcome To GIGO"}
                     </Typography>
+                    <Typography
+                        component={"div"}
+                        variant={"body1"}
+                        color={theme.palette.text.primary}
+                        sx={{
+                            position: "absolute",
+                            top: '80vh',
+                            left: "50%",
+                            transform: "translate(-50%, -50%)",
+                            zIndex: 99,
+                            borderRadius: "10px",
+                            padding: 2,
+                            textAlign: "center",
+                        }}
+                    >
+                        <h2 style={{fontWeight: "bold", marginBottom: "7px"}}>
+                            GIGO is where you learn to code.
+                        </h2>
+                        Built by self-taught developers, to streamline the learning process.
+                    </Typography>
+                    {/* Add a floating arrow down to indicate that user should scroll */}
+                    {!isHidden && (
+                        <Tooltip title={"Scroll To About"} placement={"top"}>
+                            <IconButton
+                                // @ts-ignore
+                                sx={styles.scrollDowns}
+                                onClick={() => {
+                                    window.scrollTo({top: window.innerHeight - 40, behavior: 'smooth'});
+                                }}
+                            >
+                                <KeyboardArrowDownIcon fontSize={"large"}/>
+                            </IconButton>
+                        </Tooltip>
+                    )}
                 </div>
                 <div>
                     <br/><br/><br/><br/><br/><br/>

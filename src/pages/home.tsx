@@ -541,7 +541,6 @@ function Home() {
                         paddingLeft: "10px",
                         paddingTop: "6px",
                         fontSize: "1.2em",
-                        zIndex: 1000
                     }}>
                         Recommended Challenges
                     </Typography>

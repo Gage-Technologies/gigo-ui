@@ -15,3 +15,5 @@ Disallow: /
 
 User-agent: *
 Disallow: /
+
+Sitemap: /sitemap/sitemap.xml

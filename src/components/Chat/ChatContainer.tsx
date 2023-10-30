@@ -1464,9 +1464,18 @@ export default function ChatContainer() {
     }, [messages]);
 
     const renderChatView = () => {
+        // determine the appropriate bottom margin
+        let marginBottom = '0px'
+        if (loggedIn) {
+            marginBottom = '88px'
+        }
+        if (window.innerWidth <= 1000) {
+            marginBottom = '130px'
+        }
+
         return (
             <>
-                <List style={{ flexGrow: 1, marginTop: '70px', marginBottom: window.innerWidth > 1000 ? '88px' : '130px' }}>
+                <List style={{ flexGrow: 1, marginTop: '70px', marginBottom: marginBottom }}>
                     {/* Show a spinner (MoonLoader from react-spinners) when we are loading new data */}
                     {loadingMessages && (
                         <div

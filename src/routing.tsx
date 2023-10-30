@@ -85,6 +85,14 @@ export default function Routing() {
             <Route path={"/referral/:name"} element={<ReferralWelcome/>}/>
             <Route path={"/launchpad/:id"} element={<WorkspacePage />}/>
             <Route path={"/workspace/:id"} element={<WorkspaceAdvancedPage />}/>
+            <Route path={"/about"} element={<About/>}/>
+            <Route path={"/documentation"} element={<Documentation />}/>
+            <Route path={"/documentation/:file"} element={<Documentation />}/>
+            <Route path={"/documentation/:level1/:file"} element={<Documentation />}/>
+            <Route path={"/documentation/:level1/:level2/:file"} element={<Documentation />}/>
+            <Route path={"/premium"} element={<PremiumDescription />}/>
+            <Route path={"/buyingExclusive"} element={<BuyingExclusiveContent/>}/>
+            <Route path={"/aboutExclusive"} element={<ExclusiveContent/>}/>
             <Route element={<PrivateRoute />}>
                 <Route path={"/signup"} element={<CreateNewAccount />}/>
                 <Route path={"/signup/:name"} element={<CreateNewAccount />}/>
@@ -101,14 +109,6 @@ export default function Routing() {
                 <Route path={"/reauth"} element={<StripeReauth />}/>
                 <Route path="/streak" element={<Streak />}/>
                 <Route path="/nemesis" element={<Nemesis />}/>
-                <Route path={"/about"} element={<About/>}/>
-                <Route path={"/documentation"} element={<Documentation />}/>
-                <Route path={"/documentation/:file"} element={<Documentation />}/>
-                <Route path={"/documentation/:level1/:file"} element={<Documentation />}/>
-                <Route path={"/documentation/:level1/:level2/:file"} element={<Documentation />}/>
-                <Route path={"/premium"} element={<PremiumDescription />}/>
-                <Route path={"/buyingExclusive"} element={<BuyingExclusiveContent/>}/>
-                <Route path={"/aboutExclusive"} element={<ExclusiveContent/>}/>
                 <Route path={"/curateAdmin"} element={<CurateAdminPage/>}/>
             </Route>
             <Route path="*" element={<NotFoundPage/>}/>

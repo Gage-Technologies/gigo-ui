@@ -9,14 +9,11 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import MenuItem from '@mui/material/MenuItem';
 import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import AddIcon from '@mui/icons-material/Add';
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import HomeIcon from "@mui/icons-material/Home";
-import FlareIcon from '@mui/icons-material/Flare';
 import Drawer from "@mui/material/Drawer";
 import { styled } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
@@ -82,7 +79,6 @@ import { clearProjectState } from "../reducers/createProject/createProject";
 import { clearSearchParamsState } from "../reducers/searchParams/searchParams";
 import { clearJourneyFormState } from "../reducers/journeyForm/journeyForm";
 import {
-    AccountBoxOutlined,
     BookmarkBorderOutlined, ChatBubbleOutline,
     FolderOutlined,
     HomeOutlined,
@@ -91,18 +87,16 @@ import {
 import Notification from "../models/notification";
 import NotificationPopup from "./NotificationPopup";
 import { clearCache } from "../reducers/pageCache/pageCache";
-import { LoadingButton } from "@mui/lab";
-import { useParams } from "react-router";
 import CloseIcon from "@material-ui/icons/Close";
 import { clearChatState } from "../reducers/chat/chat";
 import { clearMessageCache } from "../reducers/chat/cache";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import StopIcon from '@mui/icons-material/Stop';
 import DesktopWindowsIcon from '@mui/icons-material/DesktopWindows';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
 import DesktopAccessDisabledIcon from '@mui/icons-material/DesktopAccessDisabled';
 import QueuePlayNextIcon from '@mui/icons-material/QueuePlayNext';
+import { SocialIcon } from 'react-social-icons'
 
 
 interface IProps {
@@ -138,13 +132,12 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         loggedIn = true
     }
 
-    let homePageLockedDrawer = (
-        loggedIn &&
-        (
-            (window.location.pathname === '/home' || window.location.pathname === '/home/' ||
-                window.location.pathname === '' || window.location.pathname === '/') && window.innerWidth > 1000
-        )
+    let onHomePage = (
+        (window.location.pathname === '/home' || window.location.pathname === '/home/' ||
+            window.location.pathname === '' || window.location.pathname === '/')
     )
+
+    let homePageLockedDrawer = onHomePage && window.innerWidth > 1000
 
     const handleTheme = () => {
         colorMode.toggleColorMode();
@@ -658,7 +651,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                 <Toolbar
                     sx={holidayStyle}
                 >
-                    {loggedIn && !homePageLockedDrawer ? (
+                    {!homePageLockedDrawer ? (
                         <IconButton
                             size="large"
                             edge="start"
@@ -678,7 +671,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 GIGO
                             </Typography>
                             <Typography variant="caption" component="span" style={{ fontSize: '8px', marginLeft: '5px', textTransform: 'lowercase', color: gigoColor }}>
-                                [alpha]
+                                [beta]
                             </Typography>
                         </Box>
                     </Button>
@@ -836,6 +829,47 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                         </Box>
                     )}
                 </Toolbar>
+                {!loggedIn && onHomePage ? (
+                    <Box
+                        sx={{
+                            // @ts-ignore
+                            backgroundColor: theme.palette.background.codeEditor,
+                            color: theme.palette.text.primary,
+                            textAlign: 'center',
+                            cursor: 'pointer',
+                            pointerEvents: 'auto',
+                            paddingBottom: '10px',
+                            // add a glowing box shadow all around the box
+                            boxShadow: (mode === 'dark') ?
+                                `0px 3px 15px -1px #ffffff40, 0px 5px 18px 0px #ffffff24, 0px 1px 24px 0px #ffffff22` :
+                                "0px 3px 5px -1px #00000020, 0px 5px 8px 0px #00000014, 0px 1px 14px 0px #00000012",
+                            // lighten the background on hover
+                            "&:hover": {
+                                // @ts-ignore
+                                backgroundColor: theme.palette.primary.contrastText,
+                                color: theme.palette.primary.main,
+                            },
+                        }}
+                        onClick={() => {
+                            navigate("/about")
+                        }}
+                    >
+                        <Typography 
+                            variant="h5"
+                            // color={theme.palette.text.primary}
+                            color={'inherit'}
+                        >
+                            Welcome To GIGO!
+                        </Typography>
+                        <Typography 
+                            variant="h6"
+                            // color={theme.palette.text.primary}
+                            color={'inherit'}
+                        >
+                            GIGO is an end-to-end platform for learning to code and developing your skills. Click here to learn more!
+                        </Typography>
+                    </Box>
+                ) : null}
             </AppBar>
         )
     }
@@ -847,10 +881,6 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         url.search = params.toString();
         window.history.replaceState({}, '', url.toString());
     };
-
-
-
-
 
     const renderWorkspaceAppBar = () => {
         let toolbarStyles = JSON.parse(JSON.stringify(holidayStyle));
@@ -896,7 +926,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 GIGO
                             </Typography>
                             <Typography variant="caption" component="span" style={{ fontSize: '8px', marginLeft: '5px', textTransform: 'lowercase', color: gigoColor }}>
-                                [alpha]
+                                [beta]
                             </Typography>
                         </Box>
                     </Button>
@@ -1130,7 +1160,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     GIGO
                                 </Typography>
                                 <Typography variant="caption" component="span" style={{ fontSize: '8px', marginLeft: '5px', textTransform: 'lowercase', color: gigoColor }}>
-                                    [alpha]
+                                    [beta]
                                 </Typography>
                             </Box>
                         </Button>
@@ -1321,6 +1351,63 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     </AppBar>
                 ) : null}
             </>
+        )
+    }
+
+    const renderSocials = () => {
+        return (
+            <div style={{ display: "flex", flexDirection: "row" }}>
+                <SocialIcon
+                    network="github"
+                    url="https://github.com/Gage-Technologies/gigo.dev"
+                    bgColor={"transparent"}
+                    fgColor={mode === 'dark'? "white" : "black"}
+                    style={{
+                        height: "32px",
+                        width: "32px",
+                    }}
+                />
+                <SocialIcon
+                    network="discord"
+                    url="https://discord.gg/279hECYrfX"
+                    bgColor={"transparent"}
+                    fgColor={mode === 'dark'? "white" : "black"}
+                    style={{
+                        height: "32px",
+                        width: "32px",
+                    }}
+                />
+                <SocialIcon
+                    network="x"
+                    url="https://twitter.com/gigo_dev"
+                    bgColor={"transparent"}
+                    fgColor={mode === 'dark'? "white" : "black"}
+                    style={{
+                        height: "32px",
+                        width: "32px",
+                    }}
+                />
+                <SocialIcon
+                    network="medium"
+                    url="https://medium.com/@gigo_dev"
+                    bgColor={"transparent"}
+                    fgColor={mode === 'dark'? "white" : "black"}
+                    style={{
+                        height: "32px",
+                        width: "32px",
+                    }}
+                />
+                <SocialIcon
+                    network="reddit"
+                    url="https://www.reddit.com/r/gigodev"
+                    bgColor={"transparent"}
+                    fgColor={mode === 'dark'? "white" : "black"}
+                    style={{
+                        height: "32px",
+                        width: "32px",
+                    }}
+                />
+            </div>
         )
     }
 
@@ -1569,7 +1656,90 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     <Brightness4Icon />}
                             </Button>
                         </div>
+                        {renderSocials()}
                     </div>
+                </DrawerFooter>
+            </Drawer>
+        )
+    }
+
+    const renderLoggedOutSidebar = () => {
+        return (
+            <Drawer
+                sx={{
+                    width: drawerWidth,
+                    flexShrink: 0,
+                    zIndex: 998,
+                    '& .MuiDrawer-paper': {
+                        width: drawerWidth,
+                        border: "none",
+                        opacity: 1,
+                        color: theme.palette.text.primary,
+                        backgroundColor: (isChrome) ? theme.palette.background.default : theme.palette.background.default,
+                        backdropFilter: (isChrome) ? "blur(15px)" : undefined,
+                        zIndex: 998,
+                        height: onHomePage ? 'calc(100vh - 78px)' : undefined,
+                        marginTop: onHomePage ? "78px" : undefined,
+                    },
+                }}
+                variant="persistent"
+                anchor="left"
+                open={leftOpen || homePageLockedDrawer}
+            >
+                <DrawerHeader />
+                <List>
+                    <ListItem disablePadding>
+                        <ListItemButton color={"primary"} sx={{
+                            borderRadius: 2,
+                        }} href={"/home"}>
+                            <ListItemIcon>
+                                <HomeIcon style={{ color: theme.palette.text.primary, }} />
+                            </ListItemIcon>
+                            <Typography
+                                component={"div"}
+                                variant={"body1"}
+                                sx={{ fontSize: "0.8em" }}
+                            >
+                                Home
+                            </Typography>
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton color={"primary"} sx={{
+                            borderRadius: 2,
+                        }} href={"/about"}>
+                            <ListItemIcon>
+                                <IconifyIcon icon="mdi:about" color={theme.palette.text.primary} width="25"
+                                             height="25" />
+                            </ListItemIcon>
+                            <Typography
+                                component={"div"}
+                                variant={"body1"}
+                                sx={{ fontSize: "0.8em" }}
+                            >
+                                About
+                            </Typography>
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton color={"primary"} sx={{
+                            borderRadius: 2,
+                        }} href={"/documentation"}>
+                            <ListItemIcon>
+                                <FeedIcon style={{ color: theme.palette.text.primary, }} />
+                            </ListItemIcon>
+                            <Typography
+                                component={"div"}
+                                variant={"body1"}
+                                sx={{ fontSize: "0.8em" }}
+                            >
+                                Docs
+                            </Typography>
+                        </ListItemButton>
+                    </ListItem>
+                </List>
+                <DrawerFooter>
+                    {renderSocials()}
                 </DrawerFooter>
             </Drawer>
         )
@@ -1670,8 +1840,11 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     // height: "64px",
                 }}>
                     {appBarRenderer()}
-                    {renderSidebar()}
+                    {loggedIn ? renderSidebar() : renderLoggedOutSidebar()}
                     {renderChatSideBar()}
+                    {onHomePage && !loggedIn && window.innerWidth > 1000 ? (
+                        <div style={{ height: "30px" }}/>
+                    ) : null}
                     {
                         // we only render the children on mobile if the chat bar is not open
                         !(window.innerWidth <= 1000 && rightOpen) ?
