@@ -201,6 +201,7 @@ function JourneyForm() {
     let userPref = localStorage.getItem('theme')
     const [mode, setMode] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
+    console.log("theme: ", theme);
     const colorMode = React.useMemo(
         () => ({
             // The dark mode switch would invoke this method
@@ -222,7 +223,7 @@ function JourneyForm() {
                 ? 'calc(95vw - 15vw)'
                 : chatOpen ? 'calc(95vw - 15vw)'
                     : '95vw',
-        height: '72vh', // Set to 100% of viewport height
+        height: '65vh', // Set to 100% of viewport height
         position: 'relative',
         zIndex: 0,
         left: '2%',
@@ -469,7 +470,7 @@ function JourneyForm() {
                         <Paper elevation={3} style={{
                             padding: '20px',
                             borderRadius: '15px',
-                            backgroundColor: `${theme.palette.background.paper}`,
+
                             color: theme.palette.primary.contrastText,
                             boxShadow: 'none'
                         }}>
@@ -596,7 +597,6 @@ function JourneyForm() {
                         <Paper elevation={3} style={{
                             padding: '20px',
                             borderRadius: '15px',
-                            backgroundColor: `${theme.palette.background.paper}`,
                             color: theme.palette.primary.contrastText
                         }}>
                             <Grid container spacing={3}
@@ -745,7 +745,7 @@ function JourneyForm() {
                         <Paper elevation={3} style={{
                             padding: '20px',
                             borderRadius: '15px',
-                            backgroundColor: `${theme.palette.background.paper}`,
+
                             color: theme.palette.primary.contrastText
                         }}>
                             <Grid container spacing={3}
@@ -888,7 +888,6 @@ function JourneyForm() {
                         <Paper elevation={3} style={{
                             padding: '20px',
                             borderRadius: '15px',
-                            backgroundColor: `${theme.palette.background.paper}`,
                             color: theme.palette.primary.contrastText
                         }}>
                             <Grid container spacing={3}
@@ -1030,7 +1029,6 @@ function JourneyForm() {
                         <Paper elevation={3} style={{
                             padding: '20px',
                             borderRadius: '15px',
-                            backgroundColor: `${theme.palette.background.paper}`,
                             color: theme.palette.primary.contrastText
                         }}>
                             <Grid container spacing={3}
@@ -1170,7 +1168,6 @@ function JourneyForm() {
                         <Paper elevation={3} style={{
                             padding: '20px',
                             borderRadius: '15px',
-                            backgroundColor: `${theme.palette.background.paper}`,
                             color: theme.palette.primary.contrastText
                         }}>
                             <Grid container spacing={3}
@@ -1312,7 +1309,6 @@ function JourneyForm() {
                         <Paper elevation={3} style={{
                             padding: '20px',
                             borderRadius: '15px',
-                            backgroundColor: `${theme.palette.background.paper}`,
                             color: theme.palette.primary.contrastText
                         }}>
                             <Grid container spacing={3}
@@ -1447,7 +1443,6 @@ function JourneyForm() {
                         <Paper elevation={3} style={{
                             padding: '20px',
                             borderRadius: '15px',
-                            backgroundColor: `${theme.palette.background.paper}`,
                             color: theme.palette.primary.contrastText
                         }}>
                             <Grid container spacing={3}

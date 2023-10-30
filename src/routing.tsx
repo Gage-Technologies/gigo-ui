@@ -36,6 +36,7 @@ const Documentation = React.lazy(() => import("./pages/documentation"));
 const ResetForgotPassword = React.lazy(() => import("./pages/resetForgotPassword"));
 const Journey = React.lazy(() => import("./pages/Journey"));
 const JourneyForm = React.lazy(() => import("./pages/JourneyForm"));
+const JourneyMain = React.lazy(() => import("./pages/JourneyMain"));
 const NotFoundPage = React.lazy(() => import("./pages/NotFoundPage"));
 
 export default function Routing() {
@@ -96,9 +97,10 @@ export default function Routing() {
             <Route element={<PrivateRoute />}>
                 <Route path={"/signup"} element={<CreateNewAccount />}/>
                 <Route path={"/signup/:name"} element={<CreateNewAccount />}/>
-                {/*<Route path={"/journey"} element={<Journey />}/>*/}
-                {/*<Route path={"/journey/form"} element={<JourneyForm />}/>*/}
-                {/*<Route path={"/journey/quiz"} element={<JourneyQuiz />}/>*/}
+                <Route path={"/journey"} element={<Journey />}/>
+                <Route path={"/journey/form"} element={<JourneyForm />}/>
+                <Route path={"/journey/quiz"} element={<JourneyQuiz />}/>
+                <Route path={"/journey/main"} element={<JourneyMain />}/>
                 <Route path="/following" element={<Following />}/>
                 <Route path="/settings" element={<AccountSettings />}/>
                 <Route path="/create-challenge" element={<CreateProject />}/>

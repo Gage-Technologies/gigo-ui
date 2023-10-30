@@ -115,6 +115,7 @@
     "react-syntax-highlighter": "^15.5.0",
     "react-tagsinput": "^3.20.0",
     "react-tenor": "^2.2.0",
+    "react-tools": "^0.13.3",
     "react-use-websocket": "^4.3.1",
     "react-uuid": "^2.0.0",
     "react-virtuoso": "^4.2.0",

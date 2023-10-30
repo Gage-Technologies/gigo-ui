@@ -9,7 +9,7 @@ import {
     Container,
     PaletteMode,
     createTheme,
-    ThemeProvider, CssBaseline,
+    ThemeProvider, CssBaseline, Tooltip,
 } from '@mui/material';
 
 import {getAllTokens} from "../theme";
@@ -18,6 +18,21 @@ import {selectAppWrapperChatOpen, selectAppWrapperSidebarOpen} from "../reducers
 import JourneyFormPageDeskIcon from "../components/Icons/JourneyFormPageDesk";
 import JourneyQuizTrunkIcon from "../components/Icons/JourneyQuizTrunk";
 import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
+import call from "../services/api-call";
+import config from "../config";
+import swal from "sweetalert";
+import r10Lvl from "../img/renown/r10Lvl.svg";
+import renown1 from "../img/renown/renown1.svg"
+import renown2 from "../img/renown/renown2.svg"
+import renown3 from "../img/renown/renown3.svg"
+import renown4 from "../img/renown/renown4.svg"
+import renown5 from "../img/renown/renown5.svg"
+import renown6 from "../img/renown/renown6.svg"
+import renown7 from "../img/renown/renown7.svg"
+import renown8 from "../img/renown/renown8.svg"
+import renown9 from "../img/renown/renown9.svg"
+import renown10 from "../img/renown/renown10.svg"
+import {useNavigate} from "react-router-dom";
 
 function JourneyQuiz() {
     const aspectRatio = useAspectRatio();
@@ -270,17 +285,58 @@ for i = 1 to n:
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState(null);
+    const [selectedOptionIndex, setSelectedOptionIndex] = useState(null);
+    const [incorrect, setIncorrect] = useState(0);
+    const [correct, setCorrect] = useState(0);
+    const [score, setScore] = useState(0);
+    const [isFinished, setIsFinished] = useState(false);
+    const [recRenown, setRecRenown] = useState(0);
 
     const handleAnswerClick = (index: any) => {
+        setSelectedOptionIndex(index);
         setSelectedAnswer(index);
     };
 
     const handleNextClick = () => {
+
+        console.log("selected answer: ", selectedAnswer, questions[currentQuestion]["correct"])
+
         // Implement logic to check the answer and navigate to the next question
+        if (selectedAnswer != questions[currentQuestion]["correct"]) {
+            setIncorrect(incorrect + 1);
+        }else{
+            setCorrect(correct + 1);
+        }
+
+        console.log("correct: ", correct, "incorrect: ", incorrect)
+
         // For demonstration, simply navigate to the next question
+        setSelectedOptionIndex(null)
         setSelectedAnswer(null);
         setCurrentQuestion(currentQuestion + 1);
+        console.log("current question: ", currentQuestion, questions.length);
     };
+
+    const handleSubmit = async () => {
+        console.log("score = ", correct, " / ", questions.length)
+        console.log("score: ", correct/questions.length);
+
+        setScore(correct/questions.length);
+        setIsFinished(true);
+
+        // let res = await call(
+        //     "/api/reportIssue",
+        //     "post",
+        //     null,
+        //     null,
+        //     null,
+        //     // @ts-ignore
+        //     {page: stringSplit[3], issue: textFieldRef.current.value},
+        //     null,
+        //     config.rootPath
+        // )
+
+    }
 
 
     const iconDeskContainerStyles: React.CSSProperties = {
@@ -390,6 +446,25 @@ for i = 1 to n:
         overflow: 'hidden'
     }
 
+    const handleRenownCheck = (score: number): [string, number] => {
+        if (score < .1) return [renown1, 1];
+        if (score < .2) return [renown2, 2];
+        if (score < .3) return [renown3, 3];
+        if (score < .4) return [renown4, 4];
+        if (score < .5) return [renown5, 5];
+        if (score < .6) return [renown6, 6];
+        if (score < .7) return [renown7, 7];
+        if (score < .8) return [renown8, 8];
+        if (score < .9) return [renown9, 9];
+        return [renown10, 10];
+    }
+
+    useEffect(() => {
+        const [, renownValue] = handleRenownCheck(score);
+        setRecRenown(renownValue);
+    }, [score]);
+
+    const navigate = useNavigate();
 
 
     // @ts-ignore
@@ -397,57 +472,143 @@ for i = 1 to n:
         <ThemeProvider theme={theme}>
             <CssBaseline>
                 <div style={mainDivStyles}> {/* Container div */}
-                    <Container style={{ paddingTop: '2em' }}>
+                    <Container style={{ paddingTop: '2em', paddingBottom: '2em', height: "100%"}}>
+
                         {/* @ts-ignore */}
                         <Card style={{ backgroundColor: theme.palette.background.card }}>
-                            <CardContent>
-                                <Typography variant="h5" style={{ color: theme.palette.text.primary }}>
-                                    {questions[currentQuestion].question}
-                                </Typography>
-                                <MarkdownRenderer markdown={questions[currentQuestion].code} style={{
-                                    overflowWrap: "break-word",
-                                    borderRadius: "10px",
-                                    padding: "2em 3em",
-                                    width: "100%"
-                                }}/>
-                                <Grid container spacing={3}>
-                                    {questions[currentQuestion].options.map((option, index) => (
-                                        <Grid item xs={6} key={index}>
-                                            <Button
-                                                variant="outlined"
-                                                color="primary"
-                                                style={{
-                                                    width: '100%',
-                                                    padding: '1em',
-                                                }}
-                                                onClick={() =>
-                                                    handleAnswerClick(index)
 
-                                            }
-                                            >
-                                                {option}
-                                            </Button>
+                                {isFinished ? (
+                                    <><CardContent>
+                                        <Grid container>
+                                            <Grid item xs={12}>
+                                                <Typography variant="h5" style={{
+                                                    color: theme.palette.text.primary,
+                                                    textAlign: 'center'
+                                                }}>
+                                                    You Scored
+                                                </Typography>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <Typography variant="h5" style={{
+                                                    color: theme.palette.text.primary,
+                                                    textAlign: 'center'
+                                                }}>
+                                                    {Math.floor(score * 100)}%
+                                                </Typography>
+                                            </Grid>
+
+                                            <Grid item xs={12}>
+                                                <Typography variant="h5" style={{
+                                                    color: theme.palette.text.secondary,
+                                                    textAlign: 'center'
+                                                }}>
+                                                   We have determined you to be
+                                                </Typography>
+                                            </Grid>
+                                            <Grid item xs={12}>
+                                                <br/>
+                                            </Grid>
+
+                                            <Grid item xs={12}>
+                                                <Typography variant="h5" style={{
+                                                    color: theme.palette.text.secondary,
+                                                    textAlign: 'center'
+                                                }}>
+                                                    {score < .5 ? "Beginner" : score < .8 ? "Intermediate": "Expert" }
+                                                </Typography>
+                                            </Grid>
+                                            <Grid id="image-renown" item xs={12} style={{ display: 'flex', justifyContent: 'center', height: "1%" }}>
+                                                <Tooltip title={`Renown ${recRenown}`}>
+                                                    <img
+                                                        style={{
+                                                            height: "40vh",
+                                                            width: "auto",
+                                                            opacity: "0.85",
+                                                            overflow: "hidden",
+                                                            paddingTop: "10px"
+                                                        }}
+                                                        src={handleRenownCheck(score)[0]}
+                                                    />
+                                                </Tooltip>
+                                            </Grid>
                                         </Grid>
-                                    ))}
-                                </Grid>
-                            </CardContent>
-                            <CardActions>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    style={{ marginLeft: 'auto' }}
-                                    disabled={selectedAnswer === null}
-                                    onClick={handleNextClick}
-                                >
-                                    Next
-                                </Button>
-                            </CardActions>
+                                    </CardContent><CardActions>
+                                        <Grid container>
+                                            <Grid item xs={12} style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    style={{ marginLeft: 'auto' }}
+                                                    disabled={selectedAnswer === null}
+                                                    onClick={() => {navigate("/journey/main")}}
+                                                >
+                                                    Move On
+                                                </Button>
+                                            </Grid>
+                                        </Grid>
+                                    </CardActions></>
+
+                                ) : (
+                                    <><CardContent>
+                                        <><Typography variant="h5" style={{color: theme.palette.text.primary}}>
+                                            {questions[currentQuestion].question}
+                                        </Typography><MarkdownRenderer markdown={questions[currentQuestion].code}
+                                                                       style={{
+                                                                           overflowWrap: "break-word",
+                                                                           borderRadius: "10px",
+                                                                           padding: "2em 3em",
+                                                                           marginBottom: "2em",
+                                                                           width: "100%"
+                                                                       }}/><Grid container spacing={6}>
+                                            {questions[currentQuestion].options.map((option, index) => (
+                                                <Grid item xs={6} key={index}>
+                                                    <Button
+                                                        variant="outlined"
+                                                        color="primary"
+                                                        style={{
+                                                            width: '100%',
+                                                            padding: '1em',
+                                                            backgroundColor: selectedOptionIndex === index ? `${theme.palette.text.secondary}` : 'transparent',
+                                                        }}
+                                                        onClick={() => handleAnswerClick(index)}
+                                                    >
+                                                        {option}
+                                                    </Button>
+                                                </Grid>
+                                            ))}
+                                        </Grid></>
+                                    </CardContent><CardActions>
+
+                                        {currentQuestion < questions.length - 1 ? (
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                style={{marginLeft: 'auto'}}
+                                                disabled={selectedAnswer === null}
+                                                onClick={handleNextClick}
+                                            >
+                                                Next
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                style={{marginLeft: 'auto'}}
+                                                disabled={selectedAnswer === null}
+                                                onClick={handleSubmit}
+                                            >
+                                                Finish
+                                            </Button>
+                                        )}
+
+                                    </CardActions></>
+                                )}
+
+
+
                         </Card>
                     </Container>
-                    <div  style={iconDeskContainerStyles}>
-                        <div style={vignetteStyles}/> {/* Vignette overlay */}
-                        <JourneyQuizTrunkIcon style={iconStyles} aspectRatio={aspectRatio.toString()} />
-                    </div>
+
                 </div>
             </CssBaseline>
         </ThemeProvider>
