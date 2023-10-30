@@ -35,6 +35,7 @@ const Documentation = React.lazy(() => import("./pages/documentation"));
 const ResetForgotPassword = React.lazy(() => import("./pages/resetForgotPassword"));
 const Journey = React.lazy(() => import("./pages/Journey"));
 const JourneyForm = React.lazy(() => import("./pages/JourneyForm"));
+const JourneyMain = React.lazy(() => import("./pages/JourneyMain"));
 const NotFoundPage = React.lazy(() => import("./pages/NotFoundPage"));
 const StripeCancel = React.lazy(() => import("./pages/stripe/StripeCancel"));
 

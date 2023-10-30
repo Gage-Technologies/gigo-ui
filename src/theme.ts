@@ -216,7 +216,7 @@ export const getHalloweenTokens = (mode: PaletteMode) => ({
                     primary: {
                         light: '#84E8A2',
                         main: 'rgb(44,33,52)',
-                        dark: '#1c8762',
+                        dark: 'rgb(82,62,96)',
                         contrastText: '#feefc8',
                     },
                     secondary: {

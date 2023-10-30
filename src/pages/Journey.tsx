@@ -46,7 +46,7 @@ function Journey() {
     const containerStyles: React.CSSProperties = {
         display: 'flex',
         flexDirection: 'column',
-        height: '95vh',
+        height: '90vh',
 
     };
 
@@ -172,10 +172,33 @@ function Journey() {
     };
 
     const scrollToBottom = () => {
-        window.scrollTo({
-            top: document.body.scrollHeight,
-            behavior: 'smooth',
-        });
+        const element = document.getElementById("contentContainer");
+        if (element) {
+            const scrollHeight = element.scrollHeight;
+            const startPos = element.scrollTop;
+            const change = scrollHeight - startPos;
+            const duration = 900; // Duration of scroll in milliseconds
+            let start: number;
+
+            const animateScroll = (timestamp: number) => {
+                if (!start) start = timestamp;
+                const progress = timestamp - start;
+                const easeInOutQuad = (t: number, b: number, c: number, d: number) => {
+                    t /= d / 2;
+                    if (t < 1) return (c / 2) * t * t + b;
+                    t--;
+                    return (-c / 2) * (t * (t - 2) - 1) + b;
+                };
+
+                element.scrollTop = easeInOutQuad(progress, startPos, change, duration);
+
+                if (progress < duration) {
+                    window.requestAnimationFrame(animateScroll);
+                }
+            };
+
+            window.requestAnimationFrame(animateScroll);
+        }
     };
 
 
