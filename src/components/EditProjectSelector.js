@@ -7,13 +7,17 @@ import HoodieIcon from "./Icons/Hoodie";
 import TrophyIcon from "./Icons/Trophy";
 import GraduationIcon from "./Icons/Graduation";
 import {QuestionMark} from "@mui/icons-material";
+import {getAllTokens} from "../theme";
 import {
     createTheme,
-    PaletteMode,
 } from "@mui/material";
-import {getAllTokens} from "../theme";
 
 function ProjectSelector({ originalLabel, onProjectSelect}) {
+
+    // let userPref = localStorage.getItem('theme')
+    // //@ts-ignore
+    // const [mode, _] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
+    // const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
     // let userPref = localStorage.getItem('theme')
     //
     // const [mode, _] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
