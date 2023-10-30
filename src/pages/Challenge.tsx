@@ -257,6 +257,7 @@ function Challenge() {
     const [loadingEdit, setLoadingEdit] = React.useState(false)
     const [filteredDiscussions, setFilteredDiscussions] = React.useState([])
     const [deleteProject, setDeleteProject] = React.useState(false)
+    const [editPopup, setEditPopup] = React.useState(false)
 
     const implicitSessionID = React.useRef<string | null>("")
 
@@ -4072,6 +4073,8 @@ function Challenge() {
                 swal("Success!", res["message"], "success")
             }
         }
+
+        window.location.reload();
     }
 
     const renderTabBar = () => {
@@ -4153,7 +4156,206 @@ function Challenge() {
                             ) : null}
                         </Grid>
                     </Box>
+                    {project !== null && userId === project["author_id"] && window.innerWidth > 1000 ? (
+                        <Button variant="outlined" sx={styles.mainTabButton} style={{marginLeft: "20px"}} onClick={() => setEditPopup(true)}>
+                            Edit Project Details
+                        </Button>
+                    ) : null}
                 </div>
+                <Modal
+                    aria-labelledby="transition-modal-title"
+                    aria-describedby="transition-modal-description"
+                    open={editPopup}
+                    onClose={() => setEditPopup(false)}
+                    closeAfterTransition
+                    BackdropComponent={Backdrop}
+                    BackdropProps={{
+                        timeout: 500,
+                    }}
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center', // Add vertical scroll if content is longer than page height
+                    }}
+                >
+                    <Box
+                        sx={{
+                            width: "40vw",
+                            height: "60vh",
+                            minHeight: "420px",
+                            minHeight: "700px",
+                            minWidth: "400px",
+                            // justifyContent: "center",
+                            // marginLeft: "25vw",
+                            // marginTop: "5vh",
+                            outlineColor: "black",
+                            borderRadius: 1,
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent: "space-evenly",
+                            alignItems: "center",
+                            boxShadow:
+                                "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px 6px 0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
+                            backgroundColor: theme.palette.background.default,
+                        }}
+                    >
+                        <h3>Edit Project Details</h3>
+                        <TextField
+                            value={projectTitle}
+                            onChange={(e) => setProjectTitle(e.target.value)}
+                            variant="outlined"
+                            size="medium"
+                            color={(projectTitle.length > 30) ? "error" : "primary"}
+                            fullWidth
+                            required
+                            sx={{ mt: 2 }}
+                            style={{ width: "auto" }}
+                            inputProps={styles.textField}
+                            multiline
+                        />
+                        {project !== null && project["description"] !== null ? (
+                                <TextField
+                                    label={project["description"].length + "/500"}
+                                    variant={`outlined`}
+                                    size={`medium`}
+                                    color={(project["description"].length > 500) ? "error" : "primary"}
+                                    fullWidth
+                                    required
+                                    value={project !== null ? project["description"] : ""}
+                                    sx={{
+                                        mt: 2,
+                                        width: "90%"
+                                    }}
+                                    inputProps={
+                                        styles.textField
+                                    }
+                                    multiline={true}
+                                    onChange={e =>
+                                        setDescriptions(e.target.value)
+                                    }>
+                                </TextField>
+                        ) : null}
+                        <div style={{width: "100%", display: "flex", flexDirection: "row", justifyContent: "space-evenly", marginTop: "10px"}}>
+                            {project !== null && project["post_type_string"] !== null && (
+                                <div style={{display: "flex", flexDirection: "column", marginTop: "-50px"}}>
+                                    <h5>Renown</h5>
+                                    <ProjectRenown originalLabel={project["tier"] + 1} onProjectSelect={handleProjectSelectionRenown}/>
+                                </div>
+                            )}
+                            {project !== null && project["post_type_string"] !== null && (
+                                <ProjectSelector originalLabel={project["post_type_string"]} onProjectSelect={handleProjectSelection}/>
+                            )}
+                            {project !== null && (
+                                <Autocomplete
+                                    multiple
+                                    limitTags={5}
+                                    id="tagInputAutocomplete"
+                                    freeSolo={true}
+                                    options={tagOptions}
+                                    getOptionLabel={(option: Tag | string) => {
+                                        if (typeof option === "string") {
+                                            return option
+                                        }
+                                        return option.value
+                                    }}
+                                    isOptionEqualToValue={(option: string | Tag, value: string | Tag) => {
+                                        // return false if either of the inputs are user-defined values unless they are both
+                                        // user-defined values then we check if they are the same
+                                        if (typeof option === "string" || typeof value === "string") {
+                                            if (typeof option === "string" && typeof value === "string") {
+                                                return option.toLowerCase() === value.toLowerCase();
+                                            }
+                                            return false
+                                        }
+                                        return option._id === value._id;
+                                    }}
+                                    renderInput={(params) => (
+                                        <TextField {...params} label="Challenge Tags" placeholder="Challenge Tags"/>
+                                    )}
+                                    onInputChange={(e) => {
+                                        handleTagSearch(e)
+                                    }}
+                                    // @ts-ignore
+                                    onChange={(event, value: Array<Tag | string>) => {
+                                        const currentRemovedTags: Tag[] = [];
+                                        const currentAddedTags: Tag[] = [];
+
+                                        // Find out which tags were added
+                                        const newAddedTags = value.filter(tag => !projectTags.includes(tag));
+
+                                        newAddedTags.forEach(tag => {
+                                            if (removedTagsState.some(removedTag => removedTag.value === tag.value)) {
+                                                const index = removedTagsState.findIndex(removedTag => removedTag.value === tag.value);
+                                                if (index !== -1) removedTagsState.splice(index, 1);
+                                            } else {
+                                                if (typeof tag === "object") {
+                                                    currentAddedTags.push(tag as Tag);
+                                                } else {
+                                                    currentAddedTags.push({
+                                                        _id: "-1",
+                                                        value: tag,
+                                                    } as Tag);
+                                                }
+                                                // console.log("tag is: ", tag)
+                                                // currentAddedTags.push(tag);
+                                            }
+                                        });
+
+                                        // Find out which tags were removed
+                                        const newRemovedTags = projectTags.filter(tag => !value.includes(tag));
+
+                                        newRemovedTags.forEach(tag => {
+                                            if (addedTagsState.some(addedTag => addedTag.value === tag.value)) {
+                                                const index = addedTagsState.findIndex(addedTag => addedTag.value === tag.value);
+                                                if (index !== -1) addedTagsState.splice(index, 1);
+                                            } else {
+                                                currentRemovedTags.push(tag as Tag);
+                                            }
+                                        });
+
+                                        // Update the projectTags
+                                        let tagArray: Tag[] = [];
+                                        value.forEach(tag => {
+                                            if (typeof tag === "object") {
+                                                tagArray.push(tag as Tag);
+                                            } else {
+                                                tagArray.push({
+                                                    _id: "-1",
+                                                    value: tag,
+                                                } as Tag);
+                                            }
+                                        });
+                                        setProjectTags(tagArray);
+
+                                        // Update the state with currentRemovedTags and currentAddedTags
+                                        setRemovedTagsState(currentRemovedTags);
+                                        setAddedTagsState(currentAddedTags);
+                                    }}
+                                    // @ts-ignore
+                                    value={projectTags}
+                                    style={{
+                                        width: "50%"
+                                    }}
+                                    className={"tags"}
+                                />
+                            )}
+                        </div>
+                        <div>
+                            <Button onClick={() => editProject(
+                                null, null,
+                                projectRenown.toString() !== project["tier"].toString() ? projectRenown : null,
+                                null,
+                                removedTagsState.length > 0 ? removedTagsState : null,
+                                addedTagsState.length > 0 ? addedTagsState : null
+                            )}>
+                                Submit
+                            </Button>
+                            <Button onClick={() => setEditPopup(false)}>
+                                Cancel
+                            </Button>
+                        </div>
+                    </Box>
+                </Modal>
             <Modal open={purchasePopup} onClose={() => setPurchasePopup(false)}>
                 <Box
                     sx={{
@@ -4365,134 +4567,28 @@ function Challenge() {
                             )}
                         </div>
                     )}
-                    {project !== null && userId === project["author_id"] && !editTitle ? (
-                        <Button onClick={() => setEditTitle(true)}>
-                            <EditIcon/>
-                        </Button>
+                    {project !== null && userId === project["author_id"] ? (
+                        <div>
+                            {!editTitle ? (
+                                <Button onClick={() => setEditTitle(true)}>
+                                    <EditIcon/>
+                                </Button>
+                            ) : (
+                                <div>
+                                    <Button onClick={() => editProject(
+                                        projectTitle !== projectName ? projectTitle : null,
+                                        challengeType !== project["post_type_string"] ? challengeType : null, null, null, null, null
+                                    )}>
+                                        Submit
+                                    </Button>
+                                    <Button onClick={() => setEditTitle(false)}>
+                                        Cancel
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
                     ) : null}
                 </Typography>
-                {project !== null && project["post_type_string"] && (
-                    <div>
-                        {editTitle ? (
-                            <div style={{position: "absolute", top: "60%", paddingLeft: "10px"}}>
-                                <ProjectRenown originalLabel={project["tier"] + 1} onProjectSelect={handleProjectSelectionRenown}/>
-                            </div>
-                        ) : null}
-                    </div>
-                )}
-                {project !== null && editTitle && (
-                    <Autocomplete
-                        multiple
-                        limitTags={5}
-                        id="tagInputAutocomplete"
-                        freeSolo={true}
-                        options={tagOptions}
-                        getOptionLabel={(option: Tag | string) => {
-                            if (typeof option === "string") {
-                                return option
-                            }
-                            return option.value
-                        }}
-                        isOptionEqualToValue={(option: string | Tag, value: string | Tag) => {
-                            // return false if either of the inputs are user-defined values unless they are both
-                            // user-defined values then we check if they are the same
-                            if (typeof option === "string" || typeof value === "string") {
-                                if (typeof option === "string" && typeof value === "string") {
-                                    return option.toLowerCase() === value.toLowerCase();
-                                }
-                                return false
-                            }
-                            return option._id === value._id;
-                        }}
-                        renderInput={(params) => (
-                            <TextField {...params} label="Challenge Tags" placeholder="Challenge Tags"/>
-                        )}
-                        onInputChange={(e) => {
-                            handleTagSearch(e)
-                        }}
-                        // @ts-ignore
-                        onChange={(event, value: Array<Tag | string>) => {
-                            const currentRemovedTags: Tag[] = [];
-                            const currentAddedTags: Tag[] = [];
-
-                            // Find out which tags were added
-                            const newAddedTags = value.filter(tag => !projectTags.includes(tag));
-
-                            newAddedTags.forEach(tag => {
-                                if (removedTagsState.some(removedTag => removedTag.value === tag.value)) {
-                                    const index = removedTagsState.findIndex(removedTag => removedTag.value === tag.value);
-                                    if (index !== -1) removedTagsState.splice(index, 1);
-                                } else {
-                                    if (typeof tag === "object") {
-                                        currentAddedTags.push(tag as Tag);
-                                    } else {
-                                        currentAddedTags.push({
-                                            _id: "-1",
-                                            value: tag,
-                                        } as Tag);
-                                    }
-                                    // console.log("tag is: ", tag)
-                                    // currentAddedTags.push(tag);
-                                }
-                            });
-
-                            // Find out which tags were removed
-                            const newRemovedTags = projectTags.filter(tag => !value.includes(tag));
-
-                            newRemovedTags.forEach(tag => {
-                                if (addedTagsState.some(addedTag => addedTag.value === tag.value)) {
-                                    const index = addedTagsState.findIndex(addedTag => addedTag.value === tag.value);
-                                    if (index !== -1) addedTagsState.splice(index, 1);
-                                } else {
-                                    currentRemovedTags.push(tag as Tag);
-                                }
-                            });
-
-                            // Update the projectTags
-                            let tagArray: Tag[] = [];
-                            value.forEach(tag => {
-                                if (typeof tag === "object") {
-                                    tagArray.push(tag as Tag);
-                                } else {
-                                    tagArray.push({
-                                        _id: "-1",
-                                        value: tag,
-                                    } as Tag);
-                                }
-                            });
-                            setProjectTags(tagArray);
-
-                            // Update the state with currentRemovedTags and currentAddedTags
-                            setRemovedTagsState(currentRemovedTags);
-                            setAddedTagsState(currentAddedTags);
-                        }}
-                        // @ts-ignore
-                        value={projectTags}
-                        sx={{
-                            position: "absolute",
-                            top: "45%",
-                            paddingLeft: "10px",
-                            width: "18vw"
-                        }} className={"tags"}
-                    />
-                )}
-                {editTitle && (
-                    <div style={{position: "absolute", top: "60%", marginLeft: "100px"}}>
-                        <Button onClick={() => editProject(
-                            projectTitle !== projectName ? projectTitle : null,
-                            challengeType !== project["post_type_string"] ? challengeType : null,
-                            projectRenown.toString() !== project["tier"].toString() ? projectRenown : null,
-                            null,
-                            removedTagsState.length > 0 ? removedTagsState : null,
-                            addedTagsState.length > 0 ? addedTagsState : null
-                        )}>
-                            Submit
-                        </Button>
-                        <Button onClick={() => setEditTitle(false)}>
-                            Cancel
-                        </Button>
-                    </div>
-                )}
                 {window.innerWidth > 1000 ? (
                     <div style={project !== null ? {} : {marginBottom: "110px"}}>
                         {renderTabBar()}
