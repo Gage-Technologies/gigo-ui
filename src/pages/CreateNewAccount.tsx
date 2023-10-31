@@ -1494,7 +1494,7 @@ function CreateNewAccount() {
                                         </Grid>
                                     </Grid>
                                 </Button>
-                                <LoginGithub
+                                {/* <LoginGithub
                                     color={"primary"}
                                     sx={{
                                         width: window.innerWidth > 1000 ? '5vw' : "20vw",
@@ -1532,7 +1532,7 @@ function CreateNewAccount() {
                                             />
                                         </Grid>
                                     </Grid>
-                                </LoginGithub>
+                                </LoginGithub> */}
                             </Grid>
                             <Typography sx={{
                                 display: "flex",

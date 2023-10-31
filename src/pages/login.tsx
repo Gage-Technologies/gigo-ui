@@ -500,6 +500,7 @@ function Login(this: any) {
                                         style={{
                                             width: window.innerWidth > 1000 ? "2vw" : "8vw",
                                             height: "auto",
+                                            marginTop: "10px"
                                         }}
                                         alt={"Google Logo"}
                                         src={googleLogo}
@@ -521,7 +522,7 @@ function Login(this: any) {
                                 </Grid>
                             </Grid>
                         </Button>
-                        <LoginGithub
+                        {/* <LoginGithub
                             color={"primary"}
                             sx={{
                                 width: window.innerWidth > 1000 ? '7vw' : '25vw',
@@ -552,7 +553,7 @@ function Login(this: any) {
                                     src={theme.palette.mode === "light" ? githubNameDark : githubNameLight}
                                 />
                             </div>
-                        </LoginGithub>
+                        </LoginGithub> */}
                     </Grid>
                 </Grid>
             </Grid>
