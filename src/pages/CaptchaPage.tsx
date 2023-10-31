@@ -99,7 +99,7 @@ const CaptchaPage: React.FC<CaptchaProps> = ({setIsCaptchaVerified, redirectOnFa
     };
 
     const handleVerificationSuccess = async (token: any) => {
-        console.log("Token for cap: ", token)
+
         let res = await call(
             "/api/verifyRecaptcha",
             "post",

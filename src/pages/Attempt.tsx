@@ -67,6 +67,9 @@ import {Helmet, HelmetProvider} from "react-helmet-async"
 import gigoImg from "../img/premiumGorilla.png"
 
 import * as yaml from 'js-yaml';
+import {Backdrop} from "@material-ui/core";
+import darkImageUploadIcon from "../img/dark_image_upload2.svg";
+import EditIcon from "@mui/icons-material/Edit";
 
 function AttemptPage() {
     // retrieve url params
@@ -92,6 +95,16 @@ function AttemptPage() {
     const [wsConfig, setWsConfig] = React.useState(null)
     const [loadingEdit, setLoadingEdit] = React.useState(false)
     const [editConfirm, setEditConfirm] = React.useState(false)
+    const [editTitle, setEditTitle] = React.useState(false)
+    const [editImage, setEditImage] = React.useState(false)
+    const [projectImage, setProjectImage] = React.useState<string | null>(null)
+    const [projectTitle, setProjectTitle] = React.useState<string>("")
+    const [imageGenLoad, setImageGenLoad] = React.useState<boolean>(false)
+    const [genLimitReached, setGenLimitReached] = React.useState<boolean>(false);
+    const [genOpened, setGenOpened] = React.useState<boolean>(false);
+    const [promptError, setPromptError] = React.useState<string>("")
+    const [prompt, setPrompt] = React.useState("");
+    const [genImageId, setGenImageId] = React.useState<string>("");
 
 
     let handleCloseAttempt = () => {
@@ -151,6 +164,283 @@ function AttemptPage() {
             navigate("/login")
         }
     }
+
+    const generateImage = async () => {
+        console.log("lol: ", projectImage)
+        console.log("prompt: ", prompt)
+        // if (projectImage !== null || prompt === "")
+        //     return false
+
+        // execute api call to remote GIGO server to create image
+        let res = await call(
+            "/api/project/genImage",
+            "post",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {
+                "prompt": prompt,
+            }
+        )
+
+        // handle generation count failure
+        if (res !== undefined && res["message"] !== undefined && res["message"] === "User has already reached the generation limit") {
+            setGenLimitReached(true)
+            swal(
+                "Generation Limit Reached",
+                "Sorry, but you have reached the image generation limit for this project."
+            );
+            return false
+        }
+
+        // handle failed call
+        if (res === undefined || res["image"] === undefined) {
+            if (sessionStorage.getItem("alive") === null)
+                //@ts-ignore
+                swal(
+                    "Server Error",
+                    "We can't get in touch with the server... Sorry about that! We'll get working on that right away!"
+                );
+            return false
+        }
+
+        // handle expected failure
+        if (res["image"] === "" || res["image"] === null) {
+            if (sessionStorage.getItem("alive") === null)
+                //@ts-ignore
+                swal(
+                    "Server Error",
+                    res["message"]
+                );
+            return false
+        }
+
+        let id = res["image"]
+
+        fetch(config.rootPath + "/api/project/tempGenImage/" + id, {
+            credentials: 'include'  // Include cookies
+        })
+            .then(response => response.blob())
+            .then(blob => {
+                // create reader to format image into a base64 string
+                const reader = new FileReader();
+                // configure callback for reader once the file has been read
+                reader.onloadend = (e) => {
+                    // ensure that the target and result are not null
+                    if (e.target === null || e.target.result === null) {
+                        return
+                    }
+
+                    // exclude ArrayBuffer case for typescript (it won't ever be an ArrayBuffer though)
+                    if (typeof e.target.result !== "string") {
+                        return
+                    }
+
+                    // send data url to image src
+                    setProjectImage(e.target.result);
+                    setImageGenLoad(false)
+                }
+                reader.readAsDataURL(blob);
+            })
+            .catch(error => {
+                // fallback on browser loading
+                setProjectImage(config.rootPath + "/api/project/tempGenImage/" + id)
+                // setImageGenLoad(false)
+            });
+
+        setGenImageId(id)
+
+        return true
+    }
+
+    const handleGenClose = () => {
+        setGenOpened(false);
+        // if (prompt !== createProjectForm.name) {
+        //     setPrompt("");
+        // }
+    };
+
+    const handleGenClickOpen = () => {
+        // setPrompt(createProjectForm.name)
+        setGenOpened(true);
+    };
+
+    const editProject = async(title: null, image: null) => {
+        let params = {
+            id: attempt["_id"],
+        }
+
+        if (title != null) {
+            params["title"] = title;
+        }
+
+        let edit;
+
+        if (image != null) {
+            console.log("project is: ", projectImage)
+            if (genImageId !== null && genImageId !== "") {
+                //@ts-ignore
+                params["gen_image_id"] = genImageId
+
+                edit = await call(
+                    "/api/project/editAttempt",
+                    "post",
+                    null,
+                    null,
+                    null,
+                    // @ts-ignore
+                    params
+                )
+
+                const [res] = await Promise.all([
+                    edit
+                ])
+
+                if (res === undefined) {
+                    swal("There has been an issue loading data. Please try again later.")
+                }
+
+                if (res["message"] !== "success") {
+                    swal("There has been an issue loading data. Please try again later.")
+                } else {
+                    swal("Success!", res["message"], "success")
+                }
+            } else {
+                let res = await call(
+                    "/api/project/editProject",
+                    "post",
+                    null,
+                    null,
+                    null,
+                    // @ts-ignore
+                    params,
+                    usedThumbnail,
+                    config.rootPath
+                )
+
+                if (res === undefined) {
+                    if (sessionStorage.getItem("alive") === null)
+                        //@ts-ignore
+                        swal(
+                            "Server Error",
+                            "We are unable to connect with the GIGO servers at this time. We're sorry for the inconvenience!"
+                        );
+                    return;
+                }
+
+                if ("message" in res && res["message"] !== "File Upload Starting") {
+                    if (sessionStorage.getItem("alive") === null)
+                        //@ts-ignore
+                        swal(
+                            "Server Error",
+                            (res["message"] !== "internal server error occurred") ?
+                                res["message"] :
+                                "An unexpected error has occurred. We're sorry, we'll get right on that!"
+                        );
+                    return;
+                }
+
+                if ("message" in res && res["message"] === "success"){
+                    if (sessionStorage.getItem("alive") === null)
+                        //@ts-ignore
+                        swal("Success!", res["message"], "success")
+                    return;
+                }
+            }
+        } else {
+            edit = call(
+                "/api/project/editAttempt",
+                "post",
+                null,
+                null,
+                null,
+                //@ts-ignore
+                params,
+                null,
+                config.rootPath
+            )
+
+            const [res] = await Promise.all([
+                edit
+            ])
+
+            if (res === undefined) {
+                swal("There has been an issue loading data. Please try again later.")
+            }
+
+            if (res["message"] !== "success") {
+                swal("There has been an issue loading data. Please try again later.")
+            } else {
+                swal("Success!", res["message"], "success")
+            }
+        }
+
+        window.location.reload();
+    }
+
+    let renderGenImagePopup = () => {
+        return (
+            <Dialog open={genOpened} onClose={handleGenClose}>
+                <Box style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: theme.spacing(2), // Provide padding to ensure the modal is slightly larger than its contents.
+                    outlineColor: "black",
+                    borderRadius: 1,
+                    boxShadow: "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px 6px 0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
+                    backgroundColor: theme.palette.background.default,
+                }}>
+                    <DialogTitle>Enter Prompt</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>
+                            Your prompt will be used to generate an image using Magic
+                        </DialogContentText>
+                        <TextField
+                            autoFocus
+                            margin="dense"
+                            label="Prompt"
+                            type="text"
+                            fullWidth
+                            defaultValue={prompt}
+                            value={prompt}
+                            onChange={(e) => setPrompt(e.target.value)}
+                            inputProps={{maxLength: 120, minLength: 3}}
+                            helperText={prompt.length > 119 ? 'Character limit reached' : promptError}
+                            error={prompt.length > 119 || prompt === "" || prompt.length < 3}
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleGenClose}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleGenSubmit}>
+                            Submit
+                        </Button>
+                    </DialogActions>
+                </Box>
+            </Dialog>
+        )
+    }
+
+    const handleGenSubmit = () => {
+        let promptLength = prompt.length;
+        if (promptLength === 0) {
+            setPromptError("You must enter a prompt");
+        } else if (promptLength < 3) {
+            setPromptError("Your prompt must be at least 3 characters long");
+        } else {
+            setGenOpened(false);
+            setPromptError("");
+            setImageGenLoad(true)
+            generateImage().then((ok) => {
+                if (!ok)
+                    setImageGenLoad(false)
+            })
+        }
+    };
     const getProjectInformation = async () => {
         let attempt = await call(
             "/api/attempt/get",
@@ -226,6 +516,7 @@ function AttemptPage() {
         setAttemptDesc(res["evaluation"])
         setClosedState(res["post"]["closed"])
         setProjectName( "Attempt: " + res["post"]["post_title"])
+        setProjectTitle(res["post"]["post_title"])
     }
 
     const authState = useAppSelector(selectAuthState);
@@ -555,6 +846,32 @@ function AttemptPage() {
         setMinorTab(newValue);
     };
 
+    const LoadingImageUploadButton = styled(LoadingButton)`
+      animation: imageGenAuraEffect 2s infinite alternate;
+      border: none;
+
+      @keyframes imageGenAuraEffect {
+        0% {
+          box-shadow: 0 0 3px #84E8A2, 0 0 6px #84E8A2;
+        }
+        20% {
+          box-shadow: 0 0 3px #29C18C, 0 0 6px #29C18C;
+        }
+        40% {
+          box-shadow: 0 0 3px #1C8762, 0 0 6px #1C8762;
+        }
+        60% {
+          box-shadow: 0 0 3px #2A63AC, 0 0 6px #2A63AC;
+        }
+        80% {
+          box-shadow: 0 0 3px #3D8EF7, 0 0 6px #3D8EF7;
+        }
+        100% {
+          box-shadow: 0 0 3px #63A4F8, 0 0 6px #63A4F8;
+        }
+      }
+    `;
+
     const mainTabProject = () => {
         let minorValues = ["overview", "description"]
         if (attemptDesc && attemptDesc.trim().length > 0) {
@@ -665,7 +982,187 @@ function AttemptPage() {
                                             objectFit: 'stretch'}}
                                         onError={handleError}
                                         alt={"project thumbnail"}/>
+                                    {attempt !== null && userId === attempt["author_id"] ? (
+                                        <Button
+                                            onClick={() => setEditImage(true)}
+                                            style={{
+                                                position: 'absolute',
+                                                top: 0,
+                                                right: 0
+                                            }}
+                                        >
+                                            <EditIcon/>
+                                        </Button>
+                                    ) : null}
                                 </div>
+                                <Modal
+                                    aria-labelledby="transition-modal-title"
+                                    aria-describedby="transition-modal-description"
+                                    open={editImage}
+                                    onClose={() => setEditImage(false)}
+                                    closeAfterTransition
+                                    BackdropComponent={Backdrop}
+                                    BackdropProps={{
+                                        timeout: 500,
+                                    }}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center', // Add vertical scroll if content is longer than page height
+                                    }}
+                                >
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            padding: theme.spacing(2), // Provide padding to ensure the modal is slightly larger than its contents.
+                                            outlineColor: "black",
+                                            borderRadius: 1,
+                                            boxShadow: "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px 6px 0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
+                                            backgroundColor: theme.palette.background.default,
+                                        }}
+                                    >
+                                        <Grid item xs={12}>
+                                            {imageGenLoad ? (
+                                                <LoadingImageUploadButton
+                                                    loading={true}
+                                                    disabled={true}
+                                                    // sx={{
+                                                    //     width: "30vw",
+                                                    //     height: "43vh"
+                                                    // }}
+                                                >
+                                                    Generating Image
+                                                </LoadingImageUploadButton>
+                                            ) : (
+                                                <Button
+                                                    color={"primary"}
+                                                    component="label"
+                                                    variant="outlined"
+                                                    sx={{
+                                                        width: "30vw",
+                                                        height: "43vh"
+                                                    }}
+                                                >
+                                                    <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+                                                        {projectImage == null || projectImage == "" ? (
+                                                            <h5 style={{color: "grey"}}>Upload Image</h5>
+                                                        ) : null}
+                                                        <img
+                                                            key={projectImage}
+                                                            style={{
+                                                                height: projectImage === null ? "30vh" : "42vh",
+                                                                width: "auto",
+                                                                maxWidth: "29.5vw",
+                                                                opacity: projectImage === null ? "30%" : "100%",
+                                                                borderRadius: "10px"
+                                                            }}
+                                                            src={projectImage === null ? darkImageUploadIcon : projectImage}
+                                                            alt="upload icon"
+                                                            className={"background"}
+                                                        />
+                                                    </div>
+                                                    <input
+                                                        type="file"
+                                                        hidden
+                                                        accept="image/png, image/jpeg"
+                                                        onChange={(e) => {
+                                                            // exit if there are no files
+                                                            if (e.target.files === null) {
+                                                                return
+                                                            }
+
+                                                            // // copy initial state
+                                                            // let updateState = Object.assign({}, initialCreateProjectStateUpdate);
+                                                            // // update file in state update
+                                                            // updateState.thumbnail = e.target.files[0];
+                                                            // // execute state update
+                                                            // updateFormState(updateState)
+                                                            setUsedThumbnail(e.target.files[0])
+
+                                                            // update state for rendering the thumbnail
+                                                            loadFileToThumbnailImage(e.target.files[0])
+                                                        }}
+                                                    />
+                                                </Button>
+                                            )}
+                                        </Grid>
+                                        {!imageGenLoad ? (
+                                            <Grid item xs={12}>
+                                                <Tooltip title="Generate a unique image for your project using Magic">
+                                                    <Button
+                                                        variant={`contained`}
+                                                        color={"primary"}
+                                                        sx={{
+                                                            width: "10vw",
+                                                            height: "45px",
+                                                            borderRadius: 1,
+                                                            left: `9.75vw`,
+                                                            marginTop: "35px",
+                                                        }}
+                                                        className={'generate'}
+                                                        disabled={genLimitReached}
+                                                        onClick={() => {
+                                                            handleGenClickOpen()
+                                                        }}
+                                                        loading={imageGenLoad}
+                                                    >
+                                                        Generate Image
+                                                    </Button>
+                                                </Tooltip>
+                                            </Grid>
+                                        ) : null}
+                                        {!imageGenLoad ? (
+                                            <Grid item xs={12}>
+                                                <Tooltip title="Note : Only 3 images may be generated">
+                                                    <Button
+                                                        variant={`text`}
+                                                        color={"primary"}
+                                                        sx={{
+                                                            width: "10vw",
+                                                            height: "30px",
+                                                            borderRadius: 1,
+                                                            marginTop: "0px",
+                                                            marginBottom: "-25px",
+                                                            left: `9.75vw`,
+                                                        }}
+                                                        disabled={projectImage === null}
+                                                        onClick={() => {
+                                                            handleRemoveImage()
+                                                        }}
+                                                    >
+                                                        Remove Image
+                                                    </Button>
+                                                </Tooltip>
+                                            </Grid>
+                                        ) : null}
+                                        {renderGenImagePopup()}
+                                        {!imageGenLoad ? (
+                                            <Grid item xs={12}>
+                                                <Tooltip title="Update Image">
+                                                    <Button
+                                                        variant={`contained`}
+                                                        color={"primary"}
+                                                        sx={{
+                                                            width: "auto",
+                                                            height: "40px",
+                                                            borderRadius: 1,
+                                                            left: `-5vw`,
+                                                            position: "relative",
+                                                            marginTop: "-100px"
+                                                        }}
+                                                        disabled={projectImage === null}
+                                                        onClick={() => editProject(null, projectImage)}
+                                                    >
+                                                        Submit
+                                                    </Button>
+                                                </Tooltip>
+                                            </Grid>
+                                        ) : null}
+                                    </Box>
+                                </Modal>
                                 <PostOverview
                                     userId={attempt !== null ? attempt["author_id"] : ""}
                                     userName={attempt !== null ? attempt["author"] : ""}
@@ -980,7 +1477,7 @@ function AttemptPage() {
     `;
 
     const renderTabButtons = () => {
-        console.log("attempt: ", attempt)
+
         return (
             <>
                 <Grid item sx={1}>
@@ -1144,7 +1641,7 @@ function AttemptPage() {
         )
     }
 
-    console.log("attempt is: ", attempt)
+
 
     return (
         <div>
@@ -1170,8 +1667,26 @@ function AttemptPage() {
                     {
                         embedded ? (<div style={{paddingTop: "25px"}} />) : (<></>)
                     }
-                    <Typography variant="h5" component="div" sx={styles.projectName}>
-                        {projectName}
+                    <Typography variant="h5" component="div" sx={styles.projectName} style={{display: "flex", flexDirection: "row"}}>
+                        {editTitle ? (
+                            <TextField
+                                value={projectTitle}
+                                onChange={(e) => setProjectTitle(e.target.value)}
+                                variant="outlined"
+                                size="medium"
+                                color={(projectTitle.length > 30) ? "error" : "primary"}
+                                fullWidth
+                                required
+                                sx={{ mt: 2 }}
+                                style={{ width: "auto" }}
+                                inputProps={styles.textField}
+                                multiline
+                            />
+                        ) : (
+                            <div>
+                                {projectName}
+                            </div>
+                        )}
                         {
                             (attempt !== null) ? (
                                 <Chip
@@ -1183,6 +1698,27 @@ function AttemptPage() {
                                 />
                             ) : (<div/>)
                         }
+                        {attempt !== null && userId === attempt["author_id"] ? (
+                            <div>
+                                {!editTitle ? (
+                                    <Button onClick={() => setEditTitle(true)}>
+                                        <EditIcon/>
+                                    </Button>
+                                ) : (
+                                    <div>
+                                        <Button onClick={() => editProject(
+                                            projectTitle !== projectName ? projectTitle : null,
+                                            null
+                                        )}>
+                                            Submit
+                                        </Button>
+                                        <Button onClick={() => setEditTitle(false)}>
+                                            Cancel
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+                        ) : null}
                     </Typography>
                     {window.innerWidth > 1000 ? (
                         <div>
