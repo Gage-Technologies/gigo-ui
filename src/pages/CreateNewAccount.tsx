@@ -1495,6 +1495,7 @@ function CreateNewAccount() {
                             <Grid container sx={{
                                 justifyContent: "center",
                                 width: "100%",
+                                marginBottom: "5px"
                             }} direction="row" alignItems="center">
                                 <Button onClick={() => googleButton()}>
                                     <Grid container spacing={{xs: 2}} justifyContent="center" sx={{
@@ -1504,7 +1505,7 @@ function CreateNewAccount() {
                                         <Grid item xs={"auto"}>
                                             <img
                                                 style={{
-                                                    width: window.innerWidth > 1000 ? "1vw" : "6vw",
+                                                    width: window.innerWidth > 1000 ? "2vw" : "6vw",
                                                     height: "auto",
                                                 }}
                                                 alt={"Google Logo"}
@@ -1514,7 +1515,7 @@ function CreateNewAccount() {
                                         <Grid item xs={"auto"}>
                                             <img
                                                 style={{
-                                                    width: window.innerWidth > 1000 ? "2vw" : "10vw",
+                                                    width: window.innerWidth > 1000 ? "5vw" : "10vw",
                                                     height: "auto",
                                                     paddingTop: ".5vh"
                                                 }}
@@ -1524,10 +1525,10 @@ function CreateNewAccount() {
                                         </Grid>
                                     </Grid>
                                 </Button>
-                                {/* <LoginGithub
+                                <LoginGithub
                                     color={"primary"}
                                     sx={{
-                                        width: window.innerWidth > 1000 ? '5vw' : "20vw",
+                                        // width: window.innerWidth > 1000 ? '5vw' : "20vw",
                                         justifyContent: "center",
                                     }}
                                     clientId="9ac1616be22aebfdeb3e"
@@ -1539,22 +1540,23 @@ function CreateNewAccount() {
                                     <Grid container spacing={{xs: 2}} justifyContent="center" sx={{
                                         flexGrow: 1,
                                         paddingTop: ".1vh",
-                                        paddingLeft: ".5vh"
+                                        marginLeft: "10px",
+                                        // marginRight: "10px",
                                     }}>
                                         <Grid item xs={4}>
                                             <img
                                                 style={{
-                                                    width: window.innerWidth > 1000 ? "1vw" : "6vw",
-                                                    height: "auto"
+                                                    width: window.innerWidth > 1000 ? "2vw" : "6vw",
+                                                    height: "auto",
                                                 }}
                                                 alt={"Github Logo"}
                                                 src={theme.palette.mode === "light" ? githubLogoDark : githubLogoLight}
                                             />
                                         </Grid>
-                                        <Grid item xs={4}>
+                                        <Grid item xs={8}>
                                             <img
                                                 style={{
-                                                    width: window.innerWidth > 1000 ? "2vw" : "10vw",
+                                                    width: window.innerWidth > 1000 ? "5vw" : "10vw",
                                                     height: "auto"
                                                 }}
                                                 alt={"Github Name"}
@@ -1562,7 +1564,7 @@ function CreateNewAccount() {
                                             />
                                         </Grid>
                                     </Grid>
-                                </LoginGithub> */}
+                                </LoginGithub>
                             </Grid>
                             <Typography sx={{
                                 display: "flex",

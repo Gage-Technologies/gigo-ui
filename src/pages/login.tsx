@@ -503,11 +503,12 @@ function Login(this: any) {
                                 </Grid>
                             </Grid>
                         </Button>
-                        {/* <LoginGithub
+                        <LoginGithub
                             color={"primary"}
                             sx={{
-                                width: window.innerWidth > 1000 ? '7vw' : '25vw',
+                                // width: window.innerWidth > 1000 ? '7vw' : '25vw',
                                 justifyContent: "center",
+                                padding: "15px"
                             }}
                             clientId="9ac1616be22aebfdeb3e"
                             // this redirect URI is for production, testing on dev will not work
@@ -534,7 +535,7 @@ function Login(this: any) {
                                     src={theme.palette.mode === "light" ? githubNameDark : githubNameLight}
                                 />
                             </div>
-                        </LoginGithub> */}
+                        </LoginGithub>
                     </Grid>
                 </Grid>
             </Grid>
