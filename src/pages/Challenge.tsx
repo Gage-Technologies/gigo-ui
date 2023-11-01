@@ -92,7 +92,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import {Helmet, HelmetProvider} from "react-helmet-async";
 import CloseIcon from "@material-ui/icons/Close";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import {externalAuth} from "../services/auth";
+import {authorizeGithub} from "../services/auth";
 import CaptchaPage from "./CaptchaPage";
 
 function Challenge() {

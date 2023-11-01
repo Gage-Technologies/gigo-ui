@@ -17,7 +17,13 @@ import {
 } from "@mui/material";
 import {getAllTokens} from "../theme";
 import {useAppDispatch, useAppSelector} from "../app/hooks";
-import {DefaultTutorialState, initialAuthStateUpdate, selectAuthState, updateAuthState} from "../reducers/auth/auth";
+import {
+    DefaultTutorialState,
+    initialAuthStateUpdate,
+    selectAuthState,
+    TutorialState,
+    updateAuthState
+} from "../reducers/auth/auth";
 import {useNavigate} from "react-router-dom";
 import LockPersonIcon from '@mui/icons-material/LockPerson';
 import call from "../services/api-call";
@@ -38,7 +44,7 @@ import {useGoogleLogin} from "@react-oauth/google";
 import SendIcon from "@mui/icons-material/Send";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import {authorize, externalAuth} from "../services/auth";
+import {authorize, authorizeGithub, authorizeGoogle} from "../services/auth";
 import {LoadingButton} from "@mui/lab";
 import Tag from "../models/tag";
 import swal from "sweetalert";
@@ -537,9 +543,9 @@ function CreateNewAccount() {
             params,
             svg,
             config.rootPath,
-            (res: any) => {
+            async (res: any) => {
                 if (res["message"] !== "Google User Added.") {
-                    swal("Somethings went wrong...", res["message"], "error")
+                    swal("Something went wrong...", res["message"], "error")
                 }
 
                 if (res === undefined) {
@@ -553,26 +559,38 @@ function CreateNewAccount() {
                 }
 
                 if (res["message"] === "Google User Added.") {
-                    let authState = Object.assign({}, initialAuthStateUpdate)
-                    authState.tutorialState = DefaultTutorialState;
-                    authState.authenticated = true
-                    // // @ts-ignore
-                    // authState.expiration = auth["exp"]
+                    let auth = await authorizeGoogle(externalToken, password);
                     // @ts-ignore
-                    authState.id = res["user"]["_id"]
-                    // @ts-ignore
-                    authState.role = res["user"]["user_status"]
-                    authState.email = res["user"]["email"]
-                    authState.phone = res["user"]["phone"]
-                    authState.userName = res["user"]["user_name"]
-                    authState.thumbnail = res["user"]["pfp_path"]
-                    authState.backgroundColor = null
-                    authState.backgroundName = null
-                    authState.backgroundRenderInFront = null
-                    authState.exclusiveContent = null
-                    authState.exclusiveAgreement = null
-                    dispatch(updateAuthState(authState))
-                    navigate("/home")
+                    if (auth["user"] !== undefined) {
+                        let authState = Object.assign({}, initialAuthStateUpdate)
+                        authState.authenticated = true
+                        // @ts-ignore
+                        authState.expiration = auth["exp"]
+                        // @ts-ignore
+                        authState.id = auth["user"]
+                        // @ts-ignore
+                        authState.role = auth["user_status"]
+                        authState.email = auth["email"]
+                        authState.phone = auth["phone"]
+                        authState.userName = auth["user_name"]
+                        authState.thumbnail = auth["thumbnail"]
+                        authState.backgroundColor = auth["color_palette"]
+                        authState.backgroundName = auth["name"]
+                        authState.backgroundRenderInFront = auth["render_in_front"]
+                        authState.exclusiveContent = auth["exclusive_account"]
+                        authState.exclusiveAgreement = auth["exclusive_agreement"]
+                        authState.tutorialState = auth["tutorials"] as TutorialState
+                        authState.tier = auth["tier"]
+                        dispatch(updateAuthState(authState))
+
+                        window.location.href = "/home";
+
+                    } else {
+                        if (sessionStorage.getItem("alive") === null)
+                            //@ts-ignore
+                            swal("Sorry, we failed to log you in, please try again on login page");
+                        setLoading(false)
+                    }
                 }
             }
         )
@@ -646,7 +664,7 @@ function CreateNewAccount() {
             params,
             svg,
             config.rootPath,
-            (res: any) => {
+            async (res: any) => {
                 if (res["message"] !== "Github User Added.") {
                     swal("Somethings went wrong...", res["message"], "error")
                 }
@@ -662,26 +680,38 @@ function CreateNewAccount() {
                 }
 
                 if (res["message"] === "Github User Added.") {
-                    let authState = Object.assign({}, initialAuthStateUpdate)
-                    authState.tutorialState = DefaultTutorialState;
-                    authState.authenticated = true
-                    // // @ts-ignore
-                    // authState.expiration = auth["exp"]
+                    let auth = await authorizeGithub(password);
                     // @ts-ignore
-                    authState.id = res["user"]["_id"]
-                    // @ts-ignore
-                    authState.role = res["user"]["user_status"]
-                    authState.email = res["user"]["email"]
-                    authState.phone = res["user"]["phone"]
-                    authState.userName = res["user"]["user_name"]
-                    authState.thumbnail = res["user"]["pfp_path"]
-                    authState.backgroundColor = null
-                    authState.backgroundName = null
-                    authState.backgroundRenderInFront = null
-                    authState.exclusiveContent = null
-                    authState.exclusiveAgreement = null
-                    dispatch(updateAuthState(authState))
-                    navigate("/home")
+                    if (auth["user"] !== undefined) {
+                        let authState = Object.assign({}, initialAuthStateUpdate)
+                        authState.authenticated = true
+                        // @ts-ignore
+                        authState.expiration = auth["exp"]
+                        // @ts-ignore
+                        authState.id = auth["user"]
+                        // @ts-ignore
+                        authState.role = auth["user_status"]
+                        authState.email = auth["email"]
+                        authState.phone = auth["phone"]
+                        authState.userName = auth["user_name"]
+                        authState.thumbnail = auth["thumbnail"]
+                        authState.backgroundColor = auth["color_palette"]
+                        authState.backgroundName = auth["name"]
+                        authState.backgroundRenderInFront = auth["render_in_front"]
+                        authState.exclusiveContent = auth["exclusive_account"]
+                        authState.exclusiveAgreement = auth["exclusive_agreement"]
+                        authState.tutorialState = auth["tutorials"] as TutorialState
+                        authState.tier = auth["tier"]
+                        dispatch(updateAuthState(authState))
+
+                        window.location.href = "/home";
+
+                    } else {
+                        if (sessionStorage.getItem("alive") === null)
+                            //@ts-ignore
+                            swal("Sorry, we failed to log you in, please try again on login page");
+                        setLoading(false)
+                    }
                 }
             }
         )
