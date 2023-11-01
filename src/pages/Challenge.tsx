@@ -1122,6 +1122,7 @@ function Challenge() {
                                     id={project !== null ? project["_id"] : 0}
                                     renown={project !== null ? project["tier"] : 0}
                                     project={true}
+                                    estimatedTime={project !== null ? project["estimated_tutorial_time_millis"] : null}
                                 />
                                 <div style={{height: "20px"}}/>
                             </div>
