@@ -4075,7 +4075,7 @@ function Challenge() {
             }
         }
 
-        window.location.reload();
+        // window.location.reload();
     }
 
     const renderTabBar = () => {
@@ -4244,7 +4244,7 @@ function Challenge() {
                                 </div>
                             )}
                             {project !== null && project["post_type_string"] !== null && (
-                                <ProjectSelector originalLabel={project["post_type_string"]} onProjectSelect={handleProjectSelection}/>
+                                <ProjectSelector originalLabel={project["post_type_string"]} onProjectSelect={handleProjectSelection} theme={theme}/>
                             )}
                             {project !== null && (
                                 <Autocomplete
@@ -4551,11 +4551,11 @@ function Challenge() {
                             {projectName}
                         </div>
                     )}
-                    {project !== null && project["post_type_string"] && (
+                    {project !== null && (
                         <div>
                             {editTitle ? (
                                 <div style={{padding: "10px"}}>
-                                    <ProjectSelector originalLabel={project["post_type_string"]} onProjectSelect={handleProjectSelection}/>
+                                    <ProjectSelector originalLabel={project["post_type_string"] === null ? "Casual" : project["post_type_string"]} onProjectSelect={handleProjectSelection} theme={theme}/>
                                 </div>
                             ) : (
                                 <Chip

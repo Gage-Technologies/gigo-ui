@@ -105,6 +105,7 @@ function AttemptPage() {
     const [promptError, setPromptError] = React.useState<string>("")
     const [prompt, setPrompt] = React.useState("");
     const [genImageId, setGenImageId] = React.useState<string>("");
+    const [usedThumbnail, setUsedThumbnail] = React.useState<string | null>(null);
 
 
     let handleCloseAttempt = () => {
@@ -162,6 +163,44 @@ function AttemptPage() {
             // @ts-ignore
             dispatch(updateAuthState(authState))
             navigate("/login")
+        }
+    }
+
+    const loadFileToThumbnailImage = (file: File) => {
+        // exit if file is null
+        if (file === null) {
+            return
+        }
+
+        // clone the file so we don't read the same one we're going to upload
+        let clonedFile = new File([file], file.name, {type: file.type});
+
+        // create file reader
+        const reader = new FileReader();
+
+        // configure callback for reader once the file has been read
+        reader.onloadend = (e) => {
+            // ensure that the target and result are not null
+            if (e.target === null || e.target.result === null) {
+                return
+            }
+
+            // exclude ArrayBuffer case for typescript (it won't ever be an ArrayBuffer though)
+            if (typeof e.target.result !== "string") {
+                return
+            }
+
+            console.log("target: ", e.target.result)
+
+            // send data url to image src
+            setProjectImage(e.target.result);
+        }
+
+        try {
+            // execute file reader
+            reader.readAsDataURL(clonedFile);
+        } catch (e) {
+            console.log("ERROR: failed to read thumbnail: ", e);
         }
     }
 
@@ -308,7 +347,7 @@ function AttemptPage() {
                 }
             } else {
                 let res = await call(
-                    "/api/project/editProject",
+                    "/api/project/editAttempt",
                     "post",
                     null,
                     null,
@@ -339,14 +378,31 @@ function AttemptPage() {
                                 "An unexpected error has occurred. We're sorry, we'll get right on that!"
                         );
                     return;
-                }
-
-                if ("message" in res && res["message"] === "success"){
+                } else {
                     if (sessionStorage.getItem("alive") === null)
                         //@ts-ignore
                         swal("Success!", res["message"], "success")
                     return;
                 }
+
+                {console.log("res is: ", res["message"])}
+
+                // if ("message" in res && res["message"] !== "success"){
+                //     if (sessionStorage.getItem("alive") === null)
+                //         //@ts-ignore
+                //         swal(
+                //             "Server Error",
+                //             (res["message"] !== "internal server error occurred") ?
+                //                 res["message"] :
+                //                 "An unexpected error has occurred. We're sorry, we'll get right on that!"
+                //         );
+                //     return;
+                // } else {
+                //     if (sessionStorage.getItem("alive") === null)
+                //         //@ts-ignore
+                //         swal("Success!", res["message"], "success")
+                //     return;
+                // }
             }
         } else {
             edit = call(
@@ -376,7 +432,7 @@ function AttemptPage() {
             }
         }
 
-        window.location.reload();
+        // window.location.reload();
     }
 
     let renderGenImagePopup = () => {
