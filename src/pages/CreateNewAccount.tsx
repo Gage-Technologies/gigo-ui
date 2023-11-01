@@ -500,6 +500,7 @@ function CreateNewAccount() {
     });
 
     const googleCreate = async () => {
+        setLoading(true)
         let svgNode = avatarRef
         //@ts-ignore
         let data = svgNode.outerHTML;
@@ -545,7 +546,8 @@ function CreateNewAccount() {
             config.rootPath,
             async (res: any) => {
                 if (res["message"] !== "Google User Added.") {
-                    swal("Something went wrong...", res["message"], "error")
+                    swal("Somethings went wrong...", res["message"], "error")
+                    setLoading(false)
                 }
 
                 if (res === undefined) {
@@ -555,6 +557,7 @@ function CreateNewAccount() {
                             "Server Error",
                             "We are unable to connect with the GIGO servers at this time. We're sorry for the inconvenience!"
                         );
+                    setLoading(false)
                     return;
                 }
 
@@ -603,8 +606,9 @@ function CreateNewAccount() {
             // @ts-ignore
             dispatch(updateAuthState(authState))
             navigate("/login")
+            setLoading(false)
         }
-
+        setLoading(false)
     }
 
     const onSuccessGithub = async (gh: any) => {
@@ -614,6 +618,7 @@ function CreateNewAccount() {
     }
 
     const githubCreate = async () => {
+        setLoading(true)
         let svgNode = avatarRef
         //@ts-ignore
         let data = svgNode.outerHTML;
@@ -676,6 +681,7 @@ function CreateNewAccount() {
                             "Server Error",
                             "We are unable to connect with the GIGO servers at this time. We're sorry for the inconvenience!"
                         );
+                    setLoading(false)
                     return;
                 }
 
@@ -725,7 +731,10 @@ function CreateNewAccount() {
             // @ts-ignore
             dispatch(updateAuthState(authState))
             navigate("/login")
+            setLoading(false)
         }
+
+        setLoading(false)
     };
 
     const verifyEmail = async (emailParam: string) => {
