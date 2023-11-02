@@ -1752,7 +1752,7 @@ function AttemptPage() {
                                 fullWidth
                                 required
                                 sx={{ mt: 2 }}
-                                style={{ width: "auto" }}
+                                style={{ width: "auto", background: theme.palette.background.default, zIndex: 2000 }}
                                 inputProps={styles.textField}
                                 multiline
                             />

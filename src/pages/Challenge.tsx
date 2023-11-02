@@ -4085,7 +4085,7 @@ function Challenge() {
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    left: "50%",
+                    left: "51%",
                     transform: "translate(-50%, -50%)",
                     zIndex: 1000, // You may need to adjust this
                     ...(isScrolled ? {
@@ -4093,7 +4093,7 @@ function Challenge() {
                         top: "120px",
                     } : {
                         position: "absolute",
-                        top: "160px"
+                        top: editTitle ? "200px" : "160px"
                     })
                 } : {
                     display: "flex",
@@ -4544,7 +4544,7 @@ function Challenge() {
                             fullWidth
                             required
                             sx={{ mt: 2 }}
-                            style={{ width: "auto" }}
+                            style={{ width: "auto", background: theme.palette.background.default, zIndex: 2000 }}
                             inputProps={styles.textField}
                             multiline
                         />
@@ -4775,7 +4775,7 @@ function Challenge() {
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    left: "50%",
+                    left: "51%",
                     transform: "translate(-50%, -50%)",
                     zIndex: 1000, // You may need to adjust this
                     ...(isScrolled ? {
@@ -4783,7 +4783,7 @@ function Challenge() {
                         top: "120px",
                     } : {
                         position: "absolute",
-                        top: "160px"
+                        top: editTitle ? "200px" : "160px"
                     })
                 } : {
                     display: "flex",
