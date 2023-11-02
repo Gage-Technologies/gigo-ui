@@ -1273,8 +1273,6 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                 {!loggedIn ? (
                     <Snackbar
                         open={!mobileWelcomeBannerClosed}
-                        // onClose={closeNotification}
-                        // autoHideDuration={3000}
                         key={"mobile-welcom-notification"}
                         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
                     >
