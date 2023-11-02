@@ -202,9 +202,10 @@ export default function ChatMessage(props: IProps) {
             );
         }
 
-        // detect any @mentions in the content and replace them with html to highlight them
         let content = props.content;
-        content = content.replace(/@(?!everyone\b)([a-zA-Z0-9_]+)/g, `<a href="/user/$1" style="background-color: rgba(159,60,255,0.25); border-radius: 5px; padding: 3px; color: ${theme.palette.text.primary};">@$1</a>`);
+
+        // detect any @mentions in the content and replace them with html to highlight them
+        content = content.replace(/@\<([a-zA-Z0-9_\s]+)\>/g, `<a href="/user/$1" style="background-color: rgba(159,60,255,0.25); border-radius: 5px; padding: 3px; color: ${theme.palette.text.primary};">@$1</a>`);
         // handle the channel but not linking and setting a different background color
         content = content.replace(/@everyone/g, `<span style="background-color: rgba(255,95,95,0.25); border-radius: 5px; padding: 3px; color: ${theme.palette.text.primary};">@everyone</span>`);
 

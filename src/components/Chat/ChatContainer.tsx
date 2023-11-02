@@ -401,7 +401,7 @@ export default function ChatContainer() {
             }
             if (!sendNotification) {
                 // detect if we have been mentioned by checking for our username in the message prefaced by an @
-                if (newMessage.message.toLowerCase().includes("@" + authorName.toLowerCase()) ||
+                if (newMessage.message.toLowerCase().includes("@<" + authorName.toLowerCase() + ">") ||
                     newMessage.message.toLowerCase().includes("@everyone")) {
                     // override mute
                     sendNotification = true;
@@ -1168,7 +1168,7 @@ export default function ChatContainer() {
                                         setInputValue(inputValue.substring(0, inputValue.lastIndexOf("@") + 1) + "everyone ");
                                     } else {
                                         const selectedOption = mentionSearchOptions[mentionOptionIndex + (renderEverythingOption ? -1 : 0)];
-                                        setInputValue(inputValue.substring(0, inputValue.lastIndexOf("@") + 1) + selectedOption.user_name + " ");
+                                        setInputValue(inputValue.substring(0, inputValue.lastIndexOf("@") + 1) + "<" + selectedOption.user_name + "> ");
                                     }
                                     setMentionSelectionPopperOpen(false);
                                     setMentionOptionIndex(null);
@@ -1207,40 +1207,36 @@ export default function ChatContainer() {
                         },
                         endAdornment: (
                             <InputAdornment position="end">
-                                {
-                                    window.innerWidth > 1000
-                                        ? sendingMessage ? (
-                                            <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
-                                                <CircularProgress
-                                                    color='primary'
-                                                    size={20}
-                                                />
-                                            </div>
-                                        )
-                                            :
-                                            (
-                                                <div style={{ position: 'absolute', bottom: '6px', right: '8px' }}>
-                                                    <IconButton
-                                                        onClick={() => setShowEmojiPicker(!showEmojiPicker)} // Toggle Emoji picker
-                                                        sx={{
-                                                            fontSize: '0.8rem',
-                                                            padding: '0', // Remove padding
-                                                            minWidth: 'auto', // Remove minimum width
-                                                            lineHeight: '1', // Adjust line height
-                                                        }}
-                                                    >
-                                                        <EmojiEmotions />
-                                                    </IconButton>
-                                                    <IconButton
-                                                        onClick={() => setShowGifPicker(!showGifPicker)} // Toggle GIF picker
-                                                        disabled={inputValue.length > 2000} // Disable button if input exceeds 2000 characters
-                                                    >
-                                                        <Gif /> {/* GIF icon */}
-                                                    </IconButton>
-                                                </div>
-                                            )
-                                        :
-                                        <></>
+                                {sendingMessage ? (
+                                        <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
+                                            <CircularProgress
+                                                color='primary'
+                                                size={20}
+                                            />
+                                        </div>
+                                    )
+                                    :
+                                    (
+                                        <div style={{ position: 'absolute', bottom: '6px', right: '8px' }}>
+                                            <IconButton
+                                                onClick={() => setShowEmojiPicker(!showEmojiPicker)} // Toggle Emoji picker
+                                                sx={{
+                                                    fontSize: '0.8rem',
+                                                    padding: '0', // Remove padding
+                                                    minWidth: 'auto', // Remove minimum width
+                                                    lineHeight: '1', // Adjust line height
+                                                }}
+                                            >
+                                                <EmojiEmotions />
+                                            </IconButton>
+                                            <IconButton
+                                                onClick={() => setShowGifPicker(!showGifPicker)} // Toggle GIF picker
+                                                disabled={inputValue.length > 2000} // Disable button if input exceeds 2000 characters
+                                            >
+                                                <Gif /> {/* GIF icon */}
+                                            </IconButton>
+                                        </div>
+                                    )
                                 }
                             </InputAdornment>
                         ),
@@ -1252,7 +1248,7 @@ export default function ChatContainer() {
                 <Popper
                     open={mentionSelectionPopperOpen && mentionSearchOptions.length > 0}
                     anchorEl={messageInputContainerRef.current}
-                    placement="right-start"
+                    placement={window.innerWidth > 1000 ? "right-start" : "top"}
                     sx={{
                         zIndex: 6000,
                     }}
@@ -1284,6 +1280,7 @@ export default function ChatContainer() {
                                 boxShadow: 'none',
                                 maxHeight: "200px",
                                 overflowY: "auto",
+                                width: window.innerWidth > 1000 ? undefined : "90vw"
                             }}
                         >
                             <List>
@@ -1384,7 +1381,7 @@ export default function ChatContainer() {
                                                     }
 
                                                     // replace all of the text after the last @ with the username
-                                                    inputValueCopy = inputValueCopy.substring(0, lastAt + 1) + option.user_name + " ";
+                                                    inputValueCopy = inputValueCopy.substring(0, lastAt + 1) + "<" + option.user_name + "> ";
                                                     setInputValue(inputValueCopy);
                                                     setMentionSelectionPopperOpen(false);
                                                 }}
@@ -1542,18 +1539,12 @@ export default function ChatContainer() {
                     >
                         {/* make the text field grow with multiline input */}
                         {messageInputMemo}
-                        {
-                            window.innerWidth > 1000
-                                ?
-                                <>
-                                    <Emoji open={showEmojiPicker} closeCallback={() => setShowEmojiPicker(false)}
-                                        onEmojiSelect={addEmoji} />
-                                    <Tenor open={showGifPicker} closeCallback={() => setShowGifPicker(false)}
-                                        addGif={sendGif} />
-                                </>
-                                :
-                                <></>
-                        }
+                        <>
+                            <Emoji open={showEmojiPicker} closeCallback={() => setShowEmojiPicker(false)}
+                                onEmojiSelect={addEmoji} />
+                            <Tenor open={showGifPicker} closeCallback={() => setShowGifPicker(false)}
+                                addGif={sendGif} />
+                        </>
                     </Box>
                 )}
             </>
@@ -2639,7 +2630,12 @@ export default function ChatContainer() {
                         autoHideDuration={3000}
                         key={"chat-notification"}
                         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                        style={{ position: "fixed", width: "fit-content", top: '80px', right: chatOpen ? '340px' : '40px' }}
+                        style={{ 
+                            position: "fixed", 
+                            width: window.innerWidth > 1000 ? "fit-content" : undefined, 
+                            top: '80px', 
+                            right: window.innerWidth < 1000 ? undefined : chatOpen ? '340px' : '40px' 
+                        }}
                     >
                         {renderNotificationContent()}
                     </Snackbar>

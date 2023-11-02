@@ -134,6 +134,21 @@ export default function Tenor({ open, closeCallback, addGif }: TenorProps) {
         };
     }, [next, loading, query]);
 
+    let dialogPosition: any = {
+        bottom: 80,
+        right: 300,
+        width: "450px",
+        height: "550px",
+    }
+    if (window.innerWidth < 1000) {
+        dialogPosition = {
+            bottom: 120,
+            // right: "5vw",
+            width: "90vw",
+            height: "435px",
+        }
+    }
+
     return (
         <Dialog
             open={open}
@@ -143,13 +158,11 @@ export default function Tenor({ open, closeCallback, addGif }: TenorProps) {
                 style: {
                     position: "absolute",
                     bottom: 80,
-                    right: 300,
-                    width: "450px",
-                    height: "550px",
                     borderRadius: "10px",
                     overflow: "hidden", // Prevent GIFs from overflowing
                     // @ts-ignore
                     backgroundColor: theme.palette.background.paper,
+                    ...dialogPosition
                 },
             }}
         >

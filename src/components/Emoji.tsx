@@ -3,6 +3,7 @@ import { createTheme, PaletteMode, Dialog, DialogContent } from "@mui/material";
 import { getAllTokens } from "../theme";
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
+import { WindowRounded } from "@mui/icons-material";
 
 type EmojiProps = {
     open: boolean; // Prop to control dialog visibility
@@ -19,6 +20,21 @@ export default function EmojiPicker({ open, closeCallback, onEmojiSelect }: Emoj
         onEmojiSelect(emoji);
     };
 
+    let dialogPosition: any = {
+        bottom: 80,
+        right: 300,
+        width: "450px",
+        height: "435px",
+    }
+    if (window.innerWidth < 1000) {
+        dialogPosition = {
+            bottom: 120,
+            // right: "5vw",
+            width: "90vw",
+            height: "435px",
+        }
+    }
+
     return (
         <Dialog
             open={open} // Controlled by prop
@@ -27,13 +43,10 @@ export default function EmojiPicker({ open, closeCallback, onEmojiSelect }: Emoj
             PaperProps={{
                 style: {
                     position: "absolute",
-                    bottom: 80,
-                    right: 300,
-                    width: "450px",
-                    height: "435px",
                     borderRadius: "10px",
                     // @ts-ignore
                     backgroundColor: theme.palette.background.chat,
+                    ...dialogPosition,
                 },
             }}
         >
@@ -51,8 +64,8 @@ export default function EmojiPicker({ open, closeCallback, onEmojiSelect }: Emoj
                     onEmojiSelect={addEmoji}
                     theme={userPref === 'light' ? 'light' : 'dark'}
                     autoFocus={true}
-                    emojiSize={24}
-                    emojiButtonSize={47}
+                    emojiSize={window.innerWidth > 1000 ? 24 : 20}
+                    emojiButtonSize={window.innerWidth > 1000 ? 47 : 36}
                     perline={12}
                     style={{ flex: 1 }}
                 />
