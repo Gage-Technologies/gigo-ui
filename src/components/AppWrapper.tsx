@@ -29,6 +29,7 @@ import {
     createTheme,
     CssBaseline,
     Icon,
+    Link,
     ListItemButton,
     Menu, Modal,
     PaletteMode, Paper, TextField,
@@ -71,7 +72,7 @@ import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArro
 import ChatContainer from "./Chat/ChatContainer";
 import {
     initialAppWrapperStateUpdate,
-    resetAppWrapper, selectAppWrapperChatOpen,
+    resetAppWrapper, selectAppWrapperChatOpen, selectAppWrapperClosedMobileWelcomeBanner,
     selectAppWrapperSidebarOpen,
     updateAppWrapper
 } from "../reducers/appWrapper/appWrapper";
@@ -97,6 +98,7 @@ import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
 import DesktopAccessDisabledIcon from '@mui/icons-material/DesktopAccessDisabled';
 import QueuePlayNextIcon from '@mui/icons-material/QueuePlayNext';
 import { SocialIcon } from 'react-social-icons'
+import Snackbar from '@material-ui/core/Snackbar';
 
 
 interface IProps {
@@ -155,6 +157,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     const tutorialState = useAppSelector(selectAuthStateTutorialState)
     const leftOpen = useAppSelector(selectAppWrapperSidebarOpen)
     const rightOpen = useAppSelector(selectAppWrapperChatOpen)
+    const mobileWelcomeBannerClosed = useAppSelector(selectAppWrapperClosedMobileWelcomeBanner)
 
     const [reportPopup, setReportPopup] = React.useState(false)
 
@@ -257,6 +260,12 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         }
         appWrapperState.chatOpen = !rightOpen;
         dispatch(updateAppWrapper(appWrapperState));
+    }
+
+    const handleCloseMobileWelcomeBanner = () => {
+        let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
+        appWrapperState.closedMobileWelcomeBanner = true;
+        dispatch(updateAppWrapper(appWrapperState))
     }
 
 
@@ -854,14 +863,14 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                             navigate("/about")
                         }}
                     >
-                        <Typography 
+                        <Typography
                             variant="h5"
                             // color={theme.palette.text.primary}
                             color={'inherit'}
                         >
                             Welcome To GIGO!
                         </Typography>
-                        <Typography 
+                        <Typography
                             variant="h6"
                             // color={theme.palette.text.primary}
                             color={'inherit'}
@@ -1260,6 +1269,108 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                         )}
                     </Toolbar>
                 </AppBar>
+                {/* Welcome box */}
+                {!loggedIn ? (
+                    <Snackbar
+                        open={!mobileWelcomeBannerClosed}
+                        // onClose={closeNotification}
+                        // autoHideDuration={3000}
+                        key={"mobile-welcom-notification"}
+                        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                    >
+                        <Box
+                            sx={{
+                                // @ts-ignore
+                                backgroundColor: theme.palette.background.codeEditor,
+                                color: theme.palette.text.primary,
+                                textAlign: 'center',
+                                cursor: 'pointer',
+                                pointerEvents: 'auto',
+                                padding: '10px',
+                                borderRadius: '10px',
+                                // add a glowing box shadow all around the box
+                                boxShadow: (mode === 'dark') ?
+                                    `0px 3px 15px -1px #ffffff40, 0px 5px 18px 0px #ffffff24, 0px 1px 24px 0px #ffffff22` :
+                                    "0px 3px 5px -1px #00000020, 0px 5px 8px 0px #00000014, 0px 1px 14px 0px #00000012",
+                                ...themeHelpers.frostedGlass,
+                            }}
+                        >
+                            <IconButton
+                                sx={{
+                                    position: 'absolute',
+                                    top: '5px',
+                                    right: '5px',
+                                }}
+                                size="small"
+                                onClick={handleCloseMobileWelcomeBanner}
+                            >
+                                <CloseIcon />
+                            </IconButton>
+                            <Typography
+                                variant="h6"
+                                // color={theme.palette.text.primary}
+                                color={'inherit'}
+                            >
+                                Welcome To GIGO!
+                            </Typography>
+                            <Typography
+                                variant="body2"
+                                // color={theme.palette.text.primary}
+                                color={'inherit'}
+                            >
+                                Access GIGO on a computer to run challenges and code in DevSpaces!
+                            </Typography>
+                            <Typography
+                                variant="caption"
+                                // color={theme.palette.text.primary}
+                                color={'inherit'}
+                            >
+                                <Link href="/about" color="inherit">
+                                    Click here to learn more about GIGO!
+                                </Link>
+                            </Typography>
+                        </Box>
+                    </Snackbar>
+                    // <Box
+                    //     sx={{
+                    //         // @ts-ignore
+                    //         backgroundColor: theme.palette.background.codeEditor,
+                    //         color: theme.palette.text.primary,
+                    //         textAlign: 'center',
+                    //         cursor: 'pointer',
+                    //         pointerEvents: 'auto',
+                    //         paddingBottom: '10px',
+                    //         // add a glowing box shadow all around the box
+                    //         boxShadow: (mode === 'dark') ?
+                    //             `0px 3px 15px -1px #ffffff40, 0px 5px 18px 0px #ffffff24, 0px 1px 24px 0px #ffffff22` :
+                    //             "0px 3px 5px -1px #00000020, 0px 5px 8px 0px #00000014, 0px 1px 14px 0px #00000012",
+                    //         // lighten the background on hover
+                    //         "&:hover": {
+                    //             // @ts-ignore
+                    //             backgroundColor: theme.palette.primary.contrastText,
+                    //             color: theme.palette.primary.main,
+                    //         },
+                    //     }}
+                    //     onClick={() => {
+                    //         navigate("/about")
+                    //     }}
+                    // >
+                    // <Typography 
+                    //     variant="h5"
+                    //     // color={theme.palette.text.primary}
+                    //     color={'inherit'}
+                    // >
+                    //     Welcome To GIGO!
+                    // </Typography>
+                    //     <Typography 
+                    //         variant="h6"
+                    //         // color={theme.palette.text.primary}
+                    //         color={'inherit'}
+                    //     >
+                    //         GIGO is an end-to-end platform for learning to code and developing your skills. Click here to learn more!
+                    //     </Typography>
+                    // </Box>
+                ) : null}
                 {/*Bottom Navigation Bar*/}
                 {loggedIn ? (
                     <AppBar
@@ -1361,7 +1472,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     network="github"
                     url="https://github.com/Gage-Technologies/gigo.dev"
                     bgColor={"transparent"}
-                    fgColor={mode === 'dark'? "white" : "black"}
+                    fgColor={mode === 'dark' ? "white" : "black"}
                     style={{
                         height: "32px",
                         width: "32px",
@@ -1371,7 +1482,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     network="discord"
                     url="https://discord.gg/279hECYrfX"
                     bgColor={"transparent"}
-                    fgColor={mode === 'dark'? "white" : "black"}
+                    fgColor={mode === 'dark' ? "white" : "black"}
                     style={{
                         height: "32px",
                         width: "32px",
@@ -1381,7 +1492,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     network="x"
                     url="https://twitter.com/gigo_dev"
                     bgColor={"transparent"}
-                    fgColor={mode === 'dark'? "white" : "black"}
+                    fgColor={mode === 'dark' ? "white" : "black"}
                     style={{
                         height: "32px",
                         width: "32px",
@@ -1391,7 +1502,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     network="medium"
                     url="https://medium.com/@gigo_dev"
                     bgColor={"transparent"}
-                    fgColor={mode === 'dark'? "white" : "black"}
+                    fgColor={mode === 'dark' ? "white" : "black"}
                     style={{
                         height: "32px",
                         width: "32px",
@@ -1401,7 +1512,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     network="reddit"
                     url="https://www.reddit.com/r/gigodev"
                     bgColor={"transparent"}
-                    fgColor={mode === 'dark'? "white" : "black"}
+                    fgColor={mode === 'dark' ? "white" : "black"}
                     style={{
                         height: "32px",
                         width: "32px",
@@ -1710,7 +1821,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                         }} href={"/about"}>
                             <ListItemIcon>
                                 <IconifyIcon icon="mdi:about" color={theme.palette.text.primary} width="25"
-                                             height="25" />
+                                    height="25" />
                             </ListItemIcon>
                             <Typography
                                 component={"div"}
@@ -1843,7 +1954,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     {loggedIn ? renderSidebar() : renderLoggedOutSidebar()}
                     {renderChatSideBar()}
                     {onHomePage && !loggedIn && window.innerWidth > 1000 ? (
-                        <div style={{ height: "30px" }}/>
+                        <div style={{ height: "30px" }} />
                     ) : null}
                     {
                         // we only render the children on mobile if the chat bar is not open
