@@ -40,9 +40,45 @@ export async function authorize(username, password) {
   return decodedToken;
 }
 
-export async function externalAuth(token) {
+export async function authorizeGithub(password) {
 
-  let decodedToken = decodeToken(token);
+  let res = await call(
+    "/api/auth/confirmLoginWithGithub",
+    "post",
+    null,
+    null,
+    null,
+    // @ts-ignore
+    {password: password},
+    null,
+    config.rootPath
+  )
+
+  let decodedToken = decodeToken(res["token"]);
+  if (decodedToken === null) {
+    return false;
+  }
+
+  window.sessionStorage.setItem("user", decodedToken["user"])
+  window.sessionStorage.setItem("alive", "true");
+
+  return decodedToken;
+}
+
+export async function authorizeGoogle(externalToken, password) {
+  let res = await call(
+    "/api/auth/loginWithGoogle",
+    "post",
+    null,
+    null,
+    null,
+    // @ts-ignore
+    {external_auth: externalToken, password: password},
+    null,
+    config.rootPath
+  )
+
+  let decodedToken = decodeToken(res["token"]);
   if (decodedToken === null) {
     return false;
   }

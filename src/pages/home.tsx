@@ -316,6 +316,7 @@ function Home() {
                                                 exclusive={project["challenge_cost"] === null ? false : true}
                                                 hover={false}
                                                 role={authState.role}
+                                                estimatedTime={project["estimated_tutorial_time_millis"]}
                                             />
                                         </LazyLoad>
                                     </div>
@@ -580,6 +581,7 @@ function Home() {
                                             exclusive={project["challenge_cost"] === null ? false : true}
                                             hover={false}
                                             role={project["user_status"]}
+                                            estimatedTime={project["estimated_tutorial_time_millis"]}
                                         />
                                     </LazyLoad>
                                 </Grid>

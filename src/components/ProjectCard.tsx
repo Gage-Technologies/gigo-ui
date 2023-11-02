@@ -13,11 +13,11 @@ import {
     Tooltip,
     Typography
 } from "@mui/material";
-import {themeHelpers, getAllTokens} from "../theme";
-import {string} from "prop-types";
+import { themeHelpers, getAllTokens } from "../theme";
+import { string } from "prop-types";
 import UserIcon from "./UserIcon";
-import {useEffect} from "react";
-import {useNavigate} from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import HorseIcon from "./Icons/Horse";
 import HoodieIcon from "./Icons/Hoodie";
 import { QuestionMark } from "@mui/icons-material";
@@ -60,13 +60,14 @@ interface IProps {
     hover: boolean,
     attempt: boolean,
     exclusive: boolean | null,
-    animate: boolean
+    animate: boolean,
+    estimatedTime: number | null
 }
 
 export default function ProjectCard(props: IProps) {
     let userPref = localStorage.getItem('theme')
     const [mode, _] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
-        const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
+    const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
 
     let navigate = useNavigate();
 
@@ -170,28 +171,51 @@ export default function ProjectCard(props: IProps) {
 
     const getProjectIcon = (projectType: string) => {
         switch (projectType) {
-        case "Playground":
-            return (
-                <HorseIcon sx={{width: "24px", height: "24px"}} />
-            )
-        case "Casual":
-            return (
-                <HoodieIcon sx={{width: "20px", height: "20px"}} />
-            )
-        case "Competitive":
-            return (
-                <TrophyIcon sx={{width: "18px", height: "18px"}} />
-            )
-        case "Interactive":
-            return (
-                <GraduationIcon sx={{width: "20px", height: "20px"}} />
-            )
-        default:
-            return (
-                <QuestionMark sx={{width: "20px", height: "20px"}} />
-            )
+            case "Playground":
+                return (
+                    <HorseIcon sx={{ width: "24px", height: "24px" }} />
+                )
+            case "Casual":
+                return (
+                    <HoodieIcon sx={{ width: "20px", height: "20px" }} />
+                )
+            case "Competitive":
+                return (
+                    <TrophyIcon sx={{ width: "18px", height: "18px" }} />
+                )
+            case "Interactive":
+                return (
+                    <GraduationIcon sx={{ width: "20px", height: "20px" }} />
+                )
+            default:
+                return (
+                    <QuestionMark sx={{ width: "20px", height: "20px" }} />
+                )
         }
     }
+
+    /**
+     * Convert millis duration to a well formatted time string with a min precision of minutes (ex: 1h2m)
+     */
+    const millisToTime = (millisDuration: number) => {
+        const minutes = Math.floor((millisDuration / (1000 * 60)) % 60);
+        const hours = Math.floor((millisDuration / (1000 * 60 * 60)) % 24);
+        const days = Math.floor(millisDuration / (1000 * 60 * 60 * 24));
+
+        let timeString = "";
+
+        if (days > 0) {
+            timeString += `${days}d `;
+        }
+        if (hours > 0) {
+            timeString += `${hours}h `;
+        }
+        if (minutes > 0) {
+            timeString += `${minutes}m `;
+        }
+
+        return timeString.trim();
+    };
 
     const hoverModal = () => {
         return (
@@ -333,18 +357,29 @@ export default function ProjectCard(props: IProps) {
                                     {props.projectTitle}
                                 </Typography>
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={9}>
                                 <Chip
-                                    sx={{float: "left"}}
+                                    sx={{ float: "left" }}
                                     icon={getProjectIcon(props.projectType)}
                                     color="primary"
                                     label={props.projectType}
                                     variant="outlined"
                                 />
-                                {props.exclusive !== null && props.exclusive !== undefined && props.exclusive? (
-                                        <AttachMoneyIcon/>
+                                {props.exclusive !== null && props.exclusive !== undefined && props.exclusive ? (
+                                    <AttachMoneyIcon />
                                 ) : null}
                             </Grid>
+                            {props.estimatedTime !== null && props.estimatedTime > 0 ? (
+                                <Grid item xs={3}>
+                                    <Tooltip title={"Estimated Tutorial Time"}>
+                                        <Typography
+                                            sx={{ color: "grey"}}
+                                            color="primary"
+                                            variant="caption"
+                                        >{millisToTime(props.estimatedTime)}</Typography>
+                                    </Tooltip>
+                                </Grid>
+                            ) : null}
                         </Grid>
                     </CardContent>
                 </Card>
@@ -374,5 +409,6 @@ ProjectCard.defaultProps = {
     hover: true,
     attempt: false,
     role: null,
-    animate: false
+    animate: false,
+    estimatedTime: 0,
 }

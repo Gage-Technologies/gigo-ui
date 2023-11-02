@@ -18,7 +18,7 @@ import {getAllTokens} from "../theme";
 import {useNavigate} from "react-router-dom";
 import call from "../services/api-call";
 import config from "../config";
-import {authorize, externalAuth} from "../services/auth";
+import {authorize, authorizeGithub, authorizeGoogle} from "../services/auth";
 import {gapi} from "gapi-script";
 //@ts-ignore
 import {GoogleLogin, useGoogleLogin} from "@react-oauth/google";
@@ -114,28 +114,8 @@ function Login(this: any) {
 
     const googleSignIn = async () => {
         setLoading(true)
-        let res = await call(
-            "/api/auth/loginWithGoogle",
-            "post",
-            null,
-            null,
-            null,
-            // @ts-ignore
-            {external_auth: externalToken, password: password},
-            null,
-            config.rootPath
-        )
+        let auth = await authorizeGoogle(externalToken, password);
 
-        window.sessionStorage.setItem("loginXP", JSON.stringify(res["xp"]));
-
-        if (res["message"] === "You must be logged in to access the GIGO system."){
-            let authState = Object.assign({}, initialAuthStateUpdate)
-            // @ts-ignore
-            dispatch(updateAuthState(authState))
-            navigate("/login")
-        }
-
-        let auth = await externalAuth(res["token"]);
         // @ts-ignore
         if (auth["user"] !== undefined) {
             let authState = Object.assign({}, initialAuthStateUpdate)
@@ -170,6 +150,7 @@ function Login(this: any) {
     }
 
     const onSuccessGithub = async (gh: any) => {
+        console.log(gh)
         setExternal(true)
         setExternalToken(gh["code"])
         setExternalLogin("Github")
@@ -217,7 +198,7 @@ function Login(this: any) {
             config.rootPath
         )
 
-        let auth = await externalAuth(res["token"]);
+        let auth = await authorizeGithub(password);
 
         window.sessionStorage.setItem("loginXP", JSON.stringify(res["xp"]));
 
@@ -500,6 +481,7 @@ function Login(this: any) {
                                         style={{
                                             width: window.innerWidth > 1000 ? "2vw" : "8vw",
                                             height: "auto",
+                                            marginTop: "10px"
                                         }}
                                         alt={"Google Logo"}
                                         src={googleLogo}
@@ -524,8 +506,9 @@ function Login(this: any) {
                         <LoginGithub
                             color={"primary"}
                             sx={{
-                                width: window.innerWidth > 1000 ? '7vw' : '25vw',
+                                // width: window.innerWidth > 1000 ? '7vw' : '25vw',
                                 justifyContent: "center",
+                                padding: "15px"
                             }}
                             clientId="9ac1616be22aebfdeb3e"
                             // this redirect URI is for production, testing on dev will not work

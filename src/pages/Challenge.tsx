@@ -104,7 +104,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import {Helmet, HelmetProvider} from "react-helmet-async";
 import CloseIcon from "@material-ui/icons/Close";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import {externalAuth} from "../services/auth";
+import {authorizeGithub} from "../services/auth";
 import CaptchaPage from "./CaptchaPage";
 import EditIcon from "@mui/icons-material/Edit";
 import ProjectSelector from "../components/EditProjectSelector";
@@ -1587,6 +1587,7 @@ function Challenge() {
                                     id={project !== null ? project["_id"] : 0}
                                     renown={project !== null ? project["tier"] : 0}
                                     project={true}
+                                    estimatedTime={project !== null ? project["estimated_tutorial_time_millis"] : null}
                                 />
                                 <div style={{height: "20px"}}/>
                             </div>

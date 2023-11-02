@@ -1,18 +1,18 @@
 
 
 import * as React from "react"
-import {Button, Card, CardContent, Chip, TextField, Tooltip, Typography} from "@mui/material";
+import { Box, Button, Card, CardContent, Chip, TextField, Tooltip, Typography } from "@mui/material";
 import UserIcon from "./UserIcon";
 import EditIcon from '@mui/icons-material/Edit';
 import call from "../services/api-call";
 import config from "../config";
 import swal from "sweetalert";
-import {initialAuthStateUpdate, updateAuthState} from "../reducers/auth/auth";
-import {useNavigate} from "react-router-dom";
-import {themeHelpers} from "../theme";
+import { initialAuthStateUpdate, updateAuthState } from "../reducers/auth/auth";
+import { useNavigate } from "react-router-dom";
+import { themeHelpers } from "../theme";
 import Person3Icon from '@mui/icons-material/Person3';
 // @ts-ignore
-import styled, {keyframes} from "styled-components"
+import styled, { keyframes } from "styled-components"
 
 interface IProps {
     width: number | string,
@@ -31,6 +31,7 @@ interface IProps {
     backgroundPalette: string | null,
     backgroundRender: boolean | null,
     exclusiveDescription: string | null,
+    estimatedTime: number | null,
 }
 
 export default function PostOverview(props: IProps) {
@@ -57,7 +58,8 @@ export default function PostOverview(props: IProps) {
             borderTopLeftRadius: "10px; !important",
             boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2);",
             ...themeHelpers.frostedGlass,
-            backgroundColor: "rgba(206,206,206,0.31)"
+            // backgroundColor: "rgba(206,206,206,0.31)",
+            backgroundColor: "rgba(19,19,19,0.31)"
         },
         sectionDisplay1: {
             width: props.width,
@@ -111,6 +113,29 @@ export default function PostOverview(props: IProps) {
 
     let navigate = useNavigate();
 
+    /**
+     * Convert millis duration to a well formatted time string with a min precision of minutes (ex: 1h2m)
+     */
+    const millisToTime = (millisDuration: number) => {
+        const minutes = Math.floor((millisDuration / (1000 * 60)) % 60);
+        const hours = Math.floor((millisDuration / (1000 * 60 * 60)) % 24);
+        const days = Math.floor(millisDuration / (1000 * 60 * 60 * 24));
+
+        let timeString = "";
+
+        if (days > 0) {
+            timeString += `${days}d `;
+        }
+        if (hours > 0) {
+            timeString += `${hours}h `;
+        }
+        if (minutes > 0) {
+            timeString += `${minutes}m `;
+        }
+
+        return timeString.trim();
+    };
+
     const handleSubmit = async () => {
         if (descriptions.length > 500) {
             swal({
@@ -128,7 +153,7 @@ export default function PostOverview(props: IProps) {
                 null,
                 null,
                 //@ts-ignore
-                {id: props.id, project: props.project, description: descriptions},
+                { id: props.id, project: props.project, description: descriptions },
                 null,
                 config.rootPath
             )
@@ -171,16 +196,16 @@ export default function PostOverview(props: IProps) {
             <CardContent sx={styles.cardContent}>
                 {props.postDate === "" ? (
                     <Typography component={"div"} sx={styles.sectionDisplay1}>
-                        <Typography style={{display: "flex", flexDirection: "row", width: "85%"}}>
+                        <Typography style={{ display: "flex", flexDirection: "row", width: "85%" }}>
                             <div>
-                                <Person3Icon sx={{width: "50px", height: "50px"}}/>
+                                <Person3Icon sx={{ width: "50px", height: "50px" }} />
                             </div>
-                            <StyledDiv style={{height: "24px", width: "20%", marginBottom: "12px", borderRadius: "20px", marginTop: "10px"}}/>
+                            <StyledDiv style={{ height: "24px", width: "20%", marginBottom: "12px", borderRadius: "20px", marginTop: "10px" }} />
                         </Typography>
                     </Typography>
                 ) : (
-                    <Typography component={"div"} sx={styles.sectionDisplay1}>
-                        <Typography style={{display: "flex", flexDirection: "row", width: "85%"}}>
+                    <Box sx={styles.sectionDisplay1}>
+                        <Typography style={{ display: "flex", flexDirection: "row", width: "85%" }}>
                             <div>
                                 <UserIcon
                                     userId={props.userId}
@@ -193,18 +218,27 @@ export default function PostOverview(props: IProps) {
                                     imageTop={2}
                                 />
                             </div>
-                            <Typography variant="h5" component="div">
+                            <Typography variant="h5" component="div" color="white">
                                 {props.userName}
                             </Typography>
                         </Typography>
-                        <Typography variant="body1" color="text.primary" align="right">
-                            {date.toLocaleString("en-us", {day: '2-digit', month: 'short', year: 'numeric'})}
-                        </Typography>
-                    </Typography>
+                        <Box style={{ display: "flex", flexDirection: "column" }}>
+                            <Typography variant="body1" color="white" align="right">
+                                {date.toLocaleString("en-us", { day: '2-digit', month: 'short', year: 'numeric' })}
+                            </Typography>
+                            {props.estimatedTime !== null && props.estimatedTime > 0 && (
+                                <Tooltip title={"Estimated Tutorial Time"}>
+                                    <Typography variant="caption" color="white" align="right">
+                                        {millisToTime(props.estimatedTime)}
+                                    </Typography>
+                                </Tooltip>
+                            )}
+                        </Box>
+                    </Box>
                 )}
                 {descriptions !== "" ? (
                     <>
-                        <Typography component={"div"} sx={styles.sectionDisplay2}>
+                        <Typography component={"div"} sx={styles.sectionDisplay2} color="white">
                             {editMode && props.userIsOP ? (
                                 <TextField
                                     label={descriptions.length + "/500"}
@@ -231,9 +265,9 @@ export default function PostOverview(props: IProps) {
                                 </div>
                             )}
                         </Typography>
-                        <Typography component={"div"} style={{width: props.width, display: "flex", justifyContent: "right"}}>
+                        <Typography component={"div"} style={{ width: props.width, display: "flex", justifyContent: "right" }}>
                             {editMode ? (
-                                <div style={{display: "flex", flexDirection: "row"}}>
+                                <div style={{ display: "flex", flexDirection: "row" }}>
                                     <Button onClick={() => handleSubmit()}>
                                         Submit
                                     </Button>
@@ -243,19 +277,19 @@ export default function PostOverview(props: IProps) {
                                 </div>
                             ) : props.userIsOP ? (
                                 <Button onClick={() => setEditMode(true)}>
-                                    <EditIcon/>
+                                    <EditIcon />
                                 </Button>
 
-                            ) : (<div/>)}
+                            ) : (<div />)}
                         </Typography>
                     </>
                 ) : props.postDate === "" ? (
                     <div>
-                        <StyledDiv style={{height: "8px", width: "100%", marginBottom: "16px", borderRadius: "8px", marginTop: "24px"}}/>
-                        <StyledDiv style={{height: "8px", width: "100%", marginBottom: "16px", borderRadius: "8px"}}/>
-                        <StyledDiv style={{height: "8px", width: "100%", marginBottom: "16px", borderRadius: "8px"}}/>
-                        <StyledDiv style={{height: "8px", width: "100%", marginBottom: "16px", borderRadius: "8px"}}/>
-                        <StyledDiv style={{height: "8px", width: "40%", marginBottom: "16px", borderRadius: "8px"}}/>
+                        <StyledDiv style={{ height: "8px", width: "100%", marginBottom: "16px", borderRadius: "8px", marginTop: "24px" }} />
+                        <StyledDiv style={{ height: "8px", width: "100%", marginBottom: "16px", borderRadius: "8px" }} />
+                        <StyledDiv style={{ height: "8px", width: "100%", marginBottom: "16px", borderRadius: "8px" }} />
+                        <StyledDiv style={{ height: "8px", width: "100%", marginBottom: "16px", borderRadius: "8px" }} />
+                        <StyledDiv style={{ height: "8px", width: "40%", marginBottom: "16px", borderRadius: "8px" }} />
                     </div>
                 ) : null}
             </CardContent>
@@ -274,5 +308,6 @@ PostOverview.defaultProps = {
     postDate: "",
     userIsOP: false,
     id: "",
-    project: false
+    project: false,
+    estimatedTime: 0,
 };
