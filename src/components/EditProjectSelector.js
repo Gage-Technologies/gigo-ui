@@ -33,6 +33,15 @@ function ProjectSelector({ originalLabel, onProjectSelect, theme}) {
         "Interactive",
     ];
 
+    const listStyle = {
+        maxHeight: '150px',
+        overflow: 'auto',
+        background: theme.palette.background.default, // Make sure this color is opaque
+        borderRadius: "15px",
+        boxShadow: '0 2px 4px rgba(0,0,0,0.2)', // Optional: added for better visibility
+        zIndex: 2000
+    };
+
     const handleToggle = () => {
         setIsOpen(!isOpen);
     };
@@ -86,7 +95,7 @@ function ProjectSelector({ originalLabel, onProjectSelect, theme}) {
                 clickable
             />
             {isOpen && (
-                <List component="nav" style={{ maxHeight: '150px', overflow: 'auto', background: theme.palette.background.default, borderRadius: "15px", opacity: "100%"}}>
+                <List component="nav" style={listStyle}>
                     {projects.map((project, index) => (
                         <ListItem button key={index} onClick={() => handleSelect(project)}>
                             <Chip

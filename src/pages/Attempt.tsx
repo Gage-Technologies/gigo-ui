@@ -498,6 +498,7 @@ function AttemptPage() {
         }
     };
     const getProjectInformation = async () => {
+        console.log("getting info")
         let attempt = await call(
             "/api/attempt/get",
             "post",
@@ -565,8 +566,10 @@ function AttemptPage() {
         }
 
         // setProject(res["post"])
+        // setProject(res["post"])
         setAttempt(res["post"])
         // setProjectDesc(res["post"]["description"])
+        console.log("setting info: ", res["description"])
         setProjectDesc(res["description"])
         // setAttemptDesc(res["description"])
         setAttemptDesc(res["evaluation"])
@@ -717,6 +720,7 @@ function AttemptPage() {
     let descriptionRef = useRef(null);
 
     const descriptionTab = () => {
+        console.log("description is: ", projectDesc)
         if (window.innerWidth > 1000){
             return (
                 <MarkdownRenderer markdown={projectDesc} style={{
@@ -728,15 +732,27 @@ function AttemptPage() {
                 }}/>
             )
         } else {
-            return (
-                <MarkdownRenderer markdown={projectDesc} style={{
-                    width: "104vw",
-                    maxWidth: "1300px",
-                    overflowWrap: "break-word",
-                    borderRadius: "10px",
-                    padding: "2em 3em"
-                }}/>
-            )
+            if (projectDesc === null) {
+                return (
+                    <MarkdownRenderer markdown={""} style={{
+                        width: "104vw",
+                        maxWidth: "1300px",
+                        overflowWrap: "break-word",
+                        borderRadius: "10px",
+                        padding: "2em 3em"
+                    }}/>
+                )
+            } else {
+                return (
+                    <MarkdownRenderer markdown={projectDesc} style={{
+                        width: "104vw",
+                        maxWidth: "1300px",
+                        overflowWrap: "break-word",
+                        borderRadius: "10px",
+                        padding: "2em 3em"
+                    }}/>
+                )
+            }
         }
     }
 
@@ -976,6 +992,8 @@ function AttemptPage() {
             }
         }
 
+        console.log("html project info: ", projectDesc)
+
         return (
             <div style={{display: "flex", width: "80vw", height: "auto"}}>
                 {window.innerWidth > 1000 ? (
@@ -1038,7 +1056,7 @@ function AttemptPage() {
                                             objectFit: 'stretch'}}
                                         onError={handleError}
                                         alt={"project thumbnail"}/>
-                                    {attempt !== null && userId === attempt["author_id"] ? (
+                                    {attempt !== null && userId === attempt["author_id"] && window.innerWidth > 1000 ? (
                                         <Button
                                             onClick={() => setEditImage(true)}
                                             style={{
@@ -1754,7 +1772,7 @@ function AttemptPage() {
                                 />
                             ) : (<div/>)
                         }
-                        {attempt !== null && userId === attempt["author_id"] ? (
+                        {attempt !== null && userId === attempt["author_id"] && window.innerWidth > 1000 ? (
                             <div>
                                 {!editTitle ? (
                                     <Button onClick={() => setEditTitle(true)}>

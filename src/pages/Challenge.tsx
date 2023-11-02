@@ -1389,7 +1389,7 @@ function Challenge() {
                                         onError={handleError}
                                         alt={"project thumbnail"}
                                     />
-                                    {project !== null && userId === project["author_id"] ? (
+                                    {project !== null && userId === project["author_id"] && window.innerWidth > 1000 ? (
                                         <Button
                                             onClick={() => setEditImage(true)}
                                             style={{
@@ -4117,7 +4117,7 @@ function Challenge() {
                             borderRadius: "15px",
                             borderColor: theme.palette.primary.dark + "75",
                             boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1);",
-                            width: 'fit-content',
+                            width: '100%',
                             ...(isScrolled && {
                                 ...themeHelpers.frostedGlass,
                                 backgroundColor: "rgba(206,206,206,0.31)"
@@ -4157,12 +4157,14 @@ function Challenge() {
                             ) : null}
                         </Grid>
                     </Box>
-                    {project !== null && userId === project["author_id"] && window.innerWidth > 1000 ? (
+                </div>
+                {project !== null && userId === project["author_id"] && window.innerWidth > 1000 ? (
+                    <div style={{paddingTop: "20px", marginLeft: "10px"}}>
                         <Button variant="outlined" sx={styles.mainTabButton} style={{marginLeft: "20px"}} onClick={() => setEditPopup(true)}>
                             Edit Project Details
                         </Button>
-                    ) : null}
-                </div>
+                    </div>
+                ) : null}
                 <Modal
                     aria-labelledby="transition-modal-title"
                     aria-describedby="transition-modal-description"
@@ -4568,7 +4570,7 @@ function Challenge() {
                             )}
                         </div>
                     )}
-                    {project !== null && userId === project["author_id"] ? (
+                    {project !== null && userId === project["author_id"] && window.innerWidth > 1000 ? (
                         <div>
                             {!editTitle ? (
                                 <Button onClick={() => setEditTitle(true)}>
