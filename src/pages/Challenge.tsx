@@ -303,7 +303,7 @@ function Challenge() {
         if (tutorialState.challenge === !runTutorial) {
             return
         }
-        setRunTutorial(!tutorialState.challenge && loggedIn)
+        setRunTutorial(!tutorialState.challenge && loggedIn && window.innerWidth > 1000)
     }, [tutorialState])
 
     useEffect(() => {
@@ -910,7 +910,7 @@ function Challenge() {
 
     useEffect(() => {
         if (projectDesc !== "")
-            setRunTutorial(!tutorialState.challenge && loggedIn)
+            setRunTutorial(!tutorialState.challenge && loggedIn && window.innerWidth > 1000)
     }, [projectDesc])
 
     const projectName = project !== null ? project["title"] : ""

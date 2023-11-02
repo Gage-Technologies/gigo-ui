@@ -156,7 +156,7 @@ function Streak() {
         if (tutorialState.stats === !runTutorial) {
             return
         }
-        setRunTutorial(!tutorialState.stats)
+        setRunTutorial(!tutorialState.stats && window.innerWidth > 1000)
     }, [tutorialState])
 
     const getStreaks = async () => {

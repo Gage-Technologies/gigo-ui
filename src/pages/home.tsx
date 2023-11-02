@@ -96,7 +96,7 @@ function Home() {
         if (tutorialState.home === !runTutorial) {
             return
         }
-        setRunTutorial(!tutorialState.home && loggedIn)
+        setRunTutorial(!tutorialState.home && loggedIn && window.innerWidth > 1000)
     }, [tutorialState])
 
     const infiniteScrollHandler = async () => {
