@@ -789,7 +789,7 @@ function CreateProject() {
         }
 
 
-        if (createProjectForm.challengeType === 2) {
+        if (createProjectForm.challengeType === 2 || createProjectForm.challengeType === 4) {
             if (createProjectForm.evaluation === null || createProjectForm.evaluation === "") {
                 //@ts-ignore
                 params["workspace_evaluation"] = "Provide a more efficient solution."
@@ -1711,10 +1711,10 @@ function CreateProject() {
                             fontSize: 12,
                             textOverflow: "wrap"
                         }}>
-                            When creating a casual challenge that others can attempt, you must create a rubric
-                            for what it takes to have a complete attempt. This is an explanation of the goals of the
+                            When creating a casual challenge or a debug challenge that others can attempt, you must create a rubric
+                            for what it takes to have a complete attempt. For a casual challenge this is an explanation of the goals of the
                             project and what the code must be able to successfully complete, in order for an attempt to
-                            be considered successful. If you do not input an evaluation, a default evaluation will be
+                            be considered successful. For a debug challenge it is a general explanation of the bug to look out for or where the function is at right now and where it needs to go to. If you do not input an evaluation, a default evaluation will be
                             used.
                         </div>
                     </div>
@@ -1994,7 +1994,7 @@ function CreateProject() {
                             </div>
                         </Tooltip>
                     </Grid>
-                    {createProjectForm.challengeType === 2 ? (
+                    {createProjectForm.challengeType === 2 || createProjectForm.challengeType === 4 ? (
                         <Grid item xs={"auto"}>
                             <Tooltip title={
                                 (project !== null) ?
@@ -2025,13 +2025,13 @@ function CreateProject() {
                             <div>
                                 <Button
                                     disabled={project !== null}
-                                    variant={createProjectForm.challengeType === 2 ? (section === 3) ? "contained" : "outlined" : (section === 2) ? "contained" : "outlined"}
+                                    variant={createProjectForm.challengeType === 2 || createProjectForm.challengeType === 4 ? (section === 3) ? "contained" : "outlined" : (section === 2) ? "contained" : "outlined"}
                                     color="primary"
-                                    onClick={() => createProjectForm.challengeType === 2 ? updateSectionState(3) :
+                                    onClick={() => createProjectForm.challengeType === 2 || createProjectForm.challengeType === 4 ? updateSectionState(3) :
                                         updateSectionState(2)
                                     }
                                 >
-                                    {createProjectForm.challengeType === 2 ? "4. Workspace Config" : "3. Workspace Config"}
+                                    {createProjectForm.challengeType === 2 || createProjectForm.challengeType === 4 ? "4. Workspace Config" : "3. Workspace Config"}
                                 </Button>
                             </div>
                         </Tooltip>
@@ -3207,7 +3207,7 @@ function CreateProject() {
      * Select the createProjectForm section to render based on the section state variable
      */
     let sectionSwitch = () => {
-        if (createProjectForm.challengeType === 2) {
+        if (createProjectForm.challengeType === 2 || createProjectForm.challengeType === 4) {
             switch (section) {
                 case -1:
                     return renderExclusiveInfoSection()
