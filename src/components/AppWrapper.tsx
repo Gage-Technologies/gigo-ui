@@ -1855,13 +1855,17 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     }
 
     const renderChatSideBar = () => {
+        if (window.innerWidth <= 1000) {
+            return null
+        }
+
         return (
             <>
                 <IconButton
                     onClick={() => handleChatButton()}
                     sx={{
                         position: 'fixed',
-                        right: (rightOpen) ? (window.innerWidth > 1000 ? 290 : 350) : 10,
+                        right: (rightOpen) ? 290 : 10,
                         top: '50vh',
                         display: 'flex',
                         alignItems: 'center',

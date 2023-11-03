@@ -823,7 +823,9 @@ const WorkspacePage = () => {
 
 
     const handleMouseDown = (event: any) => {
+        console.log("button type: ", event.button)
         switch (event.button) {
+            case undefined: // Mobile
             case 0:  // Left click
                 console.log("vnc: ", isVNCRef.current)
                 setShowIframe(true);
@@ -1278,6 +1280,47 @@ const WorkspacePage = () => {
         );
     }
 
+    let progressBarMobile = () => {
+        return (
+            <div style={{
+                display: "flex",
+                justifyContent: "center",
+                paddingTop: "20px",
+                overflow: "hidden"
+            }} className={"button"}>
+                <LinearProgress
+                    sx={{
+                        position: "absolute",
+                        width: "90vw",
+                        height: "23px",
+                        top: (workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null) ? "150px" : "300px",
+                        left: "5vw",
+                        minHeight: "7px",
+                        borderRadius: 5,
+                        // transform: "rotate(270deg)",
+                        transformOrigin: "left bottom"
+                    }}
+                    color={progressColor()} // replace with your function
+                    variant={progressType()} // replace with your function
+                    value={currentProgress}
+                />
+                <div style={{
+                    position: "absolute",
+                    width: `calc(90vw * ${currentProgress / 100} - 30px)`,
+                    height: "7px",
+                    // top: "calc(80% + 5px)",
+                    top: (workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null) ? "154px" : "304px",
+                    left: "calc(5vw + 15px)",
+                    borderRadius: 10,
+                    backgroundColor: "white",
+                    opacity: "30%",
+                    // transform: "rotate(270deg)",
+                    transformOrigin: "left bottom"
+                }}/>
+            </div>
+        );
+    }
+
     const getSyncedWorkspaceStates = (wsOverride: Workspace | null = null): {state: number, init_state: number} => {
         let ws = wsOverride !== null ? wsOverride : workspace;
 
@@ -1578,7 +1621,9 @@ const WorkspacePage = () => {
             //         window.location.href = config.coderPath + workspaceUrl;
             //     }
             // }}
-            onMouseDown={(e: any) => handleMouseDown(e)}
+            onMouseDown={(e: any) => {
+                handleMouseDown(e)
+            }}
             type="primary"
             style={{
                 marginBottom: '20px',
@@ -1791,6 +1836,191 @@ const WorkspacePage = () => {
                             label={pageMode.toUpperCase()}
                         />
                     </Box>
+                </div>
+            )
+        } else {
+            return (
+                <div className={"game"}>
+                    <Grid container justifyContent="space-between" sx={{
+                        flexGrow: 1,
+                        paddingTop: "20px",
+                        display: "flex",
+                        justifyContent: "center",
+                        marginLeft: "3vw",
+                        width: "91vw",
+                        top: "10%"
+                    }}>
+                        {render2048()}
+                    </Grid>
+                </div>
+            )
+        }
+    }
+
+    const renderBodyMobile = () => {
+        let ports = []
+
+        let styles = {
+            lottie: {
+                zIndex: 4,
+                position: "absolute",
+                top: 0,
+                left: 0
+            },
+        };
+
+
+
+        if (workspace !== null) {
+            //@ts-ignore
+            ports = workspace["ports"]
+            let remainingTime = calculateRemainingTime()
+            return (
+                <div>
+                    <div 
+                        style={{
+                            position: "absolute", 
+                            left:  "calc(50vw - 107px)", 
+                            top: "150px", 
+                            height: "auto", 
+                            display: (workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null) ? "none": "block"
+                        }}
+                    >
+                        {devSpaceButtomMemo}
+
+                        <div style={{whiteSpace: 'nowrap', left: "-5%"}}>
+                            Enter within the next: {renderTime()}
+                        </div>
+
+                    </div>
+                    <Grid container justifyContent="space-between" sx={{
+                        flexGrow: 1,
+                        paddingTop: "20px",
+                        marginLeft: "3vw",
+                        overflow: "hidden"
+                    }}>
+                        <Grid item xs={12}>
+                            {progressBarMobile()}
+                        </Grid>
+                        {(workspaceError === null) ? (workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null) && (
+                            <Grid item xs={12}>
+                                <Card sx={{
+                                    // position: "absolute",
+                                    width: "80vw",
+                                    // height: "77vh",
+                                    // left: "55%",
+                                    // top:"200px",
+                                    backgroundColor: "transparent",
+                                    backgroundImage: "none",
+                                    boxShadow: "none"
+                                }}>
+                                    <div
+                                        style={{display: "flex", justifyContent: "center", marginTop: "50px"}}
+                                        className={"game"}>
+                                        {render2048()}
+                                    </div>
+                                </Card>
+                            </Grid>
+                        ) : (
+                            <Grid item xs={12}>
+                                <Card sx={{
+                                    width: "35vw",
+                                    height: "65vh",
+                                    borderRadius: 1,
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    overflowY: "auto",
+                                    border: 1,
+                                    borderColor: progressColorBorder() + "75",
+                                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1);",
+                                    backgroundColor: "transparent",
+                                    backgroundImage: "none",
+                                }}>
+                                    {/* center the header and pin it to the top of the card*/}
+                                    <Typography variant={"h4"} style={{
+                                        color: theme.palette.error.main,
+                                        paddingTop: "20px",
+                                        paddingBottom: "20px",
+                                    }}>
+                                        DevSpace Error
+                                    </Typography>
+                                    <List>
+                                        <ListItem>
+                                            <ListItemText
+                                                primary="Error"
+                                                secondary={
+                                                    <pre style={{
+                                                        whiteSpace: "pre-wrap",
+                                                        wordWrap: "break-word",
+                                                        fontFamily: "monospace",
+                                                        backgroundColor: `#151515`,
+                                                        padding: "10px",
+                                                        borderRadius: "5px"
+                                                    }}>
+                                                        {workspaceError.stderr.trim() !== "" ? workspaceError.stderr : "An unknown error has occurred."}
+                                                    </pre>
+                                                }
+                                            />
+                                        </ListItem>
+                                        {workspaceError.command.trim().length > 0 &&
+                                            <>
+                                                <ListItem>
+                                                    <ListItemText
+                                                        primary="Command"
+                                                        secondary={
+                                                            <pre style={{
+                                                                whiteSpace: "pre-wrap",
+                                                                wordWrap: "break-word",
+                                                                fontFamily: "monospace",
+                                                                backgroundColor: `#151515`,
+                                                                padding: "10px",
+                                                                borderRadius: "5px"
+                                                            }}>
+                                                                {workspaceError.command}
+                                                            </pre>
+                                                        }
+                                                    />
+                                                </ListItem>
+                                            </>
+                                        }
+                                        {workspaceError.status != -1 &&
+                                          <>
+                                            <ListItem>
+                                              <ListItemText
+                                                primary="Status"
+                                                secondary={workspaceError.status}
+                                              />
+                                            </ListItem>
+                                          </>
+                                        }
+                                        {workspaceError.stdout.trim().length > 0 &&
+                                            <>
+                                                <ListItem>
+                                                    <ListItemText
+                                                        primary="Out"
+                                                        secondary={
+                                                            <pre style={{
+                                                                whiteSpace: "pre-wrap",
+                                                                wordWrap: "break-word",
+                                                                fontFamily: "monospace",
+                                                                backgroundColor: `#151515`,
+                                                                padding: "10px",
+                                                                borderRadius: "5px"
+                                                            }}>
+                                                                {workspaceError.stdout}
+                                                            </pre>
+                                                        }
+                                                    />
+                                                </ListItem>
+                                            </>
+                                        }
+                                    </List>
+                                </Card>
+                            </Grid>
+                        )}
+                    </Grid>
+                    {/*<Grid item xs={"auto"}>*/}
                 </div>
             )
         } else {
@@ -2050,7 +2280,418 @@ const WorkspacePage = () => {
             console.log("not popped-out: ", workspaceUrl);
         }
     }, [location.pathname, location.search, workspaceUrl]);
-        // @ts-ignore
+
+    const renderDesktop = () => {
+        return (
+            <>
+            {showIframe && showDesktopIframe === "side" ? (
+
+                <div style={{ display: 'flex', overflow: 'hidden' }}>
+                    <div ref={leftPanelRef} style={{ flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
+                        {/* Left iframe content */}
+                        {(workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") ? (
+                            <iframe
+                                src={workspaceUrl}
+                                width="100%"
+                                height={`${window.innerHeight - 35}`}
+                                style={{ border: "none" }}
+                                title="Workspace"
+
+                            >
+                                Your browser does not support iframes.
+                            </iframe>
+                        ) : (
+                            <div>
+                                <ThreeDots />
+                            </div>
+                        )}
+                    </div>
+
+                    {/*<div ref={dragBarRef}*/}
+                    {/*     className="drag-bar"*/}
+                    {/*     style={{width: '40px', opacity: '0.5', visibility: 'hidden', backgroundColor: 'transparent'}}*/}
+                    {/*>*/}
+                    <div
+                        ref={dragBarRef}
+                        className="drag-bar"
+                        style={{
+                            cursor: 'ew-resize',
+                            backgroundImage: `radial-gradient(circle, ${hexToRGBA(theme.palette.primary.contrastText, 1)} 1px, ${hexToRGBA(theme.palette.primary.main, 1)} 1px)`,
+                            backgroundSize: '10px 10px',
+                            width: '20px'
+                        }}
+                    />
+                    {/*</div>*/}
+                    <div ref={rightPanelRef} style={{ flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
+                        {(workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") ? (
+                            <iframe
+                                src={convertEditorUrlToDesktop(workspaceUrl)}
+                                width="100%"
+                                height={`${window.innerHeight - 35}`}
+                                style={{ border: "none" }}
+                                title="Workspace"
+
+                            >
+                                Your browser does not support iframes.
+                            </iframe>
+                        ) : (
+                            <div>
+                                <ThreeDots />
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+            ) : showIframe ? (
+                <div style={{overflow: "hidden"}}>
+                    {(workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") ? (
+                        <iframe
+                            src={workspaceUrl}
+                            width="100%" // Your desired width
+                            height={`${window.innerHeight - 35}`}
+                            style={{border: "none"}}
+                            title="Workspace"
+                            ref={iframeRef}
+                        >
+                            Your browser does not support iframes.
+                        </iframe>
+                    ) : (
+                        <div>
+                            <ThreeDots/>
+                        </div>
+                    )}
+                </div>
+
+                ) : (
+                    <>
+                        <div style={{position: 'relative', height: '8vh', width: '100vw'}}>
+                            <Typography
+                                component={"div"}
+                                variant={"h4"}
+                                sx={{
+                                    position: "absolute",
+                                    top: "70%",
+                                    left:
+                                        sidebarOpen ?
+                                                aspectRatio === "21:9" ? "20%" : "23%"
+                                        : chatOpen ?
+                                                aspectRatio === "21:9" ? "18%" : "20%"
+                                        :
+                                                aspectRatio === "21:9" ? "24%" : "28%",
+                                    transform: "translate(-50%, -50%)",
+                                    zIndex: 2,
+                                    color: theme.palette.text.primary,
+
+                                }}
+                            >
+                                {"Launch Pad"}
+                            </Typography>
+                            <Typography
+                                component={"div"}
+                                variant={"h4"}
+                                sx={{
+                                    position: "absolute",
+                                    top: "70%",
+                                    left: sidebarOpen ?
+                                        aspectRatio === "21:9" ? "20.1%" : "23.1%"
+                                        : chatOpen ?
+                                            aspectRatio === "21:9" ? "18.1%" : "20.1%"
+                                            :
+                                            aspectRatio === "21:9" ? "24.1%" : "28.1%",
+                                    transform: "translate(-50%, -50%)",
+                                    zIndex: 1,
+                                    color: theme.palette.primary.dark,
+                                }}
+                            >
+                                {"Launch Pad"}
+                            </Typography>
+                        </div>
+
+                        {/*<div style={{display: "flex", width: "100%"}}>*/}
+                        {/*    {renderStatusBar()}*/}
+                        {/*</div>*/}
+                        <div style={{display: "flex", justifyContent: "center", width: "100%"}}>
+                            {renderBody()}
+                        </div>
+                    </>
+                )}
+            {xpPopup ? (xpPopupMemo) : null}
+            </>
+        )
+    }
+
+
+    const renderMobileButton = () => {
+        let button = (
+            <LoadingButton
+                variant={"outlined"}
+                sx={stepIndex === 3 ? {
+                    height: "40px", zIndex: "600000",
+                    '&:hover': {
+                        backgroundColor: theme.palette.primary.main + "25",
+                    }
+                } : {
+                    height: "40px", zIndex: "600000",
+                    '&:hover': {
+                        backgroundColor: theme.palette.primary.main + "25",
+                    }
+                }}
+                loading={loadingWorkspaceTransition}
+                onClick={() => handleLaunch()}
+            >
+                {"Launch"}
+            </LoadingButton>
+        )
+
+        if (workspace !== null) {
+            if (workspace.state === 1) {
+                button = (
+                    <LoadingButton
+                        variant={"outlined"}
+                        sx={{
+                            height: "40px",
+                            '&:hover': {
+                                backgroundColor: theme.palette.warning.main + "25",
+                            }
+                        }}
+                        color={"warning"}
+                        loading={loadingWorkspaceTransition}
+                        onClick={() => handleStop()}
+                    >
+                        {"Stop"}
+                    </LoadingButton>
+                )
+            } else if (workspace.state === 2) {
+                button = (
+                    <LoadingButton
+                        variant={"outlined"}
+                        sx={{
+                            height: "40px",
+                        }}
+                        disabled
+                    >
+                        {"Stopping"}
+                    </LoadingButton>
+                )
+            } else if (workspace.state === 3) {
+                button = (
+                    <LoadingButton
+                        variant={"outlined"}
+                        sx={{
+                            height: "40px",
+                            '&:hover': {
+                                backgroundColor: theme.palette.primary.main + "25",
+                            }
+                        }}
+                        loading={loadingWorkspaceTransition}
+                        onClick={() => handleLaunch()}
+                    >
+                        {"Launch"}
+                    </LoadingButton>
+                )
+            } else if (workspace.state === 4) {
+                button = (
+                    <LoadingButton
+                        variant={"outlined"}
+                        sx={{
+                            height: "40px",
+                        }}
+                        disabled
+                    >
+                        {"Removing"}
+                    </LoadingButton>
+                )
+            } else if (workspace.state === 5) {
+                button = (
+                    <LoadingButton
+                        variant={"outlined"}
+                        sx={{
+                            height: "40px",
+                        }}
+                        disabled
+                    >
+                        {"Launch Failure"}
+                    </LoadingButton>
+                )
+            } else if (workspace.state === 6) {
+                button = (
+                    <LoadingButton
+                        variant={"outlined"}
+                        sx={{
+                            height: "40px",
+                        }}
+                        disabled
+                    >
+                        {"Deleted"}
+                    </LoadingButton>
+                )
+            } else if (workspace.state === 0 && workspace.init_state === 0) {
+                button = (
+                    <LoadingButton
+                        variant={"outlined"}
+                        sx={{
+                            height: "40px"
+                        }}
+                        disabled
+                    >
+                        {"Uplink Starting"}
+                    </LoadingButton>
+                )
+            } else if (workspace.state === 0 && workspace.init_state >= 1) {
+                button = (
+                    <LoadingButton
+                        variant={"outlined"}
+                        sx={{
+                            height: "40px",
+                        }}
+                        disabled
+                    >
+                        {"Fueling Rocket"}
+                    </LoadingButton>
+                )
+            }
+        }
+
+        return button
+    }
+
+
+    const renderMobile = () => {
+        return (
+            <>
+            {showIframe && showDesktopIframe === "side" ? (
+
+                <div style={{ display: 'flex', overflow: 'hidden' }}>
+                    <div ref={leftPanelRef} style={{ flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
+                        {/* Left iframe content */}
+                        {(workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") ? (
+                            <iframe
+                                src={workspaceUrl}
+                                width="100%"
+                                height={`${window.innerHeight - 35}`}
+                                style={{ border: "none" }}
+                                title="Workspace"
+
+                            >
+                                Your browser does not support iframes.
+                            </iframe>
+                        ) : (
+                            <div>
+                                <ThreeDots />
+                            </div>
+                        )}
+                    </div>
+
+                    {/*<div ref={dragBarRef}*/}
+                    {/*     className="drag-bar"*/}
+                    {/*     style={{width: '40px', opacity: '0.5', visibility: 'hidden', backgroundColor: 'transparent'}}*/}
+                    {/*>*/}
+                    <div
+                        ref={dragBarRef}
+                        className="drag-bar"
+                        style={{
+                            cursor: 'ew-resize',
+                            backgroundImage: `radial-gradient(circle, ${hexToRGBA(theme.palette.primary.contrastText, 1)} 1px, ${hexToRGBA(theme.palette.primary.main, 1)} 1px)`,
+                            backgroundSize: '10px 10px',
+                            width: '20px'
+                        }}
+                    />
+                    {/*</div>*/}
+                    <div ref={rightPanelRef} style={{ flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
+                        {(workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") ? (
+                            <iframe
+                                src={convertEditorUrlToDesktop(workspaceUrl)}
+                                width="100%"
+                                height={`${window.innerHeight - 35}`}
+                                style={{ border: "none" }}
+                                title="Workspace"
+
+                            >
+                                Your browser does not support iframes.
+                            </iframe>
+                        ) : (
+                            <div>
+                                <ThreeDots />
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+            ) : showIframe ? (
+                <div style={{overflow: "hidden"}}>
+                    {(workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") ? (
+                        <iframe
+                            src={workspaceUrl}
+                            width="100%" // Your desired width
+                            height={`${window.innerHeight - 35}`}
+                            style={{border: "none"}}
+                            title="Workspace"
+                            ref={iframeRef}
+                        >
+                            Your browser does not support iframes.
+                        </iframe>
+                    ) : (
+                        <div>
+                            <ThreeDots/>
+                        </div>
+                    )}
+                </div>
+
+                ) : (
+                    <div style={(window.innerWidth < 500) ? {overflow: "hidden", height: "calc(100vh - 90px)"} : undefined}>
+                        <div>
+                            <Typography
+                                component={"div"}
+                                variant={"h5"}
+                                sx={{
+                                    position: "absolute",
+                                    top: "75px",
+                                    left: "15px",
+                                    zIndex: 2,
+                                    color: theme.palette.text.primary,
+
+                                }}
+                            >
+                                {"Launch Pad"}
+                            </Typography>
+                            <Typography
+                                component={"div"}
+                                variant={"h5"}
+                                sx={{
+                                    position: "absolute",
+                                    top: "75px",
+                                    left: "16px",
+
+                                    zIndex: 1,
+                                    color: theme.palette.primary.dark,
+                                }}
+                            >
+                                {"Launch Pad"}
+                            </Typography>
+                        </div>
+                        <div
+                            style={{
+                                float: "right",
+                                marginTop: "10px",
+                                marginRight: "10px"
+                            }}
+                        >
+                            {renderMobileButton()}
+                        </div>
+                        <div style={{display: "flex", justifyContent: "center", width: "100%"}}>
+                            {renderBodyMobile()}
+                        </div>
+                    </div>
+                )}
+            {xpPopup && window.innerWidth > 1000 ? (xpPopupMemo) : null}
+            </>
+        )
+    }
+
+    let renderer = window.innerWidth > 1000 ? renderDesktop : renderMobile
+
+
+    // @ts-ignore
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
@@ -2155,138 +2796,7 @@ const WorkspacePage = () => {
                         },
                     ]}
                 />
-                {showIframe && showDesktopIframe === "side" ? (
-
-                    <div style={{ display: 'flex', overflow: 'hidden' }}>
-                        <div ref={leftPanelRef} style={{ flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
-                            {/* Left iframe content */}
-                            {(workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") ? (
-                                <iframe
-                                    src={workspaceUrl}
-                                    width="100%"
-                                    height={`${window.innerHeight - 35}`}
-                                    style={{ border: "none" }}
-                                    title="Workspace"
-
-                                >
-                                    Your browser does not support iframes.
-                                </iframe>
-                            ) : (
-                                <div>
-                                    <ThreeDots />
-                                </div>
-                            )}
-                        </div>
-
-                        {/*<div ref={dragBarRef}*/}
-                        {/*     className="drag-bar"*/}
-                        {/*     style={{width: '40px', opacity: '0.5', visibility: 'hidden', backgroundColor: 'transparent'}}*/}
-                        {/*>*/}
-                        <div
-                            ref={dragBarRef}
-                            className="drag-bar"
-                            style={{
-                                cursor: 'ew-resize',
-                                backgroundImage: `radial-gradient(circle, ${hexToRGBA(theme.palette.primary.contrastText, 1)} 1px, ${hexToRGBA(theme.palette.primary.main, 1)} 1px)`,
-                                backgroundSize: '10px 10px',
-                                width: '20px'
-                            }}
-                        />
-                        {/*</div>*/}
-                        <div ref={rightPanelRef} style={{ flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
-                            {(workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") ? (
-                                <iframe
-                                    src={convertEditorUrlToDesktop(workspaceUrl)}
-                                    width="100%"
-                                    height={`${window.innerHeight - 35}`}
-                                    style={{ border: "none" }}
-                                    title="Workspace"
-
-                                >
-                                    Your browser does not support iframes.
-                                </iframe>
-                            ) : (
-                                <div>
-                                    <ThreeDots />
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                ) : showIframe ? (
-                    <div style={{overflow: "hidden"}}>
-                        {(workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") ? (
-                            <iframe
-                                src={workspaceUrl}
-                                width="100%" // Your desired width
-                                height={`${window.innerHeight - 35}`}
-                                style={{border: "none"}}
-                                title="Workspace"
-                                ref={iframeRef}
-                            >
-                                Your browser does not support iframes.
-                            </iframe>
-                        ) : (
-                            <div>
-                                <ThreeDots/>
-                            </div>
-                        )}
-                    </div>
-
-                    ) : (
-                        <>
-                            <div style={{position: 'relative', height: '8vh', width: '100vw'}}>
-                                <Typography
-                                    component={"div"}
-                                    variant={"h4"}
-                                    sx={{
-                                        position: "absolute",
-                                        top: "70%",
-                                        left:
-                                            sidebarOpen ?
-                                                    aspectRatio === "21:9" ? "20%" : "23%"
-                                            : chatOpen ?
-                                                    aspectRatio === "21:9" ? "18%" : "20%"
-                                            :
-                                                    aspectRatio === "21:9" ? "24%" : "28%",
-                                        transform: "translate(-50%, -50%)",
-                                        zIndex: 2,
-                                        color: theme.palette.text.primary,
-
-                                    }}
-                                >
-                                    {"Launch Pad"}
-                                </Typography>
-                                <Typography
-                                    component={"div"}
-                                    variant={"h4"}
-                                    sx={{
-                                        position: "absolute",
-                                        top: "70%",
-                                        left: sidebarOpen ?
-                                            aspectRatio === "21:9" ? "20.1%" : "23.1%"
-                                            : chatOpen ?
-                                                aspectRatio === "21:9" ? "18.1%" : "20.1%"
-                                                :
-                                                aspectRatio === "21:9" ? "24.1%" : "28.1%",
-                                        transform: "translate(-50%, -50%)",
-                                        zIndex: 1,
-                                        color: theme.palette.primary.dark,
-                                    }}
-                                >
-                                    {"Launch Pad"}
-                                </Typography>
-                            </div>
-
-                            {/*<div style={{display: "flex", width: "100%"}}>*/}
-                            {/*    {renderStatusBar()}*/}
-                            {/*</div>*/}
-                            <div style={{display: "flex", justifyContent: "center", width: "100%"}}>
-                                {renderBody()}
-                            </div>
-                        </>
-                    )}
-            {xpPopup ? (xpPopupMemo) : null}
+                {renderer()}
             </CssBaseline>
         </ThemeProvider>
     )

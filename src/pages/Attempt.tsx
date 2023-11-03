@@ -19,12 +19,9 @@ import {
 } from "@mui/material";
 import {getAllTokens, themeHelpers} from "../theme";
 import UserIcon from "../components/UserIcon";
-import SearchBar from "../components/SearchBar";
 import {useAppDispatch, useAppSelector} from "../app/hooks";
 import {initialAuthStateUpdate, selectAuthState, selectAuthStateUserName, updateAuthState} from "../reducers/auth/auth";
 import {useNavigate} from "react-router-dom";
-import Editor from "../components/Editor";
-import AppWrapper from "../components/AppWrapper";
 import call from "../services/api-call";
 import config from "../config";
 import {useParams} from "react-router";
@@ -64,12 +61,13 @@ import Person3Icon from "@mui/icons-material/Person3";
 import styled, {keyframes} from 'styled-components';
 import WorkspaceConfigEditor from "../components/editor/workspace_config/editor";
 import {Helmet, HelmetProvider} from "react-helmet-async"
-import gigoImg from "../img/premiumGorilla.png"
 
 import * as yaml from 'js-yaml';
 import {Backdrop} from "@material-ui/core";
 import darkImageUploadIcon from "../img/dark_image_upload2.svg";
 import EditIcon from "@mui/icons-material/Edit";
+import Fab from '@mui/material/Fab';
+import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 
 function AttemptPage() {
     // retrieve url params
@@ -1666,8 +1664,7 @@ function AttemptPage() {
                                             userId === attempt?.author_id ? launchWorkspace() : createAttempt();
                                         }}
                                     >
-                                        {closedState ? (userId === attempt?.author_id ? "View Attempt" : "Branch Attempt") :
-                                            (userId === attempt?.author_id ? "Keep Going" : "Branch Attempt")}
+                                        Launch <RocketLaunchIcon sx={{marginLeft: "10px"}}/>
                                     </LoadingButton>
                                 </Grid>
                             ) : null}
@@ -1848,6 +1845,22 @@ function AttemptPage() {
                     </div>
                     {/* add a 10vh buffer at the end of the page */}
                     <div style={{height: "10vh"}}/>
+                    {/* On mobile add a hovering button to launch the project */}
+                    {window.innerWidth <= 1000 && (
+                        <Fab 
+                            color="secondary" 
+                            aria-label="launch-mobile" 
+                            sx={{position: "fixed", bottom: "80px", right: "20px"}}
+                            onClick={() => {
+                                if (!loggedIn) {
+                                    window.location.href = "/signup";
+                                }
+                                userId === attempt?.author_id ? launchWorkspace() : createAttempt();
+                            }}
+                        >
+                            <RocketLaunchIcon />
+                        </Fab>
+                    )}
                 </CssBaseline>
             </ThemeProvider>
         </div>

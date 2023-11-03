@@ -97,24 +97,22 @@ import renown10 from "../img/renown/renown10.svg"
 import alternativeImage from "../img/Black.png"
 import CardTutorial from "../components/CardTutorial";
 import UserIcon from "../components/UserIcon";
-import {useDispatch, useSelector} from "react-redux";
+import {useSelector} from "react-redux";
 import {selectCacheState} from "../reducers/pageCache/pageCache";
 import styled, {keyframes} from 'styled-components';
 import PersonIcon from "@mui/icons-material/Person";
 import {Helmet, HelmetProvider} from "react-helmet-async";
 import CloseIcon from "@material-ui/icons/Close";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import {authorizeGithub} from "../services/auth";
 import CaptchaPage from "./CaptchaPage";
 import EditIcon from "@mui/icons-material/Edit";
 import ProjectSelector from "../components/EditProjectSelector";
-import { CloudUpload as CloudUploadIcon } from '@material-ui/icons';
 import { Backdrop, Fade, makeStyles } from '@material-ui/core';
 import darkImageUploadIcon from "../img/dark_image_upload2.svg";
-import {initialCreateProjectStateUpdate} from "../reducers/createProject/createProject";
 import ProjectRenown from "../components/EditProjectRenown";
 import Tag from "../models/tag";
-import editProjectRenown from "../components/EditProjectRenown";
+import Fab from '@mui/material/Fab';
+import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 
 function Challenge() {
 
@@ -3903,7 +3901,7 @@ function Challenge() {
             fontSize: "0.8em",
         }
 
-        let buttonText = (project !== null && userId === project["author_id"]) || (userAttempt !== null) ? "Keep Going" : project !== null && project["has_access"] !== null && project["has_access"] === false ? "Buy Content" : "Give It A Shot"
+        let buttonText = project !== null && project["has_access"] !== null && project["has_access"] === false ? "Buy Content" : "Launch"
 
         if (runTutorial && stepIndex === 1) {
             return (
@@ -3915,7 +3913,7 @@ function Challenge() {
                     className="attempt"
                     onClick={clickCallback}
                 >
-                    {buttonText}
+                    {buttonText}<RocketLaunchIcon sx={{marginLeft: "10px"}}/>
                 </TutorialLaunchButton>
             )
         }
@@ -3929,8 +3927,40 @@ function Challenge() {
                 className="attempt"
                 onClick={clickCallback}
             >
-                {buttonText}
+                {buttonText}<RocketLaunchIcon sx={{marginLeft: "10px"}}/>
             </LoadingButton>
+        )
+    }
+
+    const renderLaunchButtonMobile = () => {
+        let clickCallback = () => {
+            if (!loggedIn) {
+                window.location.href = "/signup";
+            }
+            if (project !== null && project["has_access"] !== null && project["has_access"] === false) {
+                setPurchasePopup(true);
+                return;
+            }
+            setLaunchingWorkspace(true);
+            if (project !== null && userId === project["author_id"]) {
+                launchWorkspace(project.repo_id, project._id, 0);
+                return;
+            } else if (userAttempt !== null) {
+                launchWorkspace(userAttempt.repo_id, userAttempt._id, 1);
+                return;
+            }
+            createAttempt();
+        }
+
+        return (
+            <Fab 
+                color="secondary" 
+                aria-label="launch-mobile" 
+                sx={{position: "fixed", bottom: "80px", right: "20px"}}
+                onClick={clickCallback}
+            >
+                <RocketLaunchIcon />
+            </Fab>
         )
     }
 
@@ -5066,6 +5096,8 @@ function Challenge() {
             <ThemeProvider theme={theme}>
                 <CssBaseline>
                     {isEphemeral ? ephemeralChallenge() : userChallenge()}
+                    {/* On mobile add a hovering button to launch the project */}
+                    {window.innerWidth <= 1000 && renderLaunchButtonMobile()}
                 </CssBaseline>
             </ThemeProvider>
         </div>

@@ -1,15 +1,16 @@
 //We copied this code, we are so sorry, but we cannot find where from anymore.
 //If this is your code, please claim it and let us know. We will give you credit.
 
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import uuid from 'react-uuid'
 // import Modal from '../components/Modal'
 import './css/Game.2048.css'
-import {Button, Card, createTheme, Modal, PaletteMode} from "@mui/material";
+import { Button, Card, createTheme, Modal, PaletteMode } from "@mui/material";
 import swal from "sweetalert";
-import {CardHeader} from "@material-ui/core";
+import { CardHeader } from "@material-ui/core";
 import call from "../../services/api-call";
-import {getAllTokens} from "../../theme";
+import { getAllTokens } from "../../theme";
+import { ca } from 'date-fns/locale';
 // import Modal from "./Modal"
 
 const tileColors = ['#fffcbb', '#FFFCAB', '#ffef62', '#63a4f8', '#3D8EF7', '#2a63ac', '#84E8A2', '#29C18C', '#1c8762', '#af52bf', '#9c27b0', '#6d1b7b']
@@ -52,9 +53,9 @@ export class TwentyFortyEight extends Component {
         show: false,
         buttons: []
       },
-      mode: userPref === 'light'? 'light' : 'dark',
+      mode: userPref === 'light' ? 'light' : 'dark',
       gameOver: false,
-      highScore: this.props.highScore
+      highScore: this.props.highScore,
     }
 
     this.backgroundTiles = [];
@@ -75,6 +76,9 @@ export class TwentyFortyEight extends Component {
   numToTile = new Array(16).fill(-1)
 
   isGameOver = false
+
+  startSwipeX = 0
+  startSwipeY = 0
 
   showModal = (title, content, buttons) => {
     if ((typeof content) === "function") {
@@ -110,7 +114,7 @@ export class TwentyFortyEight extends Component {
     this.showModal("Game Over", (
       <div>
         <h4 className="text-center">Game Over</h4>
-        <br/>
+        <br />
         <div className="row">
           <div className="col">
             <p className="text-right">Score:</p>
@@ -178,8 +182,8 @@ export class TwentyFortyEight extends Component {
   }
 
 
-  setHighestScore = async(num) => {
-    let res =  await call(
+  setHighestScore = async (num) => {
+    let res = await call(
       "/api/workspace/setHighestScore",
       "post",
       null,
@@ -217,7 +221,7 @@ export class TwentyFortyEight extends Component {
       let rn = Math.random() > 0.9 ? 2 : 1;
 
       let uni = uuid()
-      tls[uni] = new Tile({x: parseInt(ri / 4), y: ri % 4, n: rn})
+      tls[uni] = new Tile({ x: parseInt(ri / 4), y: ri % 4, n: rn })
       this.valid[ri] = false
       this.validCount--
       this.numbers[ri] = rn
@@ -251,7 +255,7 @@ export class TwentyFortyEight extends Component {
         //   this.setHighestScore(this.state.score)
         // }
         // setTimeout(this.gameOver, 1000);
-        this.setState({gameOver: true})
+        this.setState({ gameOver: true })
       }
     }
   }
@@ -461,9 +465,40 @@ export class TwentyFortyEight extends Component {
     }
   }
 
+  touchStart = (e) => {
+    this.startSwipeX = e.touches[0].clientX;
+    this.startSwipeY = e.touches[0].clientY;
+  }
+
+  touchSwipe = (e) => {
+    const deltaX = e.changedTouches[0].clientX - this.startSwipeX;
+    const deltaY = e.changedTouches[0].clientY - this.startSwipeY;
+    const absDeltaX = Math.abs(deltaX);
+    const absDeltaY = Math.abs(deltaY);
+
+    if (absDeltaX > absDeltaY) {
+      // Horizontal movement is greater than vertical movement
+      if (deltaX > 0) {
+        this.move(0, 1);
+      } else {
+        this.move(0, -1);
+      }
+    } else {
+      // Vertical movement is greater than horizontal movement
+      if (deltaY > 0) {
+        this.move(1, 0);
+      } else {
+        this.move(-1, 0);
+      }
+    }
+  }
+
   componentDidMount() {
 
     this.keyDownListener = window.addEventListener("keydown", this.keyDown)
+    this.swipeListenerStart = window.addEventListener("touchstart", this.touchStart)
+    this.swipeListenerEnd = window.addEventListener("touchend", this.touchSwipe)
+
 
     this.init()
   }
@@ -471,50 +506,100 @@ export class TwentyFortyEight extends Component {
   componentWillUnmount() {
 
     window.removeEventListener("keydown", this.keyDownListener)
+    window.removeEventListener("touchstart", this.touchStart)
+    window.removeEventListener("touchend", this.touchSwipe)
     // this.props.leaveGame()
   }
 
+  renderDesktopHeader = () => {
+    return (
+      <Card
+        sx={{
+          width: (tileSize * 4 + tileMargin * 6),
+          height: "90px",
+          borderRadius: 1,
+          backgroundColor: this.state.mode === "light" ? "white" : "#282826",
+          marginBottom: "10px"
+        }}
+      >
+        {/*{this.state.gameOver ? (*/}
+        {/*  <h4 style={{width: "100%", display: "flex", justifyContent: "center"}}>Game Over</h4>*/}
+        {/*) : (<div/>)}*/}
+        <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+          <Button onClick={() => this.init()}>
+            Restart Game
+          </Button>
+        </div>
+        <div style={{ width: "100%", display: "flex", flexDirection: "row", justifyContent: "space-around", alignItems: "center", height: "50%" }}>
+          <div className="row" style={{ width: "100px", display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
+            <div className="col">
+              <p className="text-right">Score:</p>
+            </div>
+            <div className="col">
+              <p>{this.state.score}</p>
+            </div>
+          </div>
+          <div className="row" style={{ width: "200px", display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
+            <div className="col">
+              <p className="text-right">High Score:</p>
+            </div>
+            <div className="col" style={{ display: "flex", alignItems: "center" }}>
+              {this.props.highScore}
+              {/*<p>{nhs ? this.state.score : this.props.highscore[this.props.gameCode]}</p>*/}
+            </div>
+          </div>
+        </div>
+      </Card>
+    )
+  }
+
+  renderMobileHeader = () => {
+    return (
+      <Card
+        sx={{
+          width: (window.innerWidth < 500) ? ((window.innerWidth - 20) / (tileSize * 4 + tileMargin * 6)) * .75 : undefined,
+          height: "90px",
+          borderRadius: 1,
+          backgroundColor: this.state.mode === "light" ? "white" : "#282826",
+          marginBottom: "10px",
+          marginLeft: (window.innerWidth < 500) ? "98px" : 0
+        }}
+      >
+        {/*{this.state.gameOver ? (*/}
+        {/*  <h4 style={{width: "100%", display: "flex", justifyContent: "center"}}>Game Over</h4>*/}
+        {/*) : (<div/>)}*/}
+        <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+          <Button onClick={() => this.init()}>
+            Restart Game
+          </Button>
+        </div>
+        <div style={{ width: "100%", display: "flex", flexDirection: (window.innerWidth > 500) ? "row" : "column", justifyContent: "space-around", alignItems: "center", height: "50%" }}>
+          <div className="row" style={{ width: "100px", display: "flex", flexDirection: "row", justifyContent: "space-between", height: (window.innerWidth < 500) ? "25px" : undefined }}>
+            <div className="col">
+              <p className="text-right">Score:</p>
+            </div>
+            <div className="col">
+              <p>{this.state.score}</p>
+            </div>
+          </div>
+          <div className="row" style={{ width: "200px", display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
+            <div className="col">
+              <p className="text-right">High Score:</p>
+            </div>
+            <div className="col" style={{ display: "flex", alignItems: "center" }}>
+              {this.props.highScore}
+              {/*<p>{nhs ? this.state.score : this.props.highscore[this.props.gameCode]}</p>*/}
+            </div>
+          </div>
+        </div>
+      </Card>
+    )
+  }
 
   render() {
     return (
       <div>
-        <Card
-          sx={{
-            width: (tileSize * 4 + tileMargin * 6),
-            height: "90px",
-            borderRadius: 1,
-            backgroundColor: this.state.mode === "light" ? "white" : "#282826",
-            marginBottom: "10px"
-          }}
-        >
-          {/*{this.state.gameOver ? (*/}
-          {/*  <h4 style={{width: "100%", display: "flex", justifyContent: "center"}}>Game Over</h4>*/}
-          {/*) : (<div/>)}*/}
-          <div style={{width: "100%", display: "flex", justifyContent: "center"}}>
-            <Button onClick={() => this.init()}>
-              Restart Game
-            </Button>
-          </div>
-          <div style={{width: "100%", display: "flex", flexDirection: "row", justifyContent: "space-around", alignItems: "center", height: "50%"}}>
-            <div className="row"  style={{width: "100px", display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
-              <div className="col">
-                <p className="text-right">Score:</p>
-              </div>
-              <div className="col">
-                <p>{this.state.score}</p>
-              </div>
-            </div>
-            <div className="row" style={{width: "200px", display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
-              <div className="col">
-                <p className="text-right">High Score:</p>
-              </div>
-              <div className="col" style={{display: "flex", alignItems: "center"}}>
-                {this.props.highScore}
-                {/*<p>{nhs ? this.state.score : this.props.highscore[this.props.gameCode]}</p>*/}
-              </div>
-            </div>
-          </div>
-        </Card>
+        {window.innerWidth > 1000 ? this.renderDesktopHeader() : this.renderMobileHeader()}
         <div className="arcade-2048-outer">
           <div className="arcade-2048-game" ref={this.mainElement} style={{
             width: (tileSize * 4 + tileMargin * 6),
@@ -524,17 +609,17 @@ export class TwentyFortyEight extends Component {
             {
               Object.entries(this.state.tiles).map(([ind, v]) => (
                 <div className={"arcade-2048-tile" + (v.isNew ? " new" : "") + (v.isMerged ? " merged" : "")} key={ind}
-                     style={{
-                       width: (tileSize + 1) + "px",
-                       height: (tileSize + 1) + "px",
-                       transform: v.transform,
-                       backgroundColor: v.color,
-                       display: "flex",
-                       justifyContent: "center",
-                       alignItems: "center",
-                       color: v.fontColor,
-                       fontSize: tileSize / 45 + "em"
-                     }}>
+                  style={{
+                    width: (tileSize + 1) + "px",
+                    height: (tileSize + 1) + "px",
+                    transform: v.transform,
+                    backgroundColor: v.color,
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    color: v.fontColor,
+                    fontSize: tileSize / 45 + "em"
+                  }}>
                   {
                     v.isMerged ? (<div className="arcade-2048-tile-inner">{v.number}</div>) : v.number
                   }
