@@ -883,6 +883,9 @@ export default function TopSearchBar(props: IProps) {
                             <MenuItem value={3}>
                                 <em>Competitive</em>
                             </MenuItem>
+                            <MenuItem value={4}>
+                                <em>Debug</em>
+                            </MenuItem>
                         </Select>
                     </Grid>
                 </Grid>

@@ -6,6 +6,7 @@ import HorseIcon from "./Icons/Horse";
 import HoodieIcon from "./Icons/Hoodie";
 import TrophyIcon from "./Icons/Trophy";
 import GraduationIcon from "./Icons/Graduation";
+import DebugIcon from "./Icons/Debug";
 import {QuestionMark} from "@mui/icons-material";
 import {getAllTokens} from "../theme";
 import {
@@ -31,6 +32,7 @@ function ProjectSelector({ originalLabel, onProjectSelect, theme}) {
         "Casual",
         "Competitive",
         "Interactive",
+        "Debug"
     ];
 
     const listStyle = {
@@ -73,6 +75,10 @@ function ProjectSelector({ originalLabel, onProjectSelect, theme}) {
             case "Interactive":
                 return (
                     <GraduationIcon sx={{width: "20px", height: "20px"}} />
+                )
+            case "Debug":
+                return (
+                    <DebugIcon sx={{width: "20px", height: "20px"}} />
                 )
             default:
                 return (

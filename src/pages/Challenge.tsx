@@ -114,6 +114,8 @@ import Tag from "../models/tag";
 import Fab from '@mui/material/Fab';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import CircularProgress from '@mui/material/CircularProgress';
+import editProjectRenown from "../components/EditProjectRenown";
+import DebugIcon from "../components/Icons/Debug";
 
 function Challenge() {
 
@@ -3632,6 +3634,10 @@ function Challenge() {
             return (
                 <GraduationIcon sx={{width: "20px", height: "20px"}} />
             )
+        case "Debug":
+            return (
+                <DebugIcon sx={{width: "20px", height: "20px"}} />
+            )
         default:
             return (
                 <QuestionMark sx={{width: "20px", height: "20px"}} />
@@ -3989,6 +3995,9 @@ function Challenge() {
                 case "Playground":
                     params["challenge_type"] = 1
                     break
+                case "Debug":
+                    params["challenge_type"] = 4
+                    break
             }
         }
 
@@ -4191,8 +4200,8 @@ function Challenge() {
                     </Box>
                 </div>
                 {project !== null && userId === project["author_id"] && window.innerWidth > 1000 ? (
-                    <div style={{paddingTop: "20px", marginLeft: "10px"}}>
-                        <Button variant="outlined" sx={styles.mainTabButton} style={{marginLeft: "20px"}} onClick={() => setEditPopup(true)}>
+                    <div style={{paddingTop: "20px", marginLeft: "10px", paddingRight: "20px"}}>
+                        <Button variant="outlined" sx={styles.mainTabButton} style={{marginLeft: "20px",}} onClick={() => setEditPopup(true)}>
                             Edit Project Details
                         </Button>
                     </div>
@@ -4532,6 +4541,7 @@ function Challenge() {
                                         <li style={styles.tutorialText}>Playground - A project with no goal that is meant to enable free experimentation.</li>
                                         <li style={styles.tutorialText}>Casual - A project that has a predefined goal and evaluations but is not competitively ranked against other users.</li>
                                         <li style={styles.tutorialText}>Competitive - Similar to Casual, but is ranked against other users.</li>
+                                        <li style={styles.tutorialText}>Debug - A project that is almost done but with a very bugs sprinkled in. Test your debugging skills by tacking back error and fixing them.</li>
                                     </ul>
                                 </div>
                             )
@@ -4576,7 +4586,7 @@ function Challenge() {
                             fullWidth
                             required
                             sx={{ mt: 2 }}
-                            style={{ width: "auto", background: theme.palette.background.default, zIndex: 2000 }}
+                            style={{ width: "auto", background: theme.palette.background.default, zIndex: 2000}}
                             inputProps={styles.textField}
                             multiline
                         />

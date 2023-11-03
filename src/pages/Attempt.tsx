@@ -69,6 +69,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import Fab from '@mui/material/Fab';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import CircularProgress from '@mui/material/CircularProgress';
+import DebugIcon from "../components/Icons/Debug";
 
 
 function AttemptPage() {
@@ -1524,6 +1525,10 @@ function AttemptPage() {
         case "Interactive":
             return (
                 <GraduationIcon sx={{width: "20px", height: "20px"}} />
+            )
+        case "Debug":
+            return (
+                <DebugIcon sx={{width: "20px", height: "20px"}} />
             )
         default:
             return (

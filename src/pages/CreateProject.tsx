@@ -1208,7 +1208,7 @@ function CreateProject() {
                         }}>
                             GIGO utilizes a class system for challenges, which allows users to quickly identify the
                             type of challenge they are attempting. This class system is broken into four distinct
-                            categories: Interactive, Playground, Casual and Competitive. Each category has its own set
+                            categories: Interactive, Playground, Casual, Debug and Competitive. Each category has its own set
                             of criteria that must be met by the author in order to meet the classification standards.
                         </div>
                         <ul>
@@ -1289,6 +1289,24 @@ function CreateProject() {
                                     tier, and each task is evaluated against a comprehensive set of metrics defined by
                                     the author. With Competitive Challenges, you can test yourself against other users
                                     and strive for higher rankings on the platform!
+                                </div>
+                            </li>
+                            <li>
+                                <strong style={{
+                                    fontSize: 12,
+                                    fontWeight: "bold",
+                                }}
+                                >
+                                    Debug
+                                </strong>
+                                <br />
+                                <div style={{
+                                    fontSize: 12,
+                                    textOverflow: "wrap"
+                                }}>
+                                    Debug Challenges will help sharpen your debugging skills. These projects are designed
+                                    similar to casual, with most of the code being done, but with bugs sprinkled in.
+                                    Strengthen your ability to track back and find bugs. Learn how to test the most important tool in a developer's arsenal.
                                 </div>
                             </li>
                         </ul>
@@ -2491,6 +2509,9 @@ function CreateProject() {
                                 </MenuItem>
                                 <MenuItem value={3}>
                                     <em>Competitive</em>
+                                </MenuItem>
+                                <MenuItem value={4}>
+                                    <em>Debug</em>
                                 </MenuItem>
                             </Select>
                         </FormControl>
