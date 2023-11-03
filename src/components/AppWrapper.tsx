@@ -1855,32 +1855,31 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     }
 
     const renderChatSideBar = () => {
-        if (window.innerWidth <= 1000) {
-            return null
-        }
+        // if (window.innerWidth <= 1000) {
+        //     return null
+        // }
 
         return (
             <>
-                <IconButton
-                    onClick={() => handleChatButton()}
-                    sx={{
-                        position: 'fixed',
-                        right: (rightOpen) ? 290 : 10,
-                        top: '50vh',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 1000,
-                        fontSize: '2rem',
-                        transform: 'translateY(-50%)',
-                    }}
-                >
-                    <Tooltip
-                        title={"Global Chat"}
+                {window.innerWidth > 1000 && (
+                    <IconButton
+                        onClick={() => handleChatButton()}
+                        sx={{
+                            position: 'fixed',
+                            right: (rightOpen) ? 290 : 10,
+                            top: '50vh',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 1000,
+                            fontSize: '2rem',
+                            transform: 'translateY(-50%)',
+                        }}
                     >
-                        {
-                            window.innerWidth > 1000
-                                ?
+                        <Tooltip
+                            title={"Global Chat"}
+                        >
+                            {
                                 (rightOpen) ?
                                     (
                                         <KeyboardDoubleArrowRightIcon
@@ -1895,11 +1894,10 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                             fontSize={"large"}
                                         />
                                     )
-                                :
-                                <></>
-                        }
-                    </Tooltip>
-                </IconButton>
+                            }
+                        </Tooltip>
+                    </IconButton>
+                )}
                 <Drawer
                     sx={{
                         width: drawerWidth * 1.5,
