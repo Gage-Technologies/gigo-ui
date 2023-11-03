@@ -1902,9 +1902,9 @@ const WorkspacePage = () => {
                         <Grid item xs={12}>
                             {progressBarMobile()}
                         </Grid>
-                        {(workspaceError === null) ? (workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null) && (
+                        {(workspaceError === null) ? (
                             <Grid item xs={12}>
-                                <Card sx={{
+                                {/* <Card sx={{
                                     // position: "absolute",
                                     width: "80vw",
                                     // height: "77vh",
@@ -1919,6 +1919,21 @@ const WorkspacePage = () => {
                                         className={"game"}>
                                         {render2048()}
                                     </div>
+                                </Card> */}
+                                <Card sx={{
+                                    width: "80vw",
+                                    backgroundColor: "transparent",
+                                    backgroundImage: "none",
+                                    boxShadow: "none",
+                                    borderRadius: 1,
+                                    border: 1,
+                                    borderColor: progressColorBorder() + "75",
+                                    marginTop: "200px",
+                                    padding: "10px"
+                                }}>
+                                    <Typography variant="h6">
+                                        Mobile DevSpace support is still early. Use a computer for the best experience!
+                                    </Typography>
                                 </Card>
                             </Grid>
                         ) : (

@@ -68,6 +68,8 @@ import darkImageUploadIcon from "../img/dark_image_upload2.svg";
 import EditIcon from "@mui/icons-material/Edit";
 import Fab from '@mui/material/Fab';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
+import CircularProgress from '@mui/material/CircularProgress';
+
 
 function AttemptPage() {
     // retrieve url params
@@ -1848,9 +1850,10 @@ function AttemptPage() {
                     {/* On mobile add a hovering button to launch the project */}
                     {window.innerWidth <= 1000 && (
                         <Fab 
+                            disabled={isLoading}
                             color="secondary" 
                             aria-label="launch-mobile" 
-                            sx={{position: "fixed", bottom: "80px", right: "20px"}}
+                            sx={{position: "fixed", bottom: "80px", right: "20px", zIndex: 6000}}
                             onClick={() => {
                                 if (!loggedIn) {
                                     window.location.href = "/signup";
@@ -1858,7 +1861,7 @@ function AttemptPage() {
                                 userId === attempt?.author_id ? launchWorkspace() : createAttempt();
                             }}
                         >
-                            <RocketLaunchIcon />
+                            {isLoading ? (<CircularProgress color="inherit" size={24} />) : (<RocketLaunchIcon />)}
                         </Fab>
                     )}
                 </CssBaseline>

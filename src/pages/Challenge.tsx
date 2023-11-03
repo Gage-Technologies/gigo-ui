@@ -113,6 +113,7 @@ import ProjectRenown from "../components/EditProjectRenown";
 import Tag from "../models/tag";
 import Fab from '@mui/material/Fab';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
+import CircularProgress from '@mui/material/CircularProgress';
 
 function Challenge() {
 
@@ -3954,12 +3955,13 @@ function Challenge() {
 
         return (
             <Fab 
+                disabled={launchingWorkspace}
                 color="secondary" 
                 aria-label="launch-mobile" 
-                sx={{position: "fixed", bottom: "80px", right: "20px"}}
+                sx={{position: "fixed", bottom: "80px", right: "20px", zIndex: 6000}}
                 onClick={clickCallback}
             >
-                <RocketLaunchIcon />
+                {launchingWorkspace ? (<CircularProgress color="inherit" size={24} />) : (<RocketLaunchIcon />)}
             </Fab>
         )
     }
