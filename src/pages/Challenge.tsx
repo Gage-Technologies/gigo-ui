@@ -1371,7 +1371,7 @@ function Challenge() {
                                 <StyledDiv style={{height: "200px", width: "inherit"}}/>
                             )}
 
-                            <div style={window.innerWidth > 1000 ? {overflow: "hidden", width: "70vw", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column"} : {overflow: "hidden", width: "100%", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column"}}>
+                            <div style={window.innerWidth > 1000 ? {overflow: "hidden", width: "70vw", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column"} : {overflow: "break-word", width: "100%", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column"}}>
                                  {minorTabDetermination()}
                             </div>
                         </div>
