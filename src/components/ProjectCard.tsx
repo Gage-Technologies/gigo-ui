@@ -34,6 +34,7 @@ import renown7 from "../img/renown/renown7.svg"
 import renown8 from "../img/renown/renown8.svg"
 import renown9 from "../img/renown/renown9.svg"
 import renown10 from "../img/renown/renown10.svg"
+import DebugIcon from "./Icons/Debug";
 
 
 interface IProps {
@@ -186,6 +187,10 @@ export default function ProjectCard(props: IProps) {
             case "Interactive":
                 return (
                     <GraduationIcon sx={{ width: "20px", height: "20px" }} />
+                )
+            case "Debug":
+                return (
+                    <DebugIcon sx={{width: "20px", height: "20px"}} />
                 )
             default:
                 return (

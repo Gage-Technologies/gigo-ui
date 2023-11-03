@@ -1927,6 +1927,9 @@ function User() {
                                             <MenuItem value={3}>
                                                 <em>Competitive</em>
                                             </MenuItem>
+                                            <MenuItem value={4}>
+                                                <em>Debug</em>
+                                            </MenuItem>
                                         </Select>
                                         <Select
                                             labelId={"tierInputLabel"}
