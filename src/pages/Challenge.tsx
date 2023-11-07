@@ -4549,8 +4549,8 @@ function Challenge() {
                         {
                             content: (
                                 <div>
-                                    <h2 style={styles.tutorialHeader}>Give It A Shot</h2>
-                                    <p style={styles.tutorialText}>On GIGO Attempts are how you accept a Challenge. Making an Attempt allows you to work on the project. Click the 'Give It A Shot' button on any Challenge to make an attempt and start working on the project!</p>
+                                    <h2 style={styles.tutorialHeader}>Launch</h2>
+                                    <p style={styles.tutorialText}>On GIGO Attempts are how you accept a Challenge. Making an Attempt allows you to work on the project. Click the 'Launch' button on any Challenge to make an attempt and start working on the project!</p>
                                 </div>
                             ),
                             moreInfo: (
@@ -4794,7 +4794,7 @@ function Challenge() {
             fontSize: "0.8em",
         }
 
-        let buttonText = (project !== null && userId === project["author_id"]) || (userAttempt !== null) ? "Keep Going" : project !== null && project["has_access"] !== null && project["has_access"] === false ? "Buy Content" : "Give It A Shot"
+        let buttonText = project !== null && project["has_access"] !== null && project["has_access"] === false ? "Buy Content" : "Launch"
 
         return (
             <LoadingButton
@@ -4805,7 +4805,7 @@ function Challenge() {
                 className="attempt"
                 onClick={() => launchEphemeralWorkspace()}
             >
-                {buttonText}
+                {buttonText}<RocketLaunchIcon sx={{marginLeft: "10px"}}/>
             </LoadingButton>
         )
     }

@@ -67,6 +67,7 @@ import {useParams} from "react-router";
 import { useTracking } from 'react-tracking';
 import { RecordWebUsage, WebTrackingEvent } from "../models/web_usage";
 import { useLocation } from 'react-router-dom';
+import { sleep } from "../services/utils";
 
 
 interface TimezoneOption {
@@ -414,6 +415,17 @@ function CreateNewAccount() {
                 }
 
                 if (res["message"] === "User Created.") {
+                    payload = {
+                        host: window.location.host,
+                        event: WebTrackingEvent.Signup,
+                        timespent: 0,
+                        path: location.pathname,
+                        latitude: null,
+                        longitude: null,
+                        metadata: {},
+                    }
+                    trackEvent(payload);
+
                     createLogin(true)
                 }
             }
@@ -422,17 +434,6 @@ function CreateNewAccount() {
         const [createRes] = await Promise.all([
             create,
         ])
-
-        payload = {
-            host: window.location.host,
-            event: WebTrackingEvent.Signup,
-            timespent: 0,
-            path: location.pathname,
-            latitude: null,
-            longitude: null,
-            metadata: {},
-        }
-        trackEvent(payload);
 
         if (createRes["message"] === "You must be logged in to access the GIGO system."){
             let authState = Object.assign({}, initialAuthStateUpdate)
@@ -466,6 +467,7 @@ function CreateNewAccount() {
 
             window.location.href = "/home";
 
+            setLoading(false)
         } else {
             if (sessionStorage.getItem("alive") === null)
                 //@ts-ignore
@@ -612,6 +614,17 @@ function CreateNewAccount() {
                 }
 
                 if (res["message"] === "Google User Added.") {
+                    payload = {
+                        host: window.location.host,
+                        event: WebTrackingEvent.Signup,
+                        timespent: 0,
+                        path: location.pathname,
+                        latitude: null,
+                        longitude: null,
+                        metadata: {"auth_provider": "google"},
+                    }
+                    trackEvent(payload);
+
                     let auth = await authorizeGoogle(externalToken, password);
                     // @ts-ignore
                     if (auth["user"] !== undefined) {
@@ -638,6 +651,7 @@ function CreateNewAccount() {
 
                         window.location.href = "/home";
 
+                        setLoading(false)
                     } else {
                         if (sessionStorage.getItem("alive") === null)
                             //@ts-ignore
@@ -651,17 +665,6 @@ function CreateNewAccount() {
             res,
         ])
 
-        payload = {
-            host: window.location.host,
-            event: WebTrackingEvent.Signup,
-            timespent: 0,
-            path: location.pathname,
-            latitude: null,
-            longitude: null,
-            metadata: {"auth_provider": "google"},
-        }
-        trackEvent(payload);
-
         if (createRes["message"] === "You must be logged in to access the GIGO system."){
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
@@ -669,7 +672,6 @@ function CreateNewAccount() {
             navigate("/login")
             setLoading(false)
         }
-        setLoading(false)
     }
 
     const onSuccessGithub = async (gh: any) => {
@@ -759,6 +761,17 @@ function CreateNewAccount() {
                 }
 
                 if (res["message"] === "Github User Added.") {
+                    payload = {
+                        host: window.location.host,
+                        event: WebTrackingEvent.Signup,
+                        timespent: 0,
+                        path: location.pathname,
+                        latitude: null,
+                        longitude: null,
+                        metadata: {"auth_provider": "github"},
+                    }
+                    trackEvent(payload);
+
                     let auth = await authorizeGithub(password);
                     // @ts-ignore
                     if (auth["user"] !== undefined) {
@@ -785,6 +798,7 @@ function CreateNewAccount() {
 
                         window.location.href = "/home";
 
+                        setLoading(false)
                     } else {
                         if (sessionStorage.getItem("alive") === null)
                             //@ts-ignore
@@ -799,17 +813,6 @@ function CreateNewAccount() {
             res,
         ])
 
-        payload = {
-            host: window.location.host,
-            event: WebTrackingEvent.Signup,
-            timespent: 0,
-            path: location.pathname,
-            latitude: null,
-            longitude: null,
-            metadata: {"auth_provider": "github"},
-        }
-        trackEvent(payload);
-
         if (createRes["message"] === "You must be logged in to access the GIGO system."){
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
@@ -817,8 +820,6 @@ function CreateNewAccount() {
             navigate("/login")
             setLoading(false)
         }
-
-        setLoading(false)
     };
 
     const verifyEmail = async (emailParam: string) => {
