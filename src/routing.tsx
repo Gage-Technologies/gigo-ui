@@ -5,6 +5,7 @@ import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import { initialAuthState, initialAuthStateUpdate, selectAuthState, updateAuthState } from "./reducers/auth/auth";
 import TrackedOutlet from './components/OutletTracking';
+import JourneyQuiz from "./pages/JourneyQuiz";
 const CurateAdminPage = React.lazy(() => import("./pages/curateAdmin"));
 const Home = React.lazy(() => import("./pages/home"));
 const Challenge = React.lazy(() => import("./pages/Challenge"));
