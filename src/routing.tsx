@@ -1,11 +1,10 @@
 
 
 import React from 'react';
-import {Navigate, Outlet, Route, Routes} from "react-router-dom";
-import {useAppDispatch, useAppSelector} from './app/hooks';
-import {initialAuthStateUpdate, selectAuthState, updateAuthState} from "./reducers/auth/auth";
-import JourneyQuiz from "./pages/JourneyQuiz";
-import CaptchaPage from "./pages/CaptchaPage";
+import { Navigate, Outlet, Route, Routes } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from './app/hooks';
+import { initialAuthStateUpdate, selectAuthState, updateAuthState } from "./reducers/auth/auth";
+import TrackedOutlet from './components/OutletTracking';
 const CurateAdminPage = React.lazy(() => import("./pages/curateAdmin"));
 const Home = React.lazy(() => import("./pages/home"));
 const Challenge = React.lazy(() => import("./pages/Challenge"));
@@ -49,10 +48,10 @@ export default function Routing() {
      * Protects private routes from unauthenticated and unauthorized access
      * @param role role required for a user to access the page (optional)
      */
-    const PrivateRoute = ({role = null}) => {
+    const PrivateRoute = ({ role = null }) => {
         // route to login for an unauthenticated user
         if (!authState.authenticated) {
-            return <Navigate to="/login"/>
+            return <Navigate to="/login" />
         }
 
         // clear expired authentication and route to login
@@ -62,56 +61,59 @@ export default function Routing() {
 
         // route to route for out-of-role url
         if (role !== null && role !== authState.role) {
-            return <Navigate to="/login"/>
+            return <Navigate to="/login" />
         }
 
-        return <Outlet/>
+        return <Outlet />
     };
+
     //todo: make sure to add the id aspect to referral id
     return (
         <Routes>
-            <Route path={"/login"} element={<Login />}/>
-            <Route path={"/forgotPassword"} element={<ForgotPassword />}/>
-            <Route path={"/resetPassword"} element={<ResetForgotPassword />}/>
-            <Route path={"/resetPassword/:token/:id"} element={<ResetForgotPassword />}/>
-            <Route path={"/home"} element={<Home />} />
-            <Route path="/search" element={<Search />}/>
-            <Route path={"/"} element={<Home />}/>
-            <Route path="/challenge/:id" element={<Challenge />}/>
-            <Route path="/attempt/:id" element={<AttemptPage />}/>
-            <Route path="/user/:id" element={<User />}/>
-            <Route path={"/signup"} element={<CreateNewAccount />}/>
-            <Route path={"/signup/:name"} element={<CreateNewAccount />}/>
-            <Route path={"/referral/:name"} element={<ReferralWelcome/>}/>
-            <Route path={"/launchpad/:id"} element={<WorkspacePage />}/>
-            <Route path={"/workspace/:id"} element={<WorkspaceAdvancedPage />}/>
-            <Route path={"/about"} element={<About/>}/>
-            <Route path={"/documentation"} element={<Documentation />}/>
-            <Route path={"/documentation/:file"} element={<Documentation />}/>
-            <Route path={"/documentation/:level1/:file"} element={<Documentation />}/>
-            <Route path={"/documentation/:level1/:level2/:file"} element={<Documentation />}/>
-            <Route path={"/premium"} element={<PremiumDescription />}/>
-            <Route path={"/buyingExclusive"} element={<BuyingExclusiveContent/>}/>
-            <Route path={"/aboutExclusive"} element={<ExclusiveContent/>}/>
-            <Route element={<PrivateRoute />}>
+            <Route element={<TrackedOutlet />}>
+                <Route path={"/login"} element={<Login />}/>
+                <Route path={"/forgotPassword"} element={<ForgotPassword />}/>
+                <Route path={"/resetPassword"} element={<ResetForgotPassword />}/>
+                <Route path={"/resetPassword/:token/:id"} element={<ResetForgotPassword />}/>
+                <Route path={"/home"} element={<Home />} />
+                <Route path="/search" element={<Search />}/>
+                <Route path={"/"} element={<Home />}/>
+                <Route path="/challenge/:id" element={<Challenge />}/>
+                <Route path="/attempt/:id" element={<AttemptPage />}/>
+                <Route path="/user/:id" element={<User />}/>
                 <Route path={"/signup"} element={<CreateNewAccount />}/>
                 <Route path={"/signup/:name"} element={<CreateNewAccount />}/>
-                {/*<Route path={"/journey"} element={<Journey />}/>*/}
-                {/*<Route path={"/journey/form"} element={<JourneyForm />}/>*/}
-                {/*<Route path={"/journey/quiz"} element={<JourneyQuiz />}/>*/}
-                <Route path="/following" element={<Following />}/>
-                <Route path="/settings" element={<AccountSettings />}/>
-                <Route path="/create-challenge" element={<CreateProject />}/>
-                <Route path="/active" element={<Active />}/>
-                <Route path={"/profile"} element={<Profile />}/>
-                <Route path={"/success"} element={<StripeSuccess />}/>
-                <Route path={"/successMembership"} element={<StripeSuccessMembership />}/>
-                <Route path={"/reauth"} element={<StripeReauth />}/>
-                <Route path="/streak" element={<Streak />}/>
-                <Route path="/nemesis" element={<Nemesis />}/>
-                <Route path={"/curateAdmin"} element={<CurateAdminPage/>}/>
+                <Route path={"/referral/:name"} element={<ReferralWelcome/>}/>
+                <Route path={"/launchpad/:id"} element={<WorkspacePage />}/>
+                <Route path={"/workspace/:id"} element={<WorkspaceAdvancedPage />}/>
+                <Route path={"/about"} element={<About/>}/>
+                <Route path={"/documentation"} element={<Documentation />}/>
+                <Route path={"/documentation/:file"} element={<Documentation />}/>
+                <Route path={"/documentation/:level1/:file"} element={<Documentation />}/>
+                <Route path={"/documentation/:level1/:level2/:file"} element={<Documentation />}/>
+                <Route path={"/premium"} element={<PremiumDescription />}/>
+                <Route path={"/buyingExclusive"} element={<BuyingExclusiveContent/>}/>
+                <Route path={"/aboutExclusive"} element={<ExclusiveContent/>}/>
+                <Route element={<PrivateRoute />}>
+                    <Route path={"/signup"} element={<CreateNewAccount />}/>
+                    <Route path={"/signup/:name"} element={<CreateNewAccount />}/>
+                    {/*<Route path={"/journey"} element={<Journey />}/>*/}
+                    {/*<Route path={"/journey/form"} element={<JourneyForm />}/>*/ }
+                    {/*<Route path={"/journey/quiz"} element={<JourneyQuiz />}/>*/ }
+                    <Route path="/following" element={<Following />}/>
+                    <Route path="/settings" element={<AccountSettings />}/>
+                    <Route path="/create-challenge" element={<CreateProject />}/>
+                    <Route path="/active" element={<Active />}/>
+                    <Route path={"/profile"} element={<Profile />}/>
+                    <Route path={"/success"} element={<StripeSuccess />}/>
+                    <Route path={"/successMembership"} element={<StripeSuccessMembership />}/>
+                    <Route path={"/reauth"} element={<StripeReauth />}/>
+                    <Route path="/streak" element={<Streak />}/>
+                    <Route path="/nemesis" element={<Nemesis />}/>
+                    <Route path={"/curateAdmin"} element={<CurateAdminPage/>}/>
+                </Route >
+                <Route path="*" element={<NotFoundPage />} />
             </Route>
-            <Route path="*" element={<NotFoundPage/>}/>
-        </Routes>
+        </Routes >
     )
 }

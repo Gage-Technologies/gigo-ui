@@ -99,6 +99,9 @@ import DesktopAccessDisabledIcon from '@mui/icons-material/DesktopAccessDisabled
 import QueuePlayNextIcon from '@mui/icons-material/QueuePlayNext';
 import { SocialIcon } from 'react-social-icons'
 import Snackbar from '@material-ui/core/Snackbar';
+import { RecordWebUsage, WebTrackingEvent } from '../models/web_usage';
+import { useLocation } from 'react-router-dom';
+import { useTracking } from 'react-tracking';
 
 
 interface IProps {
@@ -109,6 +112,18 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     const drawerWidth = 200;
 
     let userPref = localStorage.getItem('theme')
+
+    const { trackEvent } = useTracking({}, {
+        dispatch: (data: any) => {
+            call(
+                "/api/recordUsage",
+                "POST",
+                null, null, null,
+                data,
+            )
+        }
+    });
+    const location = useLocation();
 
     const [mode, setMode] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const colorMode = React.useMemo(
@@ -433,6 +448,17 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
             null,
             config.rootPath
         )
+
+        const payload: RecordWebUsage = {
+            host: window.location.host,
+            event: WebTrackingEvent.Logout,
+            timespent: 0,
+            path: location.pathname,
+            latitude: null,
+            longitude: null,
+            metadata: {},
+        }
+        trackEvent(payload);
 
         if (res["message"] === "You must be logged in to access the GIGO system.") {
             navigate("/login")

@@ -3664,6 +3664,13 @@
   dependencies:
     "@types/react" "*"
 
+"@types/react-tracking@^8.1.5":
+  version "8.1.5"
+  resolved "https://registry.yarnpkg.com/@types/react-tracking/-/react-tracking-8.1.5.tgz#84ca3675fd4f4a379d644a49c497866b40382c2b"
+  integrity sha512-0OixLUl/7gw7zIo3eQj+xIoIFRS3VSJM/jqjhjyuz4HaUZcK+ydMO7/ufhfxGqI08GXIToB1mRuNteS7mGE5mQ==
+  dependencies:
+    "@types/react" "*"
+
 "@types/react-transition-group@^4.2.0", "@types/react-transition-group@^4.4.5":
   version "4.4.6"
   resolved "https://registry.npmjs.org/@types/react-transition-group/-/react-transition-group-4.4.6.tgz"
@@ -6721,7 +6728,7 @@ fs.realpath@^1.0.0:
   resolved "https://registry.npmjs.org/fs.realpath/-/fs.realpath-1.0.0.tgz"
   integrity sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==
 
-fsevents@^2.3.2, fsevents@~2.3.2:
+fsevents@*, fsevents@^2.3.2, fsevents@~2.3.2:
   version "2.3.3"
   resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.3.3.tgz#cac6407785d03675a2a5e1a5305c697b347d90d6"
   integrity sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==
@@ -11391,6 +11398,16 @@ react-tenor@^2.2.0:
   version "2.2.0"
   resolved "https://registry.npmjs.org/react-tenor/-/react-tenor-2.2.0.tgz"
   integrity sha512-hs0KomduflTLU05fvKAtrf9f/aAj3wN2kPF2cl5cAOFPkhuaVJuWLNxRSAQN1m+aKHinujEQZ1fXp+gL1KgYhg==
+
+react-tracking@^9.3.2:
+  version "9.3.2"
+  resolved "https://registry.yarnpkg.com/react-tracking/-/react-tracking-9.3.2.tgz#8918275eb18fa90bd067e465541e349d9a71589d"
+  integrity sha512-F7miWLnkQIs/13iYJPFl9OlFouD0XXCRt87xsdObL/LJ0D5WquN9azSzA1/fclYZNs5mPTKyJ4cOA/Q8PSVhrw==
+  dependencies:
+    deepmerge "^4.2.2"
+    hoist-non-react-statics "^3.3.2"
+  optionalDependencies:
+    fsevents "*"
 
 react-transition-group@^4.4.0, react-transition-group@^4.4.5:
   version "4.4.5"

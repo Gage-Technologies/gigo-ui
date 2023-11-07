@@ -64,6 +64,9 @@ import {clearProjectState, updateCreateProjectState} from "../reducers/createPro
 import {DefaultWorkspaceConfig, WorkspaceConfig} from "../models/workspace";
 import loginImg219 from "../img/login/login_background-21-9.jpg";
 import {useParams} from "react-router";
+import { useTracking } from 'react-tracking';
+import { RecordWebUsage, WebTrackingEvent } from "../models/web_usage";
+import { useLocation } from 'react-router-dom';
 
 
 interface TimezoneOption {
@@ -76,6 +79,18 @@ function CreateNewAccount() {
     let userPref = localStorage.getItem('theme')
     const [mode, _] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
         const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
+
+    const { trackEvent } = useTracking({}, {
+        dispatch: (data: any) => {
+            call(
+                "/api/recordUsage",
+                "POST",
+                null, null, null,
+                data,
+            )
+        }
+    });
+    const location = useLocation();
 
     const styles = {
         themeButton: {
@@ -307,6 +322,18 @@ function CreateNewAccount() {
         let data = svgNode.outerHTML;
         let svg = new Blob([data], { type: "image/svg+xml" });
         setLoading(true)
+
+        let payload: RecordWebUsage = {
+            host: window.location.host,
+            event: WebTrackingEvent.SignupStart,
+            timespent: 0,
+            path: location.pathname,
+            latitude: null,
+            longitude: null,
+            metadata: {},
+        }
+        trackEvent(payload);
+
         if (password!== confirmPass) {
             //@ts-ignore
             swal("Passwords do not match")
@@ -395,6 +422,17 @@ function CreateNewAccount() {
         const [createRes] = await Promise.all([
             create,
         ])
+
+        payload = {
+            host: window.location.host,
+            event: WebTrackingEvent.Signup,
+            timespent: 0,
+            path: location.pathname,
+            latitude: null,
+            longitude: null,
+            metadata: {},
+        }
+        trackEvent(payload);
 
         if (createRes["message"] === "You must be logged in to access the GIGO system."){
             let authState = Object.assign({}, initialAuthStateUpdate)
@@ -501,6 +539,18 @@ function CreateNewAccount() {
 
     const googleCreate = async () => {
         setLoading(true)
+
+        let payload: RecordWebUsage = {
+            host: window.location.host,
+            event: WebTrackingEvent.SignupStart,
+            timespent: 0,
+            path: location.pathname,
+            latitude: null,
+            longitude: null,
+            metadata: {"auth_provider": "google"},
+        }
+        trackEvent(payload);
+
         let svgNode = avatarRef
         //@ts-ignore
         let data = svgNode.outerHTML;
@@ -601,6 +651,17 @@ function CreateNewAccount() {
             res,
         ])
 
+        payload = {
+            host: window.location.host,
+            event: WebTrackingEvent.Signup,
+            timespent: 0,
+            path: location.pathname,
+            latitude: null,
+            longitude: null,
+            metadata: {"auth_provider": "google"},
+        }
+        trackEvent(payload);
+
         if (createRes["message"] === "You must be logged in to access the GIGO system."){
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
@@ -619,6 +680,18 @@ function CreateNewAccount() {
 
     const githubCreate = async () => {
         setLoading(true)
+
+        let payload: RecordWebUsage = {
+            host: window.location.host,
+            event: WebTrackingEvent.SignupStart,
+            timespent: 0,
+            path: location.pathname,
+            latitude: null,
+            longitude: null,
+            metadata: {"auth_provider": "github"},
+        }
+        trackEvent(payload);
+
         let svgNode = avatarRef
         //@ts-ignore
         let data = svgNode.outerHTML;
@@ -725,6 +798,17 @@ function CreateNewAccount() {
         const [createRes] = await Promise.all([
             res,
         ])
+
+        payload = {
+            host: window.location.host,
+            event: WebTrackingEvent.Signup,
+            timespent: 0,
+            path: location.pathname,
+            latitude: null,
+            longitude: null,
+            metadata: {"auth_provider": "github"},
+        }
+        trackEvent(payload);
 
         if (createRes["message"] === "You must be logged in to access the GIGO system."){
             let authState = Object.assign({}, initialAuthStateUpdate)

@@ -5,20 +5,22 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
 import reportWebVitals from './reportWebVitals';
 import Routing from "./routing";
-import {BrowserRouter} from "react-router-dom";
-import {Provider} from 'react-redux';
-import {store} from './app/store';
-import {PersistGate} from 'redux-persist/integration/react'
-import {persistStore} from 'redux-persist'
-import {GoogleOAuthProvider} from "@react-oauth/google";
+import { BrowserRouter } from "react-router-dom";
+import { Provider } from 'react-redux';
+import { store } from './app/store';
+import { PersistGate } from 'redux-persist/integration/react'
+import { persistStore } from 'redux-persist'
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import config from "./config";
 import AppWrapper from "./components/AppWrapper";
-import {Suspense} from "react";
+import { Suspense } from "react";
 import Lottie from "react-lottie";
 import * as animationData from './img/loadingIcon.json'
 import './components/scrollbar.css';
 import { WebSocketProvider } from './services/websocket';
-import {GoogleReCaptchaProvider} from "react-google-recaptcha-v3";
+import track, { TrackingContext } from 'react-tracking';
+import { withPageTracking } from './components/PageTracking';
+import call from './services/api-call';
 
 // create callback to register last activity in session storage
 function setTimestamp() {
@@ -46,25 +48,21 @@ const defaultOptions = {
     }
 };
 
-
-
 root.render(
     <WebSocketProvider>
-
-            <BrowserRouter>
-                <GoogleOAuthProvider clientId={config.googleClient}>
-                    <Provider store={store}>
-                        <PersistGate loading={null} persistor={persistor}>
-                            <AppWrapper>
-                                <Suspense fallback={<div><Lottie options={defaultOptions} height={500} width={500}/></div>}>
-                                    <Routing />
-                                </Suspense>
-                            </AppWrapper>
-                        </PersistGate>
-                    </Provider>
-                </GoogleOAuthProvider>
-
-            </BrowserRouter>
+        <BrowserRouter>
+            <GoogleOAuthProvider clientId={config.googleClient}>
+                <Provider store={store}>
+                    <PersistGate loading={null} persistor={persistor}>
+                        <AppWrapper>
+                            <Suspense fallback={<div><Lottie options={defaultOptions} height={500} width={500} /></div>}>
+                                <Routing />
+                            </Suspense>
+                        </AppWrapper>
+                    </PersistGate>
+                </Provider>
+            </GoogleOAuthProvider>
+        </BrowserRouter>
     </WebSocketProvider>
 );
 

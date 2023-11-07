@@ -43,13 +43,27 @@ import {LoadingButton} from "@mui/lab";
 import LoginBackgroundIcon from "../img/login/LoginBackground";
 import JourneyPageIcon from "../components/Icons/JourneyPage";
 import ReactGA from "react-ga4";
-
+import { useTracking } from 'react-tracking';
+import { RecordWebUsage, WebTrackingEvent } from "../models/web_usage";
+import { useLocation } from 'react-router-dom';
 
 
 function Login(this: any) {
     let userPref = localStorage.getItem('theme')
     const [mode, _] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
         const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
+
+    const { trackEvent } = useTracking({}, {
+        dispatch: (data: any) => {
+            call(
+                "/api/recordUsage",
+                "POST",
+                null, null, null,
+                data,
+            )
+        }
+    });
+    const location = useLocation();
 
     const styles = {
         themeButton: {
@@ -112,6 +126,20 @@ function Login(this: any) {
         onSuccess: (usr : any) => onSuccessGoogle(usr)
     });
 
+    const startGoogle = () => {
+        const payload: RecordWebUsage = {
+            host: window.location.host,
+            event: WebTrackingEvent.LoginStart,
+            timespent: 0,
+            path: location.pathname,
+            latitude: null,
+            longitude: null,
+            metadata: {"auth_provider": "google"},
+        }
+        trackEvent(payload);
+        googleButton()
+    }
+
     const googleSignIn = async () => {
         setLoading(true)
         let auth = await authorizeGoogle(externalToken, password);
@@ -147,9 +175,30 @@ function Login(this: any) {
                 swal("Login failed. The provided username and password did not match.");
                 setLoading(false)
         }
+
+        const payload: RecordWebUsage = {
+            host: window.location.host,
+            event: WebTrackingEvent.Login,
+            timespent: 0,
+            path: location.pathname,
+            latitude: null,
+            longitude: null,
+            metadata: {"auth_provider": "google"},
+        }
+        trackEvent(payload);
     }
 
     const onSuccessGithub = async (gh: any) => {
+        const payload: RecordWebUsage = {
+            host: window.location.host,
+            event: WebTrackingEvent.LoginStart,
+            timespent: 0,
+            path: location.pathname,
+            latitude: null,
+            longitude: null,
+            metadata: {"auth_provider": "github"},
+        }
+        trackEvent(payload);
         console.log(gh)
         setExternal(true)
         setExternalToken(gh["code"])
@@ -233,6 +282,17 @@ function Login(this: any) {
                 swal("Login failed. The provided username or password is incorrect.");
             setLoading(false)
         }
+
+        const payload: RecordWebUsage = {
+            host: window.location.host,
+            event: WebTrackingEvent.Login,
+            timespent: 0,
+            path: location.pathname,
+            latitude: null,
+            longitude: null,
+            metadata: {"auth_provider": "github"},
+        }
+        trackEvent(payload);
     }
 
     const onFailureGithub = (gh: any) => {
@@ -302,6 +362,18 @@ function Login(this: any) {
 
     const loginFunction = async () => {
         setLoading(true)
+
+        const payload: RecordWebUsage = {
+            host: window.location.host,
+            event: WebTrackingEvent.LoginStart,
+            timespent: 0,
+            path: location.pathname,
+            latitude: null,
+            longitude: null,
+            metadata: {},
+        }
+        trackEvent(payload);
+
         let auth = await authorize(username, password);
 
         // @ts-ignore
@@ -328,6 +400,16 @@ function Login(this: any) {
             dispatch(updateAuthState(authState))
 
             window.location.href = "/home";
+            const payload: RecordWebUsage = {
+                host: window.location.host,
+                event: WebTrackingEvent.Login,
+                timespent: 0,
+                path: location.pathname,
+                latitude: null,
+                longitude: null,
+                metadata: {},
+            }
+            trackEvent(payload);
         } else if (auth.includes("Too many failed attempts")) {
             //@ts-ignore
             swal("Login failed.", auth);
@@ -471,7 +553,7 @@ function Login(this: any) {
                         width: "100%",
                         paddingBottom: "10px"
                     }} direction="row" alignItems="center">
-                        <Button onClick={() => googleButton()}>
+                        <Button onClick={() => startGoogle()}>
                             <Grid container spacing={{xs: 2}} justifyContent="center" sx={{
                                 flexGrow: 1,
                                 paddingRight: window.innerWidth > 1000 ? '.5vw' : "4vh"
