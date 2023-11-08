@@ -737,21 +737,6 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     ) : (
                         <div />
                     )}
-                    {loggedIn ? (
-                        <Box>
-                            <Button onClick={async () => {
-                                navigate("/create-challenge")
-                            }} sx={{ paddingLeft: "15px", paddingRight: "15px" }} className={'top-menu'}>
-                                <Icon>
-                                    <AddIcon style={{ color: theme.palette.primary.contrastText }} />
-                                </Icon>
-                                <Typography component={"div"} variant={"body2"}
-                                    sx={{ paddingLeft: "10px", color: theme.palette.primary.contrastText }}>Create Challenge</Typography>
-                            </Button>
-                        </Box>
-                    ) : (
-                        <div />
-                    )}
                     <div style={{ width: "20px" }} />
                     <Box sx={{ width: "50px" }} />
                     {loggedIn ? (
@@ -1699,7 +1684,22 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                             </Typography>
                         </ListItemButton>
                     </ListItem>
-
+                    <ListItem disablePadding>
+                        <ListItemButton color={"primary"} sx={{
+                            borderRadius: 2,
+                        }} href={"/create-challenge"}>
+                            <ListItemIcon>
+                                <AddIcon style={{ color: theme.palette.text.primary }} />
+                            </ListItemIcon>
+                            <Typography
+                                component={"div"}
+                                variant={"body1"}
+                                sx={{ fontSize: "0.8em" }}
+                            >
+                                Create
+                            </Typography>
+                        </ListItemButton>
+                    </ListItem>
                 </List>
                 <DrawerFooter>
                     <div style={{ display: "flex", flexDirection: "column" }}>
