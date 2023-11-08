@@ -952,6 +952,33 @@ function Challenge() {
         )
     }
 
+    /**
+     * Convert millis duration to a well formatted time string with a min precision of minutes (ex: 1h2m)
+     */
+    const millisToTime = (millisDuration: number) => {
+        const seconds = Math.floor((millisDuration / 1000) % 60);
+        const minutes = Math.floor((millisDuration / (1000 * 60)) % 60);
+        const hours = Math.floor((millisDuration / (1000 * 60 * 60)) % 24);
+        const days = Math.floor(millisDuration / (1000 * 60 * 60 * 24));
+
+        let timeString = "";
+
+        if (days > 0) {
+            timeString += `${days}d `;
+        }
+        if (hours > 0) {
+            timeString += `${hours}h `;
+        }
+        if (minutes > 0) {
+            timeString += `${minutes}m `;
+        }
+        if (seconds > 0) {
+            timeString += `${seconds}s `;
+        }
+
+        return timeString.trim();
+    };
+
     let imgSrc;
 
     if (project!== null) {
@@ -3909,10 +3936,31 @@ function Challenge() {
         }
 
         let buttonText = project !== null && project["has_access"] !== null && project["has_access"] === false ? "Buy Content" : "Launch"
+        let toolTipText = "Unknown Launch Time"
+        if (project["start_time_millis"] !== undefined && project["start_time_millis"] !== null && project["start_time_millis"] !== 0) {
+            toolTipText = `Estimated Launch Time: ${millisToTime(project["start_time_millis"])}`
+        }
 
         if (runTutorial && stepIndex === 1) {
             return (
-                <TutorialLaunchButton
+                <Tooltip title={toolTipText} placement={"top"} arrow disableInteractive enterDelay={200} leaveDelay={200}>
+                    <TutorialLaunchButton
+                        loading={launchingWorkspace}
+                        variant="contained"
+                        color="secondary"
+                        sx={sx}
+                        className="attempt"
+                        onClick={clickCallback}
+                    >
+                        {buttonText}<RocketLaunchIcon sx={{marginLeft: "10px"}}/>
+                    </TutorialLaunchButton>
+                </Tooltip>
+            )
+        }
+
+        return (
+            <Tooltip title={toolTipText} placement={"top"} arrow disableInteractive enterDelay={200} leaveDelay={200}>
+                <LoadingButton
                     loading={launchingWorkspace}
                     variant="contained"
                     color="secondary"
@@ -3921,21 +3969,8 @@ function Challenge() {
                     onClick={clickCallback}
                 >
                     {buttonText}<RocketLaunchIcon sx={{marginLeft: "10px"}}/>
-                </TutorialLaunchButton>
-            )
-        }
-
-        return (
-            <LoadingButton
-                loading={launchingWorkspace}
-                variant="contained"
-                color="secondary"
-                sx={sx}
-                className="attempt"
-                onClick={clickCallback}
-            >
-                {buttonText}<RocketLaunchIcon sx={{marginLeft: "10px"}}/>
-            </LoadingButton>
+                </LoadingButton>
+            </Tooltip>
         )
     }
 
@@ -4795,18 +4830,24 @@ function Challenge() {
         }
 
         let buttonText = project !== null && project["has_access"] !== null && project["has_access"] === false ? "Buy Content" : "Launch"
+        let toolTipText = "Unknown Launch Time"
+        if (project["start_time_millis"] !== undefined && project["start_time_millis"] !== null && project["start_time_millis"] !== 0) {
+            toolTipText = `Estimated Launch Time: ${millisToTime(project["start_time_millis"])}`
+        }
 
         return (
-            <LoadingButton
-                loading={loadingEphemeral}
-                variant="contained"
-                color="secondary"
-                sx={sx}
-                className="attempt"
-                onClick={() => launchEphemeralWorkspace()}
-            >
-                {buttonText}<RocketLaunchIcon sx={{marginLeft: "10px"}}/>
-            </LoadingButton>
+            <Tooltip title={toolTipText} placement={"top"} arrow disableInteractive enterDelay={200} leaveDelay={200}>
+                <LoadingButton
+                    loading={loadingEphemeral}
+                    variant="contained"
+                    color="secondary"
+                    sx={sx}
+                    className="attempt"
+                    onClick={() => launchEphemeralWorkspace()}
+                >
+                    {buttonText}<RocketLaunchIcon sx={{marginLeft: "10px"}}/>
+                </LoadingButton>
+            </Tooltip>
         )
     }
 

@@ -3,7 +3,7 @@
 // @ts-nocheck
 
 import * as React from "react";
-import {useEffect, useRef} from "react";
+import { useEffect, useRef } from "react";
 import {
     Box,
     Button,
@@ -17,23 +17,23 @@ import {
     ThemeProvider, Tooltip,
     Typography
 } from "@mui/material";
-import {getAllTokens, themeHelpers} from "../theme";
+import { getAllTokens, themeHelpers } from "../theme";
 import UserIcon from "../components/UserIcon";
-import {useAppDispatch, useAppSelector} from "../app/hooks";
-import {initialAuthStateUpdate, selectAuthState, selectAuthStateUserName, updateAuthState} from "../reducers/auth/auth";
-import {useNavigate} from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { initialAuthStateUpdate, selectAuthState, selectAuthStateUserName, updateAuthState } from "../reducers/auth/auth";
+import { useNavigate } from "react-router-dom";
 import call from "../services/api-call";
 import config from "../config";
-import {useParams} from "react-router";
+import { useParams } from "react-router";
 import Post from "../models/post"
 import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
 import PostOverview from "../components/PostOverview";
-import {selectAuthStateId} from "../reducers/auth/auth";
+import { selectAuthStateId } from "../reducers/auth/auth";
 import swal from "sweetalert";
-import {Workspace} from "../models/workspace";
+import { Workspace } from "../models/workspace";
 import CodeDisplayEditor from "../components/editor/workspace_config/code_display_editor";
-import {ThreeDots} from "react-loading-icons";
-import {LoadingButton} from "@mui/lab";
+import { ThreeDots } from "react-loading-icons";
+import { LoadingButton } from "@mui/lab";
 import Attempt from "../models/attempt";
 
 import HorseIcon from "../components/Icons/Horse";
@@ -42,7 +42,7 @@ import { QuestionMark } from "@mui/icons-material";
 import TrophyIcon from "../components/Icons/Trophy";
 import GraduationIcon from "../components/Icons/Graduation";
 
-import {v4} from "uuid";
+import { v4 } from "uuid";
 import renown1 from "../img/renown/renown1.svg";
 import renown2 from "../img/renown/renown2.svg";
 import renown3 from "../img/renown/renown3.svg";
@@ -58,12 +58,12 @@ import ReactGA from "react-ga4";
 import PostOverviewMobile from "../components/PostOverviewMobile"
 import ProjectPayment from "./stripe/projectPayment";
 import Person3Icon from "@mui/icons-material/Person3";
-import styled, {keyframes} from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import WorkspaceConfigEditor from "../components/editor/workspace_config/editor";
-import {Helmet, HelmetProvider} from "react-helmet-async"
+import { Helmet, HelmetProvider } from "react-helmet-async"
 
 import * as yaml from 'js-yaml';
-import {Backdrop} from "@material-ui/core";
+import { Backdrop } from "@material-ui/core";
 import darkImageUploadIcon from "../img/dark_image_upload2.svg";
 import EditIcon from "@mui/icons-material/Edit";
 import Fab from '@mui/material/Fab';
@@ -74,13 +74,13 @@ import DebugIcon from "../components/Icons/Debug";
 
 function AttemptPage() {
     // retrieve url params
-    let {id} = useParams();
+    let { id } = useParams();
     const queryParams = new URLSearchParams(window.location.search)
     const embedded = queryParams.has('embed') && queryParams.get('embed') === 'true';
     let userPref = localStorage.getItem('theme')
 
     const [mode, _] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
-        const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
+    const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
     const [mainTab, setMainTab] = React.useState(window.location.hash.replace('#', '') !== "" ? window.location.hash.replace('#', '') : "project")
     const [minorTab, setMinorTab] = React.useState("overview")
     const [loading, setLoading] = React.useState(true)
@@ -128,7 +128,7 @@ function AttemptPage() {
             minHeight: "35px",
             fontSize: "0.8rem",
             '&:hover': {
-                backgroundColor: theme.palette.primary.main + "25", 
+                backgroundColor: theme.palette.primary.main + "25",
             }
         }
     };
@@ -144,7 +144,7 @@ function AttemptPage() {
             null,
             null,
             //@ts-ignore
-            {attempt_id: id},
+            { attempt_id: id },
             null,
             config.rootPath
         )
@@ -159,7 +159,7 @@ function AttemptPage() {
             return
         }
 
-        if (res["message"] === "You must be logged in to access the GIGO system."){
+        if (res["message"] === "You must be logged in to access the GIGO system.") {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
@@ -174,7 +174,7 @@ function AttemptPage() {
         }
 
         // clone the file so we don't read the same one we're going to upload
-        let clonedFile = new File([file], file.name, {type: file.type});
+        let clonedFile = new File([file], file.name, { type: file.type });
 
         // create file reader
         const reader = new FileReader();
@@ -306,7 +306,7 @@ function AttemptPage() {
         setGenOpened(true);
     };
 
-    const editProject = async(title: null, image: null) => {
+    const editProject = async (title: null, image: null) => {
         let params = {
             id: attempt["_id"],
         }
@@ -386,7 +386,7 @@ function AttemptPage() {
                     return;
                 }
 
-                {console.log("res is: ", res["message"])}
+                { console.log("res is: ", res["message"]) }
 
                 // if ("message" in res && res["message"] !== "success"){
                 //     if (sessionStorage.getItem("alive") === null)
@@ -464,7 +464,7 @@ function AttemptPage() {
                             defaultValue={prompt}
                             value={prompt}
                             onChange={(e) => setPrompt(e.target.value)}
-                            inputProps={{maxLength: 120, minLength: 3}}
+                            inputProps={{ maxLength: 120, minLength: 3 }}
                             helperText={prompt.length > 119 ? 'Character limit reached' : promptError}
                             error={prompt.length > 119 || prompt === "" || prompt.length < 3}
                         />
@@ -507,7 +507,7 @@ function AttemptPage() {
             null,
             null,
             //@ts-ignore
-            {attempt_id: id},
+            { attempt_id: id },
             null,
             config.rootPath
         )
@@ -518,7 +518,7 @@ function AttemptPage() {
             null,
             null,
             null,
-            {attempt_id: id},
+            { attempt_id: id },
             null, config.rootPath
         )
 
@@ -533,7 +533,7 @@ function AttemptPage() {
             return
         }
 
-        if (res["message"] === "You must be logged in to access the GIGO system." || res2["message"] === "You must be logged in to access the GIGO system."){
+        if (res["message"] === "You must be logged in to access the GIGO system." || res2["message"] === "You must be logged in to access the GIGO system.") {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
@@ -550,7 +550,7 @@ function AttemptPage() {
             return
         }
 
-        if (res2["description"] === undefined){
+        if (res2["description"] === undefined) {
             if (res2["message"] === undefined) {
                 swal("Server Error", "Man... We don't know what happened, but there's some weird stuff going on. " +
                     "We'll get working on this, come back in a few minutes")
@@ -560,7 +560,7 @@ function AttemptPage() {
             return
         }
 
-        if (res2["exclusive"] !== undefined && res2["exclusive"] !== null){
+        if (res2["exclusive"] !== undefined && res2["exclusive"] !== null) {
             setExclusive(true)
         } else {
             setExclusive(false)
@@ -575,7 +575,7 @@ function AttemptPage() {
         // setAttemptDesc(res["description"])
         setAttemptDesc(res["evaluation"])
         setClosedState(res["post"]["closed"])
-        setProjectName( "Attempt: " + res["post"]["post_title"])
+        setProjectName("Attempt: " + res["post"]["post_title"])
         setProjectTitle(res["post"]["post_title"])
     }
 
@@ -628,7 +628,7 @@ function AttemptPage() {
         recordImplicitAction(true, sid)
 
         // record click off of tab or minimize
-        window.addEventListener('blur', function() {
+        window.addEventListener('blur', function () {
             // record the exit time in session storage
             window.sessionStorage.setItem(`project-exit-${attempt._id}`, `${new Date().getTime()}:${sid}`)
             recordImplicitAction(false)
@@ -644,7 +644,7 @@ function AttemptPage() {
         }
 
         // create a listener for beforeunload
-        let beforeUnload = function(event) {
+        let beforeUnload = function (event) {
             // don't trigger preventDefault if we are using firefox
             if (window.navigator.userAgent.indexOf("Firefox") === -1) {
                 event.preventDefault();
@@ -657,7 +657,7 @@ function AttemptPage() {
             recordImplicitAction(false)
 
             // clear hooks
-            window.removeEventListener('blur', function() {
+            window.removeEventListener('blur', function () {
                 // record the exit time in session storage
                 window.sessionStorage.setItem(`project-exit-${attempt._id}`, `${new Date().getTime()}:${implicitSessionID.current}`)
                 recordImplicitAction(false)
@@ -665,7 +665,7 @@ function AttemptPage() {
             window.onfocus = null
 
             // this is bad practice but we need a little time to get the implicit action recorded
-            setTimeout(function() {}, 500)
+            setTimeout(function () { }, 500)
         }
 
         // handle case of page change by clearing our watchers
@@ -684,7 +684,7 @@ function AttemptPage() {
 
     const recordImplicitAction = async (open: boolean, sessionId: string | null = null) => {
 
-        if (loggedIn){
+        if (loggedIn) {
             // bail if we don't have a project yet
             if (attempt === null || implicitSessionID.current === null) {
                 return
@@ -722,7 +722,7 @@ function AttemptPage() {
 
     const descriptionTab = () => {
         console.log("description is: ", projectDesc)
-        if (window.innerWidth > 1000){
+        if (window.innerWidth > 1000) {
             return (
                 <MarkdownRenderer markdown={projectDesc} style={{
                     width: "70vw",
@@ -730,7 +730,7 @@ function AttemptPage() {
                     overflowWrap: "break-word",
                     borderRadius: "10px",
                     padding: "2em 3em"
-                }}/>
+                }} />
             )
         } else {
             if (projectDesc === null) {
@@ -741,7 +741,7 @@ function AttemptPage() {
                         overflowWrap: "break-word",
                         borderRadius: "10px",
                         padding: "2em 3em"
-                    }}/>
+                    }} />
                 )
             } else {
                 return (
@@ -751,7 +751,7 @@ function AttemptPage() {
                         overflowWrap: "break-word",
                         borderRadius: "10px",
                         padding: "2em 3em"
-                    }}/>
+                    }} />
                 )
             }
         }
@@ -766,7 +766,7 @@ function AttemptPage() {
         }
 
         return (
-            <div style={{width: "80vw"}}>
+            <div style={{ width: "80vw" }}>
                 {renderFunc()}
             </div>
         )
@@ -819,7 +819,7 @@ function AttemptPage() {
             }
         )
 
-        if (res["message"] === "You must be logged in to access the GIGO system."){
+        if (res["message"] === "You must be logged in to access the GIGO system.") {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
@@ -834,7 +834,7 @@ function AttemptPage() {
                     "Server Error",
                     "We can't get in touch with the server... Sorry about that! We'll get working on that right away!"
                 );
-                setIsLoading(false)
+            setIsLoading(false)
             return
         }
 
@@ -846,7 +846,7 @@ function AttemptPage() {
                     "Server Error",
                     res["message"]
                 );
-                setIsLoading(false)
+            setIsLoading(false)
             return
         }
 
@@ -875,7 +875,7 @@ function AttemptPage() {
             }
         )
 
-        if (res["message"] === "You must be logged in to access the GIGO system."){
+        if (res["message"] === "You must be logged in to access the GIGO system.") {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
@@ -911,7 +911,7 @@ function AttemptPage() {
                 overflowWrap: "break-word",
                 borderRadius: "10px",
                 padding: "2em 3em"
-            }}/>
+            }} />
         )
     }
 
@@ -953,11 +953,11 @@ function AttemptPage() {
 
         let currentUser = false
 
-        if (userId === attempt?.author_id){
+        if (userId === attempt?.author_id) {
             currentUser = true
         }
         let imgSrc;
-        if (attempt!== null) {
+        if (attempt !== null) {
             switch (attempt?.tier) {
                 case 0:
                     imgSrc = renown1;
@@ -996,9 +996,9 @@ function AttemptPage() {
         console.log("html project info: ", projectDesc)
 
         return (
-            <div style={{display: "flex", width: "80vw", height: "auto"}}>
+            <div style={{ display: "flex", width: "80vw", height: "auto" }}>
                 {window.innerWidth > 1000 ? (
-                    <div style={{display: "flex", justifyContent: "left", paddingRight: "20px", height: "100%"}}>
+                    <div style={{ display: "flex", justifyContent: "left", paddingRight: "20px", height: "100%" }}>
                         <Tabs
                             orientation="vertical"
                             value={minorTab}
@@ -1007,20 +1007,20 @@ function AttemptPage() {
                         >
                             {minorValues.map((minorValue) => {
                                 return <Tab label={minorValue} value={minorValue} key={minorValue} className={minorValues}
-                                            sx={minorValue === "overview" ? {color: "text.primary", borderRadius: 1, zIndex: "600000"} : {color: "text.primary", borderRadius: 1}}/>;
+                                    sx={minorValue === "overview" ? { color: "text.primary", borderRadius: 1, zIndex: "600000" } : { color: "text.primary", borderRadius: 1 }} />;
                             })}
                         </Tabs>
                     </div>
                 ) : null}
-                <div style={window.innerWidth > 1000 ? {display: "flex", justifyContent: "center", width: "90%"} : {display: "flex", justifyContent: "center", width: "100%", position: "relative", flexDirection: "column", marginBottom: "150px"}}>
+                <div style={window.innerWidth > 1000 ? { display: "flex", justifyContent: "center", width: "90%" } : { display: "flex", justifyContent: "center", width: "100%", position: "relative", flexDirection: "column", marginBottom: "150px" }}>
                     {window.innerWidth <= 1000 ? (
                         <div>
-                            <div style={{marginBottom: "50px"}}>
+                            <div style={{ marginBottom: "50px" }}>
                                 <PostOverviewMobile
                                     width={"100%"}
                                     height={"100%"}
                                     description={attempt !== null && minorTab === "overview" ? attempt["description"] : ""}
-                                    exclusiveDescription={attempt!== null? attempt["exclusive_description"] : null}
+                                    exclusiveDescription={attempt !== null ? attempt["exclusive_description"] : null}
                                     postDate={attempt !== null ? attempt["created_at"] : ""}
                                     userIsOP={currentUser}
                                     id={attempt !== null ? attempt["_id"] : 0}
@@ -1029,34 +1029,37 @@ function AttemptPage() {
                                 />
                             </div>
                             {attempt !== null && attempt !== "" ? (
-                                <div style={{width: "100%", position: "relative", height: "300px", marginBottom: "50px"}}>
+                                <div style={{ width: "100%", position: "relative", height: "300px", marginBottom: "50px" }}>
                                     <img
                                         src={attempt !== null ? config.rootPath + attempt["thumbnail"] : alternativeImage}
-                                        style={{                                        width: "inherit",
-                                            height: "inherit", borderRadius: "5px"}}
+                                        style={{
+                                            width: "inherit",
+                                            height: "inherit", borderRadius: "5px"
+                                        }}
                                         onError={handleError}
-                                        alt={"project thumbnail"}/>
+                                        alt={"project thumbnail"} />
                                 </div>
                             ) : (
-                                <StyledDiv style={{height: "200px", width: "inherit"}}/>
+                                <StyledDiv style={{ height: "200px", width: "inherit" }} />
                             )}
 
-                            <div style={window.innerWidth > 1000 ? {overflow: "hidden", width: "70vw", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column"} : {overflow: "break-word", width: "100%", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column"}}>
+                            <div style={window.innerWidth > 1000 ? { overflow: "hidden", width: "70vw", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column" } : { overflow: "break-word", width: "100%", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column" }}>
                                 {minorTabDetermination()}
                             </div>
                         </div>
                     ) : (
                         <Card>
-                            <div style={{overflow: "hidden", width: "70vw", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column", zIndex: 6}}>
-                                <div style={{width: "100%", position: "relative", height: "300px"}}>
+                            <div style={{ overflow: "hidden", width: "70vw", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column", zIndex: 6 }}>
+                                <div style={{ width: "100%", position: "relative", height: "300px" }}>
                                     <img
                                         src={attempt !== null ? config.rootPath + attempt["thumbnail"] : alternativeImage}
                                         style={{
                                             width: '100%',
                                             height: '200%',
-                                            objectFit: 'stretch'}}
+                                            objectFit: 'stretch'
+                                        }}
                                         onError={handleError}
-                                        alt={"project thumbnail"}/>
+                                        alt={"project thumbnail"} />
                                     {attempt !== null && userId === attempt["author_id"] && window.innerWidth > 1000 ? (
                                         <Button
                                             onClick={() => setEditImage(true)}
@@ -1066,7 +1069,7 @@ function AttemptPage() {
                                                 right: 0
                                             }}
                                         >
-                                            <EditIcon/>
+                                            <EditIcon />
                                         </Button>
                                     ) : null}
                                 </div>
@@ -1104,10 +1107,10 @@ function AttemptPage() {
                                                 <LoadingImageUploadButton
                                                     loading={true}
                                                     disabled={true}
-                                                    // sx={{
-                                                    //     width: "30vw",
-                                                    //     height: "43vh"
-                                                    // }}
+                                                // sx={{
+                                                //     width: "30vw",
+                                                //     height: "43vh"
+                                                // }}
                                                 >
                                                     Generating Image
                                                 </LoadingImageUploadButton>
@@ -1121,9 +1124,9 @@ function AttemptPage() {
                                                         height: "43vh"
                                                     }}
                                                 >
-                                                    <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+                                                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                                                         {projectImage == null || projectImage == "" ? (
-                                                            <h5 style={{color: "grey"}}>Upload Image</h5>
+                                                            <h5 style={{ color: "grey" }}>Upload Image</h5>
                                                         ) : null}
                                                         <img
                                                             key={projectImage}
@@ -1249,16 +1252,16 @@ function AttemptPage() {
                                     backgroundRender={attempt !== null ? attempt["render_in_front"] : null}
                                     userTier={attempt !== null ? attempt["tier"] : ""}
                                     description={attempt !== null && minorTab === "overview" ? attempt["description"] : ""}
-                                    exclusiveDescription={attempt !== null? attempt["exclusive_description"] : null}
+                                    exclusiveDescription={attempt !== null ? attempt["exclusive_description"] : null}
                                     postDate={attempt !== null ? attempt["created_at"] : ""}
                                     userIsOP={currentUser}
                                     id={attempt !== null ? attempt["_id"] : 0}
                                     renown={attempt !== null ? attempt["tier"] : 0}
                                     project={false}
                                 />
-                                <div style={{height: "20px"}}/>
+                                <div style={{ height: "20px" }} />
                             </div>
-                            <div style={window.innerWidth > 1000 ? {overflow: "hidden", width: "70vw", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column"} : {overflow: "hidden", width: "70vw", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column"}}>
+                            <div style={window.innerWidth > 1000 ? { overflow: "hidden", width: "70vw", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column" } : { overflow: "hidden", width: "70vw", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column" }}>
                                 {minorTabDetermination()}
                             </div>
                         </Card>
@@ -1282,10 +1285,10 @@ function AttemptPage() {
 
     const mainTabSource = () => {
         return (
-            <div style={{display: "flex", width: "80vw", height: "63vh"}}>
+            <div style={{ display: "flex", width: "80vw", height: "63vh" }}>
                 {attempt !== null ? (
-                    <CodeDisplayEditor repoId={attempt !== null ? attempt.repo_id : 0} references={"main"} filepath={""} width={"75vw"}              height={"73vh"} style={{display: "contents", flexDirection: "row", width: "75vw"}} projectName={attempt !== null ? attempt.post_title : ""}/>
-                ) : (<ThreeDots/>)}
+                    <CodeDisplayEditor repoId={attempt !== null ? attempt.repo_id : 0} references={"main"} filepath={""} width={"75vw"} height={"73vh"} style={{ display: "contents", flexDirection: "row", width: "75vw" }} projectName={attempt !== null ? attempt.post_title : ""} />
+                ) : (<ThreeDots />)}
                 {/*<Editor theme={theme}/>*/}
             </div>
         )
@@ -1427,7 +1430,7 @@ function AttemptPage() {
 
     const mainTabEdit = () => {
         return (
-            <div style={{display: "block", width: "80vw", height: "63vh", justifyContent: "center"}}>
+            <div style={{ display: "block", width: "80vw", height: "63vh", justifyContent: "center" }}>
                 <WorkspaceConfigEditor
                     value={wsConfig}
                     setValue={(e) => setWsConfig(e)}
@@ -1440,23 +1443,23 @@ function AttemptPage() {
                     height={"58vh"}
                 />
                 <LoadingButton variant={"contained"}
-                               loading={loadingEdit}
-                               sx={{
-                                   height: "4vh",
-                                   minHeight: "35px",
-                                   bgcolor: theme.palette.primary,
-                                   width: "72.5vw",
-                                   marginTop: "45px",
-                                   marginLeft: "40px",
-                                   marginRight: "40px",
-                                   borderRadius: "10px",
-                                   fontSize: "1.2rem",
-                                   fontWeight: "bold",
-                                   textAlign: "center",
-                                   marginTop: "10px",
-                                   marginBottom: "10px"
-                               }}
-                               onClick={() => editConfig()}>
+                    loading={loadingEdit}
+                    sx={{
+                        height: "4vh",
+                        minHeight: "35px",
+                        bgcolor: theme.palette.primary,
+                        width: "72.5vw",
+                        marginTop: "45px",
+                        marginLeft: "40px",
+                        marginRight: "40px",
+                        borderRadius: "10px",
+                        fontSize: "1.2rem",
+                        fontWeight: "bold",
+                        textAlign: "center",
+                        marginTop: "10px",
+                        marginBottom: "10px"
+                    }}
+                    onClick={() => editConfig()}>
                     Confirm Edit
                 </LoadingButton>
                 <Dialog
@@ -1471,7 +1474,7 @@ function AttemptPage() {
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={() => setEditConfirm(false)} color="primary">Apply Later</Button>
-                        <Button  onClick={() => confirmEditConfig()} color={"error"}>
+                        <Button onClick={() => confirmEditConfig()} color={"error"}>
                             Apply Changes Now
                         </Button>
                     </DialogActions>
@@ -1502,40 +1505,67 @@ function AttemptPage() {
 
     const handleTabChange = (newValue: string) => {
         setMainTab(newValue);
-        window.location.hash = "#"+newValue
-        if (newValue ==="edit") {
+        window.location.hash = "#" + newValue
+        if (newValue === "edit") {
             getConfig()
         }
     };
 
     const getProjectIcon = (projectType: string) => {
         switch (projectType) {
-        case "Playground":
-            return (
-                <HorseIcon sx={{width: "24px", height: "24px"}} />
-            )
-        case "Casual":
-            return (
-                <HoodieIcon sx={{width: "20px", height: "20px"}} />
-            )
-        case "Competitive":
-            return (
-                <TrophyIcon sx={{width: "18px", height: "18px"}} />
-            )
-        case "Interactive":
-            return (
-                <GraduationIcon sx={{width: "20px", height: "20px"}} />
-            )
-        case "Debug":
-            return (
-                <DebugIcon sx={{width: "20px", height: "20px"}} />
-            )
-        default:
-            return (
-                <QuestionMark sx={{width: "20px", height: "20px"}} />
-            )
+            case "Playground":
+                return (
+                    <HorseIcon sx={{ width: "24px", height: "24px" }} />
+                )
+            case "Casual":
+                return (
+                    <HoodieIcon sx={{ width: "20px", height: "20px" }} />
+                )
+            case "Competitive":
+                return (
+                    <TrophyIcon sx={{ width: "18px", height: "18px" }} />
+                )
+            case "Interactive":
+                return (
+                    <GraduationIcon sx={{ width: "20px", height: "20px" }} />
+                )
+            case "Debug":
+                return (
+                    <DebugIcon sx={{ width: "20px", height: "20px" }} />
+                )
+            default:
+                return (
+                    <QuestionMark sx={{ width: "20px", height: "20px" }} />
+                )
         }
     }
+
+    /**
+     * Convert millis duration to a well formatted time string with a min precision of minutes (ex: 1h2m)
+     */
+    const millisToTime = (millisDuration: number) => {
+        const seconds = Math.floor((millisDuration / 1000) % 60);
+        const minutes = Math.floor((millisDuration / (1000 * 60)) % 60);
+        const hours = Math.floor((millisDuration / (1000 * 60 * 60)) % 24);
+        const days = Math.floor(millisDuration / (1000 * 60 * 60 * 24));
+
+        let timeString = "";
+
+        if (days > 0) {
+            timeString += `${days}d `;
+        }
+        if (hours > 0) {
+            timeString += `${hours}h `;
+        }
+        if (minutes > 0) {
+            timeString += `${minutes}m `;
+        }
+        if (seconds > 0) {
+            timeString += `${seconds}s `;
+        }
+
+        return timeString.trim();
+    };
 
     const shimmer = keyframes`
       0% {
@@ -1562,17 +1592,17 @@ function AttemptPage() {
                 <Grid item sx={1}>
                     {attempt !== "" && attempt !== undefined ? (
                         <Button variant={"outlined"} sx={styles.mainTabButton} disabled={mainTab === "project"}
-                                onClick={() => handleTabChange("project")}>
+                            onClick={() => handleTabChange("project")}>
                             Project
                         </Button>
                     ) : (
-                        <StyledDiv style={{height: "35px", width: "100px", borderRadius: 2}}/>
+                        <StyledDiv style={{ height: "35px", width: "100px", borderRadius: 2 }} />
                     )}
                 </Grid>
                 {!exclusive && attempt !== "" && attempt !== undefined ? (
                     <Grid item sx={1}>
                         <Button variant={"outlined"} sx={styles.mainTabButton} disabled={mainTab === "source"}
-                                onClick={() => handleTabChange("source")}>
+                            onClick={() => handleTabChange("source")}>
                             Source Code
                         </Button>
                     </Grid>
@@ -1587,11 +1617,11 @@ function AttemptPage() {
                 <Grid item sx={1}>
                     {attempt !== "" && attempt !== undefined ? (
                         <Button variant={"outlined"} sx={styles.mainTabButton}
-                                href={"/challenge/" + attempt?.post_id}>
+                            href={"/challenge/" + attempt?.post_id}>
                             Original Challenge
                         </Button>
                     ) : (
-                        <StyledDiv style={{height: "35px", width: "100px", borderRadius: 2}}/>
+                        <StyledDiv style={{ height: "35px", width: "100px", borderRadius: 2 }} />
                     )}
                 </Grid>
                 <Grid item sx={1}>
@@ -1612,7 +1642,7 @@ function AttemptPage() {
                             {closedState ? "Attempt Published" : "Publish Attempt"}
                         </Button>
                     ) : (
-                        <StyledDiv style={{height: "35px", width: "100px", borderRadius: 2}}/>
+                        <StyledDiv style={{ height: "35px", width: "100px", borderRadius: 2 }} />
                     )}
                 </Grid>
             </>
@@ -1620,6 +1650,11 @@ function AttemptPage() {
     }
 
     const renderTopBar = () => {
+        let toolTipText = "Unknown Launch Time"
+        if (attempt["start_time_millis"] !== undefined && attempt["start_time_millis"] !== null && attempt["start_time_millis"] !== 0) {
+            toolTipText = `Estimated Launch Time: ${millisToTime(attempt["start_time_millis"])}`
+        }
+
         return (
             <>
                 <div style={{
@@ -1643,36 +1678,38 @@ function AttemptPage() {
                         }}
                     >
                         <Grid container
-                              direction="row"
-                              justifyContent="space-evenly"
-                              alignItems="center"
-                              spacing={2}
-                              sx={{
-                                  width: 'fit-content',  // Add this line
-                                  height: "100%",
-                              }}
+                            direction="row"
+                            justifyContent="space-evenly"
+                            alignItems="center"
+                            spacing={2}
+                            sx={{
+                                width: 'fit-content',  // Add this line
+                                height: "100%",
+                            }}
                         >
                             {renderTabButtons()}
                             {attempt !== null && attempt !== "" ? (
                                 <Grid item sx={1}>
-                                    <LoadingButton
-                                        loading={isLoading}
-                                        variant={"contained"}
-                                        color={"secondary"}
-                                        sx={{
-                                            height: "4vh",
-                                            maxHeight: "50px",
-                                            fontSize: "0.8em",
-                                        }}
-                                        onClick={() => {
-                                            if (!loggedIn) {
-                                                window.location.href = "/signup";
-                                            }
-                                            userId === attempt?.author_id ? launchWorkspace() : createAttempt();
-                                        }}
-                                    >
-                                        Launch <RocketLaunchIcon sx={{marginLeft: "10px"}}/>
-                                    </LoadingButton>
+                                    <Tooltip title={toolTipText} placement={"top"} arrow disableInteractive enterDelay={200} leaveDelay={200}>
+                                        <LoadingButton
+                                            loading={isLoading}
+                                            variant={"contained"}
+                                            color={"secondary"}
+                                            sx={{
+                                                height: "4vh",
+                                                maxHeight: "50px",
+                                                fontSize: "0.8em",
+                                            }}
+                                            onClick={() => {
+                                                if (!loggedIn) {
+                                                    window.location.href = "/signup";
+                                                }
+                                                userId === attempt?.author_id ? launchWorkspace() : createAttempt();
+                                            }}
+                                        >
+                                            Launch <RocketLaunchIcon sx={{ marginLeft: "10px" }} />
+                                        </LoadingButton>
+                                    </Tooltip>
                                 </Grid>
                             ) : null}
                         </Grid>
@@ -1729,23 +1766,23 @@ function AttemptPage() {
                         <HelmetProvider>
                             <Helmet>
                                 <title>{attempt["post_title"]}</title>
-                                <meta property="og:title" content={attempt["post_title"]} data-rh="true"/>
-                                <meta property="og:description" content={attempt["description"]} data-rh="true"/>
-                                <meta property="og:image" content={config.rootPath + attempt["thumbnail"]} data-rh="true"/>
+                                <meta property="og:title" content={attempt["post_title"]} data-rh="true" />
+                                <meta property="og:description" content={attempt["description"]} data-rh="true" />
+                                <meta property="og:image" content={config.rootPath + attempt["thumbnail"]} data-rh="true" />
                             </Helmet>
                         </HelmetProvider>
                     ) : (
                         <HelmetProvider>
                             <Helmet>
                                 <title>Attempt</title>
-                                <meta property="og:image" content={alternativeImage} data-rh="true"/>
+                                <meta property="og:image" content={alternativeImage} data-rh="true" />
                             </Helmet>
                         </HelmetProvider>
                     )}
                     {
-                        embedded ? (<div style={{paddingTop: "25px"}} />) : (<></>)
+                        embedded ? (<div style={{ paddingTop: "25px" }} />) : (<></>)
                     }
-                    <Typography variant="h5" component="div" sx={styles.projectName} style={{display: "flex", flexDirection: "row"}}>
+                    <Typography variant="h5" component="div" sx={styles.projectName} style={{ display: "flex", flexDirection: "row" }}>
                         {editTitle ? (
                             <TextField
                                 value={projectTitle}
@@ -1771,16 +1808,16 @@ function AttemptPage() {
                                     label={attempt["post_type_string"]}
                                     color="primary"
                                     variant="outlined"
-                                    sx={{marginLeft: "20px", marginTop: "5px"}}
+                                    sx={{ marginLeft: "20px", marginTop: "5px" }}
                                     icon={getProjectIcon(attempt["post_type_string"])}
                                 />
-                            ) : (<div/>)
+                            ) : (<div />)
                         }
                         {attempt !== null && userId === attempt["author_id"] && window.innerWidth > 1000 ? (
                             <div>
                                 {!editTitle ? (
                                     <Button onClick={() => setEditTitle(true)}>
-                                        <EditIcon/>
+                                        <EditIcon />
                                     </Button>
                                 ) : (
                                     <div>
@@ -1803,13 +1840,15 @@ function AttemptPage() {
                             {renderTopBar()}
                         </div>
                     ) : (
-                        <div style={{marginTop: "25px"}}>
+                        <div style={{ marginTop: "25px" }}>
                             {attempt !== null && attempt !== "" ? (
-                                <Typography component={"div"} sx={{width: "90%",
+                                <Typography component={"div"} sx={{
+                                    width: "90%",
                                     height: "auto",
                                     display: "flex",
-                                    flexDirection: "row"}}>
-                                    <Typography style={{display: "flex", flexDirection: "row", width: "85%"}}>
+                                    flexDirection: "row"
+                                }}>
+                                    <Typography style={{ display: "flex", flexDirection: "row", width: "85%" }}>
                                         <div>
                                             <UserIcon
                                                 userId={attempt !== null ? attempt["author_id"] : ""}
@@ -1827,38 +1866,40 @@ function AttemptPage() {
                                         </Typography>
                                     </Typography>
                                     <Typography variant="body1" color="text.primary" align="right">
-                                        {new Date(attempt !== null ? attempt["created_at"] : "").toLocaleString("en-us", {day: '2-digit', month: 'short', year: 'numeric'})}
+                                        {new Date(attempt !== null ? attempt["created_at"] : "").toLocaleString("en-us", { day: '2-digit', month: 'short', year: 'numeric' })}
                                     </Typography>
                                 </Typography>
                             ) : (
-                                <Typography component={"div"} sx={{width: "90%",
+                                <Typography component={"div"} sx={{
+                                    width: "90%",
                                     height: "auto",
                                     display: "flex",
-                                    flexDirection: "row"}}>
-                                    <Typography style={{display: "flex", flexDirection: "row", width: "85%"}}>
+                                    flexDirection: "row"
+                                }}>
+                                    <Typography style={{ display: "flex", flexDirection: "row", width: "85%" }}>
                                         <div>
-                                            <Person3Icon sx={{width: "50px", height: "50px"}}/>
+                                            <Person3Icon sx={{ width: "50px", height: "50px" }} />
                                         </div>
                                     </Typography>
-                                    <StyledDiv style={{height: "24px", width: "40%", marginBottom: "12px", borderRadius: "20px", marginTop: "10px"}}/>
+                                    <StyledDiv style={{ height: "24px", width: "40%", marginBottom: "12px", borderRadius: "20px", marginTop: "10px" }} />
                                 </Typography>
                             )}
                         </div>
                     )}
                     <div>
-                        <div style={{display: "flex", justifyContent: "center", paddingTop: "1%"}}>
+                        <div style={{ display: "flex", justifyContent: "center", paddingTop: "1%" }}>
                             {mainTabHtml()}
                         </div>
                     </div>
                     {/* add a 10vh buffer at the end of the page */}
-                    <div style={{height: "10vh"}}/>
+                    <div style={{ height: "10vh" }} />
                     {/* On mobile add a hovering button to launch the project */}
                     {window.innerWidth <= 1000 && (
-                        <Fab 
+                        <Fab
                             disabled={isLoading}
-                            color="secondary" 
-                            aria-label="launch-mobile" 
-                            sx={{position: "fixed", bottom: "80px", right: "20px", zIndex: 6000}}
+                            color="secondary"
+                            aria-label="launch-mobile"
+                            sx={{ position: "fixed", bottom: "80px", right: "20px", zIndex: 6000 }}
                             onClick={() => {
                                 if (!loggedIn) {
                                     window.location.href = "/signup";
