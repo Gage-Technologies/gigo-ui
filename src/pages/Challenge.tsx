@@ -3,7 +3,7 @@
 // @ts-nocheck
 
 import * as React from "react";
-import {SyntheticEvent, useEffect} from "react";
+import { SyntheticEvent, useEffect } from "react";
 import {
     Badge,
     Box,
@@ -32,35 +32,35 @@ import {
     InputBase,
     Autocomplete
 } from "@mui/material";
-import {getAllTokens, themeHelpers} from "../theme";
+import { getAllTokens, themeHelpers } from "../theme";
 import SearchBar from "../components/SearchBar";
 import SearchIcon from '@mui/icons-material/Search';
-import {useAppSelector, useAppDispatch} from "../app/hooks";
+import { useAppSelector, useAppDispatch } from "../app/hooks";
 import {
     initialAuthStateUpdate, selectAuthState,
     selectAuthStateId, selectAuthStateTutorialState,
     selectAuthStateUserName,
     updateAuthState
 } from "../reducers/auth/auth";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import AttemptsCard from "../components/AttemptsCard";
-import {Chart} from "react-google-charts";
+import { Chart } from "react-google-charts";
 import DiscussionCard from "../components/DiscussionCard";
 import ThreadComment from "../components/ThreadComment";
 import SendIcon from '@mui/icons-material/Send';
 import call from "../services/api-call";
 import config from "../config";
 import swal from "sweetalert";
-import {useParams} from "react-router";
+import { useParams } from "react-router";
 import Post from "../models/post"
 import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
 import PostOverview from "../components/PostOverview";
 import PostOverviewMobile from "../components/PostOverviewMobile"
-import {Workspace} from "../models/workspace";
+import { Workspace } from "../models/workspace";
 import * as animationData from "../img/85023-no-data.json";
 import CodeDisplayEditor from "../components/editor/workspace_config/code_display_editor";
-import {LoadingButton} from "@mui/lab";
-import {ThreeDots} from "react-loading-icons";
+import { LoadingButton } from "@mui/lab";
+import { ThreeDots } from "react-loading-icons";
 import Attempt from "../models/attempt";
 import {
     Discussion,
@@ -75,7 +75,7 @@ import ThreadCard from "../components/ThreadComment";
 import WorkspaceConfigEditor from "../components/editor/workspace_config/editor";
 import LocalCafeOutlinedIcon from '@mui/icons-material/LocalCafeOutlined';
 import LocalCafeIcon from '@mui/icons-material/LocalCafe';
-import {v4} from "uuid";
+import { v4 } from "uuid";
 import * as yaml from 'js-yaml';
 
 import HorseIcon from "../components/Icons/Horse";
@@ -97,11 +97,11 @@ import renown10 from "../img/renown/renown10.svg"
 import alternativeImage from "../img/Black.png"
 import CardTutorial from "../components/CardTutorial";
 import UserIcon from "../components/UserIcon";
-import {useSelector} from "react-redux";
-import {selectCacheState} from "../reducers/pageCache/pageCache";
-import styled, {keyframes} from 'styled-components';
+import { useSelector } from "react-redux";
+import { selectCacheState } from "../reducers/pageCache/pageCache";
+import styled, { keyframes } from 'styled-components';
 import PersonIcon from "@mui/icons-material/Person";
-import {Helmet, HelmetProvider} from "react-helmet-async";
+import { Helmet, HelmetProvider } from "react-helmet-async";
 import CloseIcon from "@material-ui/icons/Close";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CaptchaPage from "./CaptchaPage";
@@ -122,6 +122,7 @@ function Challenge() {
     let userPref = localStorage.getItem('theme')
     const [mode, _] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
+
     const [editTitle, setEditTitle] = React.useState(false);
     const [editImage, setEditImage] = React.useState(false);
 
@@ -177,7 +178,7 @@ function Challenge() {
     };
 
     // retrieve url params
-    let {id} = useParams();
+    let { id } = useParams();
     const queryParams = new URLSearchParams(window.location.search)
 
 
@@ -353,7 +354,7 @@ function Challenge() {
         recordImplicitAction(true, sid)
 
         // record click off of tab or minimize
-        window.addEventListener('blur', function() {
+        window.addEventListener('blur', function () {
             // record the exit time in session storage
             window.sessionStorage.setItem(`project-exit-${project._id}`, `${new Date().getTime()}:${sid}`)
             recordImplicitAction(false)
@@ -369,12 +370,7 @@ function Challenge() {
         }
 
         // create a listener for beforeunload
-        let beforeUnload = function(event) {
-            // don't trigger preventDefault if we are using firefox
-            if (window.navigator.userAgent.indexOf("Firefox") === -1) {
-                event.preventDefault();
-            }
-
+        let beforeUnload = function (event) {
             // record the exit time in session storage
             window.sessionStorage.setItem(`project-exit-${project._id}`, `${new Date().getTime()}:${implicitSessionID.current}`)
 
@@ -382,15 +378,14 @@ function Challenge() {
             recordImplicitAction(false)
 
             // clear hooks
-            window.removeEventListener('blur', function() {
+            window.removeEventListener('blur', function () {
                 // record the exit time in session storage
                 window.sessionStorage.setItem(`project-exit-${project._id}`, `${new Date().getTime()}:${implicitSessionID.current}`)
                 recordImplicitAction(false)
             });
             window.onfocus = null
 
-            // this is bad practice but we need a little time to get the implicit action recorded
-            setTimeout(function() {}, 500)
+            return true
         }
 
         // handle case of page change by clearing our watchers
@@ -403,7 +398,7 @@ function Challenge() {
     }, [project])
 
     const recordImplicitAction = async (open: boolean, sessionId: string | null = null) => {
-        if (loggedIn){
+        if (loggedIn) {
             // bail if we don't have a project yet
             if (project === null || implicitSessionID.current === null) {
                 return
@@ -430,22 +425,15 @@ function Challenge() {
                 }
             }
 
-            // record click action
-            await call(
-                "/api/implicit/recordAction",
-                "post",
-                null,
-                null,
-                null,
-                //@ts-ignore
-                {
-                    post_id: id,
-                    action: action,
-                    session_id: sessionId,
-                },
-                null,
-                config.rootPath
-            )
+            // Convert payload to a string
+            const blob = new Blob([JSON.stringify({
+                post_id: id,
+                action: action,
+                session_id: sessionId,
+            })], {type : 'application/json'});
+
+            // Use navigator.sendBeacon to send the data to the server
+            navigator.sendBeacon(config.rootPath + '/api/implicit/recordAction', blob);
         }
     }
 
@@ -457,7 +445,7 @@ function Challenge() {
             null,
             null,
             //@ts-ignore
-            {post_id: id},
+            { post_id: id },
             null,
             config.rootPath
         )
@@ -469,7 +457,7 @@ function Challenge() {
             null,
             null,
             //@ts-ignore
-            {project_id: id, skip: 0, limit: 15},
+            { project_id: id, skip: 0, limit: 15 },
             null,
             config.rootPath
         )
@@ -481,7 +469,7 @@ function Challenge() {
             null,
             null,
             //@ts-ignore
-            {project_id: id, skip: 0, limit: 15},
+            { project_id: id, skip: 0, limit: 15 },
             null,
             config.rootPath
         )
@@ -492,7 +480,7 @@ function Challenge() {
             closedAttemptPromise,
         ])
 
-        if (projectResponse["message"] === "You must be logged in to access the GIGO system." || attemptResponse["message"] === "You must be logged in to access the GIGO system." ||  closedAttemptResponse["message"] === "You must be logged in to access the GIGO system."){
+        if (projectResponse["message"] === "You must be logged in to access the GIGO system." || attemptResponse["message"] === "You must be logged in to access the GIGO system." || closedAttemptResponse["message"] === "You must be logged in to access the GIGO system.") {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
@@ -551,12 +539,12 @@ function Challenge() {
             null,
             null,
             //@ts-ignore
-            {project_id: project._id},
+            { project_id: project._id },
             null,
             config.rootPath
         )
 
-        if (res["message"] === "You must be logged in to access the GIGO system."){
+        if (res["message"] === "You must be logged in to access the GIGO system.") {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
@@ -708,7 +696,7 @@ function Challenge() {
             null,
             null,
             //@ts-ignore
-            {post_id: id, skip: 0, limit: 50},
+            { post_id: id, skip: 0, limit: 50 },
             null,
             config.rootPath
         )
@@ -752,7 +740,7 @@ function Challenge() {
                 null,
                 null,
                 //@ts-ignore
-                {discussion_id: discussionLeads, skip: 0, limit: 50},
+                { discussion_id: discussionLeads, skip: 0, limit: 50 },
                 null,
                 config.rootPath
             )
@@ -793,7 +781,7 @@ function Challenge() {
                 null,
                 null,
                 //@ts-ignore
-                {comment_id: commentLeads, skip: 0, limit: 15},
+                { comment_id: commentLeads, skip: 0, limit: 15 },
                 null,
                 config.rootPath
             )
@@ -835,7 +823,7 @@ function Challenge() {
                 null,
                 null,
                 //@ts-ignore
-                {thread_id: threadLeads, skip: 0, limit: 15},
+                { thread_id: threadLeads, skip: 0, limit: 15 },
                 null,
                 config.rootPath
             )
@@ -867,7 +855,7 @@ function Challenge() {
             null,
             null,
             //@ts-ignore
-            {discussion_id: discussionLeads, skip: 0, limit: 50},
+            { discussion_id: discussionLeads, skip: 0, limit: 50 },
             null,
             config.rootPath
         )
@@ -948,7 +936,7 @@ function Challenge() {
                 overflowWrap: "break-word",
                 borderRadius: "10px",
                 padding: "2em 3em"
-            }}/>
+            }} />
         )
     }
 
@@ -958,17 +946,15 @@ function Challenge() {
     const millisToTime = (millisDuration: number) => {
         const seconds = Math.floor((millisDuration / 1000) % 60);
         const minutes = Math.floor((millisDuration / (1000 * 60)) % 60);
-        const hours = Math.floor((millisDuration / (1000 * 60 * 60)) % 24);
-        const days = Math.floor(millisDuration / (1000 * 60 * 60 * 24));
 
         let timeString = "";
 
-        if (days > 0) {
-            timeString += `${days}d `;
+        // we cap at 10 minutes since anything longer is likely a system error
+        // skewing the time to be higher
+        if (minutes >= 10) {
+            return `>10m`
         }
-        if (hours > 0) {
-            timeString += `${hours}h `;
-        }
+
         if (minutes > 0) {
             timeString += `${minutes}m `;
         }
@@ -981,7 +967,7 @@ function Challenge() {
 
     let imgSrc;
 
-    if (project!== null) {
+    if (project !== null) {
         switch (project["tier"]) {
             case 0:
                 imgSrc = renown1;
@@ -1076,7 +1062,7 @@ function Challenge() {
                         overflowWrap: "break-word",
                         borderRadius: "10px",
                         padding: "2em 3em"
-                    }}/>
+                    }} />
                 )
             }
         }
@@ -1099,7 +1085,7 @@ function Challenge() {
                 overflowWrap: "break-word",
                 borderRadius: "10px",
                 padding: "2em 3em"
-            }}/>
+            }} />
         )
     }
 
@@ -1114,39 +1100,39 @@ function Challenge() {
 
     const attemptTab = () => {
         return (
-            <div style={{overflowY: "auto", width: "50vw"}}>
-                <Typography variant={"h5"} style={{textAlign: "center", fontWeight: "bold", paddingBottom: "10px", paddingTop: "10px"}}>
+            <div style={{ overflowY: "auto", width: "50vw" }}>
+                <Typography variant={"h5"} style={{ textAlign: "center", fontWeight: "bold", paddingBottom: "10px", paddingTop: "10px" }}>
                     check out the attempts made on this project!
                 </Typography>
                 {attempt.length > 0 ? (
                     attempt.map((attempts) => {
                         return (
-                            <div style={{paddingBottom: "10px"}}>
+                            <div style={{ paddingBottom: "10px" }}>
                                 <ButtonBase onClick={() => navigate("/attempt/" + attempts["_id"])}>
-                                <AttemptsCard attemptUser={attempts["author"]} userThumb={config.rootPath + "/static/user/pfp/" + attempts["author_id"]}
-                                              userId={attempts["author_id"]} attemptTime={attempts["created_at"]}
-                                              attemptLines={attempts["attemptLines"]}
-                                              attemptPercentage={attempts["attemptPercentage"]}
-                                              success={attempts["success"]}
-                                              userTier={attempts["tier"]}
-                                              backgroundName={attempts["name"]}
-                                              backgroundPalette={attempts["color_palette"]}
-                                              backgroundRender={attempts["render_in_front"]}
-                                              width={"50vw"}
-                                              height={"auto"}
-                                              description={attempts["description"]}
-                                />
+                                    <AttemptsCard attemptUser={attempts["author"]} userThumb={config.rootPath + "/static/user/pfp/" + attempts["author_id"]}
+                                        userId={attempts["author_id"]} attemptTime={attempts["created_at"]}
+                                        attemptLines={attempts["attemptLines"]}
+                                        attemptPercentage={attempts["attemptPercentage"]}
+                                        success={attempts["success"]}
+                                        userTier={attempts["tier"]}
+                                        backgroundName={attempts["name"]}
+                                        backgroundPalette={attempts["color_palette"]}
+                                        backgroundRender={attempts["render_in_front"]}
+                                        width={"50vw"}
+                                        height={"auto"}
+                                        description={attempts["description"]}
+                                    />
                                 </ButtonBase>
                             </div>
                         );
                     })
                 ) : (
-                    <div style={{display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%"}}>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%" }}>
                         {/* Let's add a pretty message telling the user there are no attempts and encouraging them to make one */}
-                        <Typography variant={"h5"} style={{textAlign: "center", fontWeight: "bold", paddingBottom: "10px"}}>
+                        <Typography variant={"h5"} style={{ textAlign: "center", fontWeight: "bold", paddingBottom: "10px" }}>
                             No Attempts Yet!
                         </Typography>
-                        <Typography variant={"h6"} style={{textAlign: "center", fontWeight: "bold", paddingBottom: "10px"}}>
+                        <Typography variant={"h6"} style={{ textAlign: "center", fontWeight: "bold", paddingBottom: "10px" }}>
                             Be the first to attempt this challenge!
                         </Typography>
                     </div>
@@ -1207,7 +1193,7 @@ function Challenge() {
                     options={{
                         title: "My Daily Activities"
                     }}
-                    rootProps={{"data-testid": "1"}}
+                    rootProps={{ "data-testid": "1" }}
                 />
             </div>
         )
@@ -1270,7 +1256,7 @@ function Challenge() {
                             defaultValue={prompt}
                             value={prompt}
                             onChange={(e) => setPrompt(e.target.value)}
-                            inputProps={{maxLength: 120, minLength: 3}}
+                            inputProps={{ maxLength: 120, minLength: 3 }}
                             helperText={prompt.length > 119 ? 'Character limit reached' : promptError}
                             error={prompt.length > 119 || prompt === "" || prompt.length < 3}
                         />
@@ -1307,7 +1293,7 @@ function Challenge() {
         }
 
         // clone the file so we don't read the same one we're going to upload
-        let clonedFile = new File([file], file.name, {type: file.type});
+        let clonedFile = new File([file], file.name, { type: file.type });
 
         // create file reader
         const reader = new FileReader();
@@ -1344,7 +1330,7 @@ function Challenge() {
             minorValues = ["overview", "description", "evaluation", "attempts"]
         }
 
-        if (isEphemeral){
+        if (isEphemeral) {
             minorValues = ["overview", "description"]
         }
 
@@ -1354,9 +1340,9 @@ function Challenge() {
         }
 
         return (
-            <div style={{display: "flex", width: "80vw", height: "auto"}}>
+            <div style={{ display: "flex", width: "80vw", height: "auto" }}>
                 {window.innerWidth > 1000 ? (
-                    <div style={{display: "flex", justifyContent: "left", paddingRight: "20px", height: "100%"}}>
+                    <div style={{ display: "flex", justifyContent: "left", paddingRight: "20px", height: "100%" }}>
                         <Tabs
                             orientation="vertical"
                             value={minorTab}
@@ -1365,20 +1351,20 @@ function Challenge() {
                         >
                             {minorValues.map((minorValue) => {
                                 return <Tab label={minorValue} value={minorValue} key={minorValue} className={minorValues}
-                                            sx={minorValue === "overview" && stepIndex === 2 ? {color: "text.primary", borderRadius: 1, zIndex: "600000"} : {color: "text.primary", borderRadius: 1}}/>;
+                                    sx={minorValue === "overview" && stepIndex === 2 ? { color: "text.primary", borderRadius: 1, zIndex: "600000" } : { color: "text.primary", borderRadius: 1 }} />;
                             })}
                         </Tabs>
                     </div>
                 ) : null}
-                <div style={window.innerWidth > 1000 ? {display: "flex", justifyContent: "center", width: "90%"} : {display: "flex", justifyContent: "center", width: "100%", position: "relative", flexDirection: "column"}}>
+                <div style={window.innerWidth > 1000 ? { display: "flex", justifyContent: "center", width: "90%" } : { display: "flex", justifyContent: "center", width: "100%", position: "relative", flexDirection: "column" }}>
                     {window.innerWidth <= 1000 ? (
                         <div>
-                            <div style={{marginBottom: "50px"}}>
+                            <div style={{ marginBottom: "50px" }}>
                                 <PostOverviewMobile
                                     width={"100%"}
                                     height={"100%"}
                                     description={project !== null && minorTab === "overview" ? project["description"] : ""}
-                                    exclusiveDescription={project!== null? project["exclusive_description"] : null}
+                                    exclusiveDescription={project !== null ? project["exclusive_description"] : null}
                                     postDate={project !== null ? project["created_at"] : ""}
                                     userIsOP={currentUser}
                                     id={project !== null ? project["_id"] : 0}
@@ -1387,25 +1373,27 @@ function Challenge() {
                                 />
                             </div>
                             {project !== null ? (
-                                <div style={{width: "100%", position: "relative", height: "300px", marginBottom: "50px"}}>
+                                <div style={{ width: "100%", position: "relative", height: "300px", marginBottom: "50px" }}>
                                     <img
                                         src={config.rootPath + project["thumbnail"]}
-                                        style={{                                        width: "inherit",
-                                            height: "inherit", borderRadius: "5px"}}
+                                        style={{
+                                            width: "inherit",
+                                            height: "inherit", borderRadius: "5px"
+                                        }}
                                         onError={handleError}
-                                        alt={"project thumbnail"}/>
+                                        alt={"project thumbnail"} />
                                 </div>
                             ) : (
-                                <StyledDiv style={{height: "200px", width: "inherit"}}/>
+                                <StyledDiv style={{ height: "200px", width: "inherit" }} />
                             )}
 
-                            <div style={window.innerWidth > 1000 ? {overflow: "hidden", width: "70vw", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column"} : {overflow: "break-word", width: "100%", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column"}}>
-                                 {minorTabDetermination()}
+                            <div style={window.innerWidth > 1000 ? { overflow: "hidden", width: "70vw", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column" } : { overflow: "break-word", width: "100%", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column" }}>
+                                {minorTabDetermination()}
                             </div>
                         </div>
                     ) : (
                         <Card>
-                            <div style={{overflow: "hidden", width: "70vw", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column", zIndex: 6}}>
+                            <div style={{ overflow: "hidden", width: "70vw", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column", zIndex: 6 }}>
                                 <div style={{ width: "100%", position: "relative", height: "300px" }}>
                                     <img
                                         src={project !== null ? config.rootPath + project["thumbnail"] : alternativeImage}
@@ -1426,7 +1414,7 @@ function Challenge() {
                                                 right: 0
                                             }}
                                         >
-                                            <EditIcon/>
+                                            <EditIcon />
                                         </Button>
                                     ) : null}
                                 </div>
@@ -1464,10 +1452,10 @@ function Challenge() {
                                                 <LoadingImageUploadButton
                                                     loading={true}
                                                     disabled={true}
-                                                    // sx={{
-                                                    //     width: "30vw",
-                                                    //     height: "43vh"
-                                                    // }}
+                                                // sx={{
+                                                //     width: "30vw",
+                                                //     height: "43vh"
+                                                // }}
                                                 >
                                                     Generating Image
                                                 </LoadingImageUploadButton>
@@ -1481,9 +1469,9 @@ function Challenge() {
                                                         height: "43vh"
                                                     }}
                                                 >
-                                                    <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+                                                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                                                         {projectImage == null || projectImage == "" ? (
-                                                            <h5 style={{color: "grey"}}>Upload Image</h5>
+                                                            <h5 style={{ color: "grey" }}>Upload Image</h5>
                                                         ) : null}
                                                         <img
                                                             key={projectImage}
@@ -1609,7 +1597,7 @@ function Challenge() {
                                     backgroundRender={project !== null ? project["render_in_front"] : null}
                                     userTier={project !== null ? project["tier"] : ""}
                                     description={project !== null && minorTab === "overview" ? project["description"] : ""}
-                                    exclusiveDescription={project!== null? project["exclusive_description"] : null}
+                                    exclusiveDescription={project !== null ? project["exclusive_description"] : null}
                                     postDate={project !== null ? project["created_at"] : ""}
                                     userIsOP={currentUser}
                                     id={project !== null ? project["_id"] : 0}
@@ -1617,9 +1605,9 @@ function Challenge() {
                                     project={true}
                                     estimatedTime={project !== null ? project["estimated_tutorial_time_millis"] : null}
                                 />
-                                <div style={{height: "20px"}}/>
+                                <div style={{ height: "20px" }} />
                             </div>
-                            <div style={window.innerWidth > 1000 ? {overflow: "hidden", width: "70vw", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column"} : {overflow: "hidden", width: "70vw", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column"}}>
+                            <div style={window.innerWidth > 1000 ? { overflow: "hidden", width: "70vw", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column" } : { overflow: "hidden", width: "70vw", maxWidth: "1300px", alignItems: "center", display: "flex", flexDirection: "column" }}>
                                 {minorTabDetermination()}
                             </div>
                         </Card>
@@ -1645,16 +1633,16 @@ function Challenge() {
 
     const mainTabSource = () => {
         return (
-            <div style={{display: "flex", width: "80vw", height: "63vh"}}>
+            <div style={{ display: "flex", width: "80vw", height: "63vh" }}>
                 {project !== null ? (
                     <CodeDisplayEditor repoId={project !== null ? project["repo_id"] : 0}
-                                       references={"main"}
-                                       filepath={""}
-                                       height={"73vh"}
-                                       style={{display: "contents", flexDirection: "row", width: "75vw"}}
-                                       projectName={project !== null ? project["title"] : ""}
+                        references={"main"}
+                        filepath={""}
+                        height={"73vh"}
+                        style={{ display: "contents", flexDirection: "row", width: "75vw" }}
+                        projectName={project !== null ? project["title"] : ""}
                     />
-                ) : (<ThreeDots/>)}
+                ) : (<ThreeDots />)}
                 {/*<Editor theme={theme}/>*/}
             </div>
         )
@@ -1797,7 +1785,7 @@ function Challenge() {
 
     const mainTabEdit = () => {
         return (
-            <div style={{display: "block", width: "80vw", height: "63vh", justifyContent: "center"}}>
+            <div style={{ display: "block", width: "80vw", height: "63vh", justifyContent: "center" }}>
                 <WorkspaceConfigEditor
                     value={wsConfig}
                     setValue={(e) => setWsConfig(e)}
@@ -1810,23 +1798,23 @@ function Challenge() {
                     height={"58vh"}
                 />
                 <LoadingButton variant={"contained"}
-                       loading={loadingEdit}
-                        sx={{
-                            height: "4vh",
-                            minHeight: "35px",
-                            bgcolor: theme.palette.primary,
-                            width: "72.5vw",
-                            marginTop: "45px",
-                            marginLeft: "40px",
-                            marginRight: "40px",
-                            borderRadius: "10px",
-                            fontSize: "1.2rem",
-                            fontWeight: "bold",
-                            textAlign: "center",
-                            marginTop: "10px",
-                            marginBottom: "10px"
-                        }}
-                        onClick={() => editConfig()}>
+                    loading={loadingEdit}
+                    sx={{
+                        height: "4vh",
+                        minHeight: "35px",
+                        bgcolor: theme.palette.primary,
+                        width: "72.5vw",
+                        marginTop: "45px",
+                        marginLeft: "40px",
+                        marginRight: "40px",
+                        borderRadius: "10px",
+                        fontSize: "1.2rem",
+                        fontWeight: "bold",
+                        textAlign: "center",
+                        marginTop: "10px",
+                        marginBottom: "10px"
+                    }}
+                    onClick={() => editConfig()}>
                     Confirm Edit
                 </LoadingButton>
                 <Dialog
@@ -1836,12 +1824,12 @@ function Challenge() {
                     <DialogTitle>{"Apply Changes Now?"}</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                        To ensure the changes take effect, they will be automatically applied after 24 hours. However, if you prefer, you can apply the changes immediately. Please note that applying a configuration change will require the workspace to re-initialize, resulting in the deletion of any data that has not been pushed to Git or specified within the configuration.
+                            To ensure the changes take effect, they will be automatically applied after 24 hours. However, if you prefer, you can apply the changes immediately. Please note that applying a configuration change will require the workspace to re-initialize, resulting in the deletion of any data that has not been pushed to Git or specified within the configuration.
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={() => setEditConfirm(false)} color="primary">Apply Later</Button>
-                        <Button  onClick={() => confirmEditConfig()} color={"error"}>
+                        <Button onClick={() => confirmEditConfig()} color={"error"}>
                             Apply Changes Now
                         </Button>
                     </DialogActions>
@@ -1870,7 +1858,7 @@ function Challenge() {
             null,
             null,
             //@ts-ignore
-            {post_id: id, title: title, body: body, tags: []},
+            { post_id: id, title: title, body: body, tags: [] },
             null,
             config.rootPath
         )
@@ -1889,7 +1877,7 @@ function Challenge() {
             return;
         }
 
-        if (res["message"] === "You must be logged in to access the GIGO system."){
+        if (res["message"] === "You must be logged in to access the GIGO system.") {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
@@ -1927,7 +1915,7 @@ function Challenge() {
             null,
             null,
             //@ts-ignore
-            {discussion_id: selectedDiscussion["_id"], body},
+            { discussion_id: selectedDiscussion["_id"], body },
             null,
             config.rootPath
         )
@@ -1971,7 +1959,7 @@ function Challenge() {
     }
 
     const handlePostThread = async (body) => {
-        if ( body === "" || body === null ) {
+        if (body === "" || body === null) {
             return
         }
 
@@ -1982,7 +1970,7 @@ function Challenge() {
             null,
             null,
             //@ts-ignore
-            {comment_id: selectedComment["_id"], body},
+            { comment_id: selectedComment["_id"], body },
             null,
             config.rootPath
         )
@@ -2026,7 +2014,7 @@ function Challenge() {
     }
 
     const handleThreadReply = async (body) => {
-        if ( body === "" || body === null ) {
+        if (body === "" || body === null) {
             return
         }
 
@@ -2037,7 +2025,7 @@ function Challenge() {
             null,
             null,
             //@ts-ignore
-            {thread_id: selectedThread["_id"], body},
+            { thread_id: selectedThread["_id"], body },
             null,
             config.rootPath
         )
@@ -2080,7 +2068,7 @@ function Challenge() {
         return
     }
 
-    const handleDiscussionSearch =  async (e : any) => {
+    const handleDiscussionSearch = async (e: any) => {
         if (typeof e.target.value !== "string") {
             return
         }
@@ -2122,7 +2110,7 @@ function Challenge() {
         setFilteredDiscussions(res["discussions"])
     }
 
-    const handleCommentSearch =  async (e : any) => {
+    const handleCommentSearch = async (e: any) => {
         if (typeof e.target.value !== "string") {
             return
         }
@@ -2227,23 +2215,23 @@ function Challenge() {
         setLoading(false)
     }
 
-        const getThreadReplies = async (thread: object) => {
-            setDiscussionTab("reply")
-            setSelectedThread(thread)
-            setLoading(true)
+    const getThreadReplies = async (thread: object) => {
+        setDiscussionTab("reply")
+        setSelectedThread(thread)
+        setLoading(true)
 
-            for (let i = 0; i < threadReplies.length; i++) {
-                if (threadReplies[i]["thread_comment_id"] === thread["_id"]) {
-                    replyArray.push(threadReplies[i])
-                }
+        for (let i = 0; i < threadReplies.length; i++) {
+            if (threadReplies[i]["thread_comment_id"] === thread["_id"]) {
+                replyArray.push(threadReplies[i])
             }
-
-            setLoading(false)
         }
 
-        const handleSubmit = (event) => {
-            event.target.reset();
-        };
+        setLoading(false)
+    }
+
+    const handleSubmit = (event) => {
+        event.target.reset();
+    };
 
     const [editDiscussion, setEditDiscussion] = React.useState(false)
     const [newTitle, setNewTitle] = React.useState("")
@@ -2251,7 +2239,7 @@ function Challenge() {
     const [newDiscussion, setNewDiscussion] = React.useState("")
 
     const editDiscussions = async (id, discussionType: string) => {
-        if (newBody !== "" && newTitle!== "") {
+        if (newBody !== "" && newTitle !== "") {
             let res = await call(
                 "/api/discussion/editDiscussions",
                 "post",
@@ -2259,16 +2247,16 @@ function Challenge() {
                 null,
                 null,
                 //@ts-ignore
-                {_id: id, discussion_type: discussionType, title: newTitle, body: newBody, tags: []},
+                { _id: id, discussion_type: discussionType, title: newTitle, body: newBody, tags: [] },
                 null,
                 config.rootPath
             )
 
-            const [edit ] = await Promise.all([
+            const [edit] = await Promise.all([
                 res,
             ])
 
-            if (edit["message"] === "You must be logged in to access the GIGO system."){
+            if (edit["message"] === "You must be logged in to access the GIGO system.") {
                 let authState = Object.assign({}, initialAuthStateUpdate)
                 // @ts-ignore
                 dispatch(updateAuthState(authState))
@@ -2335,7 +2323,7 @@ function Challenge() {
                         console.log(`Unknown discussionType: ${discussionType}`);
                 }
             }
-            
+
             setEditDiscussion(false)
             setNewTitle("")
             setNewBody("")
@@ -2351,12 +2339,12 @@ function Challenge() {
             null,
             null,
             //@ts-ignore
-            {_id: discId, discussion_type: discussionType},
+            { _id: discId, discussion_type: discussionType },
             null,
             config.rootPath
         )
 
-        const [res ] = await Promise.all([
+        const [res] = await Promise.all([
             add,
         ])
 
@@ -2395,12 +2383,12 @@ function Challenge() {
             null,
             null,
             //@ts-ignore
-            {_id: discId, discussion_type: discussionType},
+            { _id: discId, discussion_type: discussionType },
             null,
             config.rootPath
         )
 
-        const [res ] = await Promise.all([
+        const [res] = await Promise.all([
             remove,
         ])
 
@@ -2421,19 +2409,19 @@ function Challenge() {
             setDiscussionUpVotes(newFinalUpvote)
         } else if (discussionType === "comment") {
             let fullUpvote = commentUpVotes.slice();
-            let newFinalUpvote = fullUpvote.filter(data => data!== discId)
+            let newFinalUpvote = fullUpvote.filter(data => data !== discId)
             setCommentUpVotes(newFinalUpvote)
         } else if (discussionType === "thread_comment") {
             let fullUpvote = threadUpVotes
             let index = fullUpvote.indexOf(discId)
-            if (index > -1){
+            if (index > -1) {
                 let finalThreadUpvote = fullUpvote.splice(index, 1)
                 setCommentUpVotes(finalThreadUpvote)
             }
         } else if (discussionType === "thread_reply") {
             let fullUpvote = replyUpVotes
             let index = fullUpvote.indexOf(discId)
-            if (index > -1){
+            if (index > -1) {
                 let finalReplyUpvote = fullUpvote.splice(index, 1)
                 setCommentUpVotes(finalReplyUpvote)
             }
@@ -2450,7 +2438,7 @@ function Challenge() {
             let index = testingDiscussion.map(x => x["_id"]).indexOf(obj["_id"])
 
             if (isAdd) {
-                if (discussionUpVotes.includes(obj["_id"])){
+                if (discussionUpVotes.includes(obj["_id"])) {
                     x = Number(obj["coffee"]) - 1
                     testingDiscussion[index]["coffee"] = x.toString()
                     setDiscussions(testingDiscussion)
@@ -2465,7 +2453,7 @@ function Challenge() {
                 addCoffee(obj["_id"], "discussion")
                 return
             } else {
-                if (Number(obj["coffee"]) <= 0){
+                if (Number(obj["coffee"]) <= 0) {
                     x = Number(obj["coffee"]) + 1
                     testingDiscussion[index]["coffee"] = x.toString()
                     setDiscussions(testingDiscussion)
@@ -2489,7 +2477,7 @@ function Challenge() {
             let index = discussionReplies.map(x => x["_id"]).indexOf(obj["_id"])
 
             if (isAdd) {
-                if (commentUpVotes.includes(obj["_id"])){
+                if (commentUpVotes.includes(obj["_id"])) {
                     x = Number(obj["coffee"]) - 1
                     testingDiscussion[index]["coffee"] = x.toString()
                     setDiscussionReplies(testingDiscussion)
@@ -2502,7 +2490,7 @@ function Challenge() {
                 addCoffee(obj["_id"], "comment")
                 return
             } else {
-                if (Number(obj["coffee"]) <= 0){
+                if (Number(obj["coffee"]) <= 0) {
                     x = Number(obj["coffee"]) + 1
                     testingDiscussion[index]["coffee"] = x.toString()
                     setDiscussionReplies(testingDiscussion)
@@ -2524,7 +2512,7 @@ function Challenge() {
             let testingDiscussion = threadArray
 
             if (isAdd) {
-                if (threadUpVotes.includes(obj["_id"])){
+                if (threadUpVotes.includes(obj["_id"])) {
                     x = Number(obj["coffee"]) - 1
                     testingDiscussion[index]["coffee"] = x.toString()
                     setThreadArray(testingDiscussion)
@@ -2537,7 +2525,7 @@ function Challenge() {
                 addCoffee(obj["_id"], "thread_comment")
                 return
             } else {
-                if (Number(obj["coffee"]) <= 0){
+                if (Number(obj["coffee"]) <= 0) {
                     x = Number(obj["coffee"]) + 1
                     testingDiscussion[index]["coffee"] = x.toString()
                     setThreadArray(testingDiscussion)
@@ -2559,7 +2547,7 @@ function Challenge() {
             let testingDiscussion = replyArray
 
             if (isAdd) {
-                if (replyUpVotes.includes(obj["_id"])){
+                if (replyUpVotes.includes(obj["_id"])) {
                     x = Number(obj["coffee"]) - 1
                     testingDiscussion[index]["coffee"] = x.toString()
                     setReplyArray(testingDiscussion)
@@ -2572,7 +2560,7 @@ function Challenge() {
                 addCoffee(obj["_id"], "thread_reply")
                 return
             } else {
-                if (Number(obj["coffee"]) <= 0){
+                if (Number(obj["coffee"]) <= 0) {
                     x = Number(obj["coffee"]) + 1
                     testingDiscussion[index]["coffee"] = x.toString()
                     setReplyArray(testingDiscussion)
@@ -2630,7 +2618,7 @@ function Challenge() {
                         error={commentBody.length === 2000}
                     />
                 </DialogContent>
-                <DialogActions sx={{marginTop: "-20px"}}>
+                <DialogActions sx={{ marginTop: "-20px" }}>
                     <Button onClick={handleDiscussionClose}>
                         Cancel
                     </Button>
@@ -2757,10 +2745,10 @@ function Challenge() {
                         boxShadow: "none",
                         transition: 'background-color 0.3s ease',
                         '&:hover': {
-                        backgroundColor: '#F5F5F5',
-                    },
+                            backgroundColor: '#F5F5F5',
+                        },
                     }}>
-                        <SearchIcon style={{ marginRight: "5px", marginLeft: "6px" }}/>
+                        <SearchIcon style={{ marginRight: "5px", marginLeft: "6px" }} />
                         <InputBase
                             id="discussionInput"
                             style={{
@@ -2787,13 +2775,13 @@ function Challenge() {
                             <div
                                 key={discussion["_id"]}
                                 style={{
-                                display: "flex",
-                                paddingBottom: "10px",
-                                width: "80vw",
-                                alignContent: "center",
-                                alignItems: "center",
-                                position: "relative"
-                            }}>
+                                    display: "flex",
+                                    paddingBottom: "10px",
+                                    width: "80vw",
+                                    alignContent: "center",
+                                    alignItems: "center",
+                                    position: "relative"
+                                }}>
                                 <ButtonBase onClick={() => getDiscussionComments(discussion)}>
                                     <DiscussionCard
                                         userName={discussion["author"]}
@@ -2828,25 +2816,25 @@ function Challenge() {
                                 ) : null}
                                 {discussionUpVotes.includes(discussion["_id"]) ? (
                                     <IconButton onClick={() => handleCoffeeClick(discussion["coffee"], false, "discussion", discussion)}
-                                                sx={{position: "absolute", bottom: "5%", left: "1%"}}>
+                                        sx={{ position: "absolute", bottom: "5%", left: "1%" }}>
                                         <Badge color="primary" badgeContent={discussion["coffee"]}
-                                               sx={{height: "2.5vh", minHeight: "4px"}}
-                                               anchorOrigin={{
-                                                   vertical: 'top',
-                                                   horizontal: 'left',
-                                               }}>
+                                            sx={{ height: "2.5vh", minHeight: "4px" }}
+                                            anchorOrigin={{
+                                                vertical: 'top',
+                                                horizontal: 'left',
+                                            }}>
                                             <LocalCafeIcon />
                                         </Badge>
                                     </IconButton>
                                 ) : (
                                     <IconButton onClick={() => handleCoffeeClick(discussion["coffee"], true, "discussion", discussion)}
-                                                sx={{position: "absolute", bottom: "5%", left: "1%"}}>
+                                        sx={{ position: "absolute", bottom: "5%", left: "1%" }}>
                                         <Badge color="primary" badgeContent={discussion["coffee"]}
-                                               sx={{height: "2.5vh", minHeight: "4px"}}
-                                               anchorOrigin={{
-                                                   vertical: 'top',
-                                                   horizontal: 'left',
-                                               }}>
+                                            sx={{ height: "2.5vh", minHeight: "4px" }}
+                                            anchorOrigin={{
+                                                vertical: 'top',
+                                                horizontal: 'left',
+                                            }}>
                                             <LocalCafeOutlinedIcon />
                                         </Badge>
                                     </IconButton>
@@ -2857,36 +2845,37 @@ function Challenge() {
                     {createDiscussion ? renderDiscussionPopup() : null}
                     {selectedDiscussion && editDiscussionPopup ? renderEditDiscussionPopup() : null}
                     {!createDiscussion && !editDiscussionPopup &&
-                    <div
-                        style={window.innerWidth > 1000 ?{
-                            width: "80vw",
-                            minWidth: "175px",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            paddingTop: "1%"
-                        } : {
-                            width: "80vw",
-                            minWidth: "175px",
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            paddingTop: "1%",
-                        }}
-                    >
-                        <Button
-                            variant={"contained"} color={"primary"}
-                            sx={{ height: "4vh", minHeight: "35px", right: "4%",                             zIndex: "600000" }}
-                            onClick={() => handleDiscussionOpen()} className={'discussion'}
+                        <div
+                            style={window.innerWidth > 1000 ? {
+                                width: "80vw",
+                                minWidth: "175px",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                paddingTop: "1%"
+                            } : {
+                                width: "80vw",
+                                minWidth: "175px",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                paddingTop: "1%",
+                            }}
                         >
-                            Start a Discussion
-                        </Button>
-                    </div>
+                            <Button
+                                variant={"contained"} color={"primary"}
+                                sx={{ height: "4vh", minHeight: "35px", right: "4%", zIndex: "600000" }}
+                                onClick={() => handleDiscussionOpen()} className={'discussion'}
+                            >
+                                Start a Discussion
+                            </Button>
+                        </div>
                     }
                 </div>
-            )} else if (discussionTab === "comment") {
+            )
+        } else if (discussionTab === "comment") {
             return (
-                <div style={{display: "flex", flexDirection: "column"}}>
+                <div style={{ display: "flex", flexDirection: "column" }}>
                     <Grid item xs={"auto"}>
                         <Paper style={window.innerWidth > 1000 ? {
                             padding: '2px 4px',
@@ -2899,7 +2888,7 @@ function Challenge() {
                             alignItems: 'center',
                             width: "68vw"
                         }}>
-                            <SearchIcon style={{ marginRight: "5px", marginLeft: "6px" }}/>
+                            <SearchIcon style={{ marginRight: "5px", marginLeft: "6px" }} />
                             <InputBase
                                 id="commentInput"
                                 style={{
@@ -2933,40 +2922,41 @@ function Challenge() {
                             paddingBottom: "10px",
                             width: "80vw",
                             alignContent: "center",
-                            position:`relative`}}>
+                            position: `relative`
+                        }}>
                             <DiscussionCard userName={selectedDiscussion["author"]}
-                                           userThumb={config.rootPath + "/static/user/pfp/" + selectedDiscussion["author_id"]}
-                                           userId={selectedDiscussion["author_id"]}
-                                           userTier={selectedDiscussion["author_tier"]}
-                                           discussionTitle={selectedDiscussion["title"]}
-                                           discussionSummary={selectedDiscussion["body"]}
-                                           tags={selectedDiscussion["tags"]}
-                                           discussionId={selectedDiscussion["_id"]}
-                                            width={window.innerWidth > 1000 ? 77 * window.innerWidth / 100 : 70 * window.innerWidth / 100}
-                                           height={150} backgroundName={selectedDiscussion["name"]}
-                                            backgroundPalette={selectedDiscussion["color_palette"]}
-                                            backgroundRender={selectedDiscussion["render_in_front"]} role={selectedDiscussion["user_status"]}/>
+                                userThumb={config.rootPath + "/static/user/pfp/" + selectedDiscussion["author_id"]}
+                                userId={selectedDiscussion["author_id"]}
+                                userTier={selectedDiscussion["author_tier"]}
+                                discussionTitle={selectedDiscussion["title"]}
+                                discussionSummary={selectedDiscussion["body"]}
+                                tags={selectedDiscussion["tags"]}
+                                discussionId={selectedDiscussion["_id"]}
+                                width={window.innerWidth > 1000 ? 77 * window.innerWidth / 100 : 70 * window.innerWidth / 100}
+                                height={150} backgroundName={selectedDiscussion["name"]}
+                                backgroundPalette={selectedDiscussion["color_palette"]}
+                                backgroundRender={selectedDiscussion["render_in_front"]} role={selectedDiscussion["user_status"]} />
                             {discussionUpVotes.includes(selectedDiscussion["_id"]) ? (
                                 <IconButton onClick={() => handleCoffeeClick(selectedDiscussion["coffee"], false, "discussion", selectedDiscussion)}
-                                sx={{position: "absolute", bottom: "5%", left: "1%"}}>
+                                    sx={{ position: "absolute", bottom: "5%", left: "1%" }}>
                                     <Badge color="primary" badgeContent={selectedDiscussion["coffee"]}
-                                           sx={{height: "2.5vh", minHeight: "4px"}}
-                                           anchorOrigin={{
-                                               vertical: 'top',
-                                               horizontal: 'left',
-                                           }}>
+                                        sx={{ height: "2.5vh", minHeight: "4px" }}
+                                        anchorOrigin={{
+                                            vertical: 'top',
+                                            horizontal: 'left',
+                                        }}>
                                         <LocalCafeIcon />
                                     </Badge>
                                 </IconButton>
                             ) : (
                                 <IconButton onClick={() => handleCoffeeClick(selectedDiscussion["coffee"], true, "discussion", selectedDiscussion)}
-                                            sx={{position: "absolute", bottom: "5%", left: "1%"}}>
+                                    sx={{ position: "absolute", bottom: "5%", left: "1%" }}>
                                     <Badge color="primary" badgeContent={selectedDiscussion["coffee"]}
-                                           sx={{height: "2.5vh", minHeight: "4px"}}
-                                           anchorOrigin={{
-                                               vertical: 'top',
-                                               horizontal: 'left',
-                                           }}>
+                                        sx={{ height: "2.5vh", minHeight: "4px" }}
+                                        anchorOrigin={{
+                                            vertical: 'top',
+                                            horizontal: 'left',
+                                        }}>
                                         <LocalCafeOutlinedIcon />
                                     </Badge>
                                 </IconButton>
@@ -2983,20 +2973,20 @@ function Challenge() {
                                 }}>
                                     <ButtonBase onClick={() => getCommentThreads(comment)}>
                                         <CommentCard userName={comment["author"]}
-                                                     userThumb={config.rootPath + "/static/user/pfp/" + comment["author_id"]}
-                                                     userId={comment["author_id"]}
-                                                     userTier={comment["author_tier"]}
-                                                     commentBody={comment["body"]}
-                                                     commentId={comment["_id"]}
-                                                     width={window.innerWidth > 1000 ? 77 * window.innerWidth / 100 : 70 * window.innerWidth / 100}
-                                                     height={150} backgroundName={comment["name"]}
-                                                     backgroundPalette={comment["color_palette"]}
-                                                     backgroundRender={comment["render_in_front"]} role={comment["user_status"]}/>
+                                            userThumb={config.rootPath + "/static/user/pfp/" + comment["author_id"]}
+                                            userId={comment["author_id"]}
+                                            userTier={comment["author_tier"]}
+                                            commentBody={comment["body"]}
+                                            commentId={comment["_id"]}
+                                            width={window.innerWidth > 1000 ? 77 * window.innerWidth / 100 : 70 * window.innerWidth / 100}
+                                            height={150} backgroundName={comment["name"]}
+                                            backgroundPalette={comment["color_palette"]}
+                                            backgroundRender={comment["render_in_front"]} role={comment["user_status"]} />
                                     </ButtonBase>
                                     {comment["author_id"] === callingId ? (
                                         <Button
                                             variant={`text`} color={"primary"} size={`small`}
-                                            sx={window.innerWidth > 1000 ? { position: 'absolute', right: "4%" } : {position: "absolute", top: "15%"}}
+                                            sx={window.innerWidth > 1000 ? { position: 'absolute', right: "4%" } : { position: "absolute", top: "15%" }}
                                             onClick={() => {
                                                 setSelectedComment(comment);
                                                 setNewBody(comment["body"]);
@@ -3010,28 +3000,28 @@ function Challenge() {
                                     {commentUpVotes.includes(comment["_id"]) ? (
                                         <IconButton
                                             onClick={() => handleCoffeeClick(comment["coffee"], false, "comment", comment)}
-                                            sx={{position: "absolute", bottom: "5%", left: "1%"}}
+                                            sx={{ position: "absolute", bottom: "5%", left: "1%" }}
                                         >
                                             <Badge color="primary" badgeContent={comment["coffee"]}
-                                                   sx={{height: "2.5vh", minHeight: "4px"}}
-                                                   anchorOrigin={{
-                                                       vertical: 'top',
-                                                       horizontal: 'left',
-                                                   }}>
+                                                sx={{ height: "2.5vh", minHeight: "4px" }}
+                                                anchorOrigin={{
+                                                    vertical: 'top',
+                                                    horizontal: 'left',
+                                                }}>
                                                 <LocalCafeIcon />
                                             </Badge>
                                         </IconButton>
                                     ) : (
                                         <IconButton
                                             onClick={() => handleCoffeeClick(comment["coffee"], true, "comment", comment)}
-                                            sx={{position: "absolute", bottom: "5%", left: "1%"}}
+                                            sx={{ position: "absolute", bottom: "5%", left: "1%" }}
                                         >
                                             <Badge color="primary" badgeContent={comment["coffee"]}
-                                                   sx={{height: "2.5vh", minHeight: "4px"}}
-                                                   anchorOrigin={{
-                                                       vertical: 'top',
-                                                       horizontal: 'left',
-                                                   }}>
+                                                sx={{ height: "2.5vh", minHeight: "4px" }}
+                                                anchorOrigin={{
+                                                    vertical: 'top',
+                                                    horizontal: 'left',
+                                                }}>
                                                 <LocalCafeOutlinedIcon />
                                             </Badge>
                                         </IconButton>
@@ -3040,7 +3030,7 @@ function Challenge() {
                             )
                         })}
                     </div>
-                    <div style={{width: "76vw"}}>
+                    <div style={{ width: "76vw" }}>
                         <form noValidate autoComplete="off" style={{
                             display: "flex",
                             flexDirection: "column",
@@ -3050,12 +3040,12 @@ function Challenge() {
                             paddingBottom: "2%"
                         }} onSubmit={e => e.preventDefault()}>
                             <TextField id={"outlined-basic"} label={"Comment"} variant={"outlined"} multiline={true}
-                                       style={{width: "100%",}} onChange={e => setCommentBody(e.target.value)}
-                                       value={commentBody}/>
-                            <div style={{paddingTop: "1.5%"}}>
+                                style={{ width: "100%", }} onChange={e => setCommentBody(e.target.value)}
+                                value={commentBody} />
+                            <div style={{ paddingTop: "1.5%" }}>
                                 <Button variant="contained" size={"large"} color="primary"
-                                        onClick={() => handlePostComment(selectedDiscussion, commentBody)}  className={"commentInformation"} style={{                            zIndex: "600000"}}>
-                                    <SendIcon/>
+                                    onClick={() => handlePostComment(selectedDiscussion, commentBody)} className={"commentInformation"} style={{ zIndex: "600000" }}>
+                                    <SendIcon />
                                 </Button>
                             </div>
                         </form>
@@ -3065,9 +3055,9 @@ function Challenge() {
             )
         } else if (discussionTab === "thread") {
             return (
-                <div style={{display: "flex", flexDirection: "column"}}>
-                    <div style={window.innerWidth > 1000 ? {display: "flex", width: "80vw", justifyContent: "left", paddingBottom: "15px"} : {display: "flex", width: "68vw", justifyContent: "left", paddingBottom: "15px"}}>
-                        <SearchBar handleSearchText={handleSearchText}/>
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                    <div style={window.innerWidth > 1000 ? { display: "flex", width: "80vw", justifyContent: "left", paddingBottom: "15px" } : { display: "flex", width: "68vw", justifyContent: "left", paddingBottom: "15px" }}>
+                        <SearchBar handleSearchText={handleSearchText} />
                     </div>
                     <div>
                         <Button onClick={() => goBack()}>
@@ -3089,38 +3079,39 @@ function Challenge() {
                             paddingBottom: "5px",
                             width: "80vw",
                             alignContent: "center",
-                            position: `relative`}}>
+                            position: `relative`
+                        }}>
                             <CommentCard userName={selectedComment["author"]}
-                                         userThumb={config.rootPath + "/static/user/pfp/" + selectedComment["author_id"]}
-                                         userId={selectedComment["author_id"]}
-                                         userTier={selectedComment["author_tier"]}
-                                         commentBody={selectedComment["body"]}
-                                         commentId={selectedComment["_id"]}
-                                         width={window.innerWidth > 1000 ? 77 * window.innerWidth / 100 : 70 * window.innerWidth / 100}
-                                         height={150} backgroundName={selectedComment["name"]}
-                                         backgroundPalette={selectedComment["color_palette"]}
-                                         backgroundRender={selectedComment["render_in_front"]} role={selectedComment["user_status"]}/>
+                                userThumb={config.rootPath + "/static/user/pfp/" + selectedComment["author_id"]}
+                                userId={selectedComment["author_id"]}
+                                userTier={selectedComment["author_tier"]}
+                                commentBody={selectedComment["body"]}
+                                commentId={selectedComment["_id"]}
+                                width={window.innerWidth > 1000 ? 77 * window.innerWidth / 100 : 70 * window.innerWidth / 100}
+                                height={150} backgroundName={selectedComment["name"]}
+                                backgroundPalette={selectedComment["color_palette"]}
+                                backgroundRender={selectedComment["render_in_front"]} role={selectedComment["user_status"]} />
                             {commentUpVotes.includes(selectedComment["_id"]) ? (
                                 <IconButton onClick={() => handleCoffeeClick(selectedComment["coffee"], false, "comment", selectedComment)}
-                                            sx={{position: "absolute", bottom: "5%", left: "1%"}}>
+                                    sx={{ position: "absolute", bottom: "5%", left: "1%" }}>
                                     <Badge color="primary" badgeContent={selectedComment["coffee"]}
-                                           sx={{height: "2.5vh", minHeight: "4px"}}
-                                           anchorOrigin={{
-                                               vertical: 'top',
-                                               horizontal: 'left',
-                                           }}>
+                                        sx={{ height: "2.5vh", minHeight: "4px" }}
+                                        anchorOrigin={{
+                                            vertical: 'top',
+                                            horizontal: 'left',
+                                        }}>
                                         <LocalCafeIcon />
                                     </Badge>
                                 </IconButton>
                             ) : (
                                 <IconButton onClick={() => handleCoffeeClick(selectedComment["coffee"], true, "comment", selectedComment)}
-                                            sx={{position: "absolute", bottom: "5%", left: "1%"}}>
+                                    sx={{ position: "absolute", bottom: "5%", left: "1%" }}>
                                     <Badge color="primary" badgeContent={selectedComment["coffee"]}
-                                           sx={{height: "2.5vh", minHeight: "4px"}}
-                                           anchorOrigin={{
-                                               vertical: 'top',
-                                               horizontal: 'left',
-                                           }}>
+                                        sx={{ height: "2.5vh", minHeight: "4px" }}
+                                        anchorOrigin={{
+                                            vertical: 'top',
+                                            horizontal: 'left',
+                                        }}>
                                         <LocalCafeOutlinedIcon />
                                     </Badge>
                                 </IconButton>
@@ -3137,20 +3128,20 @@ function Challenge() {
                                 }}>
                                     <ButtonBase onClick={() => getThreadReplies(thread)}>
                                         <ThreadCard userName={thread["author"]}
-                                                    userThumb={config.rootPath + "/static/user/pfp/" + thread["author_id"]}
-                                                    userId={thread["author_id"]}
-                                                    userTier={thread["author_tier"]}
-                                                    threadBody={thread["body"]}
-                                                    threadId={thread["_id"]}
-                                                    width={window.innerWidth > 1000 ? 77 * window.innerWidth / 100 : 70 * window.innerWidth / 100}
-                                                    height={150} backgroundName={thread["name"]}
-                                                    backgroundPalette={thread["color_palette"]}
-                                                    backgroundRender={thread["render_in_front"]} role={thread["user_status"]}/>
+                                            userThumb={config.rootPath + "/static/user/pfp/" + thread["author_id"]}
+                                            userId={thread["author_id"]}
+                                            userTier={thread["author_tier"]}
+                                            threadBody={thread["body"]}
+                                            threadId={thread["_id"]}
+                                            width={window.innerWidth > 1000 ? 77 * window.innerWidth / 100 : 70 * window.innerWidth / 100}
+                                            height={150} backgroundName={thread["name"]}
+                                            backgroundPalette={thread["color_palette"]}
+                                            backgroundRender={thread["render_in_front"]} role={thread["user_status"]} />
                                     </ButtonBase>
                                     {thread["author_id"] === callingId ? (
                                         <Button
                                             variant={`text`} color={"primary"} size={`small`}
-                                            sx={window.innerWidth > 1000 ? { position: 'absolute', right: "4%" } : {position: "absolute", top: "15%"}}
+                                            sx={window.innerWidth > 1000 ? { position: 'absolute', right: "4%" } : { position: "absolute", top: "15%" }}
                                             onClick={() => {
                                                 setSelectedThread(thread);
                                                 setNewBody(thread["body"]);
@@ -3163,25 +3154,25 @@ function Challenge() {
                                     ) : null}
                                     {threadUpVotes.includes(thread["_id"]) ? (
                                         <IconButton onClick={() => handleCoffeeClick(thread["coffee"], false, "thread_comment", thread)}
-                                                    sx={{position: "absolute", bottom: "5%", left: "1%"}}>
+                                            sx={{ position: "absolute", bottom: "5%", left: "1%" }}>
                                             <Badge color="primary" badgeContent={thread["coffee"]}
-                                                   sx={{height: "2.5vh", minHeight: "4px"}}
-                                                   anchorOrigin={{
-                                                       vertical: 'top',
-                                                       horizontal: 'left',
-                                                   }}>
+                                                sx={{ height: "2.5vh", minHeight: "4px" }}
+                                                anchorOrigin={{
+                                                    vertical: 'top',
+                                                    horizontal: 'left',
+                                                }}>
                                                 <LocalCafeIcon />
                                             </Badge>
                                         </IconButton>
                                     ) : (
                                         <IconButton onClick={() => handleCoffeeClick(thread["coffee"], true, "thread_comment", thread)}
-                                                    sx={{position: "absolute", bottom: "5%", left: "1%"}}>
+                                            sx={{ position: "absolute", bottom: "5%", left: "1%" }}>
                                             <Badge color="primary" badgeContent={thread["coffee"]}
-                                                   sx={{height: "2.5vh", minHeight: "4px"}}
-                                                   anchorOrigin={{
-                                                       vertical: 'top',
-                                                       horizontal: 'left',
-                                                   }}>
+                                                sx={{ height: "2.5vh", minHeight: "4px" }}
+                                                anchorOrigin={{
+                                                    vertical: 'top',
+                                                    horizontal: 'left',
+                                                }}>
                                                 <LocalCafeOutlinedIcon />
                                             </Badge>
                                         </IconButton>
@@ -3190,7 +3181,7 @@ function Challenge() {
                             )
                         })}
                     </div>
-                    <div style={{width: "76vw"}}>
+                    <div style={{ width: "76vw" }}>
                         <form noValidate autoComplete="off" style={{
                             display: "flex",
                             flexDirection: "column",
@@ -3200,12 +3191,12 @@ function Challenge() {
                             paddingBottom: "2%"
                         }} onSubmit={e => e.preventDefault()}>
                             <TextField id={"outlined-basic"} label={"Comment"} variant={"outlined"} multiline={true}
-                                       style={{width: "100%",}} onChange={e => setCommentBody(e.target.value)}
-                                       value={commentBody}/>
-                            <div style={{paddingTop: "1.5%"}}>
+                                style={{ width: "100%", }} onChange={e => setCommentBody(e.target.value)}
+                                value={commentBody} />
+                            <div style={{ paddingTop: "1.5%" }}>
                                 <Button variant="contained" size={"large"} color="primary"
-                                        onClick={() => handlePostThread(commentBody)} className={"thread"} style={{                            zIndex: "600000"}}>
-                                    <SendIcon/>
+                                    onClick={() => handlePostThread(commentBody)} className={"thread"} style={{ zIndex: "600000" }}>
+                                    <SendIcon />
                                 </Button>
                             </div>
                         </form>
@@ -3215,9 +3206,9 @@ function Challenge() {
             )
         } else if (discussionTab === "reply") {
             return (
-                <div style={{display: "flex", flexDirection: "column"}}>
-                    <div style={window.innerWidth > 1000 ? {display: "flex", width: "80vw", justifyContent: "left", paddingBottom: "15px"} : {display: "flex", width: "68vw", justifyContent: "left", paddingBottom: "15px"}}>
-                        <SearchBar handleSearchText={handleSearchText}/>
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                    <div style={window.innerWidth > 1000 ? { display: "flex", width: "80vw", justifyContent: "left", paddingBottom: "15px" } : { display: "flex", width: "68vw", justifyContent: "left", paddingBottom: "15px" }}>
+                        <SearchBar handleSearchText={handleSearchText} />
                     </div>
                     <div>
                         <Button onClick={() => goBack()}>
@@ -3239,38 +3230,39 @@ function Challenge() {
                             paddingBottom: "5px",
                             width: "80vw",
                             alignContent: "center",
-                            position: `relative`}}>
-                            <ThreadCard  userName={selectedThread["author"]}
-                                         userThumb={config.rootPath + "/static/user/pfp/" + selectedThread["author_id"]}
-                                         userId={selectedThread["author_id"]}
-                                         userTier={selectedThread["author_tier"]}
-                                         threadBody={selectedThread["body"]}
-                                         threadId={selectedThread["_id"]}
-                                         width={window.innerWidth > 1000 ? 77 * window.innerWidth / 100 : 70 * window.innerWidth / 100}
-                                         height={150} backgroundName={selectedThread["name"]}
-                                         backgroundPalette={selectedThread["color_palette"]}
-                                         backgroundRender={selectedThread["render_in_front"]} role={selectedThread["user_status"]}/>
+                            position: `relative`
+                        }}>
+                            <ThreadCard userName={selectedThread["author"]}
+                                userThumb={config.rootPath + "/static/user/pfp/" + selectedThread["author_id"]}
+                                userId={selectedThread["author_id"]}
+                                userTier={selectedThread["author_tier"]}
+                                threadBody={selectedThread["body"]}
+                                threadId={selectedThread["_id"]}
+                                width={window.innerWidth > 1000 ? 77 * window.innerWidth / 100 : 70 * window.innerWidth / 100}
+                                height={150} backgroundName={selectedThread["name"]}
+                                backgroundPalette={selectedThread["color_palette"]}
+                                backgroundRender={selectedThread["render_in_front"]} role={selectedThread["user_status"]} />
                             {threadUpVotes.includes(selectedThread["_id"]) ? (
                                 <IconButton onClick={() => handleCoffeeClick(selectedThread["coffee"], false, "thread_comment", selectedThread)}
-                                            sx={{position: "absolute", bottom: "5%", left: "1%"}}>
+                                    sx={{ position: "absolute", bottom: "5%", left: "1%" }}>
                                     <Badge color="primary" badgeContent={selectedThread["coffee"]}
-                                           sx={{height: "2.5vh", minHeight: "4px"}}
-                                           anchorOrigin={{
-                                               vertical: 'top',
-                                               horizontal: 'left',
-                                           }}>
+                                        sx={{ height: "2.5vh", minHeight: "4px" }}
+                                        anchorOrigin={{
+                                            vertical: 'top',
+                                            horizontal: 'left',
+                                        }}>
                                         <LocalCafeIcon />
                                     </Badge>
                                 </IconButton>
                             ) : (
                                 <IconButton onClick={() => handleCoffeeClick(selectedThread["coffee"], true, "thread_comment", selectedThread)}
-                                            sx={{position: "absolute", bottom: "5%", left: "1%"}}>
+                                    sx={{ position: "absolute", bottom: "5%", left: "1%" }}>
                                     <Badge color="primary" badgeContent={selectedThread["coffee"]}
-                                           sx={{height: "2.5vh", minHeight: "4px"}}
-                                           anchorOrigin={{
-                                               vertical: 'top',
-                                               horizontal: 'left',
-                                           }}>
+                                        sx={{ height: "2.5vh", minHeight: "4px" }}
+                                        anchorOrigin={{
+                                            vertical: 'top',
+                                            horizontal: 'left',
+                                        }}>
                                         <LocalCafeOutlinedIcon />
                                     </Badge>
                                 </IconButton>
@@ -3286,19 +3278,19 @@ function Challenge() {
                                     position: "relative"
                                 }}>
                                     <ThreadCard userName={reply["author"]}
-                                                userThumb={config.rootPath + "/static/user/pfp/" + reply["author_id"]}
-                                                userId={reply["author_id"]}
-                                                userTier={reply["author_tier"]}
-                                                threadBody={reply["body"]}
-                                                threadId={reply["_id"]}
-                                                width={window.innerWidth > 1000 ? 77 * window.innerWidth / 100 : 70 * window.innerWidth / 100}
-                                                height={150} backgroundName={reply["name"]}
-                                                backgroundPalette={reply["color_palette"]}
-                                                backgroundRender={reply["render_in_front"]} role={reply["user_status"]}/>
+                                        userThumb={config.rootPath + "/static/user/pfp/" + reply["author_id"]}
+                                        userId={reply["author_id"]}
+                                        userTier={reply["author_tier"]}
+                                        threadBody={reply["body"]}
+                                        threadId={reply["_id"]}
+                                        width={window.innerWidth > 1000 ? 77 * window.innerWidth / 100 : 70 * window.innerWidth / 100}
+                                        height={150} backgroundName={reply["name"]}
+                                        backgroundPalette={reply["color_palette"]}
+                                        backgroundRender={reply["render_in_front"]} role={reply["user_status"]} />
                                     {reply["author_id"] === callingId ? (
                                         <Button
                                             variant={`text`} color={"primary"} size={`small`}
-                                            sx={window.innerWidth > 1000 ? { position: 'absolute', right: "6%" } : {position: "absolute", top: "15%"}}
+                                            sx={window.innerWidth > 1000 ? { position: 'absolute', right: "6%" } : { position: "absolute", top: "15%" }}
                                             onClick={() => {
                                                 setSelectedReply(reply);
                                                 setNewBody(reply["body"]);
@@ -3311,25 +3303,25 @@ function Challenge() {
                                     ) : null}
                                     {replyUpVotes.includes(reply["_id"]) ? (
                                         <IconButton onClick={() => handleCoffeeClick(reply["coffee"], false, "thread_reply", reply)}
-                                                    sx={{position: "absolute", bottom: "5%", left: "1%"}}>
+                                            sx={{ position: "absolute", bottom: "5%", left: "1%" }}>
                                             <Badge color="primary" badgeContent={reply["coffee"]}
-                                                   sx={{height: "2.5vh", minHeight: "4px"}}
-                                                   anchorOrigin={{
-                                                       vertical: 'top',
-                                                       horizontal: 'left',
-                                                   }}>
+                                                sx={{ height: "2.5vh", minHeight: "4px" }}
+                                                anchorOrigin={{
+                                                    vertical: 'top',
+                                                    horizontal: 'left',
+                                                }}>
                                                 <LocalCafeIcon />
                                             </Badge>
                                         </IconButton>
                                     ) : (
                                         <IconButton onClick={() => handleCoffeeClick(reply["coffee"], true, "thread_reply", reply)}
-                                                    sx={{position: "absolute", bottom: "5%", left: "1%"}}>
+                                            sx={{ position: "absolute", bottom: "5%", left: "1%" }}>
                                             <Badge color="primary" badgeContent={reply["coffee"]}
-                                                   sx={{height: "2.5vh", minHeight: "4px"}}
-                                                   anchorOrigin={{
-                                                       vertical: 'top',
-                                                       horizontal: 'left',
-                                                   }}>
+                                                sx={{ height: "2.5vh", minHeight: "4px" }}
+                                                anchorOrigin={{
+                                                    vertical: 'top',
+                                                    horizontal: 'left',
+                                                }}>
                                                 <LocalCafeOutlinedIcon />
                                             </Badge>
                                         </IconButton>
@@ -3338,7 +3330,7 @@ function Challenge() {
                             )
                         })}
                     </div>
-                    <div style={{width: "76vw"}}>
+                    <div style={{ width: "76vw" }}>
                         <form noValidate autoComplete="off" style={{
                             display: "flex",
                             flexDirection: "column",
@@ -3348,12 +3340,12 @@ function Challenge() {
                             paddingBottom: "2%"
                         }} onSubmit={e => e.preventDefault()}>
                             <TextField id={"outlined-basic"} label={"Comment"} variant={"outlined"} multiline={true}
-                                       style={{width: "100%",}} onChange={e => setCommentBody(e.target.value)}
-                                       value={commentBody}/>
-                            <div style={{paddingTop: "1.5%"}}>
+                                style={{ width: "100%", }} onChange={e => setCommentBody(e.target.value)}
+                                value={commentBody} />
+                            <div style={{ paddingTop: "1.5%" }}>
                                 <Button variant="contained" size={"large"} color="primary"
-                                        onClick={() => handleThreadReply(commentBody)}>
-                                    <SendIcon/>
+                                    onClick={() => handleThreadReply(commentBody)}>
+                                    <SendIcon />
                                 </Button>
                             </div>
                         </form>
@@ -3375,7 +3367,7 @@ function Challenge() {
         }
 
         return (
-            <div style={{width: "80vw"}}>
+            <div style={{ width: "80vw" }}>
                 {renderFunc()}
             </div>
         )
@@ -3383,7 +3375,7 @@ function Challenge() {
 
     const handleTabChange = (newValue: string) => {
         setMainTab(newValue);
-        window.location.hash = "#"+newValue
+        window.location.hash = "#" + newValue
         if (newValue === "discussions") {
             getDiscussions().then(r => console.log(r))
             console.log("run: ", runTutorial)
@@ -3394,7 +3386,7 @@ function Challenge() {
             commentId: ""
         })
 
-        if (newValue ==="edit") {
+        if (newValue === "edit") {
             getConfig()
         }
     };
@@ -3459,7 +3451,7 @@ function Challenge() {
             return
         }
 
-        if (res["message"] === "You must be logged in to access the GIGO system."){
+        if (res["message"] === "You must be logged in to access the GIGO system.") {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
@@ -3499,7 +3491,7 @@ function Challenge() {
             }
         )
 
-        if (res["message"] === "You must be logged in to access the GIGO system."){
+        if (res["message"] === "You must be logged in to access the GIGO system.") {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
@@ -3553,24 +3545,24 @@ function Challenge() {
 
     const threadTab = () => {
         return (
-            <div style={{width: "16.5vw", height: "65vh", overflow: "auto"}}>
+            <div style={{ width: "16.5vw", height: "65vh", overflow: "auto" }}>
                 <div>
                     <Button onClick={() => setThread(false)}>
                         Exit Thread
                     </Button>
                 </div>
-                <div style={{paddingTop: "10px"}}>
+                <div style={{ paddingTop: "10px" }}>
                     {threadComments.map((comment) => {
                         return (
-                            <div style={{display: "flex", justifyContent: "center", paddingBottom: "5px"}}>
+                            <div style={{ display: "flex", justifyContent: "center", paddingBottom: "5px" }}>
                                 <ThreadComment userName={comment["userName"]} userThumb={config.rootPath + "/static/user/pfp/" + discussion["author_id"]}
-                                               userId={comment["userId"]} userTier={comment["userTier"]}
-                                               discussionId={comment["discussionId"]} commentId={comment["commentId"]}
-                                               discussionComment={comment["discussionComment"]}
-                                               threadId={comment["threadId"]} commentNumber={comment["commentNumber"]}
-                                               commentLead={comment["commentLead"]}
-                                               commentCoffees={comment["commentCoffee"]}
-                                               width={14 * window.innerWidth / 100}/>
+                                    userId={comment["userId"]} userTier={comment["userTier"]}
+                                    discussionId={comment["discussionId"]} commentId={comment["commentId"]}
+                                    discussionComment={comment["discussionComment"]}
+                                    threadId={comment["threadId"]} commentNumber={comment["commentNumber"]}
+                                    commentLead={comment["commentLead"]}
+                                    commentCoffees={comment["commentCoffee"]}
+                                    width={14 * window.innerWidth / 100} />
                             </div>
                         )
                     })}
@@ -3582,12 +3574,12 @@ function Challenge() {
                         width: "95%",
                         margin: `${theme.spacing(0)} auto`
                     }} onSubmit={e => e.preventDefault()}>
-                        <TextField id={"outlined-basic"} label={"Comment"} variant={"outlined"} style={{width: "100%"}}
-                                   onChange={e => setThreadComment(e.target.value)} value={threadComment}/>
+                        <TextField id={"outlined-basic"} label={"Comment"} variant={"outlined"} style={{ width: "100%" }}
+                            onChange={e => setThreadComment(e.target.value)} value={threadComment} />
                         <Button variant="contained" color="primary"
-                                onClick={() => handleThreadComment()}
+                            onClick={() => handleThreadComment()}
                         >
-                            <SendIcon/>
+                            <SendIcon />
                         </Button>
                     </form>
                 </div>
@@ -3609,7 +3601,7 @@ function Challenge() {
             null,
             null,
             //@ts-ignore
-            {project_id: project._id},
+            { project_id: project._id },
             null,
             config.rootPath
         )
@@ -3645,30 +3637,30 @@ function Challenge() {
 
     const getProjectIcon = (projectType: string) => {
         switch (projectType) {
-        case "Playground":
-            return (
-                <HorseIcon sx={{width: "24px", height: "24px"}} />
-            )
-        case "Casual":
-            return (
-                <HoodieIcon sx={{width: "20px", height: "20px"}} />
-            )
-        case "Competitive":
-            return (
-                <TrophyIcon sx={{width: "18px", height: "18px"}} />
-            )
-        case "Interactive":
-            return (
-                <GraduationIcon sx={{width: "20px", height: "20px"}} />
-            )
-        case "Debug":
-            return (
-                <DebugIcon sx={{width: "20px", height: "20px"}} />
-            )
-        default:
-            return (
-                <QuestionMark sx={{width: "20px", height: "20px"}} />
-            )
+            case "Playground":
+                return (
+                    <HorseIcon sx={{ width: "24px", height: "24px" }} />
+                )
+            case "Casual":
+                return (
+                    <HoodieIcon sx={{ width: "20px", height: "20px" }} />
+                )
+            case "Competitive":
+                return (
+                    <TrophyIcon sx={{ width: "18px", height: "18px" }} />
+                )
+            case "Interactive":
+                return (
+                    <GraduationIcon sx={{ width: "20px", height: "20px" }} />
+                )
+            case "Debug":
+                return (
+                    <DebugIcon sx={{ width: "20px", height: "20px" }} />
+                )
+            default:
+                return (
+                    <QuestionMark sx={{ width: "20px", height: "20px" }} />
+                )
         }
     }
 
@@ -3728,7 +3720,7 @@ function Challenge() {
                             Project
                         </Button>
                     ) : (
-                        <StyledDiv style={{height: "35px", width: "100px", borderRadius: 2}}/>
+                        <StyledDiv style={{ height: "35px", width: "100px", borderRadius: 2 }} />
                     )}
                 </Grid>
                 {project !== null && project["has_access"] !== null && project["has_access"] === false ? null : window.innerWidth > 1000 ? (
@@ -3738,7 +3730,7 @@ function Challenge() {
                                 Source Code
                             </Button>
                         ) : (
-                            <StyledDiv style={{height: "35px", width: "100px", borderRadius: 2}}/>
+                            <StyledDiv style={{ height: "35px", width: "100px", borderRadius: 2 }} />
                         )}
                     </Grid>
                 ) : null}
@@ -3746,10 +3738,10 @@ function Challenge() {
                     {project !== null ? (
                         isEphemeral ? <></> : renderDiscussionButton()
                     ) : (
-                        <StyledDiv style={{height: "35px", width: "100px", borderRadius: 2}}/>
+                        <StyledDiv style={{ height: "35px", width: "100px", borderRadius: 2 }} />
                     )}
                 </Grid>
-                {username === ownerName && window.innerWidth > 1000 ? (
+                {project !== null && username === ownerName && window.innerWidth > 1000 ? (
                     <>
                         <Grid item sx={1}>
                             <Button variant="outlined" sx={styles.mainTabButton} disabled={mainTab === "edit"} onClick={() => handleTabChange("edit")}>
@@ -3861,7 +3853,7 @@ function Challenge() {
             config.rootPath
         )
 
-        
+
         //todo handle if error
         setShareProject(`https://gigo.dev/challenge/${project["_id"]}?share=${res['message']}`)
         setSharePopupOpen(true);
@@ -3870,7 +3862,7 @@ function Challenge() {
     const copyToClipboard = async () => {
         try {
             await navigator.clipboard.writeText(shareProject);
-        } catch(err) {
+        } catch (err) {
             console.log('Failed to copy text: ', err);
         }
     }
@@ -3893,14 +3885,14 @@ function Challenge() {
                     }}
                 >
                     <Button onClick={() => setSharePopupOpen(false)}>
-                        <CloseIcon/>
+                        <CloseIcon />
                     </Button>
-                    <div style={{width: "100%", display: "flex", alignItems: "center", flexDirection: "column"}}>
+                    <div style={{ width: "100%", display: "flex", alignItems: "center", flexDirection: "column" }}>
                         <h3>Share your Project</h3>
-                        <div style={{display: "flex", width: "100%", flexDirection: "row", justifyContent: "center"}}>
-                            <h5 style={{outline: "solid gray", borderRadius: "5px", padding: "8px"}} id={"url"}>{shareProject.length > 30 ? shareProject.slice(0,30) + "..." : shareProject}</h5>
+                        <div style={{ display: "flex", width: "100%", flexDirection: "row", justifyContent: "center" }}>
+                            <h5 style={{ outline: "solid gray", borderRadius: "5px", padding: "8px" }} id={"url"}>{shareProject.length > 30 ? shareProject.slice(0, 30) + "..." : shareProject}</h5>
                             <Button onClick={() => copyToClipboard()}>
-                                <ContentCopyIcon/>
+                                <ContentCopyIcon />
                             </Button>
                         </div>
                     </div>
@@ -3952,7 +3944,7 @@ function Challenge() {
                         className="attempt"
                         onClick={clickCallback}
                     >
-                        {buttonText}<RocketLaunchIcon sx={{marginLeft: "10px"}}/>
+                        {buttonText}<RocketLaunchIcon sx={{ marginLeft: "10px" }} />
                     </TutorialLaunchButton>
                 </Tooltip>
             )
@@ -3968,7 +3960,7 @@ function Challenge() {
                     className="attempt"
                     onClick={clickCallback}
                 >
-                    {buttonText}<RocketLaunchIcon sx={{marginLeft: "10px"}}/>
+                    {buttonText}<RocketLaunchIcon sx={{ marginLeft: "10px" }} />
                 </LoadingButton>
             </Tooltip>
         )
@@ -3995,11 +3987,11 @@ function Challenge() {
         }
 
         return (
-            <Fab 
+            <Fab
                 disabled={launchingWorkspace}
-                color="secondary" 
-                aria-label="launch-mobile" 
-                sx={{position: "fixed", bottom: "80px", right: "20px", zIndex: 6000}}
+                color="secondary"
+                aria-label="launch-mobile"
+                sx={{ position: "fixed", bottom: "80px", right: "20px", zIndex: 6000 }}
                 onClick={clickCallback}
             >
                 {launchingWorkspace ? (<CircularProgress color="inherit" size={24} />) : (<RocketLaunchIcon />)}
@@ -4007,7 +3999,7 @@ function Challenge() {
         )
     }
 
-    const editProject = async(title: null, challengeType: null, tier: null, image: null, removeTags: null, addTags: null) => {
+    const editProject = async (title: null, challengeType: null, tier: null, image: null, removeTags: null, addTags: null) => {
         let params = {
             id: project["_id"],
         }
@@ -4036,17 +4028,17 @@ function Challenge() {
             }
         }
 
-        if (tier!= null) {
+        if (tier != null) {
             params["tier"] = tier - 1;
         }
 
         console.log("removed tags here: ", removeTags)
 
-        if (removeTags != null){
+        if (removeTags != null) {
             params["remove_tags"] = removeTags;
         }
 
-        if (addTags!= null){
+        if (addTags != null) {
             params["add_tags"] = addTags;
         }
 
@@ -4116,7 +4108,7 @@ function Challenge() {
                     return;
                 }
 
-                if ("message" in res && res["message"] === "success"){
+                if ("message" in res && res["message"] === "success") {
                     if (sessionStorage.getItem("alive") === null)
                         //@ts-ignore
                         swal("Success!", res["message"], "success")
@@ -4184,7 +4176,7 @@ function Challenge() {
                     })
                 }}>
                     <Box
-                        sx={window.innerWidth > 1000 ?{
+                        sx={window.innerWidth > 1000 ? {
                             p: 2,
                             height: "8vh",
                             minHeight: "70px",
@@ -4216,14 +4208,14 @@ function Challenge() {
                         }}
                     >
                         <Grid container
-                              direction="row"
-                              justifyContent="space-evenly"
-                              alignItems="center"
-                              spacing={2}
-                              sx={{
-                                  width: 'fit-content',  // Add this line
-                                  height: "100%",
-                              }}
+                            direction="row"
+                            justifyContent="space-evenly"
+                            alignItems="center"
+                            spacing={2}
+                            sx={{
+                                width: 'fit-content',  // Add this line
+                                height: "100%",
+                            }}
                         >
                             {!isScrolled && renderTabButtons()}
                             {project !== null ? (
@@ -4235,8 +4227,8 @@ function Challenge() {
                     </Box>
                 </div>
                 {project !== null && userId === project["author_id"] && window.innerWidth > 1000 ? (
-                    <div style={{paddingTop: "20px", marginLeft: "10px", paddingRight: "20px"}}>
-                        <Button variant="outlined" sx={styles.mainTabButton} style={{marginLeft: "20px",}} onClick={() => setEditPopup(true)}>
+                    <div style={{ paddingTop: "20px", marginLeft: "10px", paddingRight: "20px" }}>
+                        <Button variant="outlined" sx={styles.mainTabButton} style={{ marginLeft: "20px", }} onClick={() => setEditPopup(true)}>
                             Edit Project Details
                         </Button>
                     </div>
@@ -4293,36 +4285,36 @@ function Challenge() {
                             multiline
                         />
                         {project !== null && project["description"] !== null ? (
-                                <TextField
-                                    label={project["description"].length + "/500"}
-                                    variant={`outlined`}
-                                    size={`medium`}
-                                    color={(project["description"].length > 500) ? "error" : "primary"}
-                                    fullWidth
-                                    required
-                                    value={project !== null ? project["description"] : ""}
-                                    sx={{
-                                        mt: 2,
-                                        width: "90%"
-                                    }}
-                                    inputProps={
-                                        styles.textField
-                                    }
-                                    multiline={true}
-                                    onChange={e =>
-                                        setDescriptions(e.target.value)
-                                    }>
-                                </TextField>
+                            <TextField
+                                label={project["description"].length + "/500"}
+                                variant={`outlined`}
+                                size={`medium`}
+                                color={(project["description"].length > 500) ? "error" : "primary"}
+                                fullWidth
+                                required
+                                value={project !== null ? project["description"] : ""}
+                                sx={{
+                                    mt: 2,
+                                    width: "90%"
+                                }}
+                                inputProps={
+                                    styles.textField
+                                }
+                                multiline={true}
+                                onChange={e =>
+                                    setDescriptions(e.target.value)
+                                }>
+                            </TextField>
                         ) : null}
-                        <div style={{width: "100%", display: "flex", flexDirection: "row", justifyContent: "space-evenly", marginTop: "10px"}}>
+                        <div style={{ width: "100%", display: "flex", flexDirection: "row", justifyContent: "space-evenly", marginTop: "10px" }}>
                             {project !== null && project["post_type_string"] !== null && (
-                                <div style={{display: "flex", flexDirection: "column", marginTop: "-50px"}}>
+                                <div style={{ display: "flex", flexDirection: "column", marginTop: "-50px" }}>
                                     <h5>Renown</h5>
-                                    <ProjectRenown originalLabel={project["tier"] + 1} onProjectSelect={handleProjectSelectionRenown}/>
+                                    <ProjectRenown originalLabel={project["tier"] + 1} onProjectSelect={handleProjectSelectionRenown} />
                                 </div>
                             )}
                             {project !== null && project["post_type_string"] !== null && (
-                                <ProjectSelector originalLabel={project["post_type_string"]} onProjectSelect={handleProjectSelection} theme={theme}/>
+                                <ProjectSelector originalLabel={project["post_type_string"]} onProjectSelect={handleProjectSelection} theme={theme} />
                             )}
                             {project !== null && (
                                 <Autocomplete
@@ -4349,7 +4341,7 @@ function Challenge() {
                                         return option._id === value._id;
                                     }}
                                     renderInput={(params) => (
-                                        <TextField {...params} label="Challenge Tags" placeholder="Challenge Tags"/>
+                                        <TextField {...params} label="Challenge Tags" placeholder="Challenge Tags" />
                                     )}
                                     onInputChange={(e) => {
                                         handleTagSearch(e)
@@ -4435,46 +4427,46 @@ function Challenge() {
                         </div>
                     </Box>
                 </Modal>
-            <Modal open={purchasePopup} onClose={() => setPurchasePopup(false)}>
-                <Box
-                    sx={{
-                        width: "30vw",
-                        height: "20vh",
-                        justifyContent: "center",
-                        marginLeft: "40vw",
-                        marginTop: "40vh",
-                        outlineColor: "black",
-                        borderRadius: 1,
-                        boxShadow: "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px 6px 0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
-                        backgroundColor: theme.palette.background.default,
-                    }}
-                >
-                    <ProjectPayment price={project !== null ? project["stripe_price_id"] : ""} post={project !== null ? project["_id"].toString() : ""} />
-                </Box>
-            </Modal>
-            <Modal open={deleteProject} onClose={() => setDeleteProject(false)}>
-                <Box
-                    sx={{
-                        width: "30vw",
-                        height: "20vh",
-                        justifyContent: "center",
-                        marginLeft: "40vw",
-                        marginTop: "40vh",
-                        outlineColor: "black",
-                        borderRadius: 1,
-                        boxShadow: "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px 6px 0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
-                        backgroundColor: theme.palette.background.default,
-                    }}
-                >
-                    <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
-                        <h4>Are you sure you want to delete this project?</h4>
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "row", width: "100%", justifyContent: "center" }}>
-                        <Button onClick={() => deleteProjectFunction()}>Confirm</Button>
-                        <Button onClick={() => setDeleteProject(false)}>Cancel</Button>
-                    </div>
-                </Box>
-            </Modal>
+                <Modal open={purchasePopup} onClose={() => setPurchasePopup(false)}>
+                    <Box
+                        sx={{
+                            width: "30vw",
+                            height: "20vh",
+                            justifyContent: "center",
+                            marginLeft: "40vw",
+                            marginTop: "40vh",
+                            outlineColor: "black",
+                            borderRadius: 1,
+                            boxShadow: "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px 6px 0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
+                            backgroundColor: theme.palette.background.default,
+                        }}
+                    >
+                        <ProjectPayment price={project !== null ? project["stripe_price_id"] : ""} post={project !== null ? project["_id"].toString() : ""} />
+                    </Box>
+                </Modal>
+                <Modal open={deleteProject} onClose={() => setDeleteProject(false)}>
+                    <Box
+                        sx={{
+                            width: "30vw",
+                            height: "20vh",
+                            justifyContent: "center",
+                            marginLeft: "40vw",
+                            marginTop: "40vh",
+                            outlineColor: "black",
+                            borderRadius: 1,
+                            boxShadow: "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px 6px 0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
+                            backgroundColor: theme.palette.background.default,
+                        }}
+                    >
+                        <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+                            <h4>Are you sure you want to delete this project?</h4>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "row", width: "100%", justifyContent: "center" }}>
+                            <Button onClick={() => deleteProjectFunction()}>Confirm</Button>
+                            <Button onClick={() => setDeleteProject(false)}>Cancel</Button>
+                        </div>
+                    </Box>
+                </Modal>
             </>
         )
     }
@@ -4541,16 +4533,16 @@ function Challenge() {
                     <HelmetProvider>
                         <Helmet>
                             <title>{project !== null ? project["post_title"] : "Challenge"}</title>
-                            <meta property="og:title" content={project !== null ? project["post_title"]: "Challenge"} data-rh="true"/>
-                            <meta property="og:description" content={project !== null ? project["description"] : "Description"} data-rh="true"/>
-                            <meta property="og:image" content={project !== null ? config.rootPath + project["thumbnail"] : alternativeImage} data-rh="true"/>
+                            <meta property="og:title" content={project !== null ? project["post_title"] : "Challenge"} data-rh="true" />
+                            <meta property="og:description" content={project !== null ? project["description"] : "Description"} data-rh="true" />
+                            <meta property="og:image" content={project !== null ? config.rootPath + project["thumbnail"] : alternativeImage} data-rh="true" />
                         </Helmet>
                     </HelmetProvider>
                 ) : (
                     <HelmetProvider>
                         <Helmet>
                             <title>{project !== null ? project["post_title"] : "Challenge"}</title>
-                            <meta property="og:image" content={project !== null ? config.rootPath + project["thumbnail"] : alternativeImage} data-rh="true"/>
+                            <meta property="og:image" content={project !== null ? config.rootPath + project["thumbnail"] : alternativeImage} data-rh="true" />
                         </Helmet>
                     </HelmetProvider>
                 )}
@@ -4610,7 +4602,7 @@ function Challenge() {
                         },
                     ]}
                 />
-                <Typography variant="h5" component="div" sx={styles.projectName} style={{display: "flex", flexDirection: "row"}}>
+                <Typography variant="h5" component="div" sx={styles.projectName} style={{ display: "flex", flexDirection: "row" }}>
                     {editTitle ? (
                         <TextField
                             value={projectTitle}
@@ -4621,7 +4613,7 @@ function Challenge() {
                             fullWidth
                             required
                             sx={{ mt: 2 }}
-                            style={{ width: "auto", background: theme.palette.background.default, zIndex: 2000}}
+                            style={{ width: "auto", background: theme.palette.background.default, zIndex: 2000 }}
                             inputProps={styles.textField}
                             multiline
                         />
@@ -4633,8 +4625,8 @@ function Challenge() {
                     {project !== null && (
                         <div>
                             {editTitle ? (
-                                <div style={{padding: "10px"}}>
-                                    <ProjectSelector originalLabel={project["post_type_string"] === null ? "Casual" : project["post_type_string"]} onProjectSelect={handleProjectSelection} theme={theme}/>
+                                <div style={{ padding: "10px" }}>
+                                    <ProjectSelector originalLabel={project["post_type_string"] === null ? "Casual" : project["post_type_string"]} onProjectSelect={handleProjectSelection} theme={theme} />
                                 </div>
                             ) : (
                                 <Chip
@@ -4651,7 +4643,7 @@ function Challenge() {
                         <div>
                             {!editTitle ? (
                                 <Button onClick={() => setEditTitle(true)}>
-                                    <EditIcon/>
+                                    <EditIcon />
                                 </Button>
                             ) : (
                                 <div>
@@ -4670,17 +4662,19 @@ function Challenge() {
                     ) : null}
                 </Typography>
                 {window.innerWidth > 1000 ? (
-                    <div style={project !== null ? {} : {marginBottom: "110px"}}>
+                    <div style={project !== null ? {} : { marginBottom: "110px" }}>
                         {renderTabBar()}
                     </div>
                 ) : (
-                    <div style={{marginTop: "25px"}}>
+                    <div style={{ marginTop: "25px" }}>
                         {project !== null ? (
-                            <Typography component={"div"} sx={{width: "90%",
+                            <Typography component={"div"} sx={{
+                                width: "90%",
                                 height: "auto",
                                 display: "flex",
-                                flexDirection: "row"}}>
-                                <Typography sx={{display: "flex", flexDirection: "row", width: "85%", ml: 2}}>
+                                flexDirection: "row"
+                            }}>
+                                <Typography sx={{ display: "flex", flexDirection: "row", width: "85%", ml: 2 }}>
                                     <div>
                                         <UserIcon
                                             userId={project !== null ? project["author_id"] : ""}
@@ -4698,20 +4692,22 @@ function Challenge() {
                                     </Typography>
                                 </Typography>
                                 <Typography variant="body1" color="text.primary" align="right">
-                                    {new Date(project !== null ? project["created_at"] : "").toLocaleString("en-us", {day: '2-digit', month: 'short', year: 'numeric'})}
+                                    {new Date(project !== null ? project["created_at"] : "").toLocaleString("en-us", { day: '2-digit', month: 'short', year: 'numeric' })}
                                 </Typography>
                             </Typography>
                         ) : (
-                            <Typography component={"div"} sx={{width: "90%",
+                            <Typography component={"div"} sx={{
+                                width: "90%",
                                 height: "auto",
                                 display: "flex",
-                                flexDirection: "row"}}>
-                                <Typography style={{display: "flex", flexDirection: "row", width: "85%"}}>
+                                flexDirection: "row"
+                            }}>
+                                <Typography style={{ display: "flex", flexDirection: "row", width: "85%" }}>
                                     <div>
-                                        <PersonIcon sx={{width: "50px", height: "50px"}}/>
+                                        <PersonIcon sx={{ width: "50px", height: "50px" }} />
                                     </div>
                                 </Typography>
-                                <StyledDiv style={{height: "24px", width: "40%", marginBottom: "12px", borderRadius: "20px", marginTop: "10px"}}/>
+                                <StyledDiv style={{ height: "24px", width: "40%", marginBottom: "12px", borderRadius: "20px", marginTop: "10px" }} />
                             </Typography>
                         )}
                     </div>
@@ -4777,7 +4773,7 @@ function Challenge() {
                     )}
                 </div>
                 {/* add a 10vh buffer at the end of the page */}
-                <div style={{height: "10vh"}}/>
+                <div style={{ height: "10vh" }} />
             </>
         )
     }
@@ -4845,7 +4841,7 @@ function Challenge() {
                     className="attempt"
                     onClick={() => launchEphemeralWorkspace()}
                 >
-                    {buttonText}<RocketLaunchIcon sx={{marginLeft: "10px"}}/>
+                    {buttonText}<RocketLaunchIcon sx={{ marginLeft: "10px" }} />
                 </LoadingButton>
             </Tooltip>
         )
@@ -4881,7 +4877,7 @@ function Challenge() {
                     })
                 }}>
                     <Box
-                        sx={window.innerWidth > 1000 ?{
+                        sx={window.innerWidth > 1000 ? {
                             p: 2,
                             height: "8vh",
                             minHeight: "70px",
@@ -4913,14 +4909,14 @@ function Challenge() {
                         }}
                     >
                         <Grid container
-                              direction="row"
-                              justifyContent="space-evenly"
-                              alignItems="center"
-                              spacing={2}
-                              sx={{
-                                  width: 'fit-content',  // Add this line
-                                  height: "100%",
-                              }}
+                            direction="row"
+                            justifyContent="space-evenly"
+                            alignItems="center"
+                            spacing={2}
+                            sx={{
+                                width: 'fit-content',  // Add this line
+                                height: "100%",
+                            }}
                         >
                             {!isScrolled && renderTabButtons()}
                             {project !== null ? (
@@ -4983,16 +4979,16 @@ function Challenge() {
                     <HelmetProvider>
                         <Helmet>
                             <title>{project !== null ? project["post_title"] : "Challenge"}</title>
-                            <meta property="og:title" content={project !== null ? project["post_title"]: "Challenge"} data-rh="true"/>
-                            <meta property="og:description" content={project !== null ? project["description"] : "Description"} data-rh="true"/>
-                            <meta property="og:image" content={project !== null ? config.rootPath + project["thumbnail"] : alternativeImage} data-rh="true"/>
+                            <meta property="og:title" content={project !== null ? project["post_title"] : "Challenge"} data-rh="true" />
+                            <meta property="og:description" content={project !== null ? project["description"] : "Description"} data-rh="true" />
+                            <meta property="og:image" content={project !== null ? config.rootPath + project["thumbnail"] : alternativeImage} data-rh="true" />
                         </Helmet>
                     </HelmetProvider>
                 ) : (
                     <HelmetProvider>
                         <Helmet>
                             <title>{project !== null ? project["post_title"] : "Challenge"}</title>
-                            <meta property="og:image" content={project !== null ? config.rootPath + project["thumbnail"] : alternativeImage} data-rh="true"/>
+                            <meta property="og:image" content={project !== null ? config.rootPath + project["thumbnail"] : alternativeImage} data-rh="true" />
                         </Helmet>
                     </HelmetProvider>
                 )}
@@ -5010,17 +5006,19 @@ function Challenge() {
                     )}
                 </Typography>
                 {window.innerWidth > 1000 ? (
-                    <div style={project !== null ? {} : {marginBottom: "110px"}}>
+                    <div style={project !== null ? {} : { marginBottom: "110px" }}>
                         {ephemeralTabBar()}
                     </div>
                 ) : (
-                    <div style={{marginTop: "25px"}}>
+                    <div style={{ marginTop: "25px" }}>
                         {project !== null ? (
-                            <Typography component={"div"} sx={{width: "90%",
+                            <Typography component={"div"} sx={{
+                                width: "90%",
                                 height: "auto",
                                 display: "flex",
-                                flexDirection: "row"}}>
-                                <Typography style={{display: "flex", flexDirection: "row", width: "85%"}}>
+                                flexDirection: "row"
+                            }}>
+                                <Typography style={{ display: "flex", flexDirection: "row", width: "85%" }}>
                                     <div>
                                         <UserIcon
                                             userId={project !== null ? project["author_id"] : ""}
@@ -5038,20 +5036,22 @@ function Challenge() {
                                     </Typography>
                                 </Typography>
                                 <Typography variant="body1" color="text.primary" align="right">
-                                    {new Date(project !== null ? project["created_at"] : "").toLocaleString("en-us", {day: '2-digit', month: 'short', year: 'numeric'})}
+                                    {new Date(project !== null ? project["created_at"] : "").toLocaleString("en-us", { day: '2-digit', month: 'short', year: 'numeric' })}
                                 </Typography>
                             </Typography>
                         ) : (
-                            <Typography component={"div"} sx={{width: "90%",
+                            <Typography component={"div"} sx={{
+                                width: "90%",
                                 height: "auto",
                                 display: "flex",
-                                flexDirection: "row"}}>
-                                <Typography style={{display: "flex", flexDirection: "row", width: "85%"}}>
+                                flexDirection: "row"
+                            }}>
+                                <Typography style={{ display: "flex", flexDirection: "row", width: "85%" }}>
                                     <div>
-                                        <PersonIcon sx={{width: "50px", height: "50px"}}/>
+                                        <PersonIcon sx={{ width: "50px", height: "50px" }} />
                                     </div>
                                 </Typography>
-                                <StyledDiv style={{height: "24px", width: "40%", marginBottom: "12px", borderRadius: "20px", marginTop: "10px"}}/>
+                                <StyledDiv style={{ height: "24px", width: "40%", marginBottom: "12px", borderRadius: "20px", marginTop: "10px" }} />
                             </Typography>
                         )}
                     </div>
@@ -5117,7 +5117,7 @@ function Challenge() {
                     )}
                 </div>
                 {/* add a 10vh buffer at the end of the page */}
-                <div style={{height: "10vh"}}/>
+                <div style={{ height: "10vh" }} />
             </>
         )
     }
@@ -5131,7 +5131,7 @@ function Challenge() {
             setIsCaptchaVerified={(verified) => setIsCaptchaVerified(verified)}
             redirectOnFailure={() => {
                 // redirect to this page but with no share query param
-                navigate(window.location.pathname, {replace: true});
+                navigate(window.location.pathname, { replace: true });
             }}
         />
     ), [])

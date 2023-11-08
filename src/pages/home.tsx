@@ -100,7 +100,6 @@ function Home() {
     }, [tutorialState])
 
     const infiniteScrollHandler = async () => {
-
         // we make up to 3 attempts to retrieve the next block of data
         for (let i = 0; i < 3; i++) {
             let rec = await call(
@@ -555,7 +554,7 @@ function Home() {
                     {
                         recData.map((project, index) => {
                             return (
-                                <Grid item xs={12} sm={6} md={4} lg={3} key={"rec-"+project["_id"]+"-"+randomTag()}>
+                                <Grid item xs={12} sm={6} md={4} lg={3} key={"rec-"+project["_id"]}>
                                     <LazyLoad once scroll unmountIfInvisible>
                                         <ProjectCard
                                             height={"20vh"}

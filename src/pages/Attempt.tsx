@@ -645,11 +645,6 @@ function AttemptPage() {
 
         // create a listener for beforeunload
         let beforeUnload = function (event) {
-            // don't trigger preventDefault if we are using firefox
-            if (window.navigator.userAgent.indexOf("Firefox") === -1) {
-                event.preventDefault();
-            }
-
             // record the exit time in session storage
             window.sessionStorage.setItem(`project-exit-${attempt._id}`, `${new Date().getTime()}:${implicitSessionID.current}`)
 
@@ -664,8 +659,7 @@ function AttemptPage() {
             });
             window.onfocus = null
 
-            // this is bad practice but we need a little time to get the implicit action recorded
-            setTimeout(function () { }, 500)
+            return true
         }
 
         // handle case of page change by clearing our watchers
@@ -695,22 +689,15 @@ function AttemptPage() {
                 sessionId = implicitSessionID.current
             }
 
-            // record click action
-            await call(
-                "/api/implicit/recordAction",
-                "post",
-                null,
-                null,
-                null,
-                //@ts-ignore
-                {
-                    post_id: id,
-                    action: 0,
-                    session_id: sessionId,
-                },
-                null,
-                config.rootPath
-            )
+            // Convert payload to a string
+            const blob = new Blob([JSON.stringify({
+                post_id: id,
+                action: 0,
+                session_id: sessionId,
+            })], {type : 'application/json'});
+
+            // Use navigator.sendBeacon to send the data to the server
+            navigator.sendBeacon(config.rootPath + '/api/implicit/recordAction', blob);
         }
     }
 
@@ -1546,17 +1533,15 @@ function AttemptPage() {
     const millisToTime = (millisDuration: number) => {
         const seconds = Math.floor((millisDuration / 1000) % 60);
         const minutes = Math.floor((millisDuration / (1000 * 60)) % 60);
-        const hours = Math.floor((millisDuration / (1000 * 60 * 60)) % 24);
-        const days = Math.floor(millisDuration / (1000 * 60 * 60 * 24));
 
         let timeString = "";
 
-        if (days > 0) {
-            timeString += `${days}d `;
+        // we cap at 10 minutes since anything longer is likely a system error
+        // skewing the time to be higher
+        if (minutes >= 10) {
+            return `>10m`
         }
-        if (hours > 0) {
-            timeString += `${hours}h `;
-        }
+
         if (minutes > 0) {
             timeString += `${minutes}m `;
         }
