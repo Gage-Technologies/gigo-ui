@@ -121,7 +121,8 @@ const WorkspacePage = () => {
     const workspaceRef = React.useRef<Workspace | null>(workspace);
     let [workspaceUrl, setWorkspaceUrl] = React.useState<string | null>(null);
     let [codeSource, setCodeSource] = React.useState<CodeSource | null>(null);
-    let isVNCRef = React.useRef<boolean>(false);
+    let [isVNC, setVNC] = React.useState<boolean>(false);
+    let [iframeUrl, setIframeUrl] = React.useState<string | null>(null);
 
     let [expiration, setExpiration] = React.useState<number | null>(null);
     const [highestScore, setHighestScore] = React.useState<number | null>(0);
@@ -310,7 +311,9 @@ const WorkspacePage = () => {
         setWorkspace(workspace)
 
         // update isVNC ref
-        isVNCRef.current = workspace.is_vnc
+        if (!isVNC && workspace.is_vnc) {
+            setVNC(true)
+        }
 
         // calculate the updated expiratoion time
         calculateExpiration(workspace)
@@ -821,31 +824,42 @@ const WorkspacePage = () => {
         stopWorkspace()
     }
 
-
-    const handleMouseDown = (event: any) => {
-        console.log("button type: ", event.button)
-        switch (event.button) {
-            case undefined: // Mobile
-            case 0:  // Left click
-                console.log("vnc: ", isVNCRef.current)
-                setShowIframe(true);
-                // update the current page url to set the query string
-                window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true");
-                if (isVNCRef.current) {
-                    setShowDesktopIframe("none")
-                    window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=none");
-                }
-
-                window.location.reload();
-                break;
-            case 1:  // Middle click
-                window.open(config.coderPath + workspaceUrl, '_blank');
-                break;
-            // No case for right click as the context menu will be handled by <a> tag
-            default:
-                break;
+    useEffect(() => {
+        console.log("updating iframe url: ", isVNC)
+        if (workspace !== null && workspace.init_state === 13 && workspace.state === 1 || workspaceUrl !== null) {
+            if (isVNC) {
+                setIframeUrl(window.location.href.split("?")[0] + "?editor=true&desktop=none")
+            } else {
+                setIframeUrl(window.location.href.split("?")[0] + "?editor=true")
+            }
         }
-    };
+    }, [workspace, workspaceUrl, isVNC])
+
+
+    // const handleMouseDown = (event: any) => {
+    //     console.log("button type: ", event.button)
+    //     switch (event.button) {
+    //         case undefined: // Mobile
+    //         case 0:  // Left click
+    //             console.log("vnc: ", isVNCRef.current)
+    //             // setShowIframe(true);
+    //             // update the current page url to set the query string
+    //             window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true");
+    //             if (isVNCRef.current) {
+    //                 setShowDesktopIframe("none")
+    //                 window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=none");
+    //             }
+    //
+    //             window.location.reload();
+    //             break;
+    //         case 1:  // Middle click
+    //             window.open(config.coderPath + workspaceUrl, '_blank');
+    //             break;
+    //         // No case for right click as the context menu will be handled by <a> tag
+    //         default:
+    //             break;
+    //     }
+    // };
 
     useEffect(() => {
         // Callback to run when workspace.state changes
@@ -1613,38 +1627,6 @@ const WorkspacePage = () => {
         setPageMode(prevMode => prevMode === 'simple' ? 'advanced' : 'simple');
     };
 
-    const devSpaceButtomMemo = React.useMemo(() => (
-        <AnimatedAwesomeButton
-            // disabled={workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null}
-            // action={() => {
-            //     if (workspaceUrl !== null) {
-            //         window.location.href = config.coderPath + workspaceUrl;
-            //     }
-            // }}
-            onMouseDown={(e: any) => {
-                handleMouseDown(e)
-            }}
-            type="primary"
-            style={{
-                marginBottom: '20px',
-                width: "auto",
-                '--button-default-height': '78px',
-                '--button-default-font-size': '23px',
-                '--button-default-border-radius': '25px',
-                ' --button-horizontal-padding': '20px',
-                '--button-raise-level': '10px',
-                '--button-hover-pressure': '4',
-                '--transform-speed':' 0.2s',
-                '--button-primary-border': 'none',
-                hover: {
-                    backgroundColor: theme.palette.primary.main + '25',
-                }
-            }}
-        >
-            Enter DevSpace
-        </AnimatedAwesomeButton>
-    ), [])
-
     const renderBody = () => {
         let ports = []
 
@@ -1666,9 +1648,29 @@ const WorkspacePage = () => {
             return (
                 <div>
 
-                    <div style={{position: "absolute", left:  aspectRatio === "21:9" ? "68.5%" :  "67%", top: aspectRatio === "21:9" ? "9%" : "10%", height: "auto", display: (workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null) ? "none": "block"}}>
-                        {devSpaceButtomMemo}
-
+                    <div style={{position: "absolute", left:  aspectRatio === "21:9" ? "68.5%" :  "67%", top: aspectRatio === "21:9" ? "9%" : "10%", height: "auto", display: (workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null || iframeUrl === null) ? "none": "block"}}>
+                        <AnimatedAwesomeButton
+                            // @ts-ignore
+                            href={iframeUrl}
+                            type="primary"
+                            style={{
+                                marginBottom: '20px',
+                                width: "auto",
+                                '--button-default-height': '78px',
+                                '--button-default-font-size': '23px',
+                                '--button-default-border-radius': '25px',
+                                ' --button-horizontal-padding': '20px',
+                                '--button-raise-level': '10px',
+                                '--button-hover-pressure': '4',
+                                '--transform-speed':' 0.2s',
+                                '--button-primary-border': 'none',
+                                hover: {
+                                    backgroundColor: theme.palette.primary.main + '25',
+                                }
+                            }}
+                        >
+                            Enter DevSpace
+                        </AnimatedAwesomeButton>
                         <div style={{whiteSpace: 'nowrap', left: "-5%"}}>
                             Enter within the next: {renderTime()}
                         </div>
@@ -1883,11 +1885,31 @@ const WorkspacePage = () => {
                             left:  "calc(50vw - 107px)", 
                             top: "150px", 
                             height: "auto", 
-                            display: (workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null) ? "none": "block"
+                            display: (workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null || iframeUrl === null) ? "none": "block"
                         }}
                     >
-                        {devSpaceButtomMemo}
-
+                        <AnimatedAwesomeButton
+                            // @ts-ignore
+                            href={iframeUrl}
+                            type="primary"
+                            style={{
+                                marginBottom: '20px',
+                                width: "auto",
+                                '--button-default-height': '78px',
+                                '--button-default-font-size': '23px',
+                                '--button-default-border-radius': '25px',
+                                ' --button-horizontal-padding': '20px',
+                                '--button-raise-level': '10px',
+                                '--button-hover-pressure': '4',
+                                '--transform-speed':' 0.2s',
+                                '--button-primary-border': 'none',
+                                hover: {
+                                    backgroundColor: theme.palette.primary.main + '25',
+                                }
+                            }}
+                        >
+                            Enter DevSpace
+                        </AnimatedAwesomeButton>
                         <div style={{whiteSpace: 'nowrap', left: "-5%"}}>
                             Enter within the next: {renderTime()}
                         </div>

@@ -962,7 +962,6 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                         <>
                             <div style={{
                                 position: 'fixed',
-                                top: 0,
                                 left: '50%',
                                 transform: 'translateX(-50%)',
                                 zIndex: 1000,
@@ -970,7 +969,6 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 <Tooltip title="Open DevSpace Controls">
 
                                     <IconButton ref={toggleButtonRef} onClick={() => setIsOpen(!isOpen)}>
-
                                         <SettingsApplicationsIcon />
                                     </IconButton>
                                 </Tooltip>
