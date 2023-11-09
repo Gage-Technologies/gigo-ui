@@ -25,6 +25,10 @@ import premiumImage from "../img/croppedPremium.png"
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ErrorIcon from '@mui/icons-material/Error';
+import codeTeacher from "../img/premiumPageIcons/graduation-cap.svg"
+import resources from "../img/premiumPageIcons/technology.svg"
+import privateWorkspace from "../img/premiumPageIcons/padlock.svg"
+import proGorilla from "../img/icons/proPopupFace.svg"
 import {
     Button, Card, CardContent, Container,
     createTheme,
@@ -853,52 +857,86 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                         width: 'auto',
                                         maxWidth: '600px',
                                         p: 4,
-                                        borderRadius: 1,
+                                        borderRadius: 5,
                                         boxShadow: "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px 6px 0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
                                         backgroundColor: theme.palette.background.default,
                                         display: 'flex',
                                         flexDirection: 'column',
                                     }}
                                 >
-                                    <Box textAlign="right" mb={2}>
-                                        <Button onClick={() => setOpenSetup(false)}>
-                                            <CloseIcon />
-                                        </Button>
-                                    </Box>
-                                    <Typography id="pro-membership-modal-title" variant="h6" component="h2" textAlign="center" mb={3}>
-                                        Finish Setting Up Your Account
-                                    </Typography>
-                                    <Box sx={{ display: 'flex', alignItems: 'start', mb: 2, p: 2, border: 1, borderRadius: '8px', borderColor: 'grey.300' }}>
-                                        <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
-                                            {/* Replace with actual icon */}
-                                            <ErrorIcon color="primary" />
-                                        </Box>
-                                        <Box>
-                                            <Typography variant="subtitle1">
-                                                Feature Title
-                                            </Typography>
-                                            <Typography variant="body2" color="text.secondary">
-                                                This is a smaller description text explaining the feature in more detail.
-                                            </Typography>
-                                        </Box>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'start', mb: 2, p: 2, border: 1, borderRadius: '8px', borderColor: 'grey.300' }}>
-                                        <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
-                                            {/* Replace with actual icon */}
-                                            <ErrorIcon color="primary" />
-                                        </Box>
-                                        <Box>
-                                            <Typography variant="subtitle1">
-                                                Feature Title
-                                            </Typography>
-                                            <Typography variant="body2" color="text.secondary">
-                                                This is a smaller description text explaining the feature in more detail.
-                                            </Typography>
-                                        </Box>
-                                    </Box>
+                                    {/*<Box textAlign="right" mb={2} height={auto} width={auto}>*/}
+                                    {/*    <Button onClick={() => setOpenSetup(false)}>*/}
+                                    {/*        <CloseIcon />*/}
+                                    {/*    </Button>*/}
+                                    {/*</Box>*/}
+                                    <div style={{ display: "flex", flexDirection: "row", alignItems: "center"}}>
+                                        <img src={proGorilla} width={170} height={130} />
+                                        <div style={{ display: "flex", flexDirection: "column", height: "auto", justifyContent: "center" }}>
+                                            <h1 style={{ marginBottom: '0', lineHeight: '.5', marginLeft: "25%", textShadow: "10px 1px black", fontWeight: "bold", fontStyle: "italic"}}>PRO</h1>
+                                            <h1 style={{fontWeight: "300"}}>GIGO</h1>
+                                        </div>
+                                    </div>
+                                    <Card>
+                                        <Typography id="pro-membership-modal-title" variant="h6" component="h2" textAlign="center" mb={3} marginTop={"10px"} marginBottom={"-5px"}>
+                                            Keep enjoying these features
+                                        </Typography>
+                                        <CardContent>
+                                            <Box sx={{ display: 'flex', alignItems: 'start', mb: 2, p: 2, border: 1, borderRadius: '8px', borderColor: 'grey.300' }}>
+                                                <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
+                                                    {/* Replace with actual icon */}
+                                                    <img src={codeTeacher} width={50} height={50}/>
+                                                </Box>
+                                                <Box>
+                                                    <Typography variant="subtitle1" style={{fontWeight: "bold"}}>
+                                                        Code Teacher
+                                                    </Typography>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        Unrestricted access to the best integrated programming tutor.
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+                                        </CardContent>
+                                        <CardContent>
+                                            <Box sx={{ display: 'flex', alignItems: 'start', mb: 2, p: 2, border: 1, borderRadius: '8px', borderColor: 'grey.300' }}>
+                                                <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
+                                                    {/* Replace with actual icon */}
+                                                    <img src={resources} width={50} height={50}/>
+                                                </Box>
+                                                <Box>
+                                                    <Typography variant="subtitle1" style={{fontWeight: "bold"}}>
+                                                        Improved Resource Limit
+                                                    </Typography>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        More resources, better compute, more possibilities.
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+                                        </CardContent>
+                                        <CardContent>
+                                            <Box sx={{ display: 'flex', alignItems: 'start', mb: 2, p: 2, border: 1, borderRadius: '8px', borderColor: 'grey.300' }}>
+                                                <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
+                                                    {/* Replace with actual icon */}
+                                                    <img src={privateWorkspace} width={50} height={50}/>
+                                                </Box>
+                                                <Box>
+                                                    <Typography variant="subtitle1" style={{fontWeight: "bold"}}>
+                                                        Private DevSpaces
+                                                    </Typography>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        Keep your top-secret work for your eyes only.
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+                                        </CardContent>
+                                        <CardContent style={{textAlign: "center", marginTop: "-10px"}}>
+                                            <Button href={"/premium"} variant={"contained"} style={{margin: "auto"}}>
+                                                Learn More
+                                            </Button>
+                                        </CardContent>
+                                    </Card>
                                     <Box textAlign="center" mt={3}>
                                         <Button variant="contained" color="primary" onClick={() => stripeNavigate()}>
-                                            Complete Setup
+                                            Add Payment Method
                                         </Button>
                                     </Box>
                                 </Box>
