@@ -24,8 +24,9 @@ import 'react-awesome-button/dist/styles.css';
 import premiumImage from "../img/croppedPremium.png"
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import ErrorIcon from '@mui/icons-material/Error';
 import {
-    Button, Container,
+    Button, Card, CardContent, Container,
     createTheme,
     CssBaseline,
     Icon,
@@ -52,10 +53,14 @@ import { useAppDispatch, useAppSelector } from "../app/hooks";
 import {
     initialAuthState,
     initialAuthStateUpdate,
-    selectAuthState,
+    selectAuthState, selectAuthStateAlreadyCancelled,
     selectAuthStateBackgroundName,
-    selectAuthStateColorPalette, selectAuthStateExclusiveAgreement,
-    selectAuthStateThumbnail, selectAuthStateTutorialState,
+    selectAuthStateColorPalette,
+    selectAuthStateExclusiveAgreement, selectAuthStateHasPaymentInfo,
+    selectAuthStateHasSubscription,
+    selectAuthStateInTrial,
+    selectAuthStateThumbnail,
+    selectAuthStateTutorialState,
     selectAuthStateUserName,
     updateAuthState,
 } from "../reducers/auth/auth";
@@ -174,6 +179,11 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     const leftOpen = useAppSelector(selectAppWrapperSidebarOpen)
     const rightOpen = useAppSelector(selectAppWrapperChatOpen)
     const mobileWelcomeBannerClosed = useAppSelector(selectAppWrapperClosedMobileWelcomeBanner)
+    const inTrial = useAppSelector(selectAuthStateInTrial)
+    const hasPaymentInfo = useAppSelector(selectAuthStateHasPaymentInfo)
+    const hasSubscription = useAppSelector(selectAuthStateHasSubscription)
+    const alreadyCancelled = useAppSelector(selectAuthStateAlreadyCancelled)
+
 
     const [reportPopup, setReportPopup] = React.useState(false)
 
@@ -184,6 +194,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     const [notificationCount, setNotificationCount] = React.useState<number>(0);
     const [showReferPopup, setShowReferPopup] = React.useState(false)
     const [isOpen, setIsOpen] = React.useState(false);
+    const [openSetup, setOpenSetup] = React.useState(false)
     const toggleButtonRef = React.useRef(null);
 
     const styles = {
@@ -764,6 +775,15 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     profileButton={false}
                                     pro={authState.role.toString() === "1"}
                                 />
+                                <ErrorIcon
+                                    style={{
+                                        color: "orange",
+                                        position: 'absolute',
+                                        bottom: 0, // align to the bottom
+                                        right: 0, // align to the right
+                                        fontSize: '1rem'
+                                    }}
+                                />
                             </Button>
                             <Menu
                                 id="menu-appbar"
@@ -785,6 +805,13 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     await handleLogout()
                                 }}>Logout</MenuItem>
                                 <MenuItem onClick={() => setShowReferPopup(true)}>Refer A Friend</MenuItem>
+                                {/*{inTrial && !hasPaymentInfo && (*/}
+                                {/*    <MenuItem onClick={() => stripeNavigate()}>Finish Setup</MenuItem>*/}
+                                {/*)}*/}
+                                <MenuItem onClick={() => setOpenSetup(true)}>
+                                    <h4 style={{color: "red", paddingRight: "5px"}}>Finish Setup</h4>
+                                    <ErrorIcon style={{color: "orange"}}/>
+                                </MenuItem>
                             </Menu>
                             <Modal open={showReferPopup} onClose={() => setShowReferPopup(false)}>
                                 <Box
@@ -814,6 +841,66 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                             </Button>
                                         </div>
                                     </div>
+                                </Box>
+                            </Modal>
+                            <Modal open={openSetup} onClose={() => setOpenSetup(false)}>
+                                <Box
+                                    sx={{
+                                        position: 'absolute',
+                                        top: '50%',
+                                        left: '50%',
+                                        transform: 'translate(-50%, -50%)',
+                                        width: 'auto',
+                                        maxWidth: '600px',
+                                        p: 4,
+                                        borderRadius: 1,
+                                        boxShadow: "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px 6px 0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
+                                        backgroundColor: theme.palette.background.default,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                    }}
+                                >
+                                    <Box textAlign="right" mb={2}>
+                                        <Button onClick={() => setOpenSetup(false)}>
+                                            <CloseIcon />
+                                        </Button>
+                                    </Box>
+                                    <Typography id="pro-membership-modal-title" variant="h6" component="h2" textAlign="center" mb={3}>
+                                        Finish Setting Up Your Account
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', alignItems: 'start', mb: 2, p: 2, border: 1, borderRadius: '8px', borderColor: 'grey.300' }}>
+                                        <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
+                                            {/* Replace with actual icon */}
+                                            <ErrorIcon color="primary" />
+                                        </Box>
+                                        <Box>
+                                            <Typography variant="subtitle1">
+                                                Feature Title
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary">
+                                                This is a smaller description text explaining the feature in more detail.
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                    <Box sx={{ display: 'flex', alignItems: 'start', mb: 2, p: 2, border: 1, borderRadius: '8px', borderColor: 'grey.300' }}>
+                                        <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
+                                            {/* Replace with actual icon */}
+                                            <ErrorIcon color="primary" />
+                                        </Box>
+                                        <Box>
+                                            <Typography variant="subtitle1">
+                                                Feature Title
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary">
+                                                This is a smaller description text explaining the feature in more detail.
+                                            </Typography>
+                                        </Box>
+                                    </Box>
+                                    <Box textAlign="center" mt={3}>
+                                        <Button variant="contained" color="primary" onClick={() => stripeNavigate()}>
+                                            Complete Setup
+                                        </Button>
+                                    </Box>
                                 </Box>
                             </Modal>
                         </Box>
@@ -861,6 +948,30 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         url.search = params.toString();
         window.history.replaceState({}, '', url.toString());
     };
+
+    const stripeNavigate = async () => {
+        let res = await call(
+            "/api/stripe/premiumMembershipSession",
+            "post",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {},
+            null,
+            config.rootPath
+        )
+
+        if (res["message"] === "You must be logged in to access the GIGO system.") {
+            let authState = Object.assign({}, initialAuthStateUpdate)
+            // @ts-ignore
+            dispatch(updateAuthState(authState))
+            navigate("/login")
+        }
+        if (res !== undefined && res["return url"] !== undefined){
+            window.location.replace(res["return url"])
+        }
+    }
 
     const renderWorkspaceAppBar = () => {
         let toolbarStyles = JSON.parse(JSON.stringify(holidayStyle));

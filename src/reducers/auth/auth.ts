@@ -46,7 +46,11 @@ export interface AuthState {
     backgroundName: string,
     exclusiveContent: boolean,
     exclusiveAgreement: boolean,
-    tutorialState: TutorialState
+    tutorialState: TutorialState,
+    inTrial: boolean,
+    hasPaymentInfo: boolean,
+    hasSubscription: boolean,
+    alreadyCancelled: boolean
 }
 
 export interface AuthStateUpdate {
@@ -67,7 +71,11 @@ export interface AuthStateUpdate {
     backgroundName: string | null,
     exclusiveContent: boolean | null,
     exclusiveAgreement: boolean | null,
-    tutorialState: TutorialState | null
+    tutorialState: TutorialState | null,
+    inTrial: boolean | null,
+    hasPaymentInfo: boolean | null,
+    hasSubscription: boolean | null,
+    alreadyCancelled: boolean | null
 }
 
 export const initialAuthState: AuthState = {
@@ -98,7 +106,11 @@ export const initialAuthState: AuthState = {
         create_project: false,
         launchpad: false,
         vscode: false,
-    }
+    },
+    inTrial: false,
+    hasPaymentInfo: false,
+    hasSubscription: false,
+    alreadyCancelled: false
 };
 
 export const initialAuthStateUpdate: AuthStateUpdate = {
@@ -119,7 +131,11 @@ export const initialAuthStateUpdate: AuthStateUpdate = {
     backgroundName: null,
     exclusiveContent: null,
     exclusiveAgreement: null,
-    tutorialState: null
+    tutorialState: null,
+    inTrial: null,
+    hasPaymentInfo: null,
+    hasSubscription: null,
+    alreadyCancelled: null
 };
 
 export const authSlice = createSlice({
@@ -201,6 +217,22 @@ export const authSlice = createSlice({
             if (update.payload.tutorialState !== null) {
                 state.tutorialState = update.payload.tutorialState
             }
+
+            if (update.payload.inTrial !== null) {
+                state.inTrial = update.payload.inTrial
+            }
+
+            if (update.payload.hasSubscription!== null) {
+                state.hasSubscription = update.payload.hasSubscription
+            }
+
+            if (update.payload.hasPaymentInfo!== null) {
+                state.hasPaymentInfo = update.payload.hasPaymentInfo
+            }
+
+            if (update.payload.alreadyCancelled!== null) {
+                state.alreadyCancelled = update.payload.alreadyCancelled
+            }
         },
     }
 });
@@ -229,5 +261,9 @@ export const selectAuthStateBackgroundName = (state: RootState) => state.auth.ba
 export const selectAuthStateExclusiveContent = (state: RootState) => state.auth.exclusiveContent ? state.auth.exclusiveContent : initialAuthState.exclusiveContent;
 export const selectAuthStateExclusiveAgreement = (state: RootState) => state.auth.exclusiveAgreement ? state.auth.exclusiveAgreement : initialAuthState.exclusiveAgreement;
 export const selectAuthStateTutorialState = (state: RootState) => state.auth.tutorialState ? state.auth.tutorialState : initialAuthState.tutorialState;
+export const selectAuthStateInTrial = (state: RootState) => state.auth.inTrial? state.auth.inTrial : initialAuthState.inTrial;
+export const selectAuthStateHasSubscription = (state: RootState) => state.auth.hasSubscription? state.auth.hasSubscription : initialAuthState.hasSubscription;
+export const selectAuthStateHasPaymentInfo = (state: RootState) => state.auth.hasPaymentInfo? state.auth.hasPaymentInfo : initialAuthState.hasPaymentInfo;
+export const selectAuthStateAlreadyCancelled = (state: RootState) => state.auth.alreadyCancelled? state.auth.alreadyCancelled : initialAuthState.alreadyCancelled;
 
 export default authSlice.reducer;
