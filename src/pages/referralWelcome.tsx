@@ -195,7 +195,7 @@ function ReferralWelcome(this: any) {
                                         '--button-hover-pressure': "4",
                                         height: "5vh",
                                         '--button-raise-level': "6px"
-                                    }} type="primary" onPress={() => navigate("/signup/" + referralUser["user_name"])}>
+                                    }} type="primary" href={"/signup/" + referralUser["user_name"]}>
                                         <h1 style={{fontSize: "3vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
                                             Create Account
                                         </h1>

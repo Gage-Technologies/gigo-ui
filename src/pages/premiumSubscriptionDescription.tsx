@@ -236,9 +236,8 @@ function PremiumDescription() {
                                             '--button-primary-color-light': theme.palette.text.primary,
                                             '--button-primary-color-hover': theme.palette.primary.main,
                                             fontSize: "14px"
-                                        }} type="primary" onPress={() => {
+                                        }} type="primary" href={"/settings"} onPress={() => {
                                             window.sessionStorage.setItem("accountsPage", "membership");
-                                            navigate("/settings")
                                         }}>
                                             <span>Manage Plan</span>
                                         </AwesomeButton>

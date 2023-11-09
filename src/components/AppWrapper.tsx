@@ -1711,7 +1711,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                         '--button-primary-color-light': theme.palette.text.primary,
                                         '--button-primary-color-hover': theme.palette.primary.main,
                                         fontSize: "14px"
-                                    }} type="primary" onPress={() => navigate("/premium")}>
+                                    }} type="primary" href={"/premium"}>
                                         <img src={premiumImage} />
                                     </AwesomeButton>
                                 </div>

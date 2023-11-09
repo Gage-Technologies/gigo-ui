@@ -280,7 +280,7 @@ function Journey() {
 
                                             borderRadius: "25px",
                                             fontSize: "100%",
-                                        }} type="primary" onPress={() => navigate("/journey/form")}>
+                                        }} type="primary" href={"/journey/form"}>
                                             Embark On Your Journey
                                         </AwesomeButton>
                                         <br/>
