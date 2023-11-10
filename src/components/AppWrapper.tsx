@@ -859,85 +859,103 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                         p: 4,
                                         borderRadius: 5,
                                         boxShadow: "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px 6px 0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
-                                        backgroundColor: theme.palette.background.default,
+                                        // backgroundColor: theme.palette.background.default,
                                         display: 'flex',
                                         flexDirection: 'column',
+                                        background: 'linear-gradient(45deg, #142623 30%, #306c57)'
                                     }}
                                 >
-                                    {/*<Box textAlign="right" mb={2} height={auto} width={auto}>*/}
-                                    {/*    <Button onClick={() => setOpenSetup(false)}>*/}
-                                    {/*        <CloseIcon />*/}
-                                    {/*    </Button>*/}
-                                    {/*</Box>*/}
+                                    <Box mb={2} style={{position: "absolute", top: 5, right: 10}}>
+                                        <Button onClick={() => setOpenSetup(false)}>
+                                            <CloseIcon />
+                                        </Button>
+                                    </Box>
                                     <div style={{ display: "flex", flexDirection: "row", alignItems: "center"}}>
                                         <img src={proGorilla} width={170} height={130} />
                                         <div style={{ display: "flex", flexDirection: "column", height: "auto", justifyContent: "center" }}>
-                                            <h1 style={{ marginBottom: '0', lineHeight: '.5', marginLeft: "25%", textShadow: "10px 1px black", fontWeight: "bold", fontStyle: "italic"}}>PRO</h1>
-                                            <h1 style={{fontWeight: "300"}}>GIGO</h1>
+                                            <h1 style={{ marginBottom: '0', lineHeight: '.5', marginLeft: "25%", textShadow: "-4px 1px #618a7c", fontWeight: "bold", fontStyle: "italic", color: "#9dbab0"}}>PRO</h1>
+                                            <h1 style={{fontWeight: "300", color: "#9dbab0"}}>GIGO</h1>
                                         </div>
                                     </div>
-                                    <Card>
-                                        <Typography id="pro-membership-modal-title" variant="h6" component="h2" textAlign="center" mb={3} marginTop={"10px"} marginBottom={"-5px"}>
+                                    <div style={{height: "15px"}}/>
+                                    <Card style={{
+                                        background: 'linear-gradient(45deg, #2c473f 30%, #376454)',
+                                        borderRadius: "12%"
+                                    }}>
+                                        <Typography id="pro-membership-modal-title" variant="h6" component="h2" color={"#829c93"} textAlign="center" mb={3} marginTop={"10px"} marginBottom={"-5px"}>
                                             Keep enjoying these features
                                         </Typography>
                                         <CardContent>
-                                            <Box sx={{ display: 'flex', alignItems: 'start', mb: 2, p: 2, border: 1, borderRadius: '8px', borderColor: 'grey.300' }}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, p: 2, borderRadius: '30px', backgroundColor: "#648378", height: "110px" }}>
                                                 <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
                                                     {/* Replace with actual icon */}
                                                     <img src={codeTeacher} width={50} height={50}/>
                                                 </Box>
                                                 <Box>
-                                                    <Typography variant="subtitle1" style={{fontWeight: "bold"}}>
+                                                    <Typography variant="subtitle1" style={{fontWeight: "bold", color: "#9dbab0"}}>
                                                         Code Teacher
                                                     </Typography>
-                                                    <Typography variant="body2" color="text.secondary">
+                                                    <Typography variant="body2" color="#9dbab0">
                                                         Unrestricted access to the best integrated programming tutor.
                                                     </Typography>
                                                 </Box>
                                             </Box>
                                         </CardContent>
                                         <CardContent>
-                                            <Box sx={{ display: 'flex', alignItems: 'start', mb: 2, p: 2, border: 1, borderRadius: '8px', borderColor: 'grey.300' }}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, p: 2, borderRadius: '30px', backgroundColor: "#648378", height: "110px" }}>
                                                 <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
                                                     {/* Replace with actual icon */}
                                                     <img src={resources} width={50} height={50}/>
                                                 </Box>
                                                 <Box>
-                                                    <Typography variant="subtitle1" style={{fontWeight: "bold"}}>
+                                                    <Typography variant="subtitle1" style={{fontWeight: "bold", color: "#9dbab0"}}>
                                                         Improved Resource Limit
                                                     </Typography>
-                                                    <Typography variant="body2" color="text.secondary">
+                                                    <Typography variant="body2" color="#9dbab0">
                                                         More resources, better compute, more possibilities.
                                                     </Typography>
                                                 </Box>
                                             </Box>
                                         </CardContent>
                                         <CardContent>
-                                            <Box sx={{ display: 'flex', alignItems: 'start', mb: 2, p: 2, border: 1, borderRadius: '8px', borderColor: 'grey.300' }}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, p: 2, borderRadius: '30px', backgroundColor: "#648378", height: "110px" }}>
                                                 <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
                                                     {/* Replace with actual icon */}
                                                     <img src={privateWorkspace} width={50} height={50}/>
                                                 </Box>
                                                 <Box>
-                                                    <Typography variant="subtitle1" style={{fontWeight: "bold"}}>
+                                                    <Typography variant="subtitle1" style={{fontWeight: "bold", color: "#9dbab0"}}>
                                                         Private DevSpaces
                                                     </Typography>
-                                                    <Typography variant="body2" color="text.secondary">
+                                                    <Typography variant="body2" color="#9dbab0">
                                                         Keep your top-secret work for your eyes only.
                                                     </Typography>
                                                 </Box>
                                             </Box>
                                         </CardContent>
                                         <CardContent style={{textAlign: "center", marginTop: "-10px"}}>
-                                            <Button href={"/premium"} variant={"contained"} style={{margin: "auto"}}>
+                                            <AwesomeButton href={"/premium"} style={{
+                                                '--button-primary-color': "#628277",
+                                                '--button-primary-color-dark': "#4e6c61",
+                                                '--button-primary-color-light': "#41594f",
+                                                '--button-primary-color-hover': "#4e6c61",
+                                                margin: "auto",
+                                                "--button-default-border-radius": "20px"
+                                            }}>
                                                 Learn More
-                                            </Button>
+                                            </AwesomeButton>
                                         </CardContent>
                                     </Card>
                                     <Box textAlign="center" mt={3}>
-                                        <Button variant="contained" color="primary" onClick={() => stripeNavigate()}>
+                                        <AwesomeButton onPressed={() => stripeNavigate()} style={{
+                                            '--button-primary-color': "#9dbab0",
+                                            '--button-primary-color-dark': "#4a5d5b",
+                                            '--button-primary-color-light': "#4a5d5b",
+                                            '--button-primary-color-hover': "#8aa49b",
+                                            "--button-default-border-radius": "20px"
+                                        }}>
                                             Add Payment Method
-                                        </Button>
+                                        </AwesomeButton>
                                     </Box>
                                 </Box>
                             </Modal>
