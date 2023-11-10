@@ -41,7 +41,8 @@ import {
     selectAuthState,
     selectAuthStateId,
     selectAuthStateTier,
-    selectAuthStateUserName
+    selectAuthStateUserName,
+    selectAuthStateRole
 } from '../../reducers/auth/auth';
 import ld from 'lodash';
 import MoonLoader from 'react-spinners/MoonLoader';
@@ -222,6 +223,9 @@ export default function ChatContainer() {
     const authorId = useAppSelector(selectAuthStateId);
     const authorName = useAppSelector(selectAuthStateUserName);
     const authorRenown = useAppSelector(selectAuthStateTier);
+    const authorRole = useAppSelector(selectAuthStateRole);
+
+    console.log("auth role: ", authorRole)
 
     const chatOpen = useAppSelector(selectAppWrapperChatOpen);
 
@@ -716,6 +720,38 @@ export default function ChatContainer() {
         setMentionSearchOptions(users);
     }
 
+    const searchUsersPublic = async (query: string) => {
+        let res = await call(
+            "/api/search/users",
+            "POST",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {
+                skip: 0,
+                limit: 10,
+                query: query,
+            },
+            null,
+            config.rootPath
+        )
+
+        if (res === undefined) {
+            swal("Server Error", "We can't get in touch with the GIGO servers right now. Sorry about that! " +
+                "We'll get crackin' on that right away!")
+            return
+        }
+
+        if (res["users"] === undefined) {
+            swal("Server Error", "Something funky is afoot. We better get runnin'!")
+            return;
+        }
+
+        let users: User[] = res["users"];
+        setFriendSearchOptions(users);
+    }
+
     const getNextMessageBlock = async (override: boolean, lastMessageTime: Date | null = null) => {
         // Check if a call is already in progress or if there is no more data to load
         if (!override && (loadingMessages || noMoreData)) {
@@ -1208,13 +1244,13 @@ export default function ChatContainer() {
                         endAdornment: (
                             <InputAdornment position="end">
                                 {sendingMessage ? (
-                                        <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
-                                            <CircularProgress
-                                                color='primary'
-                                                size={20}
-                                            />
-                                        </div>
-                                    )
+                                    <div style={{ position: 'absolute', bottom: '10px', right: '10px' }}>
+                                        <CircularProgress
+                                            color='primary'
+                                            size={20}
+                                        />
+                                    </div>
+                                )
                                     :
                                     (
                                         <div style={{ position: 'absolute', bottom: '6px', right: '8px' }}>
@@ -1569,7 +1605,11 @@ export default function ChatContainer() {
             autoCompleteRef.current.focus();
         }
 
-        await searchFriends(value);
+        if (authorRole === 1) {
+            await searchUsersPublic(value);
+        } else {
+            await searchFriends(value);
+        }
 
         if (autoCompleteRef.current) {
             autoCompleteRef.current.focus();
@@ -1735,7 +1775,7 @@ export default function ChatContainer() {
                     sx={{
                         width: '324px',
                     }}
-                    onClick={(e) => searchFriends(friendNameQuery)}
+                    onClick={(e) => (authorRole === 1) ? searchUsersPublic(friendNameQuery) : searchFriends(friendNameQuery)}
                     onChange={(e) => handleFriendSearchInputChange(e as any)}
                     defaultValue={friendNameQuery}
                     placeholder="Search your Friends!"
@@ -2630,11 +2670,11 @@ export default function ChatContainer() {
                         autoHideDuration={3000}
                         key={"chat-notification"}
                         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                        style={{ 
-                            position: "fixed", 
-                            width: window.innerWidth > 1000 ? "fit-content" : undefined, 
-                            top: '80px', 
-                            right: window.innerWidth < 1000 ? undefined : chatOpen ? '340px' : '40px' 
+                        style={{
+                            position: "fixed",
+                            width: window.innerWidth > 1000 ? "fit-content" : undefined,
+                            top: '80px',
+                            right: window.innerWidth < 1000 ? undefined : chatOpen ? '340px' : '40px'
                         }}
                     >
                         {renderNotificationContent()}
