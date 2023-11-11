@@ -359,7 +359,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         <ContentContainer
             leftOpen={leftOpen || homePageLockedDrawer}
             rightOpen={rightOpen}
-            style={{ marginTop: window.location.pathname.startsWith("/launchpad/") && query.get("editor") === "true" ? "28px" : "65px" }}
+            style={{ marginTop: window.location.pathname.startsWith("/launchpad/") && query.get("editor") === "true" ? "28px" : window.innerWidth > 1000 ? "65px" : "56px" }}
             id={"contentContainer"}
         >
             {props.children}

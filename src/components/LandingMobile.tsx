@@ -1,32 +1,22 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Button, Typography, Box, PaletteMode, createTheme } from '@mui/material';
 import { styled } from '@mui/system';
-
 import logoImg from '../img/logo.png';
-import backgroundImageWebP from "../img/gigo-landing.webp"
-import backgroundImageLargeWebP from "../img/gigo-landing-large.webp"
-import backgroundImagePNG from "../img/gigo-landing.png"
-import backgroundImageLargePNG from "../img/gigo-landing-large.png"
-import { useAppSelector } from '../app/hooks';
-import { selectAppWrapperChatOpen, selectAppWrapperSidebarOpen } from '../reducers/appWrapper/appWrapper';
+import backgroundImageWebP from "../img/gigo-landing.webp";
+import backgroundImagePNG from "../img/gigo-landing.png";
 import { getAllTokens, themeHelpers } from '../theme';
 import LazyLoad from 'react-lazyload';
 
-
-// Hero container with jungle-themed background
+// Responsive Hero container for mobile
 const HeroContainer = styled(Box)(({ theme }) => ({
     position: 'relative',
     height: '100vh',
-    width: '100vw', // Adjust for the sidebar width
-    marginLeft: 0,
-    marginRight: 0,
+    width: '100vw',
     display: 'flex',
+    flexDirection: 'column', // Change to column for mobile
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundImage: `
-        url(${window.innerWidth > 2000 ? backgroundImageLargeWebP : backgroundImageWebP}),
-        url(${window.innerWidth > 2000 ? backgroundImageLargePNG : backgroundImagePNG})
-    `,
+    justifyContent: 'flex-start', // Change alignment for mobile
+    backgroundImage: `url(${backgroundImageWebP}), url(${backgroundImagePNG})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     overflow: 'hidden',
@@ -35,25 +25,24 @@ const HeroContainer = styled(Box)(({ theme }) => ({
 const HeroContent = styled(Box)({
     position: 'relative',
     textAlign: 'center',
-    width: "fit-content",
+    width: "90vw", // Adjust width for mobile
     zIndex: 999,
     color: '#fff',
     borderRadius: "10px",
-    padding: "20px",
+    padding: "10px", // Adjust padding for mobile
     ...themeHelpers.frostedGlass,
-    backgroundColor: "#1D1D1D25"
+    backgroundColor: "#1D1D1D25",
+    marginTop: 'auto', // Adjust margin for mobile layout
+    marginBottom: 'auto'
 });
 
-
-const GIGOLandingPage: React.FC = () => {
+const GIGOLandingPageMobile: React.FC = () => {
     // retrieve theme from local storage
     let userPref = localStorage.getItem('theme')
     const [mode, _] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
 
     const [fireflies, setFireflies] = useState<string[]>([]);
-    const leftOpen = useAppSelector(selectAppWrapperSidebarOpen)
-    const rightOpen = useAppSelector(selectAppWrapperChatOpen)
     const endRef = useRef<HTMLDivElement | null>(null);
 
     // Define the move animation
@@ -121,33 +110,21 @@ const GIGOLandingPage: React.FC = () => {
         )
     }, [fireflies])
 
-    let width = '100vw'
-    let widthSub = 0;
-    if (leftOpen) {
-        widthSub += 200
-    }
-    if (rightOpen) {
-        widthSub += 300
-    }
-    if (widthSub > 0) {
-        width = `calc(100vw - ${widthSub}px)`
-    }
-
     return (
         <>
-            <HeroContainer sx={{ width: width }}>
+            <HeroContainer sx={{ width: "100vw" }}>
                 {fireflyMemo}
                 <HeroContent>
-                    <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                        <img src={logoImg} alt="GIGO Logo" style={{ height: '90px', marginRight: "20px", marginBottom: "10px" }} />
-                        <Typography variant="h3" gutterBottom>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <img src={logoImg} alt="GIGO Logo" style={{ height: '60px', marginBottom: "10px" }} /> {/* Adjust image size */}
+                        <Typography variant="h4" gutterBottom> {/* Change typography variant */}
                             Welcome to GIGO
                         </Typography>
                     </Box>
-                    <Typography variant="h5" gutterBottom sx={{ maxWidth: "40vw" }}>
+                    <Typography variant="h6" gutterBottom sx={{ maxWidth: "80vw" }}> {/* Change typography variant and max width */}
                         GIGO is the best place to learn how to code
                     </Typography>
-                    <Typography variant="body1" gutterBottom sx={{ maxWidth: "40vw" }}>
+                    <Typography variant="body2" gutterBottom sx={{ maxWidth: "80vw" }}> {/* Change typography variant and max width */}
                         Built by self-taught developers, GIGO focuses on aligning learning with the real world of development.
                         Code in the cloud, work on real projects, and learn the latest technologies from any machine, even a tablet!
                         Pick a project and click launch to get started!
@@ -159,7 +136,6 @@ const GIGOLandingPage: React.FC = () => {
                             mt: 2,
                             color: "white",
                             backgroundColor: theme.palette.primary.main + "50",
-                            // highlight on hover
                             '&:hover': {
                                 backgroundColor: theme.palette.primary.main + "99",
                             }
@@ -179,4 +155,4 @@ const GIGOLandingPage: React.FC = () => {
     );
 };
 
-export default GIGOLandingPage;
+export default GIGOLandingPageMobile;

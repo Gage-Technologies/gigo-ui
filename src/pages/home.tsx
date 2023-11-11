@@ -51,6 +51,7 @@ import PumpkinIcon from "../components/Icons/Pumpkin";
 import Pumpkin2Icon from "../components/Icons/Pumpkin2";
 import HalloweenBannerIcon from "../components/Icons/HalloweenBanner";
 import GIGOLandingPage from "../components/Landing";
+import GIGOLandingPageMobile from "../components/LandingMobile";
 
 
 function Home() {
@@ -752,7 +753,7 @@ function Home() {
             <CssBaseline>
                 <div>
                     {renderWelcomePopup()}
-                    {window.innerWidth > 1000 && <GIGOLandingPage />}
+                    {window.innerWidth > 1000 ? <GIGOLandingPage /> : <GIGOLandingPageMobile />}
                     <Typography component={"div"}>
                     </Typography>
                     {xpPopup ? (<XpPopup oldXP={
