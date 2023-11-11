@@ -154,7 +154,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
             window.location.pathname === '' || window.location.pathname === '/')
     )
 
-    let homePageLockedDrawer = onHomePage && window.innerWidth > 1000
+    let homePageLockedDrawer = loggedIn && onHomePage && window.innerWidth > 1000
 
     const handleTheme = () => {
         colorMode.toggleColorMode();
@@ -849,47 +849,6 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                         </Box>
                     )}
                 </Toolbar>
-                {!loggedIn && onHomePage ? (
-                    <Box
-                        sx={{
-                            // @ts-ignore
-                            backgroundColor: theme.palette.background.codeEditor,
-                            color: theme.palette.text.primary,
-                            textAlign: 'center',
-                            cursor: 'pointer',
-                            pointerEvents: 'auto',
-                            paddingBottom: '10px',
-                            // add a glowing box shadow all around the box
-                            boxShadow: (mode === 'dark') ?
-                                `0px 3px 15px -1px #ffffff40, 0px 5px 18px 0px #ffffff24, 0px 1px 24px 0px #ffffff22` :
-                                "0px 3px 5px -1px #00000020, 0px 5px 8px 0px #00000014, 0px 1px 14px 0px #00000012",
-                            // lighten the background on hover
-                            "&:hover": {
-                                // @ts-ignore
-                                backgroundColor: theme.palette.primary.contrastText,
-                                color: theme.palette.primary.main,
-                            },
-                        }}
-                        onClick={() => {
-                            navigate("/about")
-                        }}
-                    >
-                        <Typography
-                            variant="h5"
-                            // color={theme.palette.text.primary}
-                            color={'inherit'}
-                        >
-                            Welcome To GIGO!
-                        </Typography>
-                        <Typography
-                            variant="h6"
-                            // color={theme.palette.text.primary}
-                            color={'inherit'}
-                        >
-                            GIGO is an end-to-end platform for learning to code and developing your skills. Click here to learn more!
-                        </Typography>
-                    </Box>
-                ) : null}
             </AppBar>
         )
     }
@@ -1811,8 +1770,6 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                         backgroundColor: (isChrome) ? theme.palette.background.default : theme.palette.background.default,
                         backdropFilter: (isChrome) ? "blur(15px)" : undefined,
                         zIndex: 998,
-                        height: onHomePage ? 'calc(100vh - 78px)' : undefined,
-                        marginTop: onHomePage ? "78px" : undefined,
                     },
                 }}
                 variant="persistent"
@@ -1977,9 +1934,6 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     {appBarRenderer()}
                     {loggedIn ? renderSidebar() : renderLoggedOutSidebar()}
                     {renderChatSideBar()}
-                    {onHomePage && !loggedIn && window.innerWidth > 1000 ? (
-                        <div style={{ height: "30px" }} />
-                    ) : null}
                     {
                         // we only render the children on mobile if the chat bar is not open
                         !(window.innerWidth <= 1000 && rightOpen) ?

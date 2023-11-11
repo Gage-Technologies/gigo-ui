@@ -50,6 +50,7 @@ import HappyHalloweenIcon from "../components/Icons/HappyHalloween";
 import PumpkinIcon from "../components/Icons/Pumpkin";
 import Pumpkin2Icon from "../components/Icons/Pumpkin2";
 import HalloweenBannerIcon from "../components/Icons/HalloweenBanner";
+import GIGOLandingPage from "../components/Landing";
 
 
 function Home() {
@@ -751,35 +752,7 @@ function Home() {
             <CssBaseline>
                 <div>
                     {renderWelcomePopup()}
-                    {/*<Joyride*/}
-                    {/*   callback={handleJoyrideCallback}*/}
-                    {/*   continuous={true}*/}
-                    {/*   disableOverlayClose={true}*/}
-                    {/*   // disableCloseOnEsc={true}*/}
-                    {/*   // getHelpers={getHelpers}*/}
-                    {/*   run={run}*/}
-                    {/*   scrollToFirstStep={true}*/}
-                    {/*   showProgress={true}*/}
-                    {/*   showSkipButton={false}*/}
-                    {/*   hideCloseButton={true}*/}
-                    {/*   //@ts-ignore*/}
-                    {/*   steps={steps}*/}
-                    {/*   styles={{*/}
-                    {/*        options: {*/}
-                    {/*            zIndex: 10000,*/}
-                    {/*            primaryColor: theme.palette.primary.dark,*/}
-                    {/*            overlayColor: "rgba(255,255,255,0.4)",*/}
-                    {/*            backgroundColor: theme.palette.background.default,*/}
-                    {/*            arrowColor: theme.palette.background.default,*/}
-                    {/*            textColor: theme.palette.text.primary*/}
-                    {/*        },*/}
-                    {/*        overlay: {*/}
-                    {/*            backdropFilter: "blur(10px)"*/}
-                    {/*        }*/}
-                    {/*    }}*/}
-                    {/*    stepIndex={stepIndex}*/}
-                    {/*/>*/}
-                    {/*<AppWrapper/>*/}
+                    {window.innerWidth > 1000 && <GIGOLandingPage />}
                     <Typography component={"div"}>
                     </Typography>
                     {xpPopup ? (<XpPopup oldXP={
