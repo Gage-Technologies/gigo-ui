@@ -753,7 +753,7 @@ function Home() {
             <CssBaseline>
                 <div>
                     {renderWelcomePopup()}
-                    {window.innerWidth > 1000 ? <GIGOLandingPage /> : <GIGOLandingPageMobile />}
+                    {loggedIn ? null : window.innerWidth > 1000 ? <GIGOLandingPage /> : <GIGOLandingPageMobile />}
                     <Typography component={"div"}>
                     </Typography>
                     {xpPopup ? (<XpPopup oldXP={

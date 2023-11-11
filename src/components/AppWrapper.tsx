@@ -50,6 +50,7 @@ import config from "../config";
 import swal from "sweetalert";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import {
+    initialAuthState,
     initialAuthStateUpdate,
     selectAuthState,
     selectAuthStateBackgroundName,
@@ -393,7 +394,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     let navigate = useNavigate();
 
     const clearReducers = () => {
-        let authState = Object.assign({}, initialAuthStateUpdate)
+        let authState = Object.assign({}, initialAuthState)
         // @ts-ignore
         dispatch(updateAuthState(authState))
 
