@@ -1407,7 +1407,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     </Toolbar>
                 </AppBar>
                 {/* Welcome box */}
-                {!loggedIn ? (
+                {!loggedIn && (window.location.href !== "/" && window.location.href !== "/home") ? (
                     <Snackbar
                         open={!mobileWelcomeBannerClosed}
                         key={"mobile-welcom-notification"}
@@ -1453,7 +1453,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 // color={theme.palette.text.primary}
                                 color={'inherit'}
                             >
-                                Access GIGO on a computer to run challenges and code in DevSpaces!
+                                GIGO is best on a computer or tablet. Programming on your phone is hard but we do our best to support it!
                             </Typography>
                             <Typography
                                 variant="caption"

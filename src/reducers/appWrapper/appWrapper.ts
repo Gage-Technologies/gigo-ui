@@ -20,13 +20,13 @@ export interface AppWrapperStateUpdate {
 export const initialAppWrapperState: AppWrapperState = {
     sidebarOpen: false,
     chatOpen: false,
-    closedMobileWelcomeBanner: true
+    closedMobileWelcomeBanner: false
 }
 
 export const initialAppWrapperStateUpdate: AppWrapperStateUpdate = {
-    sidebarOpen: false,
-    chatOpen: false,
-    closedMobileWelcomeBanner: false,
+    sidebarOpen: null,
+    chatOpen: null,
+    closedMobileWelcomeBanner: null,
 }
 
 export const appWrapperSlice = createSlice({
@@ -36,6 +36,7 @@ export const appWrapperSlice = createSlice({
         resetAppWrapper: (state) => {
             state.sidebarOpen = false
             state.chatOpen = false
+            state.closedMobileWelcomeBanner = false
         },
         updateAppWrapper: (state, update: PayloadAction<AppWrapperStateUpdate>) => {
             if (update.payload.sidebarOpen !== null) {

@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Button, Typography, Box, PaletteMode, createTheme } from '@mui/material';
+import { Button, Typography, Box, PaletteMode, createTheme, Link } from '@mui/material';
 import { styled } from '@mui/system';
 import logoImg from '../img/logo.png';
 import backgroundImageWebP from "../img/gigo-landing.webp";
 import backgroundImagePNG from "../img/gigo-landing.png";
 import { getAllTokens, themeHelpers } from '../theme';
 import LazyLoad from 'react-lazyload';
+import { SocialIcon } from 'react-social-icons';
+import GigoCircleIcon from './Icons/GigoCircleLogo';
 
 // Responsive Hero container for mobile
 const HeroContainer = styled(Box)(({ theme }) => ({
     position: 'relative',
-    height: '100vh',
+    height: 'calc(100vh - 56px)',
     width: '100vw',
     display: 'flex',
     flexDirection: 'column', // Change to column for mobile
@@ -116,7 +118,7 @@ const GIGOLandingPageMobile: React.FC = () => {
                 {fireflyMemo}
                 <HeroContent>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                        <img src={logoImg} alt="GIGO Logo" style={{ height: '60px', marginBottom: "10px" }} /> {/* Adjust image size */}
+                        <GigoCircleIcon sx={{ height: '60px', width: '60px', color: "#fff" }}/>
                         <Typography variant="h4" gutterBottom> {/* Change typography variant */}
                             Welcome to GIGO
                         </Typography>
@@ -148,6 +150,22 @@ const GIGOLandingPageMobile: React.FC = () => {
                     >
                         Enter The Jungle
                     </Button>
+                    <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', mt: 2 }}>
+                        <Link variant="caption" href="https://discord.gg/279hECYrfX" gutterBottom color="#ffffff" target="_blank"> {/* Change typography variant */}
+                            Join us on Discord!
+                        </Link>
+                        <SocialIcon
+                            network="discord"
+                            url="https://discord.gg/279hECYrfX"
+                            bgColor={"transparent"}
+                            fgColor={mode === 'dark' ? "white" : "black"}
+                            style={{
+                                height: "32px",
+                                width: "32px",
+                                marginBottom: "5px"
+                            }}
+                        />
+                    </Box>
                 </HeroContent>
             </HeroContainer>
             <div ref={endRef} id="end-landing" />

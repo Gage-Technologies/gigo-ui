@@ -22,6 +22,7 @@ import {
 import {getAllTokens} from "../theme";
 import {useAppDispatch, useAppSelector} from "../app/hooks";
 import {
+    initialAuthState,
     initialAuthStateUpdate,
     selectAuthState,
     selectAuthStateEmail,
@@ -29,20 +30,14 @@ import {
     selectAuthStateUserName, updateAuthState
 } from "../reducers/auth/auth";
 import {useNavigate} from "react-router-dom";
-import AppWrapper from "../components/AppWrapper";
-import {ArrowBack} from "@mui/icons-material";
-import ProfilePicture from "../components/ProfilePicture";
 import call from "../services/api-call";
 import config from "../config";
 import swal from "sweetalert";
-import Subscribe from "./stripe/subscribe";
 import {ThreeDots} from "react-loading-icons";
 import Avataaar from "../components/Avatar/avatar";
 import ReactDOM from "react-dom";
-import {generateRandomAvatarOptions} from "../components/Avatar/avatarRandomize";
 import {LoadingButton} from "@mui/lab";
 import UserIcon from "../components/UserIcon";
-import Post from "../models/post";
 import {persistStore} from "redux-persist";
 import {store} from "../app/store";
 import {resetAppWrapper} from "../reducers/appWrapper/appWrapper";
@@ -50,6 +45,8 @@ import {clearProjectState} from "../reducers/createProject/createProject";
 import {clearSearchParamsState} from "../reducers/searchParams/searchParams";
 import {clearJourneyFormState} from "../reducers/journeyForm/journeyForm";
 import {clearCache} from "../reducers/pageCache/pageCache";
+import { clearMessageCache } from "../reducers/chat/cache";
+import { clearChatState } from "../reducers/chat/chat";
 
 
 function AccountSettings() {
@@ -605,7 +602,7 @@ function AccountSettings() {
     }
 
     const clearReducers = () => {
-        let authState = Object.assign({}, initialAuthStateUpdate)
+        let authState = Object.assign({}, initialAuthState)
         // @ts-ignore
         dispatch(updateAuthState(authState))
 
@@ -614,6 +611,8 @@ function AccountSettings() {
         dispatch(clearSearchParamsState())
         dispatch(clearJourneyFormState())
         dispatch(clearCache())
+        dispatch(clearMessageCache())
+        dispatch(clearChatState())
     }
 
     const deleteUserAccount = async () => {
