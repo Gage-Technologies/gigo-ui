@@ -1407,9 +1407,9 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     </Toolbar>
                 </AppBar>
                 {/* Welcome box */}
-                {!loggedIn && (window.location.href !== "/" && window.location.href !== "/home") ? (
+                {!loggedIn ? (
                     <Snackbar
-                        open={!mobileWelcomeBannerClosed}
+                        open={!mobileWelcomeBannerClosed && window.location.pathname !== "" && window.location.pathname !== "/" && window.location.pathname !== "/home"}
                         key={"mobile-welcom-notification"}
                         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
                     >
