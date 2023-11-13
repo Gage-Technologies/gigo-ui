@@ -36,6 +36,7 @@ const ResetForgotPassword = React.lazy(() => import("./pages/resetForgotPassword
 const Journey = React.lazy(() => import("./pages/Journey"));
 const JourneyForm = React.lazy(() => import("./pages/JourneyForm"));
 const NotFoundPage = React.lazy(() => import("./pages/NotFoundPage"));
+const StripeCancel = React.lazy(() => import("./pages/stripe/StripeCancel"));
 
 export default function Routing() {
     // initialize redux dispatcher
@@ -107,6 +108,8 @@ export default function Routing() {
                     <Route path={"/profile"} element={<Profile />}/>
                     <Route path={"/success"} element={<StripeSuccess />}/>
                     <Route path={"/successMembership"} element={<StripeSuccessMembership />}/>
+                    <Route path={"/cancel"} element={<StripeCancel />}/>
+                    <Route path={"/canceled"} element={<StripeCancel />}/>
                     <Route path={"/reauth"} element={<StripeReauth />}/>
                     <Route path="/streak" element={<Streak />}/>
                     <Route path="/nemesis" element={<Nemesis />}/>
