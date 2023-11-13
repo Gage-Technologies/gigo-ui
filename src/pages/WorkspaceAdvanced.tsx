@@ -4,6 +4,7 @@ import {
     Box,
     Button,
     Card,
+    CircularProgress,
     createTheme,
     CssBaseline,
     Divider, FormControlLabel,
@@ -1068,18 +1069,14 @@ const WorkspaceAdvancedPage = () => {
             )
         } else {
             return (
-                <div className={"game"}>
-                    <Grid container justifyContent="space-between" sx={{
-                        flexGrow: 1,
-                        paddingTop: "20px",
-                        display: "flex",
-                        justifyContent: "center",
-                        marginLeft: "3vw",
-                        width: "91vw",
-                    }}>
-                        {render2048()}
-                    </Grid>
-                </div>
+                <Box
+                    position="absolute"
+                    top="50%"
+                    left="50%"
+                    style={{ transform: 'translate(-50%, -50%)' }}
+                >
+                    <CircularProgress color="inherit" />
+                </Box>
             )
         }
     }
