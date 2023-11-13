@@ -165,6 +165,10 @@ function Login(this: any) {
             authState.exclusiveAgreement = auth["exclusive_agreement"]
             authState.tutorialState = auth["tutorials"] as TutorialState
             authState.tier = auth["tier"]
+            authState.inTrial = auth["in_trial"]
+            authState.alreadyCancelled = auth["already_cancelled"]
+            authState.hasPaymentInfo = auth["has_payment_info"]
+            authState.hasSubscription = auth["has_subscription"]
             dispatch(updateAuthState(authState))
 
             window.location.href = "/home";
@@ -272,6 +276,10 @@ function Login(this: any) {
             authState.exclusiveAgreement = auth["exclusive_agreement"]
             authState.tutorialState = auth["tutorials"] as TutorialState
             authState.tier = auth["tier"]
+            authState.inTrial = auth["in_trial"]
+            authState.alreadyCancelled = auth["already_cancelled"]
+            authState.hasPaymentInfo = auth["has_payment_info"]
+            authState.hasSubscription = auth["has_subscription"]
             dispatch(updateAuthState(authState))
 
             window.location.href = "/home";
@@ -397,7 +405,13 @@ function Login(this: any) {
             authState.exclusiveAgreement = auth["exclusive_agreement"]
             authState.tutorialState = auth["tutorials"] as TutorialState
             authState.tier = auth["tier"]
+            authState.inTrial = auth["in_trial"]
+            authState.alreadyCancelled = auth["already_cancelled"]
+            authState.hasPaymentInfo = auth["has_payment_info"]
+            authState.hasSubscription = auth["has_subscription"]
             dispatch(updateAuthState(authState))
+
+            console.log("auth is: ", auth)
 
             window.location.href = "/home";
             const payload: RecordWebUsage = {

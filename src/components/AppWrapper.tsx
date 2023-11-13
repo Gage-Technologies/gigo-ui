@@ -24,8 +24,13 @@ import 'react-awesome-button/dist/styles.css';
 import premiumImage from "../img/croppedPremium.png"
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import ErrorIcon from '@mui/icons-material/Error';
+import codeTeacher from "../img/premiumPageIcons/graduation-cap.svg"
+import resources from "../img/premiumPageIcons/technology.svg"
+import privateWorkspace from "../img/premiumPageIcons/padlock.svg"
+import proGorilla from "../img/icons/proPopupFace.svg"
 import {
-    Button, Container,
+    Button, Card, CardContent, Container,
     createTheme,
     CssBaseline,
     Icon,
@@ -52,10 +57,14 @@ import { useAppDispatch, useAppSelector } from "../app/hooks";
 import {
     initialAuthState,
     initialAuthStateUpdate,
-    selectAuthState,
+    selectAuthState, selectAuthStateAlreadyCancelled,
     selectAuthStateBackgroundName,
-    selectAuthStateColorPalette, selectAuthStateExclusiveAgreement,
-    selectAuthStateThumbnail, selectAuthStateTutorialState,
+    selectAuthStateColorPalette,
+    selectAuthStateExclusiveAgreement, selectAuthStateHasPaymentInfo,
+    selectAuthStateHasSubscription,
+    selectAuthStateInTrial,
+    selectAuthStateThumbnail,
+    selectAuthStateTutorialState,
     selectAuthStateUserName,
     updateAuthState,
 } from "../reducers/auth/auth";
@@ -174,6 +183,11 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     const leftOpen = useAppSelector(selectAppWrapperSidebarOpen)
     const rightOpen = useAppSelector(selectAppWrapperChatOpen)
     const mobileWelcomeBannerClosed = useAppSelector(selectAppWrapperClosedMobileWelcomeBanner)
+    const inTrial = useAppSelector(selectAuthStateInTrial)
+    const hasPaymentInfo = useAppSelector(selectAuthStateHasPaymentInfo)
+    const hasSubscription = useAppSelector(selectAuthStateHasSubscription)
+    const alreadyCancelled = useAppSelector(selectAuthStateAlreadyCancelled)
+
 
     const [reportPopup, setReportPopup] = React.useState(false)
 
@@ -184,6 +198,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     const [notificationCount, setNotificationCount] = React.useState<number>(0);
     const [showReferPopup, setShowReferPopup] = React.useState(false)
     const [isOpen, setIsOpen] = React.useState(false);
+    const [openSetup, setOpenSetup] = React.useState(false)
     const toggleButtonRef = React.useRef(null);
 
     const styles = {
@@ -764,6 +779,17 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     profileButton={false}
                                     pro={authState.role.toString() === "1"}
                                 />
+                                {inTrial && !hasPaymentInfo && (
+                                    <ErrorIcon
+                                        style={{
+                                            color: "orange",
+                                            position: 'absolute',
+                                            bottom: 0, // align to the bottom
+                                            right: 0, // align to the right
+                                            fontSize: '1rem'
+                                        }}
+                                    />
+                                )}
                             </Button>
                             <Menu
                                 id="menu-appbar"
@@ -785,6 +811,12 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     await handleLogout()
                                 }}>Logout</MenuItem>
                                 <MenuItem onClick={() => setShowReferPopup(true)}>Refer A Friend</MenuItem>
+                                {inTrial && !hasPaymentInfo && (
+                                    <MenuItem onClick={() => setOpenSetup(true)}>
+                                        <h4 style={{color: "red", paddingRight: "5px"}}>Finish Setup</h4>
+                                        <ErrorIcon style={{color: "orange"}}/>
+                                    </MenuItem>
+                                )}
                             </Menu>
                             <Modal open={showReferPopup} onClose={() => setShowReferPopup(false)}>
                                 <Box
@@ -814,6 +846,118 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                             </Button>
                                         </div>
                                     </div>
+                                </Box>
+                            </Modal>
+                            <Modal open={openSetup} onClose={() => setOpenSetup(false)}>
+                                <Box
+                                    sx={{
+                                        position: 'absolute',
+                                        top: '50%',
+                                        left: '50%',
+                                        transform: 'translate(-50%, -50%)',
+                                        width: 'auto',
+                                        maxWidth: '600px',
+                                        p: 4,
+                                        borderRadius: 5,
+                                        boxShadow: "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px 6px 0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
+                                        // backgroundColor: theme.palette.background.default,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        background: 'linear-gradient(45deg, #142623 30%, #306c57)'
+                                    }}
+                                >
+                                    <Box mb={2} style={{position: "absolute", top: 5, right: 10}}>
+                                        <Button onClick={() => setOpenSetup(false)}>
+                                            <CloseIcon />
+                                        </Button>
+                                    </Box>
+                                    <div style={{ display: "flex", flexDirection: "row", alignItems: "center"}}>
+                                        <img src={proGorilla} width={170} height={130} />
+                                        <div style={{ display: "flex", flexDirection: "column", height: "auto", justifyContent: "center" }}>
+                                            <h1 style={{ marginBottom: '0', lineHeight: '.5', marginLeft: "25%", textShadow: "-4px 1px #618a7c", fontWeight: "bold", fontStyle: "italic", color: "#9dbab0"}}>PRO</h1>
+                                            <h1 style={{fontWeight: "300", color: "#9dbab0"}}>GIGO</h1>
+                                        </div>
+                                    </div>
+                                    <div style={{height: "15px"}}/>
+                                    <Card style={{
+                                        background: 'linear-gradient(45deg, #2c473f 30%, #376454)',
+                                        borderRadius: "12%"
+                                    }}>
+                                        <Typography id="pro-membership-modal-title" variant="h6" component="h2" color={"#829c93"} textAlign="center" mb={3} marginTop={"10px"} marginBottom={"-5px"}>
+                                            Keep enjoying these features
+                                        </Typography>
+                                        <CardContent>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, p: 2, borderRadius: '30px', backgroundColor: "#648378", height: "110px" }}>
+                                                <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
+                                                    {/* Replace with actual icon */}
+                                                    <img src={codeTeacher} width={50} height={50}/>
+                                                </Box>
+                                                <Box>
+                                                    <Typography variant="subtitle1" style={{fontWeight: "bold", color: "#9dbab0"}}>
+                                                        Code Teacher
+                                                    </Typography>
+                                                    <Typography variant="body2" color="#9dbab0">
+                                                        Unrestricted access to the best integrated programming tutor.
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+                                        </CardContent>
+                                        <CardContent>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, p: 2, borderRadius: '30px', backgroundColor: "#648378", height: "110px" }}>
+                                                <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
+                                                    {/* Replace with actual icon */}
+                                                    <img src={resources} width={50} height={50}/>
+                                                </Box>
+                                                <Box>
+                                                    <Typography variant="subtitle1" style={{fontWeight: "bold", color: "#9dbab0"}}>
+                                                        Improved Resource Limit
+                                                    </Typography>
+                                                    <Typography variant="body2" color="#9dbab0">
+                                                        More resources, better compute, more possibilities.
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+                                        </CardContent>
+                                        <CardContent>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, p: 2, borderRadius: '30px', backgroundColor: "#648378", height: "110px" }}>
+                                                <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
+                                                    {/* Replace with actual icon */}
+                                                    <img src={privateWorkspace} width={50} height={50}/>
+                                                </Box>
+                                                <Box>
+                                                    <Typography variant="subtitle1" style={{fontWeight: "bold", color: "#9dbab0"}}>
+                                                        Private DevSpaces
+                                                    </Typography>
+                                                    <Typography variant="body2" color="#9dbab0">
+                                                        Keep your top-secret work for your eyes only.
+                                                    </Typography>
+                                                </Box>
+                                            </Box>
+                                        </CardContent>
+                                        <CardContent style={{textAlign: "center", marginTop: "-10px"}}>
+                                            <AwesomeButton href={"/premium"} style={{
+                                                '--button-primary-color': "#628277",
+                                                '--button-primary-color-dark': "#4e6c61",
+                                                '--button-primary-color-light': "#41594f",
+                                                '--button-primary-color-hover': "#4e6c61",
+                                                margin: "auto",
+                                                "--button-default-border-radius": "20px"
+                                            }}>
+                                                Learn More
+                                            </AwesomeButton>
+                                        </CardContent>
+                                    </Card>
+                                    <Box textAlign="center" mt={3}>
+                                        <AwesomeButton onPress={() => stripeNavigate()} style={{
+                                            '--button-primary-color': "#9dbab0",
+                                            '--button-primary-color-dark': "#4a5d5b",
+                                            '--button-primary-color-light': "#4a5d5b",
+                                            '--button-primary-color-hover': "#8aa49b",
+                                            "--button-default-border-radius": "20px"
+                                        }}>
+                                            Add Payment Method
+                                        </AwesomeButton>
+                                    </Box>
                                 </Box>
                             </Modal>
                         </Box>
@@ -861,6 +1005,30 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         url.search = params.toString();
         window.history.replaceState({}, '', url.toString());
     };
+
+    const stripeNavigate = async () => {
+        let res = await call(
+            "/api/stripe/premiumMembershipSession",
+            "post",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {},
+            null,
+            config.rootPath
+        )
+
+        if (res["message"] === "You must be logged in to access the GIGO system.") {
+            let authState = Object.assign({}, initialAuthStateUpdate)
+            // @ts-ignore
+            dispatch(updateAuthState(authState))
+            navigate("/login")
+        }
+        if (res !== undefined && res["return url"] !== undefined){
+            window.location.replace(res["return url"])
+        }
+    }
 
     const renderWorkspaceAppBar = () => {
         let toolbarStyles = JSON.parse(JSON.stringify(holidayStyle));
