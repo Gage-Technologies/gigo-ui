@@ -1,5 +1,5 @@
 import * as React from "react";
-import {ElementType, useCallback, useEffect, useState} from "react";
+import { ElementType, useCallback, useEffect, useState } from "react";
 import {
     Box,
     Button,
@@ -17,47 +17,48 @@ import {
     ThemeProvider,
     Typography
 } from "@mui/material";
-import {getAllTokens} from "../theme";
-import {useLocation, useParams} from "react-router";
+import { getAllTokens } from "../theme";
+import { useLocation, useParams } from "react-router";
 import call from "../services/api-call";
-import {Workspace, WorkspaceInitFailure} from "../models/workspace";
+import { Workspace, WorkspaceInitFailure } from "../models/workspace";
 import config from "../config";
 import TwentyFortyEight from "../components/Games/TwentyFortyEight";
-import {useAppDispatch, useAppSelector} from "../app/hooks";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
 import {
     initialAuthStateUpdate, selectAuthStateTutorialState,
     selectAuthStateUserName,
     updateAuthState
 } from "../reducers/auth/auth";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import CodeSource from "../models/codeSource";
-import {CountdownCircleTimer} from "react-countdown-circle-timer";
-import {LoadingButton} from "@mui/lab";
+import { CountdownCircleTimer } from "react-countdown-circle-timer";
+import { LoadingButton } from "@mui/lab";
 import useWebSocket from "react-use-websocket";
 import XpPopup from "../components/XpPopup";
-import Joyride, {ACTIONS, CallBackProps, EVENTS, STATUS} from "react-joyride";
+import Joyride, { ACTIONS, CallBackProps, EVENTS, STATUS } from "react-joyride";
 import CardHeader from "@material-ui/core/CardHeader";
 import CardContent from "@material-ui/core/CardContent";
-import {ThreeDots} from "react-loading-icons";
+import { ThreeDots } from "react-loading-icons";
 import LaunchPadRocket from "../components/Icons/launch-pad-rocket";
 import LaunchPadRocketIcon from "../components/Icons/launch-pad-rocket";
 import LaunchPadIcon from "../components/Icons/LaunchPad";
 import LottieAnimation from "../components/LottieAnimation";
 import * as animationData from "../img/launch-pad-smoke.json";
-import {useGlobalWebSocket} from "../services/websocket";
+import { useGlobalWebSocket } from "../services/websocket";
 // @ts-ignore
 import * as animationDataStopped from "../img/launch-page-stopped.json";
 import Lottie from "react-lottie";
-import {useSpring, animated, useSprings, SpringValues, useSpringRef} from 'react-spring';
+import { useSpring, animated, useSprings, SpringValues, useSpringRef } from 'react-spring';
 // @ts-ignore
 import * as fullRocket from "../img/rocket.json";
 import { AwesomeButton } from "react-awesome-button";
 import styled from "@emotion/styled";
 import CardTutorial from "../components/CardTutorial";
-import {setCache, deleteCache, clearCache, selectCacheState} from '../reducers/pageCache/pageCache';
-import {useSelector} from "react-redux";
-import {selectAppWrapperChatOpen, selectAppWrapperSidebarOpen} from "../reducers/appWrapper/appWrapper";
+import { setCache, deleteCache, clearCache, selectCacheState } from '../reducers/pageCache/pageCache';
+import { useSelector } from "react-redux";
+import { selectAppWrapperChatOpen, selectAppWrapperSidebarOpen } from "../reducers/appWrapper/appWrapper";
 import * as wsModels from "../models/websocket";
+import IframeRenderer from "../components/IframeRenderer";
 
 
 interface InitialStatusMessage {
@@ -76,7 +77,7 @@ const WorkspacePage = () => {
     const aspectRatio = useAspectRatio();
 
     // retrieve url params
-    let {id} = useParams();
+    let { id } = useParams();
 
     let cacheKey = "launchpad::" + id
     const cache = useSelector(selectCacheState);
@@ -195,28 +196,28 @@ const WorkspacePage = () => {
                     <h2>Workspace Status</h2>
                     <p>This is the Workspace's status bar. Workspaces start in the provisioning state but will show a progress bar once the workspace begins to start.</p>
                 </div>
-            ), 
-            target: '.bar', 
+            ),
+            target: '.bar',
             disableBeacon: true
-        }, 
+        },
         {
             content: (
                 <div>
                     <h2>Opening the Workspace</h2>
                     <p>Once the workspace has finished initializing and is ready to be used, the 'Open Workspace' button will light up. If you click the 'Open Workspace' button the workspace will be opened in a new tab.</p>
                 </div>
-            ), 
+            ),
             target: '.open_button'
-        }, 
+        },
         {
             content: (
                 <div>
                     <h2>Starting & Stopping the Workspace</h2>
                     <p>Workspaces are automtically stopped after 10m of inactivity. If your workspace stops and you want to start it again, you can use the button here to start it.</p>
                 </div>
-            ), 
+            ),
             target: '.button'
-        }, 
+        },
         {
             content: (
                 <div>
@@ -225,7 +226,7 @@ const WorkspacePage = () => {
                 </div>
             ),
             target: '.circle'
-        }, 
+        },
         {
             content: (
                 <div>
@@ -375,7 +376,7 @@ const WorkspacePage = () => {
     useEffect(() => {
 
         if (lottieBackground === undefined || lottieBackground === null) {
-            fetch(`${config.rootPath}/static/ui/lottie/general/launch-page-provisioning-reg.json`, {credentials: 'include'})
+            fetch(`${config.rootPath}/static/ui/lottie/general/launch-page-provisioning-reg.json`, { credentials: 'include' })
                 .then(data => {
                     data.json().then(json => {
                         setLottieBackground(json)
@@ -386,7 +387,7 @@ const WorkspacePage = () => {
         }
 
         if (lottieStopped === undefined || lottieStopped === null) {
-            fetch(`${config.rootPath}/static/ui/lottie/general/launch-page-stopped.json`, {credentials: 'include'})
+            fetch(`${config.rootPath}/static/ui/lottie/general/launch-page-stopped.json`, { credentials: 'include' })
                 .then(data => {
                     data.json().then(json => {
                         setLottieStoppedBackground(json)
@@ -395,7 +396,7 @@ const WorkspacePage = () => {
                 .catch(error => console.error(error));
 
         }
-    },[])
+    }, [])
 
     useEffect(() => {
         console.log('workspaceError after set:', workspaceError);
@@ -511,7 +512,7 @@ const WorkspacePage = () => {
     const renderCodeSourceLink = () => {
         if (codeSource === null) {
             return (
-                <div/>
+                <div />
             )
         }
 
@@ -668,7 +669,7 @@ const WorkspacePage = () => {
             return () => {
                 clearInterval(timer);
             };
-        }else if (currentProgress !== targetProgress && workspace !== null && workspace.init_state !== null && workspace.init_state === 0) {
+        } else if (currentProgress !== targetProgress && workspace !== null && workspace.init_state !== null && workspace.init_state === 0) {
             const timer = setInterval(() => {
                 if (currentProgress < targetProgress) {
                     setCurrentProgress(prev => {
@@ -805,20 +806,20 @@ const WorkspacePage = () => {
     }
 
 
-    const handleLaunch =  () => {
+    const handleLaunch = () => {
         // @ts-ignore
         // console.log("workspace state before change", workspace.init_state)
         localStorage.setItem('currentProgress', "0");
         setCurrentProgress(0);
         setLaunchingAnim(true)
-        if (workspace!== null && workspace.init_state!== null){
+        if (workspace !== null && workspace.init_state !== null) {
             workspace.state = 0
             workspace.init_state = 0
         }
         startWorkspace()
     }
 
-    const handleStop =  () => {
+    const handleStop = () => {
         localStorage.setItem('currentProgress', "0"); // Save to localStorage
         setLaunchingAnim(false)
         stopWorkspace()
@@ -1008,7 +1009,7 @@ const WorkspacePage = () => {
     const render2048 = () => {
         return (
             <Grid item xs={"auto"}>
-                <TwentyFortyEight scoreCallback={twentyFortyEight} highScore={highestScore}/>
+                <TwentyFortyEight scoreCallback={twentyFortyEight} highScore={highestScore} />
             </Grid>
         )
     }
@@ -1257,10 +1258,10 @@ const WorkspacePage = () => {
                         left:
                             sidebarOpen ?
                                 aspectRatio === "21:9" ? "40.5vw" : "51%"
-                            : chatOpen ?
-                                aspectRatio === "21:9" ? "31vw" : "37%"
-                            :
-                                aspectRatio === "21:9" ? "36%" : "45%",
+                                : chatOpen ?
+                                    aspectRatio === "21:9" ? "31vw" : "37%"
+                                    :
+                                    aspectRatio === "21:9" ? "36%" : "45%",
                         minHeight: "7px",
                         borderRadius: 5,
                         transform: "rotate(270deg)",
@@ -1279,16 +1280,16 @@ const WorkspacePage = () => {
                     left:
                         sidebarOpen ?
                             aspectRatio === "21:9" ? "40vw" : "50.15vw"
-                        : chatOpen ?
-                            aspectRatio === "21:9" ? "30.4vw" : "36.15vw"
-                        :
-                            aspectRatio === "21:9" ? "calc(35.85% - 12px)" : "44.15vw",
+                            : chatOpen ?
+                                aspectRatio === "21:9" ? "30.4vw" : "36.15vw"
+                                :
+                                aspectRatio === "21:9" ? "calc(35.85% - 12px)" : "44.15vw",
                     borderRadius: 10,
                     backgroundColor: "white",
                     opacity: "30%",
                     transform: "rotate(270deg)",
                     transformOrigin: "left bottom"
-                }}/>
+                }} />
                 {button}
             </div>
         );
@@ -1330,12 +1331,12 @@ const WorkspacePage = () => {
                     opacity: "30%",
                     // transform: "rotate(270deg)",
                     transformOrigin: "left bottom"
-                }}/>
+                }} />
             </div>
         );
     }
 
-    const getSyncedWorkspaceStates = (wsOverride: Workspace | null = null): {state: number, init_state: number} => {
+    const getSyncedWorkspaceStates = (wsOverride: Workspace | null = null): { state: number, init_state: number } => {
         let ws = wsOverride !== null ? wsOverride : workspace;
 
         if (ws === null) {
@@ -1405,18 +1406,18 @@ const WorkspacePage = () => {
         }
 
         if (currentStates.state === 1 && currentStates.state !== lastStates.state) {
-            lpAnimPropsActiveRef.update({reset: true});
+            lpAnimPropsActiveRef.update({ reset: true });
             lpAnimPropsActiveRef.start();
-            lpAnimPropsActiveRef.update({reset: false});
+            lpAnimPropsActiveRef.update({ reset: false });
         }
 
         if (currentStates.init_state > 0 && lastStates.init_state === 0) {
-            satAnimPropsActiveRef.update({reset: true});
-            rocketAnimPropsActiveRef.update({reset: true});
+            satAnimPropsActiveRef.update({ reset: true });
+            rocketAnimPropsActiveRef.update({ reset: true });
             satAnimPropsActiveRef.start();
             rocketAnimPropsActiveRef.start();
-            satAnimPropsActiveRef.update({reset: false});
-            rocketAnimPropsActiveRef.update({reset: false});
+            satAnimPropsActiveRef.update({ reset: false });
+            rocketAnimPropsActiveRef.update({ reset: false });
         }
     }
 
@@ -1454,7 +1455,7 @@ const WorkspacePage = () => {
                         left: '50%',
                         zIndex: 2,
                         transform: 'translate(-50%, -50%)',
-                    }}/>
+                    }} />
             </AnimationWrapper>
         )
     }
@@ -1472,7 +1473,7 @@ const WorkspacePage = () => {
                 <Lottie
                     options={{
                         // @ts-ignore
-                        initialSegment: [42,56],
+                        initialSegment: [42, 56],
                         animationData: animationData,
                         rendererSettings: {
                             preserveAspectRatio: 'xMidYMid slice'
@@ -1494,7 +1495,7 @@ const WorkspacePage = () => {
                 <Lottie
                     options={{
                         // @ts-ignore
-                        initialSegment: [42,75],
+                        initialSegment: [42, 75],
                         animationData: animationData,
                         rendererSettings: {
                             preserveAspectRatio: 'xMidYMid slice'
@@ -1519,7 +1520,7 @@ const WorkspacePage = () => {
                 {/*top: 10*/}
                 {/*left: -120*/}
                 <div>
-                    <LaunchPadIcon style={{position: 'absolute', top: "1.166vh", left: aspectRatio === "21:9" ? "-4.8vw" : "-6.25vw", zIndex: 1, height: "900%", width: "900%"}}/>
+                    <LaunchPadIcon style={{ position: 'absolute', top: "1.166vh", left: aspectRatio === "21:9" ? "-4.8vw" : "-6.25vw", zIndex: 1, height: "900%", width: "900%" }} />
                 </div>
                 {/*</animated.div>*/}
 
@@ -1528,7 +1529,7 @@ const WorkspacePage = () => {
                 {/*left: -46*/}
                 <div>
                     {/*<LaunchPadRocketIcon style={{position: 'absolute', top: -110, left: -46, zIndex: 99, height: 900, width: 750}} />*/}
-                    <LaunchPadRocketIcon style={{position: 'absolute', top: "-12.821vh", left:  aspectRatio === "21:9" ? "-6.5vw" : "-2.396vw", zIndex: 99, height: "104.895vh", width: "39.0625vw"}} />
+                    <LaunchPadRocketIcon style={{ position: 'absolute', top: "-12.821vh", left: aspectRatio === "21:9" ? "-6.5vw" : "-2.396vw", zIndex: 99, height: "104.895vh", width: "39.0625vw" }} />
                 </div>
             </animated.div>
         )
@@ -1546,7 +1547,7 @@ const WorkspacePage = () => {
                 {/*launch pad moving down*/}
                 <animated.div id={"landing-pad-drop"} style={lpAnimPropsActive}>
                     <div>
-                        <LaunchPadIcon style={{position: 'absolute', top: 10, left: -120, zIndex: 1, height: "900%", width: "900%"}}/>
+                        <LaunchPadIcon style={{ position: 'absolute', top: 10, left: -120, zIndex: 1, height: "900%", width: "900%" }} />
                     </div>
                 </animated.div>
                 {/*fully animated rocket*/}
@@ -1563,9 +1564,9 @@ const WorkspacePage = () => {
                         }}
                         // width={700}
                         // height={800}
-                        width={ aspectRatio === "21:9" ? "25vw" : "36.458vw"}
-                        height={ aspectRatio === "21:9" ? "50vh" : "93.24vh"}
-                        style={{position: 'absolute', top: aspectRatio === "21:9" ? "-12.821vh" : "-12.821vh", left: aspectRatio === "21:9" ? ".5vw" : ".521vw", zIndex: 3, height: aspectRatio === "21:9" ? "90vh" : "93.24vh", width: aspectRatio === "21:9" ? "25vw" : "33.854vw"}}
+                        width={aspectRatio === "21:9" ? "25vw" : "36.458vw"}
+                        height={aspectRatio === "21:9" ? "50vh" : "93.24vh"}
+                        style={{ position: 'absolute', top: aspectRatio === "21:9" ? "-12.821vh" : "-12.821vh", left: aspectRatio === "21:9" ? ".5vw" : ".521vw", zIndex: 3, height: aspectRatio === "21:9" ? "90vh" : "93.24vh", width: aspectRatio === "21:9" ? "25vw" : "33.854vw" }}
                     />
                 </div>
             </>
@@ -1648,7 +1649,7 @@ const WorkspacePage = () => {
             return (
                 <div>
 
-                    <div style={{position: "absolute", left:  aspectRatio === "21:9" ? "68.5%" :  "67%", top: aspectRatio === "21:9" ? "9%" : "10%", height: "auto", display: (workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null || iframeUrl === null) ? "none": "block"}}>
+                    <div style={{ position: "absolute", left: aspectRatio === "21:9" ? "68.5%" : "67%", top: aspectRatio === "21:9" ? "9%" : "10%", height: "auto", display: (workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null || iframeUrl === null) ? "none" : "block" }}>
                         <AnimatedAwesomeButton
                             // @ts-ignore
                             href={iframeUrl}
@@ -1662,7 +1663,7 @@ const WorkspacePage = () => {
                                 ' --button-horizontal-padding': '20px',
                                 '--button-raise-level': '10px',
                                 '--button-hover-pressure': '4',
-                                '--transform-speed':' 0.2s',
+                                '--transform-speed': ' 0.2s',
                                 '--button-primary-border': 'none',
                                 hover: {
                                     backgroundColor: theme.palette.primary.main + '25',
@@ -1671,7 +1672,7 @@ const WorkspacePage = () => {
                         >
                             Enter DevSpace
                         </AnimatedAwesomeButton>
-                        <div style={{whiteSpace: 'nowrap', left: "-5%"}}>
+                        <div style={{ whiteSpace: 'nowrap', left: "-5%" }}>
                             Enter within the next: {renderTime()}
                         </div>
 
@@ -1687,7 +1688,7 @@ const WorkspacePage = () => {
                         {(workspaceError === null) ? (
                             <Grid item xs={"auto"}>
                                 <Card sx={{
-                                    width: aspectRatio === "21:9" ? "26.25vw" :  "35vw",
+                                    width: aspectRatio === "21:9" ? "26.25vw" : "35vw",
                                     height: "75vh",
                                     borderRadius: 1,
                                     border: 2.5,
@@ -1697,7 +1698,7 @@ const WorkspacePage = () => {
                                     backgroundImage: "none",
                                 }}>
                                     {buttonsAndProgressBar()}
-                                    <div style={{position: 'relative'}}>
+                                    <div style={{ position: 'relative' }}>
                                         {renderProvisioningSatAnim()}
                                         {renderPostProvisioningRocketAnim()}
                                         {renderActiveRocketLaunchAnim()}
@@ -1769,14 +1770,14 @@ const WorkspacePage = () => {
                                             </>
                                         }
                                         {workspaceError.status != -1 &&
-                                          <>
-                                            <ListItem>
-                                              <ListItemText
-                                                primary="Status"
-                                                secondary={workspaceError.status}
-                                              />
-                                            </ListItem>
-                                          </>
+                                            <>
+                                                <ListItem>
+                                                    <ListItemText
+                                                        primary="Status"
+                                                        secondary={workspaceError.status}
+                                                    />
+                                                </ListItem>
+                                            </>
                                         }
                                         {workspaceError.stdout.trim().length > 0 &&
                                             <>
@@ -1813,13 +1814,13 @@ const WorkspacePage = () => {
                             width: "35vw",
                             height: "77vh",
                             left: "55%",
-                            top:"17.5%",
+                            top: "17.5%",
                             backgroundColor: "transparent",
                             backgroundImage: "none",
                             boxShadow: "none"
                         }}>
                             <div
-                                style={stepIndex === 5 ? {position:  "absolute", width: "43%", display: "flex", justifyContent: "center", zIndex: "600000", top: "15%", left: "30%"} : {position:  "absolute", width: "43%", display: "flex", justifyContent: "center", top: "8%", left: "30%"}}
+                                style={stepIndex === 5 ? { position: "absolute", width: "43%", display: "flex", justifyContent: "center", zIndex: "600000", top: "15%", left: "30%" } : { position: "absolute", width: "43%", display: "flex", justifyContent: "center", top: "8%", left: "30%" }}
                                 className={"game"}>
                                 {render2048()}
                             </div>
@@ -1879,13 +1880,13 @@ const WorkspacePage = () => {
             let remainingTime = calculateRemainingTime()
             return (
                 <div>
-                    <div 
+                    <div
                         style={{
-                            position: "absolute", 
-                            left:  "calc(50vw - 107px)", 
-                            top: "150px", 
-                            height: "auto", 
-                            display: (workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null || iframeUrl === null) ? "none": "block"
+                            position: "absolute",
+                            left: "calc(50vw - 107px)",
+                            top: "150px",
+                            height: "auto",
+                            display: (workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null || iframeUrl === null) ? "none" : "block"
                         }}
                     >
                         <AnimatedAwesomeButton
@@ -1901,7 +1902,7 @@ const WorkspacePage = () => {
                                 ' --button-horizontal-padding': '20px',
                                 '--button-raise-level': '10px',
                                 '--button-hover-pressure': '4',
-                                '--transform-speed':' 0.2s',
+                                '--transform-speed': ' 0.2s',
                                 '--button-primary-border': 'none',
                                 hover: {
                                     backgroundColor: theme.palette.primary.main + '25',
@@ -1910,7 +1911,7 @@ const WorkspacePage = () => {
                         >
                             Enter DevSpace
                         </AnimatedAwesomeButton>
-                        <div style={{whiteSpace: 'nowrap', left: "-5%"}}>
+                        <div style={{ whiteSpace: 'nowrap', left: "-5%" }}>
                             Enter within the next: {renderTime()}
                         </div>
 
@@ -2022,14 +2023,14 @@ const WorkspacePage = () => {
                                             </>
                                         }
                                         {workspaceError.status != -1 &&
-                                          <>
-                                            <ListItem>
-                                              <ListItemText
-                                                primary="Status"
-                                                secondary={workspaceError.status}
-                                              />
-                                            </ListItem>
-                                          </>
+                                            <>
+                                                <ListItem>
+                                                    <ListItemText
+                                                        primary="Status"
+                                                        secondary={workspaceError.status}
+                                                    />
+                                                </ListItem>
+                                            </>
                                         }
                                         {workspaceError.stdout.trim().length > 0 &&
                                             <>
@@ -2232,10 +2233,10 @@ const WorkspacePage = () => {
         if (xpData === undefined || xpData === null) {
             return null
         }
-        return(
+        return (
             <XpPopup oldXP={
                 //@ts-ignore
-                (xpData["xp_update"]["old_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]} levelUp={xpData["level_up_reward"] === null ? false : true} homePage={false} popupClose={null} maxXP={100} newXP={(xpData["xp_update"]["new_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]} nextLevel={xpData["xp_update"]["next_level"]} gainedXP={xpData["xp_update"]["new_xp"] - xpData["xp_update"]["old_xp"]} reward={xpData["level_up_reward"]} renown={xpData["xp_update"]["current_renown"]}/>
+                (xpData["xp_update"]["old_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]} levelUp={xpData["level_up_reward"] === null ? false : true} homePage={false} popupClose={null} maxXP={100} newXP={(xpData["xp_update"]["new_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]} nextLevel={xpData["xp_update"]["next_level"]} gainedXP={xpData["xp_update"]["new_xp"] - xpData["xp_update"]["old_xp"]} reward={xpData["level_up_reward"]} renown={xpData["xp_update"]["current_renown"]} />
         )
     }, [xpData])
 
@@ -2313,7 +2314,7 @@ const WorkspacePage = () => {
             window.open(config.coderPath + convertEditorUrlToDesktop(workspaceUrl), '_blank')
             window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=none");
             window.location.reload();
-        }else{
+        } else {
             console.log("not popped-out: ", workspaceUrl);
         }
     }, [location.pathname, location.search, workspaceUrl]);
@@ -2321,87 +2322,64 @@ const WorkspacePage = () => {
     const renderDesktop = () => {
         return (
             <>
-            {showIframe && showDesktopIframe === "side" ? (
+                {showIframe && showDesktopIframe === "side" ? (
 
-                <div style={{ display: 'flex', overflow: 'hidden' }}>
-                    <div ref={leftPanelRef} style={{ flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
-                        {/* Left iframe content */}
-                        {(workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") ? (
-                            <iframe
-                                src={workspaceUrl}
+                    <div style={{ display: 'flex', overflow: 'hidden' }}>
+                        <div ref={leftPanelRef} style={{ flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
+                            {/* Left iframe content */}
+                            <IframeRenderer
+                                src={!workspaceUrl ? "" : workspaceUrl}
                                 width="100%"
                                 height={`${window.innerHeight - 35}`}
                                 style={{ border: "none" }}
                                 title="Workspace"
-
+                                ref={iframeRef}
                             >
                                 Your browser does not support iframes.
-                            </iframe>
-                        ) : (
-                            <div>
-                                <ThreeDots />
-                            </div>
-                        )}
-                    </div>
-
-                    {/*<div ref={dragBarRef}*/}
-                    {/*     className="drag-bar"*/}
-                    {/*     style={{width: '40px', opacity: '0.5', visibility: 'hidden', backgroundColor: 'transparent'}}*/}
-                    {/*>*/}
-                    <div
-                        ref={dragBarRef}
-                        className="drag-bar"
-                        style={{
-                            cursor: 'ew-resize',
-                            backgroundImage: `radial-gradient(circle, ${hexToRGBA(theme.palette.primary.contrastText, 1)} 1px, ${hexToRGBA(theme.palette.primary.main, 1)} 1px)`,
-                            backgroundSize: '10px 10px',
-                            width: '20px'
-                        }}
-                    />
-                    {/*</div>*/}
-                    <div ref={rightPanelRef} style={{ flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
-                        {(workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") ? (
-                            <iframe
-                                src={convertEditorUrlToDesktop(workspaceUrl)}
+                            </IframeRenderer>
+                        </div>
+                        <div
+                            ref={dragBarRef}
+                            className="drag-bar"
+                            style={{
+                                cursor: 'ew-resize',
+                                backgroundImage: `radial-gradient(circle, ${hexToRGBA(theme.palette.primary.contrastText, 1)} 1px, ${hexToRGBA(theme.palette.primary.main, 1)} 1px)`,
+                                backgroundSize: '10px 10px',
+                                width: '20px'
+                            }}
+                        />
+                        {/*</div>*/}
+                        <div ref={rightPanelRef} style={{ flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
+                            <IframeRenderer
+                                src={!workspaceUrl ? "" : convertEditorUrlToDesktop(workspaceUrl)}
                                 width="100%"
                                 height={`${window.innerHeight - 35}`}
                                 style={{ border: "none" }}
                                 title="Workspace"
-
+                                ref={undefined}
                             >
                                 Your browser does not support iframes.
-                            </iframe>
-                        ) : (
-                            <div>
-                                <ThreeDots />
-                            </div>
-                        )}
+                            </IframeRenderer>
+                        </div>
                     </div>
-                </div>
 
-            ) : showIframe ? (
-                <div style={{overflow: "hidden"}}>
-                    {(workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") ? (
-                        <iframe
-                            src={workspaceUrl}
+                ) : showIframe ? (
+                    <div style={{ overflow: "hidden" }}>
+                        <IframeRenderer
+                            src={!workspaceUrl ? "" : workspaceUrl}
                             width="100%" // Your desired width
                             height={`${window.innerHeight - 35}`}
-                            style={{border: "none"}}
+                            style={{ border: "none" }}
                             title="Workspace"
                             ref={iframeRef}
                         >
                             Your browser does not support iframes.
-                        </iframe>
-                    ) : (
-                        <div>
-                            <ThreeDots/>
-                        </div>
-                    )}
-                </div>
+                        </IframeRenderer>
+                    </div>
 
                 ) : (
                     <>
-                        <div style={{position: 'relative', height: '8vh', width: '100vw'}}>
+                        <div style={{ position: 'relative', height: '8vh', width: '100vw' }}>
                             <Typography
                                 component={"div"}
                                 variant={"h4"}
@@ -2410,10 +2388,10 @@ const WorkspacePage = () => {
                                     top: "70%",
                                     left:
                                         sidebarOpen ?
-                                                aspectRatio === "21:9" ? "20%" : "23%"
-                                        : chatOpen ?
+                                            aspectRatio === "21:9" ? "20%" : "23%"
+                                            : chatOpen ?
                                                 aspectRatio === "21:9" ? "18%" : "20%"
-                                        :
+                                                :
                                                 aspectRatio === "21:9" ? "24%" : "28%",
                                     transform: "translate(-50%, -50%)",
                                     zIndex: 2,
@@ -2447,12 +2425,12 @@ const WorkspacePage = () => {
                         {/*<div style={{display: "flex", width: "100%"}}>*/}
                         {/*    {renderStatusBar()}*/}
                         {/*</div>*/}
-                        <div style={{display: "flex", justifyContent: "center", width: "100%"}}>
+                        <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
                             {renderBody()}
                         </div>
                     </>
                 )}
-            {xpPopup ? (xpPopupMemo) : null}
+                {xpPopup ? (xpPopupMemo) : null}
             </>
         )
     }
@@ -2596,17 +2574,16 @@ const WorkspacePage = () => {
     const renderMobile = () => {
         return (
             <>
-            {showIframe && showDesktopIframe === "side" ? (
+                {showIframe && showDesktopIframe === "side" ? (
 
-                <div style={{ display: 'flex', overflow: 'hidden', height: "calc(100vh - 28px)" }}>
-                    <div ref={leftPanelRef} style={{ flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
-                        {/* Left iframe content */}
-                        {(workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") ? (
-                            <iframe
-                                src={workspaceUrl}
+                    <div style={{ display: 'flex', overflow: 'hidden', height: "calc(100vh - 28px)" }}>
+                        <div ref={leftPanelRef} style={{ flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
+                            {/* Left iframe content */}
+                            <IframeRenderer
+                                src={!workspaceUrl ? "" : workspaceUrl}
                                 width="100%"
                                 height={`${window.innerHeight - 35}`}
-                                style={{ 
+                                style={{
                                     border: "none",
                                     transform: "scale(0.5)",
                                     transformOrigin: "0 0",
@@ -2614,39 +2591,28 @@ const WorkspacePage = () => {
                                     height: "calc(200vh - 56px)"
                                 }}
                                 title="Workspace"
-
+                                ref={iframeRef}
                             >
                                 Your browser does not support iframes.
-                            </iframe>
-                        ) : (
-                            <div>
-                                <ThreeDots />
-                            </div>
-                        )}
-                    </div>
-
-                    {/*<div ref={dragBarRef}*/}
-                    {/*     className="drag-bar"*/}
-                    {/*     style={{width: '40px', opacity: '0.5', visibility: 'hidden', backgroundColor: 'transparent'}}*/}
-                    {/*>*/}
-                    <div
-                        ref={dragBarRef}
-                        className="drag-bar"
-                        style={{
-                            cursor: 'ew-resize',
-                            backgroundImage: `radial-gradient(circle, ${hexToRGBA(theme.palette.primary.contrastText, 1)} 1px, ${hexToRGBA(theme.palette.primary.main, 1)} 1px)`,
-                            backgroundSize: '10px 10px',
-                            width: '20px'
-                        }}
-                    />
-                    {/*</div>*/}
-                    <div ref={rightPanelRef} style={{ flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
-                        {(workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") ? (
-                            <iframe
-                                src={convertEditorUrlToDesktop(workspaceUrl)}
+                            </IframeRenderer>
+                        </div>
+                        <div
+                            ref={dragBarRef}
+                            className="drag-bar"
+                            style={{
+                                cursor: 'ew-resize',
+                                backgroundImage: `radial-gradient(circle, ${hexToRGBA(theme.palette.primary.contrastText, 1)} 1px, ${hexToRGBA(theme.palette.primary.main, 1)} 1px)`,
+                                backgroundSize: '10px 10px',
+                                width: '20px'
+                            }}
+                        />
+                        {/*</div>*/}
+                        <div ref={rightPanelRef} style={{ flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
+                            <IframeRenderer
+                                src={!workspaceUrl ? "" : convertEditorUrlToDesktop(workspaceUrl)}
                                 width="100%"
                                 height={`${window.innerHeight - 35}`}
-                                style={{ 
+                                style={{
                                     border: "none",
                                     transform: "scale(0.5)",
                                     transformOrigin: "0 0",
@@ -2654,23 +2620,17 @@ const WorkspacePage = () => {
                                     height: "calc(200vh - 56px)"
                                 }}
                                 title="Workspace"
-
+                                ref={undefined}
                             >
                                 Your browser does not support iframes.
-                            </iframe>
-                        ) : (
-                            <div>
-                                <ThreeDots />
-                            </div>
-                        )}
+                            </IframeRenderer>
+                        </div>
                     </div>
-                </div>
 
-            ) : showIframe ? (
-                <div style={{overflow: "hidden", height: "calc(100vh - 28px)"}}>
-                    {(workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") ? (
-                        <iframe
-                            src={workspaceUrl}
+                ) : showIframe ? (
+                    <div style={{ overflow: "hidden", height: "calc(100vh - 28px)" }}>
+                        <IframeRenderer
+                            src={!workspaceUrl ? "" : workspaceUrl}
                             width="100%" // Your desired width
                             height={`${window.innerHeight - 35}`}
                             style={{
@@ -2684,16 +2644,11 @@ const WorkspacePage = () => {
                             ref={iframeRef}
                         >
                             Your browser does not support iframes.
-                        </iframe>
-                    ) : (
-                        <div>
-                            <ThreeDots/>
-                        </div>
-                    )}
-                </div>
+                        </IframeRenderer>
+                    </div>
 
                 ) : (
-                    <div style={(window.innerWidth < 500) ? {overflow: "hidden", height: "calc(100vh - 90px)"} : undefined}>
+                    <div style={(window.innerWidth < 500) ? { overflow: "hidden", height: "calc(100vh - 90px)" } : undefined}>
                         <div>
                             <Typography
                                 component={"div"}
@@ -2733,12 +2688,12 @@ const WorkspacePage = () => {
                         >
                             {renderMobileButton()}
                         </div>
-                        <div style={{display: "flex", justifyContent: "center", width: "100%"}}>
+                        <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
                             {renderBodyMobile()}
                         </div>
                     </div>
                 )}
-            {xpPopup && window.innerWidth > 1000 ? (xpPopupMemo) : null}
+                {xpPopup && window.innerWidth > 1000 ? (xpPopupMemo) : null}
             </>
         )
     }

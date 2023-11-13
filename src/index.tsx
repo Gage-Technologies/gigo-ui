@@ -21,6 +21,7 @@ import { WebSocketProvider } from './services/websocket';
 import track, { TrackingContext } from 'react-tracking';
 import { withPageTracking } from './components/PageTracking';
 import call from './services/api-call';
+import { Box, CircularProgress } from '@material-ui/core';
 
 // create callback to register last activity in session storage
 function setTimestamp() {
@@ -39,14 +40,16 @@ const root = ReactDOM.createRoot(document.getElementById('root')!);
 
 let persistor = persistStore(store);
 
-const defaultOptions = {
-    loop: true,
-    autoplay: true,
-    animationData: animationData,
-    rendererSettings: {
-        preserveAspectRatio: 'xMidYMid slice'
-    }
-};
+const lazyLoadFallback = (
+    <Box
+        position="absolute"
+        top="50%"
+        left="50%"
+        style={{ transform: 'translate(-50%, -50%)' }}
+    >
+        <CircularProgress color="inherit" />
+    </Box>
+)
 
 root.render(
     <WebSocketProvider>
@@ -55,7 +58,7 @@ root.render(
                 <Provider store={store}>
                     <PersistGate loading={null} persistor={persistor}>
                         <AppWrapper>
-                            <Suspense fallback={<div><Lottie options={defaultOptions} height={500} width={500} /></div>}>
+                            <Suspense fallback={lazyLoadFallback}>
                                 <Routing />
                             </Suspense>
                         </AppWrapper>
