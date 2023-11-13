@@ -2598,7 +2598,7 @@ const WorkspacePage = () => {
             <>
             {showIframe && showDesktopIframe === "side" ? (
 
-                <div style={{ display: 'flex', overflow: 'hidden' }}>
+                <div style={{ display: 'flex', overflow: 'hidden', height: "calc(100vh - 28px)" }}>
                     <div ref={leftPanelRef} style={{ flex: '1 1 0%', minWidth: 0, overflow: 'hidden' }}>
                         {/* Left iframe content */}
                         {(workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") ? (
@@ -2606,7 +2606,13 @@ const WorkspacePage = () => {
                                 src={workspaceUrl}
                                 width="100%"
                                 height={`${window.innerHeight - 35}`}
-                                style={{ border: "none" }}
+                                style={{ 
+                                    border: "none",
+                                    transform: "scale(0.5)",
+                                    transformOrigin: "0 0",
+                                    width: "100vw",
+                                    height: "calc(200vh - 56px)"
+                                }}
                                 title="Workspace"
 
                             >
@@ -2640,7 +2646,13 @@ const WorkspacePage = () => {
                                 src={convertEditorUrlToDesktop(workspaceUrl)}
                                 width="100%"
                                 height={`${window.innerHeight - 35}`}
-                                style={{ border: "none" }}
+                                style={{ 
+                                    border: "none",
+                                    transform: "scale(0.5)",
+                                    transformOrigin: "0 0",
+                                    width: "100vw",
+                                    height: "calc(200vh - 56px)"
+                                }}
                                 title="Workspace"
 
                             >
@@ -2655,13 +2667,19 @@ const WorkspacePage = () => {
                 </div>
 
             ) : showIframe ? (
-                <div style={{overflow: "hidden"}}>
+                <div style={{overflow: "hidden", height: "calc(100vh - 28px)"}}>
                     {(workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") ? (
                         <iframe
                             src={workspaceUrl}
                             width="100%" // Your desired width
                             height={`${window.innerHeight - 35}`}
-                            style={{border: "none"}}
+                            style={{
+                                border: "none",
+                                transform: "scale(0.5)",
+                                transformOrigin: "0 0",
+                                width: "200vw",
+                                height: "calc(200vh - 56px)"
+                            }}
                             title="Workspace"
                             ref={iframeRef}
                         >
