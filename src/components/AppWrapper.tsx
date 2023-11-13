@@ -779,15 +779,17 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     profileButton={false}
                                     pro={authState.role.toString() === "1"}
                                 />
-                                <ErrorIcon
-                                    style={{
-                                        color: "orange",
-                                        position: 'absolute',
-                                        bottom: 0, // align to the bottom
-                                        right: 0, // align to the right
-                                        fontSize: '1rem'
-                                    }}
-                                />
+                                {inTrial && !hasPaymentInfo && (
+                                    <ErrorIcon
+                                        style={{
+                                            color: "orange",
+                                            position: 'absolute',
+                                            bottom: 0, // align to the bottom
+                                            right: 0, // align to the right
+                                            fontSize: '1rem'
+                                        }}
+                                    />
+                                )}
                             </Button>
                             <Menu
                                 id="menu-appbar"
@@ -809,13 +811,12 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     await handleLogout()
                                 }}>Logout</MenuItem>
                                 <MenuItem onClick={() => setShowReferPopup(true)}>Refer A Friend</MenuItem>
-                                {/*{inTrial && !hasPaymentInfo && (*/}
-                                {/*    <MenuItem onClick={() => stripeNavigate()}>Finish Setup</MenuItem>*/}
-                                {/*)}*/}
-                                <MenuItem onClick={() => setOpenSetup(true)}>
-                                    <h4 style={{color: "red", paddingRight: "5px"}}>Finish Setup</h4>
-                                    <ErrorIcon style={{color: "orange"}}/>
-                                </MenuItem>
+                                {inTrial && !hasPaymentInfo && (
+                                    <MenuItem onClick={() => setOpenSetup(true)}>
+                                        <h4 style={{color: "red", paddingRight: "5px"}}>Finish Setup</h4>
+                                        <ErrorIcon style={{color: "orange"}}/>
+                                    </MenuItem>
+                                )}
                             </Menu>
                             <Modal open={showReferPopup} onClose={() => setShowReferPopup(false)}>
                                 <Box
@@ -947,7 +948,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                         </CardContent>
                                     </Card>
                                     <Box textAlign="center" mt={3}>
-                                        <AwesomeButton onPressed={() => stripeNavigate()} style={{
+                                        <AwesomeButton onPress={() => stripeNavigate()} style={{
                                             '--button-primary-color': "#9dbab0",
                                             '--button-primary-color-dark': "#4a5d5b",
                                             '--button-primary-color-light': "#4a5d5b",
