@@ -1719,6 +1719,8 @@ function AttemptPage() {
                         <DialogContent>
                             <DialogContentText>
                                 If you close this attempt, you will still be able to view your project, but you will no longer be able to make any changes.
+                                <hr/>
+                                If you have already changed the title from the post title and would like to keep that name, please retype it below to confirm.
                             </DialogContentText>
                             <TextField
                                 id={"title"}
