@@ -1597,9 +1597,18 @@ function AttemptPage() {
                 {!exclusive && attempt !== "" && attempt !== undefined && (attempt["closed"] === true || userId === attempt?.author_id) ? (
                     <Grid item sx={1}>
                         <Button variant={"outlined"} sx={styles.mainTabButton} disabled={mainTab === "source"}
-                            onClick={() => handleTabChange("source")}>
+                                onClick={() => handleTabChange("source")}>
                             Source Code
                         </Button>
+                    </Grid>
+                ) : !exclusive && attempt !== "" && attempt !== undefined && (attempt["closed"] === false && userId !== attempt?.author_id) ? (
+                    <Grid item sx={1}>
+                        <Tooltip title={"This user has not yet published this attempt"}>
+                            <Button variant={"outlined"} sx={styles.mainTabButton} disabled={mainTab === "source"}
+                                    onClick={() => handleTabChange("source")} disabled={true}>
+                                Source Code
+                            </Button>
+                        </Tooltip>
                     </Grid>
                 ) : null}
                 {window.innerWidth > 1000 && attempt !== "" && attempt !== undefined && userId === attempt?.author_id ? (
@@ -1652,6 +1661,10 @@ function AttemptPage() {
             toolTipText = `Estimated Launch Time: ${millisToTime(attempt["start_time_millis"])}`
         }
 
+        if (attempt["closed"] === false && userId !== attempt?.author_id) {
+            toolTipText = "This user has not yet published this attempt"
+        }
+
         return (
             <>
                 <div style={{
@@ -1685,27 +1698,30 @@ function AttemptPage() {
                             }}
                         >
                             {renderTabButtons()}
-                            {attempt !== null && attempt !== "" && (attempt["closed"] === true || userId === attempt?.author_id) ? (
+                            {attempt !== null && attempt !== "" ? (
                                 <Grid item sx={1}>
                                     <Tooltip title={toolTipText} placement={"top"} arrow disableInteractive enterDelay={200} leaveDelay={200}>
-                                        <LoadingButton
-                                            loading={isLoading}
-                                            variant={"contained"}
-                                            color={"secondary"}
-                                            sx={{
-                                                height: "4vh",
-                                                maxHeight: "50px",
-                                                fontSize: "0.8em",
-                                            }}
-                                            onClick={() => {
-                                                if (!loggedIn) {
-                                                    window.location.href = "/signup";
-                                                }
-                                                userId === attempt?.author_id ? launchWorkspace() : createAttempt();
-                                            }}
-                                        >
-                                            Launch <RocketLaunchIcon sx={{ marginLeft: "10px" }} />
-                                        </LoadingButton>
+                                        <div>
+                                            <LoadingButton
+                                                loading={isLoading}
+                                                variant={"contained"}
+                                                disabled={attempt["closed"] === false && userId !== attempt?.author_id}
+                                                color={"secondary"}
+                                                sx={{
+                                                    height: "4vh",
+                                                    maxHeight: "50px",
+                                                    fontSize: "0.8em",
+                                                }}
+                                                onClick={() => {
+                                                    if (!loggedIn) {
+                                                        window.location.href = "/signup";
+                                                    }
+                                                    userId === attempt?.author_id ? launchWorkspace() : createAttempt();
+                                                }}
+                                            >
+                                                Launch <RocketLaunchIcon sx={{ marginLeft: "10px" }} />
+                                            </LoadingButton>
+                                        </div>
                                     </Tooltip>
                                 </Grid>
                             ) : null}
@@ -1912,10 +1928,10 @@ function AttemptPage() {
                     {/* add a 10vh buffer at the end of the page */}
                     <div style={{ height: "10vh" }} />
                     {/* On mobile add a hovering button to launch the project */}
-                    {window.innerWidth <= 1000 && (attempt["closed"] === true || userId === attempt?.author_id) && (
+                    {window.innerWidth <= 1000 && (
                         <Fab
-                            disabled={isLoading}
                             color="secondary"
+                            disabled={(attempt["closed"] === false && userId !== attempt?.author_id) || isLoading}
                             aria-label="launch-mobile"
                             sx={{ position: "fixed", bottom: "80px", right: "20px", zIndex: 6000 }}
                             onClick={() => {
