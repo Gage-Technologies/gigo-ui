@@ -1619,27 +1619,29 @@ function AttemptPage() {
                         <StyledDiv style={{ height: "35px", width: "100px", borderRadius: 2 }} />
                     )}
                 </Grid>
-                <Grid item sx={1}>
-                    {attempt !== "" && attempt !== undefined ? (
-                        <Button
-                            variant={"outlined"}
-                            sx={{
-                                height: "4vh",
-                                fontSize: "0.8em",
-                                '&:hover': {
-                                    backgroundColor: theme.palette.error.main + "25",
-                                }
-                            }}
-                            color={"error"}
-                            disabled={closedState}
-                            onClick={() => setConfirm(true)}
-                        >
-                            {closedState ? "Attempt Published" : "Publish Attempt"}
-                        </Button>
-                    ) : (
-                        <StyledDiv style={{ height: "35px", width: "100px", borderRadius: 2 }} />
-                    )}
-                </Grid>
+                {userId === attempt?.author_id && (
+                    <Grid item sx={1}>
+                        {attempt !== "" && attempt !== undefined ? (
+                            <Button
+                                variant={"outlined"}
+                                sx={{
+                                    height: "4vh",
+                                    fontSize: "0.8em",
+                                    '&:hover': {
+                                        backgroundColor: theme.palette.error.main + "25",
+                                    }
+                                }}
+                                color={"error"}
+                                disabled={closedState}
+                                onClick={() => setConfirm(true)}
+                            >
+                                {closedState ? "Attempt Published" : "Publish Attempt"}
+                            </Button>
+                        ) : (
+                            <StyledDiv style={{ height: "35px", width: "100px", borderRadius: 2 }} />
+                        )}
+                    </Grid>
+                )}
             </>
         )
     }
