@@ -1602,7 +1602,7 @@ function AttemptPage() {
                         </Button>
                     </Grid>
                 ) : null}
-                {window.innerWidth > 1000 && attempt !== "" && attempt !== undefined ? (
+                {window.innerWidth > 1000 && attempt !== "" && attempt !== undefined && userId === attempt?.author_id ? (
                     <Grid item sx={1}>
                         <Button variant="outlined" sx={styles.mainTabButton} disabled={mainTab === "edit"} onClick={() => handleTabChange("edit")}>
                             Edit Config
