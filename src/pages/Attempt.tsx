@@ -70,6 +70,7 @@ import Fab from '@mui/material/Fab';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import CircularProgress from '@mui/material/CircularProgress';
 import DebugIcon from "../components/Icons/Debug";
+import {initialCreateProjectStateUpdate} from "../reducers/createProject/createProject";
 
 
 function AttemptPage() {
@@ -107,11 +108,16 @@ function AttemptPage() {
     const [prompt, setPrompt] = React.useState("");
     const [genImageId, setGenImageId] = React.useState<string>("");
     const [usedThumbnail, setUsedThumbnail] = React.useState<string | null>(null);
+    const [attemptTitle, setAttemptTitle] = React.useState<string>("")
 
 
     let handleCloseAttempt = () => {
-        setConfirm(false)
-        closeAttempt()
+        if (attemptTitle === "") {
+            swal("Please add a unique title for your attempt!")
+        } else {
+            setConfirm(false)
+            closeAttempt()
+        }
     }
     const styles = {
         themeButton: {
@@ -144,7 +150,7 @@ function AttemptPage() {
             null,
             null,
             //@ts-ignore
-            { attempt_id: id },
+            { attempt_id: id, title: attemptTitle },
             null,
             config.rootPath
         )
@@ -575,8 +581,12 @@ function AttemptPage() {
         // setAttemptDesc(res["description"])
         setAttemptDesc(res["evaluation"])
         setClosedState(res["post"]["closed"])
-        setProjectName("Attempt: " + res["post"]["post_title"])
-        setProjectTitle(res["post"]["post_title"])
+        if (res["post"]["title"] === null) {
+            setProjectName("Attempt:  " + res["post"]["post_title"])
+        } else {
+            setProjectName("Attempt:  " + res["post"]["title"])
+        }
+        setProjectTitle(res["post"]["title"] !== null ? res["post"]["title"] : res["post"]["post_title"])
     }
 
     const authState = useAppSelector(selectAuthState);
@@ -1584,15 +1594,24 @@ function AttemptPage() {
                         <StyledDiv style={{ height: "35px", width: "100px", borderRadius: 2 }} />
                     )}
                 </Grid>
-                {!exclusive && attempt !== "" && attempt !== undefined ? (
+                {!exclusive && attempt !== "" && attempt !== undefined && (attempt["closed"] === true || userId === attempt?.author_id) ? (
                     <Grid item sx={1}>
                         <Button variant={"outlined"} sx={styles.mainTabButton} disabled={mainTab === "source"}
-                            onClick={() => handleTabChange("source")}>
+                                onClick={() => handleTabChange("source")}>
                             Source Code
                         </Button>
                     </Grid>
+                ) : !exclusive && attempt !== "" && attempt !== undefined && (attempt["closed"] === false && userId !== attempt?.author_id) ? (
+                    <Grid item sx={1}>
+                        <Tooltip title={"This user has not yet published this attempt"}>
+                            <Button variant={"outlined"} sx={styles.mainTabButton} disabled={mainTab === "source"}
+                                    onClick={() => handleTabChange("source")} disabled={true}>
+                                Source Code
+                            </Button>
+                        </Tooltip>
+                    </Grid>
                 ) : null}
-                {window.innerWidth > 1000 && attempt !== "" && attempt !== undefined ? (
+                {window.innerWidth > 1000 && attempt !== "" && attempt !== undefined && userId === attempt?.author_id ? (
                     <Grid item sx={1}>
                         <Button variant="outlined" sx={styles.mainTabButton} disabled={mainTab === "edit"} onClick={() => handleTabChange("edit")}>
                             Edit Config
@@ -1609,27 +1628,29 @@ function AttemptPage() {
                         <StyledDiv style={{ height: "35px", width: "100px", borderRadius: 2 }} />
                     )}
                 </Grid>
-                <Grid item sx={1}>
-                    {attempt !== "" && attempt !== undefined ? (
-                        <Button
-                            variant={"outlined"}
-                            sx={{
-                                height: "4vh",
-                                fontSize: "0.8em",
-                                '&:hover': {
-                                    backgroundColor: theme.palette.error.main + "25",
-                                }
-                            }}
-                            color={"error"}
-                            disabled={closedState}
-                            onClick={() => setConfirm(true)}
-                        >
-                            {closedState ? "Attempt Published" : "Publish Attempt"}
-                        </Button>
-                    ) : (
-                        <StyledDiv style={{ height: "35px", width: "100px", borderRadius: 2 }} />
-                    )}
-                </Grid>
+                {userId === attempt?.author_id && (
+                    <Grid item sx={1}>
+                        {attempt !== "" && attempt !== undefined ? (
+                            <Button
+                                variant={"outlined"}
+                                sx={{
+                                    height: "4vh",
+                                    fontSize: "0.8em",
+                                    '&:hover': {
+                                        backgroundColor: theme.palette.error.main + "25",
+                                    }
+                                }}
+                                color={"error"}
+                                disabled={closedState}
+                                onClick={() => setConfirm(true)}
+                            >
+                                {closedState ? "Attempt Published" : "Publish Attempt"}
+                            </Button>
+                        ) : (
+                            <StyledDiv style={{ height: "35px", width: "100px", borderRadius: 2 }} />
+                        )}
+                    </Grid>
+                )}
             </>
         )
     }
@@ -1638,6 +1659,10 @@ function AttemptPage() {
         let toolTipText = "Unknown Launch Time"
         if (attempt["start_time_millis"] !== undefined && attempt["start_time_millis"] !== null && attempt["start_time_millis"] !== 0) {
             toolTipText = `Estimated Launch Time: ${millisToTime(attempt["start_time_millis"])}`
+        }
+
+        if (attempt["closed"] === false && userId !== attempt?.author_id) {
+            toolTipText = "This user has not yet published this attempt"
         }
 
         return (
@@ -1676,24 +1701,27 @@ function AttemptPage() {
                             {attempt !== null && attempt !== "" ? (
                                 <Grid item sx={1}>
                                     <Tooltip title={toolTipText} placement={"top"} arrow disableInteractive enterDelay={200} leaveDelay={200}>
-                                        <LoadingButton
-                                            loading={isLoading}
-                                            variant={"contained"}
-                                            color={"secondary"}
-                                            sx={{
-                                                height: "4vh",
-                                                maxHeight: "50px",
-                                                fontSize: "0.8em",
-                                            }}
-                                            onClick={() => {
-                                                if (!loggedIn) {
-                                                    window.location.href = "/signup";
-                                                }
-                                                userId === attempt?.author_id ? launchWorkspace() : createAttempt();
-                                            }}
-                                        >
-                                            Launch <RocketLaunchIcon sx={{ marginLeft: "10px" }} />
-                                        </LoadingButton>
+                                        <div>
+                                            <LoadingButton
+                                                loading={isLoading}
+                                                variant={"contained"}
+                                                disabled={attempt["closed"] === false && userId !== attempt?.author_id}
+                                                color={"secondary"}
+                                                sx={{
+                                                    height: "4vh",
+                                                    maxHeight: "50px",
+                                                    fontSize: "0.8em",
+                                                }}
+                                                onClick={() => {
+                                                    if (!loggedIn) {
+                                                        window.location.href = "/signup";
+                                                    }
+                                                    userId === attempt?.author_id ? launchWorkspace() : createAttempt();
+                                                }}
+                                            >
+                                                Launch <RocketLaunchIcon sx={{ marginLeft: "10px" }} />
+                                            </LoadingButton>
+                                        </div>
                                     </Tooltip>
                                 </Grid>
                             ) : null}
@@ -1704,12 +1732,30 @@ function AttemptPage() {
                     open={confirm}
                     onClose={() => setConfirm(false)}
                 >
-                    <DialogTitle>{"Close This Attempt?"}</DialogTitle>
-                    <DialogContent>
-                        <DialogContentText>
-                            If you close this attempt, you will still be able to view your project, but you will no longer be able to make any changes.
-                        </DialogContentText>
-                    </DialogContent>
+                    <div>
+                        <DialogTitle>{"Publish This Attempt? Add A Title"}</DialogTitle>
+                        <DialogContent>
+                            <DialogContentText>
+                                If you close this attempt, you will still be able to view your project, but you will no longer be able to make any changes.
+                                <hr/>
+                                If you have already changed the title from the post title and would like to keep that name, please retype it below to confirm.
+                            </DialogContentText>
+                            <TextField
+                                id={"title"}
+                                variant={`outlined`}
+                                color={"primary"}
+                                label={"Title"}
+                                required={true}
+                                margin={`normal`}
+                                type={`text`}
+                                sx={{
+                                    width: "100%"
+                                }}
+                                value={attemptTitle}
+                                onChange={(e) => setAttemptTitle(e.target.value)}
+                            />
+                        </DialogContent>
+                    </div>
                     <DialogActions>
                         <Button
                             onClick={handleCloseAttempt}
@@ -1750,8 +1796,8 @@ function AttemptPage() {
                     {attempt !== null ? (
                         <HelmetProvider>
                             <Helmet>
-                                <title>{attempt["post_title"]}</title>
-                                <meta property="og:title" content={attempt["post_title"]} data-rh="true" />
+                                <title>{attempt["title"] !== null ? attempt["title"] : attempt["post_title"]}</title>
+                                <meta property="og:title" content={attempt["title"] !== null ? attempt["title"] : attempt["post_title"]} data-rh="true" />
                                 <meta property="og:description" content={attempt["description"]} data-rh="true" />
                                 <meta property="og:image" content={config.rootPath + attempt["thumbnail"]} data-rh="true" />
                             </Helmet>
@@ -1784,6 +1830,7 @@ function AttemptPage() {
                             />
                         ) : (
                             <div>
+                                {console.log("projectname: ", projectName)}
                                 {projectName}
                             </div>
                         )}
@@ -1806,10 +1853,12 @@ function AttemptPage() {
                                     </Button>
                                 ) : (
                                     <div>
-                                        <Button onClick={() => editProject(
-                                            projectTitle !== projectName ? projectTitle : null,
-                                            null
-                                        )}>
+                                        <Button onClick={() => {
+                                            editProject(
+                                                projectTitle !== projectName ? projectTitle : null,
+                                                null
+                                            )
+                                        }}>
                                             Submit
                                         </Button>
                                         <Button onClick={() => setEditTitle(false)}>
@@ -1881,8 +1930,8 @@ function AttemptPage() {
                     {/* On mobile add a hovering button to launch the project */}
                     {window.innerWidth <= 1000 && (
                         <Fab
-                            disabled={isLoading}
                             color="secondary"
+                            disabled={(attempt["closed"] === false && userId !== attempt?.author_id) || isLoading}
                             aria-label="launch-mobile"
                             sx={{ position: "fixed", bottom: "80px", right: "20px", zIndex: 6000 }}
                             onClick={() => {

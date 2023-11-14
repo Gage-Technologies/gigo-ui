@@ -486,7 +486,7 @@ function Home() {
                                                 width={(chatOpen) ? "16vw" : (document.documentElement.clientWidth < 1000 ? 'fit-content' : '21vw')}
                                                 imageWidth={(chatOpen) ? "16vw" : "21vw"}
                                                 projectId={project["_id"]}
-                                                projectTitle={project["post_title"]}
+                                                projectTitle={project["title"] !== null ? project["title"] : project["post_title"]}
                                                 projectDesc={project["description"]}
                                                 projectThumb={config.rootPath + project["thumbnail"]}
                                                 projectDate={project["updated_at"]}
