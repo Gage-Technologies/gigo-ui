@@ -1594,7 +1594,7 @@ function AttemptPage() {
                         <StyledDiv style={{ height: "35px", width: "100px", borderRadius: 2 }} />
                     )}
                 </Grid>
-                {!exclusive && attempt !== "" && attempt !== undefined ? (
+                {!exclusive && attempt !== "" && attempt !== undefined && (attempt["closed"] === true || userId === attempt?.author_id) ? (
                     <Grid item sx={1}>
                         <Button variant={"outlined"} sx={styles.mainTabButton} disabled={mainTab === "source"}
                             onClick={() => handleTabChange("source")}>
@@ -1685,7 +1685,7 @@ function AttemptPage() {
                             }}
                         >
                             {renderTabButtons()}
-                            {attempt !== null && attempt !== "" ? (
+                            {attempt !== null && attempt !== "" && (attempt["closed"] === true || userId === attempt?.author_id) ? (
                                 <Grid item sx={1}>
                                     <Tooltip title={toolTipText} placement={"top"} arrow disableInteractive enterDelay={200} leaveDelay={200}>
                                         <LoadingButton
@@ -1912,7 +1912,7 @@ function AttemptPage() {
                     {/* add a 10vh buffer at the end of the page */}
                     <div style={{ height: "10vh" }} />
                     {/* On mobile add a hovering button to launch the project */}
-                    {window.innerWidth <= 1000 && (
+                    {window.innerWidth <= 1000 && (attempt["closed"] === true || userId === attempt?.author_id) && (
                         <Fab
                             disabled={isLoading}
                             color="secondary"
