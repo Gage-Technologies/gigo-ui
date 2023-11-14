@@ -70,6 +70,7 @@ import Fab from '@mui/material/Fab';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 import CircularProgress from '@mui/material/CircularProgress';
 import DebugIcon from "../components/Icons/Debug";
+import {initialCreateProjectStateUpdate} from "../reducers/createProject/createProject";
 
 
 function AttemptPage() {
@@ -107,11 +108,16 @@ function AttemptPage() {
     const [prompt, setPrompt] = React.useState("");
     const [genImageId, setGenImageId] = React.useState<string>("");
     const [usedThumbnail, setUsedThumbnail] = React.useState<string | null>(null);
+    const [attemptTitle, setAttemptTitle] = React.useState<string>("")
 
 
     let handleCloseAttempt = () => {
-        setConfirm(false)
-        closeAttempt()
+        if (attemptTitle === "") {
+            swal("Please add a unique title for your attempt!")
+        } else {
+            setConfirm(false)
+            // closeAttempt()
+        }
     }
     const styles = {
         themeButton: {
@@ -1704,12 +1710,28 @@ function AttemptPage() {
                     open={confirm}
                     onClose={() => setConfirm(false)}
                 >
-                    <DialogTitle>{"Close This Attempt?"}</DialogTitle>
-                    <DialogContent>
-                        <DialogContentText>
-                            If you close this attempt, you will still be able to view your project, but you will no longer be able to make any changes.
-                        </DialogContentText>
-                    </DialogContent>
+                    <div>
+                        <DialogTitle>{"Publish This Attempt? Add A Title"}</DialogTitle>
+                        <DialogContent>
+                            <DialogContentText>
+                                If you close this attempt, you will still be able to view your project, but you will no longer be able to make any changes.
+                            </DialogContentText>
+                            <TextField
+                                id={"title"}
+                                variant={`outlined`}
+                                color={"primary"}
+                                label={"Title"}
+                                required={true}
+                                margin={`normal`}
+                                type={`text`}
+                                sx={{
+                                    width: "100%"
+                                }}
+                                value={attemptTitle}
+                                onChange={(e) => setAttemptTitle(e.target.value)}
+                            />
+                        </DialogContent>
+                    </div>
                     <DialogActions>
                         <Button
                             onClick={handleCloseAttempt}
