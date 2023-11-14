@@ -873,107 +873,6 @@ const WorkspacePage = () => {
         }
     }, [workspace]);
 
-    /**
-     * Renders top status bar
-     */
-    const renderStatusBar = () => {
-        return (
-            <>
-                {/*<div style={{width: "60%"}}/>*/}
-                <div style={{
-                    width: "70%",
-
-                    top: "0%",
-                }}>
-                    <LinearProgress
-                        sx={{
-                            width: "40%",
-                            height: "3vh",
-                            left: "14vw",
-                            minHeight: "7px",
-                            borderRadius: 1,
-
-                        }}
-                        color={progressColor()}
-                        variant={progressType()}
-                        value={progressValue()}
-                    />
-                </div>
-                {/*<Card                                                                  */}
-                {/*    sx={{                                                              */}
-                {/*        width: "81vw",                                                 */}
-                {/*        height: "10vh",                                                */}
-                {/*        minHeight: "85px",                                             */}
-                {/*        marginLeft: "3vw",                                             */}
-                {/*        marginTop: "1vh",                                              */}
-                {/*        borderRadius: 1,                                               */}
-                {/*        zIndex: tutorial && stepIndex === 0 ? "600000" : undefined,    */}
-                {/*        border: 1,                                                     */}
-                {/*        borderColor: progressColorBorder() + "75",                     */}
-                {/*        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1);",                 */}
-                {/*        backgroundColor: "transparent",                                */}
-                {/*        backgroundImage: "none",                                       */}
-                {/*    }}                                                                 */}
-                {/*    className={"bar"}                                                  */}
-                {/*>                                                                      */}
-                {/*<Grid container justifyContent="space-around" sx={{*/}
-                {/*    flexGrow: 1,*/}
-                {/*    paddingTop: "20px",*/}
-                {/*    minHeight: "85px"*/}
-                {/*}}>*/}
-                {/*    <Grid item xs={"auto"}>*/}
-                {/*        <Typography component={"div"} variant="subtitle1">*/}
-                {/*            State: {(workspace === null) ? "Pending" : workspace.state_string}*/}
-                {/*        </Typography>*/}
-                {/*    </Grid>*/}
-                {/*    {*/}
-                {/*        (workspace !== null && (workspace.state === 0 || workspace.state === 1)) ?*/}
-                {/*            (*/}
-                {/*                <Grid item xs={"auto"}>*/}
-                {/*                    <Typography component={"div"} variant="subtitle1">*/}
-                {/*                        Initialization: {workspace.init_state_string}*/}
-                {/*                    </Typography>*/}
-                {/*                </Grid>*/}
-                {/*            ) : (*/}
-                {/*                <></>*/}
-                {/*            )*/}
-                {/*    }*/}
-                {/*    <Grid item xs={"auto"}>*/}
-                {/*        <Typography component={"div"} variant="subtitle1">*/}
-                {/*            Commit: {(workspace === null) ? "Pending" : workspace.commit}*/}
-                {/*        </Typography>*/}
-                {/*    </Grid>*/}
-                {/*    <Grid item xs={"auto"}>*/}
-                {/*        {renderCodeSourceLink()}*/}
-                {/*    </Grid>*/}
-                {/*    <Grid item xs={"auto"}>*/}
-                {/*        <Button*/}
-                {/*            disabled={workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null}*/}
-                {/*            variant={"outlined"}*/}
-                {/*            color={"primary"}*/}
-                {/*            href={config.coderPath + workspaceUrl}*/}
-                {/*            onMouseDown={handleMouseDown}*/}
-                {/*            className={"open_button"}*/}
-                {/*            sx={stepIndex === 1 ? {*/}
-                {/*                zIndex: "600000",*/}
-                {/*                '&:hover': {*/}
-                {/*                    backgroundColor: theme.palette.primary.main + "25",*/}
-                {/*                }*/}
-                {/*            } : {*/}
-                {/*                '&:hover': {*/}
-                {/*                    backgroundColor: theme.palette.primary.main + "25",*/}
-                {/*                }*/}
-                {/*            }}*/}
-                {/*        >*/}
-                {/*            Open Workspace*/}
-                {/*        </Button>*/}
-                {/*    </Grid>*/}
-                {/*</Grid>*/}
-                {/*</Card>  */}
-            </>
-        )
-    }
-
     const setHighestScoreFunc = async (num: any) => {
         let res = await call(
             "/api/workspace/setHighestScore",
@@ -986,15 +885,6 @@ const WorkspacePage = () => {
                 highest_score: num.toString(),
             }
         )
-
-        // if (res === undefined || res["message"] === undefined || res["message"] !== "success") {
-        //     // swal("Unable to set highest score. Please try again.")
-        // } else {
-        //     // this.setState({
-        //     //     highScore: num
-        //     // })
-        //     setHighestScore(num)
-        // }
 
         if (res !== undefined && res["message"] !== undefined && res["message"] === "success") {
             setHighestScore(num)
@@ -1629,6 +1519,35 @@ const WorkspacePage = () => {
         setPageMode(prevMode => prevMode === 'simple' ? 'advanced' : 'simple');
     };
 
+    const enterButtonMemo = React.useMemo(() => {
+        return (
+            <>
+                <AnimatedAwesomeButton
+                    // @ts-ignore
+                    href={iframeUrl}
+                    type="primary"
+                    style={{
+                        marginBottom: '20px',
+                        width: "auto",
+                        '--button-default-height': '78px',
+                        '--button-default-font-size': '23px',
+                        '--button-default-border-radius': '25px',
+                        ' --button-horizontal-padding': '20px',
+                        '--button-raise-level': '10px',
+                        '--button-hover-pressure': '4',
+                        '--transform-speed': ' 0.2s',
+                        '--button-primary-border': 'none',
+                        hover: {
+                            backgroundColor: theme.palette.primary.main + '25',
+                        }
+                    }}
+                >
+                    Enter DevSpace
+                </AnimatedAwesomeButton>
+            </>
+        )
+    }, [iframeUrl])
+
     const renderBody = () => {
         let ports = []
 
@@ -1651,32 +1570,10 @@ const WorkspacePage = () => {
                 <div>
 
                     <div style={{ position: "absolute", left: aspectRatio === "21:9" ? "68.5%" : "67%", top: aspectRatio === "21:9" ? "9%" : "10%", height: "auto", display: (workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null || iframeUrl === null) ? "none" : "block" }}>
-                        <AnimatedAwesomeButton
-                            // @ts-ignore
-                            href={iframeUrl}
-                            type="primary"
-                            style={{
-                                marginBottom: '20px',
-                                width: "auto",
-                                '--button-default-height': '78px',
-                                '--button-default-font-size': '23px',
-                                '--button-default-border-radius': '25px',
-                                ' --button-horizontal-padding': '20px',
-                                '--button-raise-level': '10px',
-                                '--button-hover-pressure': '4',
-                                '--transform-speed': ' 0.2s',
-                                '--button-primary-border': 'none',
-                                hover: {
-                                    backgroundColor: theme.palette.primary.main + '25',
-                                }
-                            }}
-                        >
-                            Enter DevSpace
-                        </AnimatedAwesomeButton>
+                        {enterButtonMemo}
                         <div style={{ whiteSpace: 'nowrap', left: "-5%" }}>
                             Enter within the next: {renderTime()}
                         </div>
-
                     </div>
                     <Grid container justifyContent="space-between" sx={{
                         flexGrow: 1,
@@ -1885,32 +1782,10 @@ const WorkspacePage = () => {
                             display: (workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null || iframeUrl === null) ? "none" : "block"
                         }}
                     >
-                        <AnimatedAwesomeButton
-                            // @ts-ignore
-                            href={iframeUrl}
-                            type="primary"
-                            style={{
-                                marginBottom: '20px',
-                                width: "auto",
-                                '--button-default-height': '78px',
-                                '--button-default-font-size': '23px',
-                                '--button-default-border-radius': '25px',
-                                ' --button-horizontal-padding': '20px',
-                                '--button-raise-level': '10px',
-                                '--button-hover-pressure': '4',
-                                '--transform-speed': ' 0.2s',
-                                '--button-primary-border': 'none',
-                                hover: {
-                                    backgroundColor: theme.palette.primary.main + '25',
-                                }
-                            }}
-                        >
-                            Enter DevSpace
-                        </AnimatedAwesomeButton>
+                        {enterButtonMemo}
                         <div style={{ whiteSpace: 'nowrap', left: "-5%" }}>
                             Enter within the next: {renderTime()}
                         </div>
-
                     </div>
                     <Grid container justifyContent="space-between" sx={{
                         flexGrow: 1,

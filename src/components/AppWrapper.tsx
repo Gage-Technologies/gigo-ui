@@ -34,6 +34,7 @@ import {
     createTheme,
     CssBaseline,
     Icon,
+    LinearProgress,
     Link,
     ListItemButton,
     Menu, Modal,
@@ -112,6 +113,8 @@ import Snackbar from '@material-ui/core/Snackbar';
 import { RecordWebUsage, WebTrackingEvent } from '../models/web_usage';
 import { useLocation } from 'react-router-dom';
 import { useTracking } from 'react-tracking';
+import { useGlobalWebSocket } from '../services/websocket';
+import { WsMessage, WsMessageType } from '../models/websocket';
 
 
 interface IProps {
@@ -200,6 +203,14 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     const [isOpen, setIsOpen] = React.useState(false);
     const [openSetup, setOpenSetup] = React.useState(false)
     const toggleButtonRef = React.useRef(null);
+    const [cpuUsagePercentage, setCpuUsagePercentage] = React.useState<number>(0);
+    const [memoryUsagePercentage, setMemoryUsagePercentage] = React.useState<number>(0);
+    const [cpuLimit, setCpuLimit] = React.useState<number>(0);
+    const [memoryLimit, setMemoryLimit] = React.useState<number>(0);
+    const [cpuUsage, setCpuUsage] = React.useState<number>(0);
+    const [memoryUsage, setMemoryUsage] = React.useState<number>(0);
+
+    let globalWs = useGlobalWebSocket();
 
     const styles = {
         regular: {
@@ -813,8 +824,8 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 <MenuItem onClick={() => setShowReferPopup(true)}>Refer A Friend</MenuItem>
                                 {inTrial && !hasPaymentInfo && (
                                     <MenuItem onClick={() => setOpenSetup(true)}>
-                                        <h4 style={{color: "red", paddingRight: "5px"}}>Finish Setup</h4>
-                                        <ErrorIcon style={{color: "orange"}}/>
+                                        <h4 style={{ color: "red", paddingRight: "5px" }}>Finish Setup</h4>
+                                        <ErrorIcon style={{ color: "orange" }} />
                                     </MenuItem>
                                 )}
                             </Menu>
@@ -866,19 +877,19 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                         background: 'linear-gradient(45deg, #142623 30%, #306c57)'
                                     }}
                                 >
-                                    <Box mb={2} style={{position: "absolute", top: 5, right: 10}}>
+                                    <Box mb={2} style={{ position: "absolute", top: 5, right: 10 }}>
                                         <Button onClick={() => setOpenSetup(false)}>
                                             <CloseIcon />
                                         </Button>
                                     </Box>
-                                    <div style={{ display: "flex", flexDirection: "row", alignItems: "center"}}>
+                                    <div style={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
                                         <img src={proGorilla} width={170} height={130} />
                                         <div style={{ display: "flex", flexDirection: "column", height: "auto", justifyContent: "center" }}>
-                                            <h1 style={{ marginBottom: '0', lineHeight: '.5', marginLeft: "25%", textShadow: "-4px 1px #618a7c", fontWeight: "bold", fontStyle: "italic", color: "#9dbab0"}}>PRO</h1>
-                                            <h1 style={{fontWeight: "300", color: "#9dbab0"}}>GIGO</h1>
+                                            <h1 style={{ marginBottom: '0', lineHeight: '.5', marginLeft: "25%", textShadow: "-4px 1px #618a7c", fontWeight: "bold", fontStyle: "italic", color: "#9dbab0" }}>PRO</h1>
+                                            <h1 style={{ fontWeight: "300", color: "#9dbab0" }}>GIGO</h1>
                                         </div>
                                     </div>
-                                    <div style={{height: "15px"}}/>
+                                    <div style={{ height: "15px" }} />
                                     <Card style={{
                                         background: 'linear-gradient(45deg, #2c473f 30%, #376454)',
                                         borderRadius: "12%"
@@ -890,10 +901,10 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, p: 2, borderRadius: '30px', backgroundColor: "#648378", height: "110px" }}>
                                                 <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
                                                     {/* Replace with actual icon */}
-                                                    <img src={codeTeacher} width={50} height={50}/>
+                                                    <img src={codeTeacher} width={50} height={50} />
                                                 </Box>
                                                 <Box>
-                                                    <Typography variant="subtitle1" style={{fontWeight: "bold", color: "#9dbab0"}}>
+                                                    <Typography variant="subtitle1" style={{ fontWeight: "bold", color: "#9dbab0" }}>
                                                         Code Teacher
                                                     </Typography>
                                                     <Typography variant="body2" color="#9dbab0">
@@ -906,10 +917,10 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, p: 2, borderRadius: '30px', backgroundColor: "#648378", height: "110px" }}>
                                                 <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
                                                     {/* Replace with actual icon */}
-                                                    <img src={resources} width={50} height={50}/>
+                                                    <img src={resources} width={50} height={50} />
                                                 </Box>
                                                 <Box>
-                                                    <Typography variant="subtitle1" style={{fontWeight: "bold", color: "#9dbab0"}}>
+                                                    <Typography variant="subtitle1" style={{ fontWeight: "bold", color: "#9dbab0" }}>
                                                         Improved Resource Limit
                                                     </Typography>
                                                     <Typography variant="body2" color="#9dbab0">
@@ -922,10 +933,10 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, p: 2, borderRadius: '30px', backgroundColor: "#648378", height: "110px" }}>
                                                 <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
                                                     {/* Replace with actual icon */}
-                                                    <img src={privateWorkspace} width={50} height={50}/>
+                                                    <img src={privateWorkspace} width={50} height={50} />
                                                 </Box>
                                                 <Box>
-                                                    <Typography variant="subtitle1" style={{fontWeight: "bold", color: "#9dbab0"}}>
+                                                    <Typography variant="subtitle1" style={{ fontWeight: "bold", color: "#9dbab0" }}>
                                                         Private DevSpaces
                                                     </Typography>
                                                     <Typography variant="body2" color="#9dbab0">
@@ -934,7 +945,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                                 </Box>
                                             </Box>
                                         </CardContent>
-                                        <CardContent style={{textAlign: "center", marginTop: "-10px"}}>
+                                        <CardContent style={{ textAlign: "center", marginTop: "-10px" }}>
                                             <AwesomeButton href={"/premium"} style={{
                                                 '--button-primary-color': "#628277",
                                                 '--button-primary-color-dark': "#4e6c61",
@@ -1025,16 +1036,235 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
             dispatch(updateAuthState(authState))
             navigate("/login")
         }
-        if (res !== undefined && res["return url"] !== undefined){
+        if (res !== undefined && res["return url"] !== undefined) {
             window.location.replace(res["return url"])
         }
+    }
+
+    const renderDevSpaceControls = () => {
+        return (
+            <>
+                <style>
+                    {`
+                        @keyframes glitch {
+                            0% {
+                                transform: translate(0);
+                                opacity: 1;
+                            }
+                            20% {
+                                transform: translate(-1px, 1px);
+                                opacity: 0.4;
+                            }
+                            40% {
+                                transform: translate(1px, -1px);
+                                opacity: 0.9;
+                            }
+                            60% {
+                                transform: translate(-1px, -1px);
+                                opacity: 0.6;
+                            }
+                            80% {
+                                transform: translate(1px, 1px);
+                                opacity: 0.95;
+                            }
+                            100% {
+                                transform: translate(0);
+                                opacity: 1;
+                            }
+                        }
+                    `}
+                </style>
+                <style>
+                    {`
+                        @keyframes fade {
+                            0% {
+                                opacity: 1;
+                            }
+                            50% {
+                                opacity: 0.6;
+                            }
+                            100% {
+                                opacity: 1;
+                            }
+                        }
+                    `}
+                </style>
+                <div style={{
+                    position: 'fixed',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 1000,
+                }}>
+                    <Tooltip title="Open DevSpace Controls">
+
+                        <IconButton
+                            ref={toggleButtonRef}
+                            onClick={() => setIsOpen(!isOpen)}
+                            color={((cpuUsagePercentage >= 90 || memoryUsagePercentage >= 90) ? "error" : (cpuUsagePercentage >= 75 || memoryUsagePercentage >= 75) ? "warning" : "inherit")}
+                            sx={{
+                                ...((cpuUsagePercentage >= 75 || memoryUsagePercentage >= 75) ? { animation: 'fade 1s infinite' } : {})
+                            }}
+                        >
+                            <SettingsApplicationsIcon />
+                        </IconButton>
+                    </Tooltip>
+
+                    {isOpen && (
+                        <Paper elevation={3} style={{
+                            padding: '8px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'space-between',
+                            position: 'absolute',
+                            top: '70%',
+                            left: "50%",
+                            transform: 'translate(-50%, 0)',
+                            width: '30vw',
+                            minWidth: "150px",
+                            maxWidth: "400px"
+                        }}>
+                            <Box sx={{ display: "flex", width: "100%", flexDirection: "row", justifyContent: "center" }}>
+                                <Tooltip title="Go Back">
+                                    <IconButton color="error" onClick={async () => {
+                                        window.history.replaceState({}, "", window.location.href.split("?")[0]);
+                                        window.location.reload();
+                                    }}>
+                                        <ArrowBackIcon />
+                                    </IconButton>
+                                </Tooltip>
+
+                                <Tooltip title="Stop Workspace">
+                                    <IconButton color="warning" onClick={() => stopWorkspace()}>
+                                        <StopIcon />
+                                    </IconButton>
+                                </Tooltip>
+
+                                {
+                                    window.location.pathname.startsWith("/launchpad/") ? (
+                                        new URLSearchParams(window.location.search).get("desktop") === "none" ? (
+                                            <>
+                                                <Tooltip title="View Desktop">
+                                                    <IconButton color="success" onClick={async () => {
+                                                        window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=side");
+                                                        window.location.reload();
+                                                    }}>
+                                                        <DesktopWindowsIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Open Desktop In New Tab">
+                                                    <IconButton color="success" onClick={async () => {
+                                                        window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=popped-out");
+                                                        window.location.reload();
+                                                    }}>
+                                                        <QueuePlayNextIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </>
+                                        ) : new URLSearchParams(window.location.search).get("desktop") === "side" ? (
+                                            <>
+                                                <Tooltip title="Close Desktop">
+                                                    <IconButton color="error" onClick={async () => {
+                                                        window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=none");
+                                                        window.location.reload();
+                                                    }}>
+                                                        <DesktopAccessDisabledIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Open Desktop In New Tab">
+                                                    <IconButton color="success" onClick={async () => {
+                                                        window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=popped-out");
+                                                        window.location.reload();
+                                                    }}>
+                                                        <QueuePlayNextIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </>
+                                        ) : new URLSearchParams(window.location.search).get("desktop") === "popped-out" ? (
+                                            <>
+                                                <Tooltip title="View Desktop">
+                                                    <IconButton color="success" onClick={async () => {
+                                                        window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=side");
+                                                        window.location.reload();
+                                                    }}>
+                                                        <DesktopWindowsIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </>
+                                        ) : null
+                                    ) : null
+                                }
+                            </Box>
+
+                            {/* CPU Usage Progress Bar */}
+                            <div style={{ marginTop: '8px', position: 'relative' }}>
+                                <div
+                                    style={{
+                                        color: cpuUsagePercentage < 75 ? theme.palette.text.primary : cpuUsagePercentage < 90 ? theme.palette.warning.main : theme.palette.error.main
+                                    }}
+                                >
+                                    CPU
+                                </div>
+                                <LinearProgress
+                                    variant="determinate"
+                                    value={cpuUsagePercentage}
+                                    color={cpuUsagePercentage < 75 ? "primary" : cpuUsagePercentage < 90 ? "warning" : "error"}
+                                    sx={{
+                                        height: "10px",
+                                        borderRadius: "10px",
+                                        ...(cpuUsagePercentage >= 90 && { animation: 'glitch 1s infinite' })
+                                    }}
+                                />
+                                <div style={{
+                                    position: 'absolute',
+                                    bottom: 5,
+                                    right: 0,
+                                    fontSize: '0.8em',
+                                    color: cpuUsagePercentage < 75 ? theme.palette.text.primary : cpuUsagePercentage < 90 ? theme.palette.warning.main : theme.palette.error.main
+                                }}>
+                                    {cpuUsage.toFixed(2)}/{cpuLimit} Cores
+                                </div>
+                            </div>
+
+                            {/* Memory Usage Progress Bar */}
+                            <div style={{ marginTop: '8px', position: 'relative' }}>
+                                <div
+                                    style={{
+                                        color: memoryUsagePercentage < 75 ? theme.palette.text.primary : memoryUsagePercentage < 90 ? theme.palette.warning.main : theme.palette.error.main
+                                    }}
+                                >
+                                    Memory
+                                </div>
+                                <LinearProgress
+                                    variant="determinate"
+                                    value={memoryUsagePercentage}
+                                    color={memoryUsagePercentage < 75 ? "secondary" : memoryUsagePercentage < 90 ? "warning" : "error"}
+                                    sx={{
+                                        height: "10px",
+                                        borderRadius: "10px",
+                                        ...(memoryUsagePercentage >= 90 && { animation: 'glitch 1s infinite' })
+                                    }}
+                                />
+                                <div style={{
+                                    position: 'absolute',
+                                    bottom: 5,
+                                    right: 0,
+                                    fontSize: '0.8em',
+                                    color: memoryUsagePercentage < 75 ? theme.palette.text.primary : memoryUsagePercentage < 90 ? theme.palette.warning.main : theme.palette.error.main
+                                }}>
+                                    {Math.round(memoryUsage)}/{memoryLimit}MB
+                                </div>
+                            </div>
+                        </Paper>
+                    )}
+                </div>
+            </>
+        )
     }
 
     const renderWorkspaceAppBar = () => {
         let toolbarStyles = JSON.parse(JSON.stringify(holidayStyle));
         toolbarStyles.height = "32px"
         toolbarStyles.minHeight = "32px !important"
-
 
 
         return (
@@ -1086,108 +1316,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     {/*</Button>*/}
 
 
-                    {loggedIn ? (
-                        <>
-                            <div style={{
-                                position: 'fixed',
-                                left: '50%',
-                                transform: 'translateX(-50%)',
-                                zIndex: 1000,
-                            }}>
-                                <Tooltip title="Open DevSpace Controls">
-
-                                    <IconButton ref={toggleButtonRef} onClick={() => setIsOpen(!isOpen)}>
-                                        <SettingsApplicationsIcon />
-                                    </IconButton>
-                                </Tooltip>
-
-                                {isOpen && (
-                                    <Paper elevation={3} style={{
-                                        padding: '8px',
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        position: 'absolute',
-                                        top: '70%',
-                                        left: "50%",
-                                        transform: 'translate(-50%, 0)',
-                                        width: 'auto',
-                                    }}>
-                                        <Tooltip title="Go Back">
-                                            <IconButton color="error" onClick={async () => {
-                                                window.history.replaceState({}, "", window.location.href.split("?")[0]);
-                                                window.location.reload();
-                                            }}>
-                                                <ArrowBackIcon />
-                                            </IconButton>
-                                        </Tooltip>
-
-                                        <Tooltip title="Stop Workspace">
-                                            <IconButton color="warning" onClick={() => stopWorkspace()}>
-                                                <StopIcon />
-                                            </IconButton>
-                                        </Tooltip>
-
-                                        {
-                                            window.location.pathname.startsWith("/launchpad/") ? (
-                                                new URLSearchParams(window.location.search).get("desktop") === "none" ? (
-                                                    <>
-                                                        <Tooltip title="View Desktop">
-                                                            <IconButton color="success" onClick={async () => {
-                                                                window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=side");
-                                                                window.location.reload();
-                                                            }}>
-                                                                <DesktopWindowsIcon />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                        <Tooltip title="Open Desktop In New Tab">
-                                                            <IconButton color="success" onClick={async () => {
-                                                                window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=popped-out");
-                                                                window.location.reload();
-                                                            }}>
-                                                                <QueuePlayNextIcon />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    </>
-                                                ) : new URLSearchParams(window.location.search).get("desktop") === "side" ? (
-                                                    <>
-                                                        <Tooltip title="Close Desktop">
-                                                            <IconButton color="error" onClick={async () => {
-                                                                window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=none");
-                                                                window.location.reload();
-                                                            }}>
-                                                                <DesktopAccessDisabledIcon />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                        <Tooltip title="Open Desktop In New Tab">
-                                                            <IconButton color="success" onClick={async () => {
-                                                                window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=popped-out");
-                                                                window.location.reload();
-                                                            }}>
-                                                                <QueuePlayNextIcon />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    </>
-                                                ) : new URLSearchParams(window.location.search).get("desktop") === "popped-out" ? (
-                                                    <>
-                                                        <Tooltip title="View Desktop">
-                                                            <IconButton color="success" onClick={async () => {
-                                                                window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=side");
-                                                                window.location.reload();
-                                                            }}>
-                                                                <DesktopWindowsIcon />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                    </>
-                                                ) : null
-                                            ) : null
-                                        }
-                                    </Paper>
-                                )}
-                            </div>
-
-
-                        </>
-                    ) : (
+                    {loggedIn ? renderDevSpaceControls() : (
                         <Button onClick={async () => {
                             navigate("/signup")
                         }} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '18%', height: '55px', left: '8% ', color: theme.palette.primary.contrastText }}>
@@ -2074,8 +2203,57 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         )
     }
 
+    const handleWsMessage = (message: WsMessage<any>) => {
+        // attempt to parse json message
+        let jsonMessage: any | null = null
+        try {
+            jsonMessage = message.payload;
+        } catch (e) {
+            console.log("websocket json decode error: ", e);
+            return
+        }
+
+        if (jsonMessage === null) {
+            console.log("unexpected null message")
+            return
+        }
+
+        // exit if there's no resource utilization
+        if (!jsonMessage["resources"]) {
+            return
+        }
+
+        // exit if this is not the launchpad
+        if (!window.location.pathname.startsWith("/launchpad/")) {
+            return
+        }
+
+        // load the id from the path
+        let id = window.location.pathname.split("/launchpad/")[1]
+        if (id.endsWith("/")) {
+            // trim final slash
+            id = id.replaceAll("/", "")
+        }
+        // skip if the workspace isn't the same one
+        if (!jsonMessage["workspace"] || !jsonMessage["workspace"]["_id"] || jsonMessage["workspace"]["_id"] !== id) {
+            return
+        }
+
+        setCpuUsagePercentage(jsonMessage["resources"]["cpu"] * 100)
+        setMemoryUsagePercentage(jsonMessage["resources"]["memory"] * 100)
+        setCpuUsage(jsonMessage["resources"]["cpu_usage"] / 1000)
+        setMemoryUsage(jsonMessage["resources"]["memory_usage"] / 1_000_000_000)
+        setCpuLimit(jsonMessage["resources"]["cpu_limit"] / 1000)
+        setMemoryLimit(jsonMessage["resources"]["memory_limit"] / 1_000_000_000)
+    }
+
     let appBarRenderer = renderAppBar
     if (window.location.pathname.startsWith("/launchpad/") && query.get("editor") === "true") {
+        globalWs.registerCallback(
+            WsMessageType.WorkspaceStatusUpdate,
+            `workspace:usage:${window.location.pathname.split("/launchpad/")[1]}`,
+            handleWsMessage
+        );
         appBarRenderer = renderWorkspaceAppBar
     } else if (window.innerWidth < 1000) {
         appBarRenderer = mobileAppBar
