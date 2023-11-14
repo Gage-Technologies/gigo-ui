@@ -51,6 +51,10 @@ import JourneyFormFiveIcon from "../components/Icons/journeyForms/Forms5";
 import JourneyFormSixIcon from "../components/Icons/journeyForms/Forms6";
 import JourneyFormSevenIcon from "../components/Icons/journeyForms/Forms7";
 import {useNavigate} from "react-router-dom";
+import call from "../services/api-call";
+import config from "../config";
+import swal from "sweetalert";
+import {programmingLanguages} from "../services/vars";
 
 function JourneyForm() {
     // const [formData, setFormData] = useState({
@@ -82,17 +86,17 @@ function JourneyForm() {
     const [section, setSection] = React.useState<number>(reduxSectionState === null ? 0 : reduxSectionState)
 
     const [journeyForm, setJourneyForm] = React.useState(
-            {
+        {
 
-                learningGoal: reduxLearningGoal,
-                languageInterest: reduxLanguageInterest,
-                endGoal: reduxEndGoal,
-                experienceLevel: reduxExperienceLevel,
-                triedProgramming: reduxTriedProgramming,
-                triedProgrammingOnline: reduxTriedProgrammingOnline,
-                familiarityIDE: reduxFamiliarityIDE,
-                familiarityLinux: reduxFamiliarityLinux,
-            }
+            learning_goal: reduxLearningGoal,
+            selected_language: reduxLanguageInterest,
+            end_goal: reduxEndGoal,
+            experience_level: reduxExperienceLevel,
+            familiarity_ide: reduxFamiliarityIDE,
+            familiarity_linux: reduxFamiliarityLinux,
+            tried: reduxTriedProgramming,
+            tried_online: reduxTriedProgrammingOnline,
+        }
 
     )
 
@@ -141,35 +145,35 @@ function JourneyForm() {
         // conditionally update each field in the createProjectForm state depending on which values were passed
 
         if (state.learningGoal !== '') {
-            formUpdate.learningGoal = state.learningGoal;
+            formUpdate.learning_goal = state.learningGoal;
         }
 
         if (state.languageInterest !== '') {
-            formUpdate.languageInterest = state.languageInterest;
+            formUpdate.selected_language = state.languageInterest;
         }
 
-        if (state.endGoal !== null) {
-            formUpdate.endGoal = state.endGoal;
+        if (state.endGoal !== '') {
+            formUpdate.end_goal = state.endGoal;
         }
 
-        if (state.experienceLevel !== null) {
-            formUpdate.experienceLevel = state.experienceLevel;
+        if (state.experienceLevel !== '') {
+            formUpdate.experience_level = state.experienceLevel;
         }
 
-        if (state.familiarityLinux !== null) {
-            formUpdate.familiarityLinux = state.familiarityLinux;
+        if (state.familiarityLinux !== '') {
+            formUpdate.familiarity_linux = state.familiarityLinux;
         }
 
-        if (state.familiarityIDE !== null) {
-            formUpdate.familiarityIDE = state.familiarityIDE;
+        if (state.familiarityIDE !== '') {
+            formUpdate.familiarity_ide = state.familiarityIDE;
         }
 
-        if (state.triedProgramming !== null) {
-            formUpdate.triedProgramming = state.triedProgramming;
+        if (state.triedProgramming !== '') {
+            formUpdate.tried = state.triedProgramming;
         }
 
-        if (state.triedProgrammingOnline !== null) {
-            formUpdate.triedProgrammingOnline = state.triedProgrammingOnline;
+        if (state.triedProgrammingOnline !== '') {
+            formUpdate.tried_online = state.triedProgrammingOnline;
         }
 
 
@@ -185,14 +189,14 @@ function JourneyForm() {
     const clearState = () => {
         dispatch(clearJourneyFormState())
         setJourneyForm({
-            learningGoal: '',
-            languageInterest: '',
-            endGoal: '',
-            experienceLevel: '',
-            familiarityIDE: '',
-            familiarityLinux: '',
-            triedProgramming: '',
-            triedProgrammingOnline: '',
+            learning_goal: '',
+            selected_language: '',
+            end_goal: '',
+            experience_level: '',
+            familiarity_ide: '',
+            familiarity_linux: '',
+            tried: '',
+            tried_online: '',
         });
     }
 
@@ -248,7 +252,7 @@ function JourneyForm() {
                     ? 'calc(80vw - 15vw)'
                     : chatOpen ? 'calc(80vw - 17vw)'
                         : '80vw'
-            :
+                :
                 sidebarOpen
                     ? 'calc(87vw - 15vw)'
                     : chatOpen ? 'calc(87vw - 17vw)'
@@ -256,9 +260,9 @@ function JourneyForm() {
         height:
             aspectRatio === '21:9' ?
                 sidebarOpen ? 'calc(87vh - 64px)'
-                : chatOpen ? 'calc(87vh - 64px)'
-                    : 'calc(87vh - 64px)'
-            :
+                    : chatOpen ? 'calc(87vh - 64px)'
+                        : 'calc(87vh - 64px)'
+                :
                 sidebarOpen ? 'calc(90vh - 64px)'
                     : chatOpen ? 'calc(89vh - 64px)'
                         : 'calc(87vh - 64px)',
@@ -269,8 +273,8 @@ function JourneyForm() {
                 sidebarOpen
                     ? '9.5%'
                     : chatOpen ? '11.5%'
-                    : '8%'
-            :
+                        : '8%'
+                :
                 sidebarOpen
                     ? '4.5%'
                     : chatOpen ? '6%'
@@ -278,10 +282,10 @@ function JourneyForm() {
         top:
             aspectRatio === '21:9' ?
                 sidebarOpen
-                ? '-15%'
-                : chatOpen ? '-15%'
-                : '0%'
-            :
+                    ? '-15%'
+                    : chatOpen ? '-15%'
+                        : '0%'
+                :
                 sidebarOpen
                     ? '0%'
                     : chatOpen ? '0%'
@@ -298,7 +302,7 @@ function JourneyForm() {
                     ? 'calc(80vw - 15vw)'
                     : chatOpen ? 'calc(80vw - 17vw)'
                         : '80vw'
-            :
+                :
                 sidebarOpen
                     ? 'calc(90vw - 15vw)'
                     : chatOpen ? 'calc(90vw - 17vw)'
@@ -308,8 +312,8 @@ function JourneyForm() {
                 sidebarOpen
                     ? 'calc(25vw - 64px)'
                     : chatOpen? 'calc(25vw - 64px)'
-                    : 'calc(80vh - 64px)'
-            :
+                        : 'calc(80vh - 64px)'
+                :
                 sidebarOpen
                     ? 'calc(35vw - 64px)'
                     : chatOpen? 'calc(35vw - 64px)'
@@ -322,7 +326,7 @@ function JourneyForm() {
                     ? '9.5%'
                     : chatOpen ? '11.5%'
                         : '8%'
-            :
+                :
                 sidebarOpen
                     ? '1%'
                     : chatOpen ? '1%'
@@ -337,7 +341,7 @@ function JourneyForm() {
 
     const mainDivStyles: React.CSSProperties = {
         position: 'relative',
-        height: 'calc(95vh-64px)',
+        height: 'calc(95vh - 64px)',
         overflow: 'hidden'
     }
 
@@ -393,21 +397,21 @@ function JourneyForm() {
     let sectionSwitch = () => {
         console.log("sectionSwitch: ", section);
         switch (section) {
-            case -1:
-                return renderLearningGoalSection()
             case 0:
-                return renderLanguageInterest()
+                return renderLearningGoalSection()
             case 1:
-                return renderEndGoal()
+                return renderLanguageInterest()
             case 2:
-                return renderExperienceLevel()
+                return renderEndGoal()
             case 3:
-                return renderFamiliarityIDE()
+                return renderExperienceLevel()
             case 4:
-                return renderFamiliarityLinux()
+                return renderFamiliarityIDE()
             case 5:
-                return renderTriedProgramming()
+                return renderFamiliarityLinux()
             case 6:
+                return renderTriedProgramming()
+            case 7:
                 return renderTriedProgrammingOnline()
             default:
                 return renderLearningGoalSection()
@@ -421,12 +425,41 @@ function JourneyForm() {
     const [aptitudeDialogOpen, setAptitudeDialogOpen] = useState(false);
     // ... (other state variables, methods)
 
-    const handleAptitudeDialogClose = () => {
+    const handleAptitudeDialogClose = async () => {
         setAptitudeDialogOpen(false);
     };
 
-    const handleAptitudeDialogOpen = () => {
-        setAptitudeDialogOpen(true);
+    const handleSelectNo = async () => {
+        // TODO: uncomment and make necessary changes
+
+        // let info = await call(
+        //     "/api/journey/saveJourneyInfo",
+        //     "post",
+        //     null,
+        //     null,
+        //     null,
+        //     // @ts-ignore
+        //     {
+        //         journey_info: journeyForm,
+        //         aptitude_level: journeyForm.experience_level
+        //     },
+        //     null,
+        //     config.rootPath
+        // )
+        //
+        // const [res] = await Promise.all([
+        //     info
+        // ])
+        //
+        // if (res["message"] !== "journey info saved") {
+        //     // TODO make this for production, this was testing
+        //     swal("failed", "", "error")
+        // } else {
+        //     // TODO make this for production, this was testing
+        //     swal("success", "", "success")
+        // }
+
+        setAptitudeDialogOpen(false);
     };
 
 
@@ -467,10 +500,10 @@ function JourneyForm() {
                                 The purpose of this form is to customize the GIGO Journey experience according to your individual requirements and proficiency level. We kindly request that you provide the necessary information in the fields provided below. By doing so, we will be able to ensure that your experience with GIGO Journey is optimized to meet your unique needs.
                             </p>
                         </div>
-                        <Paper elevation={3} style={{
+                        <Paper elevation={0} style={{
                             padding: '20px',
                             borderRadius: '15px',
-
+                            backgroundColor: 'transparent',
                             color: theme.palette.primary.contrastText,
                             boxShadow: 'none'
                         }}>
@@ -481,14 +514,14 @@ function JourneyForm() {
                                       alignItems: 'center',
                                       position: 'absolute',
                                       bottom: sidebarOpen
-                                              ? '9vh'
-                                              : chatOpen ? '9vh'
-                                              : '6vh',
+                                          ? '9vh'
+                                          : chatOpen ? '9vh'
+                                              : '8vh',
                                       left: sidebarOpen
                                           ? '-5%'
                                           : chatOpen ? '-3.5%'
                                               : '1%',
-                            }}>
+                                  }}>
                                 <br/>
                                 <Grid item xs={6}>
                                     <FormControl>
@@ -497,7 +530,7 @@ function JourneyForm() {
                                             fullWidth
                                             name="learningGoal"
                                             required={true}
-                                            value={journeyForm.learningGoal}
+                                            value={journeyForm.learning_goal}
                                             onChange={(e) => {
                                                 console.log("learningGoal: ", e.target.value);
                                                 // copy initial state
@@ -524,7 +557,7 @@ function JourneyForm() {
                             </Grid>
                             <Grid container spacing={3}
                                   style={{paddingTop: '20px',
-                                      top: '92%',
+                                      top: '93%',
                                       justifyContent: 'center',
                                       alignItems: 'center',
                                       position: 'absolute',
@@ -535,49 +568,36 @@ function JourneyForm() {
                                 <Grid item xs={3}>
                                     <div
                                         onClick={() => {
-                                            if (journeyForm.learningGoal === '') {
+                                            if (journeyForm.learning_goal === '') {
                                                 setDialogOpen(true);
                                             } else {
-                                                updateSectionState(0);
+                                                updateSectionState(1);
                                             }
                                         }}
                                     >
-                                        <AwesomeButton style={{
+                                        <Button variant={"outlined"} style={{
                                             width: "30%", height: "100%", left: '32%',
-                                            '--button-primary-color': theme.palette.primary.main,
-                                            '--button-primary-color-dark': theme.palette.primary.dark,
-                                            '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.main,
-                                            '--button-default-height': '5vh',
-                                            '--button-default-font-size': '2vh',
-                                            '--button-default-border-radius': '12px',
-                                            '--button-horizontal-padding': '27px',
-                                            '--button-raise-level': '6px',
-                                            '--button-hover-pressure': '1',
-                                            '--transform-speed': '0.185s',
-
-
                                             borderRadius: "25px",
                                             fontSize: "100%",
-                                        }} type="primary"
+                                        }}
                                         >
                                             Next
 
-                                        </AwesomeButton>
+                                        </Button>
                                     </div>
-                                        <Dialog open={dialogOpen} onClose={handleDialogClose}>
-                                            <DialogTitle>Empty Learning Goal</DialogTitle>
-                                            <DialogContent>
-                                                <DialogContentText>
-                                                    The learning goal cannot be empty.
-                                                </DialogContentText>
-                                            </DialogContent>
-                                            <DialogActions>
-                                                <Button onClick={handleDialogClose} color="primary">
-                                                    Close
-                                                </Button>
-                                            </DialogActions>
-                                        </Dialog>
+                                    <Dialog open={dialogOpen} onClose={handleDialogClose}>
+                                        <DialogTitle>Empty Learning Goal</DialogTitle>
+                                        <DialogContent>
+                                            <DialogContentText>
+                                                The learning goal cannot be empty.
+                                            </DialogContentText>
+                                        </DialogContent>
+                                        <DialogActions>
+                                            <Button onClick={handleDialogClose} color="primary">
+                                                Close
+                                            </Button>
+                                        </DialogActions>
+                                    </Dialog>
 
                                 </Grid>
                             </Grid>
@@ -594,10 +614,11 @@ function JourneyForm() {
             <ThemeProvider theme={theme}>
                 <CssBaseline>
                     <div style={mainDivStyles}>
-                        <Paper elevation={3} style={{
+                        <Paper elevation={0} style={{
                             padding: '20px',
                             borderRadius: '15px',
-                            color: theme.palette.primary.contrastText
+                            color: theme.palette.primary.contrastText,
+                            backgroundColor: 'transparent',
                         }}>
                             <Grid container spacing={3}
                                   style={{justifyContent: 'center', alignItems: 'center', paddingTop: '20px'}}>
@@ -609,7 +630,7 @@ function JourneyForm() {
                                             fullWidth
                                             name="languageInterest"
                                             required={true}
-                                            value={journeyForm.languageInterest}
+                                            value={journeyForm.selected_language}
                                             onChange={(e) => {
                                                 // copy initial state
                                                 let updateState = Object.assign({}, initialJourneyFormState);
@@ -624,14 +645,14 @@ function JourneyForm() {
                                                 width: "45vw",
                                             }}
                                         >
-                                            <MenuItem value="Python">Python</MenuItem>
-                                            <MenuItem value="Golang">Golang</MenuItem>
-                                            <MenuItem value="Javascript">Javascript</MenuItem>
-                                            <MenuItem value="Typescript">Typescript</MenuItem>
-                                            <MenuItem value="Cpp">C++</MenuItem>
-                                            <MenuItem value="CSharp">C#</MenuItem>
-                                            <MenuItem value="Other">Other</MenuItem>
-                                            <MenuItem value="Undecided">I don't know</MenuItem>
+                                            <MenuItem value={5}>Python</MenuItem>
+                                            <MenuItem value={6}>Golang</MenuItem>
+                                            <MenuItem value={3}>Javascript</MenuItem>
+                                            <MenuItem value={4}>Typescript</MenuItem>
+                                            <MenuItem value={8}>C++</MenuItem>
+                                            <MenuItem value={10}>C#</MenuItem>
+                                            <MenuItem value={1}>Other</MenuItem>
+                                            <MenuItem value={0}>I don't know</MenuItem>
                                         </Select>
                                     </FormControl>
                                 </Grid>
@@ -644,32 +665,19 @@ function JourneyForm() {
                                     <div
                                         onClick={() => {
                                             console.log("clicked back")
-                                            updateSectionState(-1);
+                                            updateSectionState(0);
                                             let updateState = Object.assign({}, initialJourneyFormStateUpdate);
                                             console.log("current state: ", updateState.section);
                                         }}
                                     >
-                                        <AwesomeButton style={{
+                                        <Button variant={"outlined"} style={{
                                             width: "30%", height: "100%", left: '32%',
-                                            '--button-primary-color': theme.palette.primary.main,
-                                            '--button-primary-color-dark': theme.palette.primary.dark,
-                                            '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.main,
-                                            '--button-default-height': '5vh',
-                                            '--button-default-font-size': '2vh',
-                                            '--button-default-border-radius': '12px',
-                                            '--button-horizontal-padding': '27px',
-                                            '--button-raise-level': '6px',
-                                            '--button-hover-pressure': '1',
-                                            '--transform-speed': '0.185s',
-
-
                                             borderRadius: "25px",
                                             fontSize: "100%",
-                                        }} type="primary"
+                                        }}
                                         >
                                             Back
-                                        </AwesomeButton>
+                                        </Button>
                                     </div>
                                     <Dialog open={dialogOpen} onClose={handleDialogClose}>
                                         <DialogTitle>Empty Language</DialogTitle>
@@ -689,35 +697,22 @@ function JourneyForm() {
                                 <Grid item xs={3}>
                                     <div
                                         onClick={() => {
-                                            if (journeyForm.learningGoal === '') {
+                                            if (journeyForm.selected_language === '') {
                                                 setDialogOpen(true);
                                             } else {
-                                                updateSectionState(1);
+                                                updateSectionState(2);
                                             }
                                         }}
                                     >
-                                        <AwesomeButton style={{
+                                        <Button variant={"outlined"} style={{
                                             width: "30%", height: "100%", left: '32%',
-                                            '--button-primary-color': theme.palette.primary.main,
-                                            '--button-primary-color-dark': theme.palette.primary.dark,
-                                            '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.main,
-                                            '--button-default-height': '5vh',
-                                            '--button-default-font-size': '2vh',
-                                            '--button-default-border-radius': '12px',
-                                            '--button-horizontal-padding': '27px',
-                                            '--button-raise-level': '6px',
-                                            '--button-hover-pressure': '1',
-                                            '--transform-speed': '0.185s',
-
-
                                             borderRadius: "25px",
                                             fontSize: "100%",
-                                        }} type="primary"
+                                        }}
                                         >
                                             Next
 
-                                        </AwesomeButton>
+                                        </Button>
                                     </div>
                                 </Grid>
                                 <Grid item xs={12}>
@@ -742,10 +737,10 @@ function JourneyForm() {
             <ThemeProvider theme={theme}>
                 <CssBaseline>
                     <div style={mainDivStyles}>
-                        <Paper elevation={3} style={{
+                        <Paper elevation={0} style={{
                             padding: '20px',
                             borderRadius: '15px',
-
+                            backgroundColor: 'transparent',
                             color: theme.palette.primary.contrastText
                         }}>
                             <Grid container spacing={3}
@@ -767,7 +762,7 @@ function JourneyForm() {
                                             }}
                                             fullWidth
                                             name="endGoal"
-                                            value={journeyForm.endGoal}
+                                            value={journeyForm.end_goal}
                                             sx={{
                                                 width: "45vw",
                                             }}
@@ -788,32 +783,19 @@ function JourneyForm() {
                                 <Grid item xs={3}>
                                     <div
                                         onClick={() => {
-                                            updateSectionState(0);
+                                            updateSectionState(1);
                                             let updateState = Object.assign({}, initialJourneyFormStateUpdate);
                                             console.log("current state: ", updateState.section);
                                         }}
                                     >
-                                        <AwesomeButton style={{
+                                        <Button variant={"outlined"} style={{
                                             width: "30%", height: "100%", left: '32%',
-                                            '--button-primary-color': theme.palette.primary.main,
-                                            '--button-primary-color-dark': theme.palette.primary.dark,
-                                            '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.main,
-                                            '--button-default-height': '5vh',
-                                            '--button-default-font-size': '2vh',
-                                            '--button-default-border-radius': '12px',
-                                            '--button-horizontal-padding': '27px',
-                                            '--button-raise-level': '6px',
-                                            '--button-hover-pressure': '1',
-                                            '--transform-speed': '0.185s',
-
-
                                             borderRadius: "25px",
                                             fontSize: "100%",
-                                        }} type="primary"
+                                        }}
                                         >
                                             Back
-                                        </AwesomeButton>
+                                        </Button>
                                     </div>
                                     <Dialog open={dialogOpen} onClose={handleDialogClose}>
                                         <DialogTitle>Empty end goal</DialogTitle>
@@ -833,35 +815,22 @@ function JourneyForm() {
 
                                     <div
                                         onClick={() => {
-                                            if (journeyForm.learningGoal === '') {
+                                            if (journeyForm.end_goal === '') {
                                                 setDialogOpen(true);
                                             } else {
-                                                updateSectionState(2);
+                                                updateSectionState(3);
                                             }
                                         }}
                                     >
-                                        <AwesomeButton style={{
+                                        <Button variant={"outlined"} style={{
                                             width: "30%", height: "100%", left: '32%',
-                                            '--button-primary-color': theme.palette.primary.main,
-                                            '--button-primary-color-dark': theme.palette.primary.dark,
-                                            '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.main,
-                                            '--button-default-height': '5vh',
-                                            '--button-default-font-size': '2vh',
-                                            '--button-default-border-radius': '12px',
-                                            '--button-horizontal-padding': '27px',
-                                            '--button-raise-level': '6px',
-                                            '--button-hover-pressure': '1',
-                                            '--transform-speed': '0.185s',
-
-
                                             borderRadius: "25px",
                                             fontSize: "100%",
-                                        }} type="primary"
+                                        }}
                                         >
                                             Next
 
-                                        </AwesomeButton>
+                                        </Button>
                                     </div>
                                 </Grid>
                                 <Grid item xs={12}>
@@ -885,9 +854,10 @@ function JourneyForm() {
             <ThemeProvider theme={theme}>
                 <CssBaseline>
                     <div style={mainDivStyles}>
-                        <Paper elevation={3} style={{
+                        <Paper elevation={0} style={{
                             padding: '20px',
                             borderRadius: '15px',
+                            backgroundColor: 'transparent',
                             color: theme.palette.primary.contrastText
                         }}>
                             <Grid container spacing={3}
@@ -901,7 +871,7 @@ function JourneyForm() {
                                             label="What is your experience level in programming?"
                                             fullWidth
                                             name="experienceLevel"
-                                            value={journeyForm.experienceLevel}
+                                            value={journeyForm.experience_level}
                                             onChange={(e) => {
                                                 // copy initial state
                                                 let updateState = Object.assign({}, initialJourneyFormState);
@@ -932,30 +902,17 @@ function JourneyForm() {
                                 <Grid item xs={3}>
                                     <div
                                         onClick={() => {
-                                            updateSectionState(1);
+                                            updateSectionState(2);
                                         }}
                                     >
-                                        <AwesomeButton style={{
+                                        <Button variant={"outlined"} style={{
                                             width: "30%", height: "100%", left: '32%',
-                                            '--button-primary-color': theme.palette.primary.main,
-                                            '--button-primary-color-dark': theme.palette.primary.dark,
-                                            '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.main,
-                                            '--button-default-height': '5vh',
-                                            '--button-default-font-size': '2vh',
-                                            '--button-default-border-radius': '12px',
-                                            '--button-horizontal-padding': '27px',
-                                            '--button-raise-level': '6px',
-                                            '--button-hover-pressure': '1',
-                                            '--transform-speed': '0.185s',
-
-
                                             borderRadius: "25px",
                                             fontSize: "100%",
-                                        }} type="primary"
+                                        }}
                                         >
                                             Back
-                                        </AwesomeButton>
+                                        </Button>
                                     </div>
                                     <Dialog open={dialogOpen} onClose={handleDialogClose}>
                                         <DialogTitle>Empty experience level</DialogTitle>
@@ -974,35 +931,22 @@ function JourneyForm() {
                                 <Grid item xs={3}>
                                     <div
                                         onClick={() => {
-                                            if (journeyForm.learningGoal === '') {
+                                            if (journeyForm.experience_level === '') {
                                                 setDialogOpen(true);
                                             } else {
-                                                updateSectionState(3);
+                                                updateSectionState(4);
                                             }
                                         }}
                                     >
-                                        <AwesomeButton style={{
+                                        <Button variant={"outlined"} style={{
                                             width: "30%", height: "100%", left: '32%',
-                                            '--button-primary-color': theme.palette.primary.main,
-                                            '--button-primary-color-dark': theme.palette.primary.dark,
-                                            '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.main,
-                                            '--button-default-height': '5vh',
-                                            '--button-default-font-size': '2vh',
-                                            '--button-default-border-radius': '12px',
-                                            '--button-horizontal-padding': '27px',
-                                            '--button-raise-level': '6px',
-                                            '--button-hover-pressure': '1',
-                                            '--transform-speed': '0.185s',
-
-
                                             borderRadius: "25px",
                                             fontSize: "100%",
-                                        }} type="primary"
+                                        }}
                                         >
                                             Next
 
-                                        </AwesomeButton>
+                                        </Button>
                                     </div>
                                 </Grid>
                                 <Grid item xs={12}>
@@ -1026,9 +970,10 @@ function JourneyForm() {
             <ThemeProvider theme={theme}>
                 <CssBaseline>
                     <div style={mainDivStyles}>
-                        <Paper elevation={3} style={{
+                        <Paper elevation={0} style={{
                             padding: '20px',
                             borderRadius: '15px',
+                            backgroundColor: 'transparent',
                             color: theme.palette.primary.contrastText
                         }}>
                             <Grid container spacing={3}
@@ -1042,7 +987,7 @@ function JourneyForm() {
                                             labelId={"familiarityIDELabel"}
                                             fullWidth
                                             name="familiarityIDE"
-                                            value={journeyForm.familiarityIDE}
+                                            value={journeyForm.familiarity_ide}
                                             onChange={(e) => {
                                                 // copy initial state
                                                 let updateState = Object.assign({}, initialJourneyFormState);
@@ -1071,30 +1016,17 @@ function JourneyForm() {
                                 <Grid item xs={3}>
                                     <div
                                         onClick={() => {
-                                            updateSectionState(2);
+                                            updateSectionState(3);
                                         }}
                                     >
-                                        <AwesomeButton style={{
+                                        <Button variant={"outlined"} style={{
                                             width: "30%", height: "100%", left: '32%',
-                                            '--button-primary-color': theme.palette.primary.main,
-                                            '--button-primary-color-dark': theme.palette.primary.dark,
-                                            '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.main,
-                                            '--button-default-height': '5vh',
-                                            '--button-default-font-size': '2vh',
-                                            '--button-default-border-radius': '12px',
-                                            '--button-horizontal-padding': '27px',
-                                            '--button-raise-level': '6px',
-                                            '--button-hover-pressure': '1',
-                                            '--transform-speed': '0.185s',
-
-
                                             borderRadius: "25px",
                                             fontSize: "100%",
-                                        }} type="primary"
+                                        }}
                                         >
                                             Back
-                                        </AwesomeButton>
+                                        </Button>
                                     </div>
                                     <Dialog open={dialogOpen} onClose={handleDialogClose}>
                                         <DialogTitle>Empty familiarity field</DialogTitle>
@@ -1113,35 +1045,22 @@ function JourneyForm() {
                                 <Grid item xs={3}>
                                     <div
                                         onClick={() => {
-                                            if (journeyForm.learningGoal === '') {
+                                            if (journeyForm.familiarity_ide === '') {
                                                 setDialogOpen(true);
                                             } else {
-                                                updateSectionState(4);
+                                                updateSectionState(5);
                                             }
                                         }}
                                     >
-                                        <AwesomeButton style={{
+                                        <Button variant={"outlined"} style={{
                                             width: "30%", height: "100%", left: '32%',
-                                            '--button-primary-color': theme.palette.primary.main,
-                                            '--button-primary-color-dark': theme.palette.primary.dark,
-                                            '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.main,
-                                            '--button-default-height': '5vh',
-                                            '--button-default-font-size': '2vh',
-                                            '--button-default-border-radius': '12px',
-                                            '--button-horizontal-padding': '27px',
-                                            '--button-raise-level': '6px',
-                                            '--button-hover-pressure': '1',
-                                            '--transform-speed': '0.185s',
-
-
                                             borderRadius: "25px",
                                             fontSize: "100%",
-                                        }} type="primary"
+                                        }}
                                         >
                                             Next
 
-                                        </AwesomeButton>
+                                        </Button>
                                     </div>
                                 </Grid>
                                 <Grid item xs={12}>
@@ -1165,9 +1084,10 @@ function JourneyForm() {
             <ThemeProvider theme={theme}>
                 <CssBaseline>
                     <div style={mainDivStyles}>
-                        <Paper elevation={3} style={{
+                        <Paper elevation={0} style={{
                             padding: '20px',
                             borderRadius: '15px',
+                            backgroundColor: 'transparent',
                             color: theme.palette.primary.contrastText
                         }}>
                             <Grid container spacing={3}
@@ -1175,13 +1095,13 @@ function JourneyForm() {
                                 <br/>
                                 <Grid item xs={6}>
                                     <FormControl>
-                                        <InputLabel id={"familiarityLinuxLabel"}>Why do you want learn programming?</InputLabel>
+                                        <InputLabel id={"familiarityLinuxLabel"}>How familiar are you with Linux?</InputLabel>
                                         <Select
                                             labelId={"familiarityLinuxLabel"}
                                             label="How familiar are you with the Linux OS?"
                                             fullWidth
                                             name="familiarityLinux"
-                                            value={journeyForm.familiarityLinux}
+                                            value={journeyForm.familiarity_linux}
                                             onChange={(e) => {
                                                 // copy initial state
                                                 let updateState = Object.assign({}, initialJourneyFormState);
@@ -1198,7 +1118,7 @@ function JourneyForm() {
                                             <MenuItem value="No Experience">I have no prior experience or I have not heard of Linux
                                                 before</MenuItem>
                                             <MenuItem value="Beginner">I have seen Linux before but have not used it much</MenuItem>
-                                            <MenuItem value="Intermediate">I have used Linux a fair bit and know some enough
+                                            <MenuItem value="Intermediate">I have used Linux a fair bit and know enough
                                                 terminal commands to get by</MenuItem>
                                             <MenuItem value="Advanced">I have used Linux a significant amount and feel that I can
                                                 hold my own on any task in Linux.</MenuItem>
@@ -1213,30 +1133,17 @@ function JourneyForm() {
                                 <Grid item xs={3}>
                                     <div
                                         onClick={() => {
-                                            updateSectionState(3);
+                                            updateSectionState(4);
                                         }}
                                     >
-                                        <AwesomeButton style={{
+                                        <Button variant={"outlined"} style={{
                                             width: "30%", height: "100%", left: '32%',
-                                            '--button-primary-color': theme.palette.primary.main,
-                                            '--button-primary-color-dark': theme.palette.primary.dark,
-                                            '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.main,
-                                            '--button-default-height': '5vh',
-                                            '--button-default-font-size': '2vh',
-                                            '--button-default-border-radius': '12px',
-                                            '--button-horizontal-padding': '27px',
-                                            '--button-raise-level': '6px',
-                                            '--button-hover-pressure': '1',
-                                            '--transform-speed': '0.185s',
-
-
                                             borderRadius: "25px",
                                             fontSize: "100%",
-                                        }} type="primary"
+                                        }}
                                         >
                                             Back
-                                        </AwesomeButton>
+                                        </Button>
                                     </div>
                                     <Dialog open={dialogOpen} onClose={handleDialogClose}>
                                         <DialogTitle>Empty familiarity field</DialogTitle>
@@ -1255,35 +1162,22 @@ function JourneyForm() {
                                 <Grid item xs={3}>
                                     <div
                                         onClick={() => {
-                                            if (journeyForm.learningGoal === '') {
+                                            if (journeyForm.learning_goal === '') {
                                                 setDialogOpen(true);
                                             } else {
-                                                updateSectionState(5);
+                                                updateSectionState(6);
                                             }
                                         }}
                                     >
-                                        <AwesomeButton style={{
+                                        <Button variant={"outlined"} style={{
                                             width: "30%", height: "100%", left: '32%',
-                                            '--button-primary-color': theme.palette.primary.main,
-                                            '--button-primary-color-dark': theme.palette.primary.dark,
-                                            '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.main,
-                                            '--button-default-height': '5vh',
-                                            '--button-default-font-size': '2vh',
-                                            '--button-default-border-radius': '12px',
-                                            '--button-horizontal-padding': '27px',
-                                            '--button-raise-level': '6px',
-                                            '--button-hover-pressure': '1',
-                                            '--transform-speed': '0.185s',
-
-
                                             borderRadius: "25px",
                                             fontSize: "100%",
-                                        }} type="primary"
+                                        }}
                                         >
                                             Next
 
-                                        </AwesomeButton>
+                                        </Button>
                                     </div>
                                 </Grid>
                                 <Grid item xs={12}>
@@ -1306,9 +1200,10 @@ function JourneyForm() {
             <ThemeProvider theme={theme}>
                 <CssBaseline>
                     <div style={mainDivStyles}>
-                        <Paper elevation={3} style={{
+                        <Paper elevation={0} style={{
                             padding: '20px',
                             borderRadius: '15px',
+                            backgroundColor: 'transparent',
                             color: theme.palette.primary.contrastText
                         }}>
                             <Grid container spacing={3}
@@ -1322,7 +1217,7 @@ function JourneyForm() {
                                             label="Have you tried to learn programming before?"
                                             fullWidth
                                             name="triedProgramming"
-                                            value={journeyForm.triedProgramming}
+                                            value={journeyForm.tried}
                                             onChange={(e) => {
                                                 // copy initial state
                                                 let updateState = Object.assign({}, initialJourneyFormState);
@@ -1346,30 +1241,17 @@ function JourneyForm() {
                                 <Grid item xs={3}>
                                     <div
                                         onClick={() => {
-                                            updateSectionState(4);
+                                            updateSectionState(5);
                                         }}
                                     >
-                                        <AwesomeButton style={{
+                                        <Button variant={"outlined"} style={{
                                             width: "30%", height: "100%", left: '32%',
-                                            '--button-primary-color': theme.palette.primary.main,
-                                            '--button-primary-color-dark': theme.palette.primary.dark,
-                                            '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.main,
-                                            '--button-default-height': '5vh',
-                                            '--button-default-font-size': '2vh',
-                                            '--button-default-border-radius': '12px',
-                                            '--button-horizontal-padding': '27px',
-                                            '--button-raise-level': '6px',
-                                            '--button-hover-pressure': '1',
-                                            '--transform-speed': '0.185s',
-
-
                                             borderRadius: "25px",
                                             fontSize: "100%",
-                                        }} type="primary"
+                                        }}
                                         >
                                             Back
-                                        </AwesomeButton>
+                                        </Button>
                                     </div>
                                     <Dialog open={dialogOpen} onClose={handleDialogClose}>
                                         <DialogTitle>Empty experience field</DialogTitle>
@@ -1389,35 +1271,22 @@ function JourneyForm() {
                                 <Grid item xs={3}>
                                     <div
                                         onClick={() => {
-                                            if (journeyForm.learningGoal === '') {
+                                            if (journeyForm.learning_goal === '') {
                                                 setDialogOpen(true);
                                             } else {
-                                                updateSectionState(6);
+                                                updateSectionState(7);
                                             }
                                         }}
                                     >
-                                        <AwesomeButton style={{
+                                        <Button variant={"outlined"} style={{
                                             width: "30%", height: "100%", left: '32%',
-                                            '--button-primary-color': theme.palette.primary.main,
-                                            '--button-primary-color-dark': theme.palette.primary.dark,
-                                            '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.main,
-                                            '--button-default-height': '5vh',
-                                            '--button-default-font-size': '2vh',
-                                            '--button-default-border-radius': '12px',
-                                            '--button-horizontal-padding': '27px',
-                                            '--button-raise-level': '6px',
-                                            '--button-hover-pressure': '1',
-                                            '--transform-speed': '0.185s',
-
-
                                             borderRadius: "25px",
                                             fontSize: "100%",
-                                        }} type="primary"
+                                        }}
                                         >
                                             Next
 
-                                        </AwesomeButton>
+                                        </Button>
                                     </div>
                                 </Grid>
                                 <Grid item xs={12}>
@@ -1440,9 +1309,10 @@ function JourneyForm() {
             <ThemeProvider theme={theme}>
                 <CssBaseline>
                     <div style={mainDivStyles}>
-                        <Paper elevation={3} style={{
+                        <Paper elevation={0} style={{
                             padding: '20px',
                             borderRadius: '15px',
+                            backgroundColor: 'transparent',
                             color: theme.palette.primary.contrastText
                         }}>
                             <Grid container spacing={3}
@@ -1456,7 +1326,7 @@ function JourneyForm() {
                                             label="Have you tried to learn programming online before?"
                                             fullWidth
                                             name="triedProgrammingOnline"
-                                            value={journeyForm.triedProgrammingOnline}
+                                            value={journeyForm.tried_online}
                                             onChange={(e) => {
                                                 // copy initial state
                                                 let updateState = Object.assign({}, initialJourneyFormState);
@@ -1481,30 +1351,17 @@ function JourneyForm() {
                                 <Grid item xs={3}>
                                     <div
                                         onClick={() => {
-                                            updateSectionState(5);
+                                            updateSectionState(6);
                                         }}
                                     >
-                                        <AwesomeButton style={{
+                                        <Button variant={"outlined"} style={{
                                             width: "30%", height: "100%", left: '32%',
-                                            '--button-primary-color': theme.palette.primary.main,
-                                            '--button-primary-color-dark': theme.palette.primary.dark,
-                                            '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.main,
-                                            '--button-default-height': '5vh',
-                                            '--button-default-font-size': '2vh',
-                                            '--button-default-border-radius': '12px',
-                                            '--button-horizontal-padding': '27px',
-                                            '--button-raise-level': '6px',
-                                            '--button-hover-pressure': '1',
-                                            '--transform-speed': '0.185s',
-
-
                                             borderRadius: "25px",
                                             fontSize: "100%",
-                                        }} type="primary"
+                                        }}
                                         >
                                             Back
-                                        </AwesomeButton>
+                                        </Button>
                                     </div>
                                     <Dialog open={dialogOpen} onClose={handleDialogClose}>
                                         <DialogTitle>Empty programming experience online field</DialogTitle>
@@ -1524,35 +1381,22 @@ function JourneyForm() {
                                 <Grid item xs={3}>
                                     <div
                                         onClick={() => {
-                                            if (journeyForm.learningGoal === '') {
+                                            if (journeyForm.learning_goal === '') {
                                                 setDialogOpen(true);
                                             } else {
                                                 setAptitudeDialogOpen(true);
                                             }
                                         }}
                                     >
-                                        <AwesomeButton style={{
+                                        <Button variant={"outlined"} style={{
                                             width: "30%", height: "100%", left: '32%',
-                                            '--button-primary-color': theme.palette.primary.main,
-                                            '--button-primary-color-dark': theme.palette.primary.dark,
-                                            '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.main,
-                                            '--button-default-height': '5vh',
-                                            '--button-default-font-size': '2vh',
-                                            '--button-default-border-radius': '12px',
-                                            '--button-horizontal-padding': '27px',
-                                            '--button-raise-level': '6px',
-                                            '--button-hover-pressure': '1',
-                                            '--transform-speed': '0.185s',
-
-
                                             borderRadius: "25px",
                                             fontSize: "100%",
-                                        }} type="primary"
+                                        }}
                                         >
                                             Next
 
-                                        </AwesomeButton>
+                                        </Button>
                                     </div>
                                 </Grid>
                                 <Dialog open={aptitudeDialogOpen} onClose={handleAptitudeDialogClose}>
@@ -1565,14 +1409,14 @@ function JourneyForm() {
                                     <DialogActions>
                                         <Button onClick={() => {
                                             // Handle "No" button click
-                                            handleAptitudeDialogClose();
+                                            handleSelectNo();
                                         }} color="primary">
                                             No
                                         </Button>
                                         <Button onClick={() => {
                                             // Handle "Yes" button click
                                             // Navigate to the aptitude test or set up state accordingly
-                                             navigate("/journey/quiz")
+                                            navigate("/journey/quiz")
                                         }} color="primary">
                                             Yes
                                         </Button>
@@ -1594,9 +1438,7 @@ function JourneyForm() {
     }
 
 
-
-
-
+    
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>

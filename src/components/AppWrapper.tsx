@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import LoginIcon from '@mui/icons-material/Login';
+import ExploreIcon from '@mui/icons-material/Explore';
 import MuiAppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -1935,6 +1936,24 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 sx={{ fontSize: "0.8em" }}
                             >
                                 Home
+                            </Typography>
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton color={"primary"} sx={{
+                            borderRadius: 2,
+                        }} href={"/journey"}>
+                            <ListItemIcon>
+                                <ExploreIcon style={{ color: theme.palette.text.primary, }} />
+                                {/*<IconifyIcon icon="mdi:map-search-outline" color={theme.palette.text.primary} width="25"*/}
+                                {/*             height="25" />*/}
+                            </ListItemIcon>
+                            <Typography
+                                component={"div"}
+                                variant={"body1"}
+                                sx={{ fontSize: "0.8em" }}
+                            >
+                                Journey
                             </Typography>
                         </ListItemButton>
                     </ListItem>
