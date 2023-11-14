@@ -196,7 +196,7 @@ function Active() {
                                                             width={(chatOpen || sidebarOpen) ? "16vw" : (window.innerWidth < 1000 ? 'fit-content' : '20vw')}
                                                             imageWidth={(chatOpen || sidebarOpen) ? "16vw" : "23vw"}
                                                             projectId={project["_id"]}
-                                                            projectTitle={project["post_title"]}
+                                                            projectTitle={project["attempt_title"] !== null ? project["attempt_title"] : project["post_title"]}
                                                             projectDesc={project["description"]}
                                                             projectThumb={config.rootPath + project["thumbnail"]}
                                                             projectDate={project["updated_at"]}
@@ -313,7 +313,7 @@ function Active() {
                                                         width={(chatOpen || sidebarOpen) ? "16vw" : (window.innerWidth < 1000 ? 'fit-content' : '20vw')}
                                                         imageWidth={(chatOpen || sidebarOpen) ? "16vw" : "23vw"}
                                                         projectId={project["_id"]}
-                                                        projectTitle={project["post_title"]}
+                                                        projectTitle={project["title"] !== null ? project["title"] : project["post_title"]}
                                                         projectDesc={project["description"]}
                                                         projectThumb={config.rootPath + project["thumbnail"]}
                                                         projectDate={project["updated_at"]}
@@ -403,7 +403,7 @@ function Active() {
                                                             width={(chatOpen || sidebarOpen) ? "16vw" : (window.innerWidth < 1000 ? 'fit-content' : '20vw')}
                                                             imageWidth={(chatOpen || sidebarOpen) ? "16vw" : "23vw"}
                                                             projectId={project["_id"]}
-                                                            projectTitle={project["post_title"]}
+                                                            projectTitle={project["attempt_title"] !== null ? project["attempt_title"] : project["post_title"]}
                                                             projectDesc={project["description"]}
                                                             projectThumb={config.rootPath + project["thumbnail"]}
                                                             projectDate={project["updated_at"]}
