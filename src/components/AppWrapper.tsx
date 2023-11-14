@@ -115,6 +115,7 @@ import { useLocation } from 'react-router-dom';
 import { useTracking } from 'react-tracking';
 import { useGlobalWebSocket } from '../services/websocket';
 import { WsMessage, WsMessageType } from '../models/websocket';
+import Pro from './Icons/Pro';
 
 
 interface IProps {
@@ -2122,6 +2123,22 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 sx={{ fontSize: "0.8em" }}
                             >
                                 Docs
+                            </Typography>
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton color={"primary"} sx={{
+                            borderRadius: 2,
+                        }} href={"/premium"}>
+                            <ListItemIcon>
+                                <Pro />
+                            </ListItemIcon>
+                            <Typography
+                                component={"div"}
+                                variant={"body1"}
+                                sx={{ fontSize: "0.8em" }}
+                            >
+                                Pro
                             </Typography>
                         </ListItemButton>
                     </ListItem>

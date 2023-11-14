@@ -1,7 +1,7 @@
 
 
 import * as React from "react";
-import {useEffect} from "react";
+import { useEffect } from "react";
 import {
     Box, Button,
     Card,
@@ -13,22 +13,22 @@ import {
     ThemeProvider,
     Typography
 } from "@mui/material";
-import {getAllTokens} from "../theme";
+import { getAllTokens } from "../theme";
 import ProjectCard from "../components/ProjectCard";
 import AppWrapper from "../components/AppWrapper";
-import {useAppDispatch, useAppSelector} from "../app/hooks";
-import {initialAuthStateUpdate, selectAuthState, updateAuthState} from "../reducers/auth/auth";
-import {useNavigate} from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { initialAuthState, initialAuthStateUpdate, selectAuthState, updateAuthState } from "../reducers/auth/auth";
+import { useNavigate } from "react-router-dom";
 import call from "../services/api-call";
 import config from "../config";
 import swal from "sweetalert";
 import Lottie from "react-lottie";
 import * as animationData from '../img/85023-no-data.json'
 import Carousel from "../components/Carousel";
-import {ThreeDots} from "react-loading-icons";
+import { ThreeDots } from "react-loading-icons";
 import aboutUsImg from "../img/aboutUsBackground.png"
 import loginImg from "../img/login/login_background.png";
-import {AwesomeButton} from "react-awesome-button";
+import { AwesomeButton } from "react-awesome-button";
 import 'react-awesome-button/dist/styles.css';
 
 import premiumImage from "../img/croppedPremium.png";
@@ -45,15 +45,16 @@ function PremiumDescription() {
 
     const [mode, setMode] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
 
-        const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
+    const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
 
     const [loading, setLoading] = React.useState(false)
     const [inTrial, setInTrial] = React.useState(false)
     const [membership, setMembership] = React.useState(0)
-    const [membershipDates, setMembershipDates] = React.useState({start: 0, last: 0, upcoming: 0})
+    const [membershipDates, setMembershipDates] = React.useState({ start: 0, last: 0, upcoming: 0 })
 
 
     let navigate = useNavigate();
+    let dispatch = useAppDispatch();
 
     const stripeNavigate = async () => {
         let res = await call(
@@ -69,12 +70,12 @@ function PremiumDescription() {
         )
 
         if (res["message"] === "You must be logged in to access the GIGO system.") {
-            let authState = Object.assign({}, initialAuthStateUpdate)
+            let authState = Object.assign({}, initialAuthState)
             // @ts-ignore
             dispatch(updateAuthState(authState))
             navigate("/login")
         }
-        if (res !== undefined && res["return url"] !== undefined){
+        if (res !== undefined && res["return url"] !== undefined) {
             window.location.replace(res["return url"])
         }
     }
@@ -113,10 +114,10 @@ function PremiumDescription() {
     const UnixDateConverter = (unixTimestamp: number) => {
         let date = new Date(unixTimestamp * 1000);
         let day = date.getDate();
-        let month= date.getMonth() + 1;
+        let month = date.getMonth() + 1;
         let year = date.getFullYear();
 
-        if (day === 0){
+        if (day === 0) {
             return "N/A"
         } else {
             return month + "/" + day + "/" + year;
@@ -149,31 +150,31 @@ function PremiumDescription() {
     let height = "200px"
     let width = "200px"
 
-    if (window.innerWidth <= 1000){
+    if (window.innerWidth <= 1000) {
         height = "180px"
         width = "180px"
     }
 
     let textWidth = "250px"
 
-    if (window.innerWidth <= 1000){
-        if (window.innerWidth <= 280){
+    if (window.innerWidth <= 1000) {
+        if (window.innerWidth <= 280) {
             textWidth = "150px"
         } else {
             textWidth = "200px"
         }
     }
 
-    
+
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
                 <div>
-                    <Box style={window.innerWidth > 1000 ? {width: "100%", height: "500px", backgroundColor: theme.palette.primary.light} : {width: "100%", height: "850px", backgroundColor: theme.palette.primary.light}}>
-                        <div style={window.innerWidth > 1000 ? {width: "100%", display: "flex", flexDirection: "row", justifyContent: "space-evenly"}: {width: "100%", display: "flex", flexDirection: "column", height: "100%"}}>
-                            <div style={window.innerWidth > 1000 ? {position: "relative", top: "150px"} : {position: "relative", height: "100%", top: "50px"}}>
+                    <Box style={window.innerWidth > 1000 ? { width: "100%", height: "500px", backgroundColor: theme.palette.primary.light } : { width: "100%", height: "850px", backgroundColor: theme.palette.primary.light }}>
+                        <div style={window.innerWidth > 1000 ? { width: "100%", display: "flex", flexDirection: "row", justifyContent: "space-evenly" } : { width: "100%", display: "flex", flexDirection: "column", height: "100%" }}>
+                            <div style={window.innerWidth > 1000 ? { position: "relative", top: "150px" } : { position: "relative", height: "100%", top: "50px" }}>
                                 {inTrial ? (
-                                    <div style={window.innerWidth > 1000 ? {} : {left: "20px", position: "relative", width: "90%", lineHeight: 1.5}}>
+                                    <div style={window.innerWidth > 1000 ? {} : { left: "20px", position: "relative", width: "90%", lineHeight: 1.5 }}>
                                         <h1 style={{ top: '1%' }}>
                                             1 Month Trial Expires in{' '}
                                             {window.innerWidth > 1000 ? (
@@ -192,45 +193,62 @@ function PremiumDescription() {
                                                     {getCountdown(membershipDates.upcoming)}
                                                 </span>
                                             ) : (
-                                                <div style={window.innerWidth > 1000 ? {} : {marginTop: "20px"}}>
-                                                <span style={window.innerWidth > 1000 ? {
-                                                    backgroundColor: 'rgba(256, 256, 256, 0.6)', // adjust the transparency by changing the alpha value
-                                                    padding: '10px',
-                                                    borderRadius: '15px',
-                                                    marginLeft: '10px', // adjust the space between the text and the date
-                                                } : {
-                                                    backgroundColor: 'rgba(256, 256, 256, 0.6)', // adjust the transparency by changing the alpha value
-                                                    padding: '10px',
-                                                    borderRadius: '15px',
-                                                    marginLeft: '10px', // adjust the space between the text and the date
-                                                    fontSize: "18px"
-                                                }}>
-                                                    {getCountdown(membershipDates.upcoming)}
-                                                </span>
-                                            </div>
+                                                <div style={window.innerWidth > 1000 ? {} : { marginTop: "20px" }}>
+                                                    <span style={window.innerWidth > 1000 ? {
+                                                        backgroundColor: 'rgba(256, 256, 256, 0.6)', // adjust the transparency by changing the alpha value
+                                                        padding: '10px',
+                                                        borderRadius: '15px',
+                                                        marginLeft: '10px', // adjust the space between the text and the date
+                                                    } : {
+                                                        backgroundColor: 'rgba(256, 256, 256, 0.6)', // adjust the transparency by changing the alpha value
+                                                        padding: '10px',
+                                                        borderRadius: '15px',
+                                                        marginLeft: '10px', // adjust the space between the text and the date
+                                                        fontSize: "18px"
+                                                    }}>
+                                                        {getCountdown(membershipDates.upcoming)}
+                                                    </span>
+                                                </div>
                                             )}
                                         </h1>
                                         {/*<h4> Dont want To see it go?</h4>*/}
 
 
                                         <h4>Don't want to see it go? Only $15.00/month. Cancel anytime.</h4>
-                                        <AwesomeButton style={{ width: "auto",
+                                        <AwesomeButton style={{
+                                            width: "auto",
                                             '--button-primary-color': theme.palette.primary.main,
                                             '--button-primary-color-dark': theme.palette.primary.dark,
                                             '--button-primary-color-light': theme.palette.text.primary,
                                             '--button-primary-color-hover': theme.palette.primary.main,
                                             fontSize: "14px"
                                         }} type="primary" onPress={() => stripeNavigate()}>
-                                            <img src={premiumImage}/>
+                                            <img src={premiumImage} />
                                         </AwesomeButton>
                                     </div>
                                 ) : membership !== 1 ? (
-                                    <div style={window.innerWidth > 1000 ? {} : {position: "relative", left: "20px", width: "90%", lineHeight: 1.5}}>
+                                    <div style={window.innerWidth > 1000 ? {} : { left: "20px", position: "relative", width: "90%" }}>
+                                        <h1>Become a Pro</h1>
+                                        <h4>Only $15.00/month. Cancel anytime.</h4>
+                                        <AwesomeButton style={{
+                                            width: "auto",
+                                            '--button-primary-color': theme.palette.primary.main,
+                                            '--button-primary-color-dark': theme.palette.primary.dark,
+                                            '--button-primary-color-light': theme.palette.text.primary,
+                                            '--button-primary-color-hover': theme.palette.primary.main,
+                                            fontSize: "14px"
+                                        }} type="primary" onPress={() => stripeNavigate()}>
+                                            <img src={premiumImage} />
+                                        </AwesomeButton>
+                                    </div>
+                                ) : (
+                                    <div style={window.innerWidth > 1000 ? {} : { position: "relative", left: "20px", width: "90%", lineHeight: 1.5 }}>
                                         <h1>
                                             It Feels Good to Be A Pro
                                         </h1>
                                         <h4>No Limits. No Restrictions. True Freedom.</h4>
-                                        <AwesomeButton style={{ width: "auto",
+                                        <AwesomeButton style={{
+                                            width: "auto",
                                             '--button-primary-color': theme.palette.primary.main,
                                             '--button-primary-color-dark': theme.palette.primary.dark,
                                             '--button-primary-color-light': theme.palette.text.primary,
@@ -242,92 +260,78 @@ function PremiumDescription() {
                                             <span>Manage Plan</span>
                                         </AwesomeButton>
                                     </div>
-                                ) : (
-                                <div style={window.innerWidth > 1000 ? {} : {left: "20px", position: "relative", width: "90%"}}>
-                                    <h1> Become a Pro</h1>
-                                    <h4>Only $15.00/month. Cancel anytime.</h4>
-                                    <AwesomeButton style={{ width: "auto",
-                                        '--button-primary-color': theme.palette.primary.main,
-                                        '--button-primary-color-dark': theme.palette.primary.dark,
-                                        '--button-primary-color-light': theme.palette.text.primary,
-                                        '--button-primary-color-hover': theme.palette.primary.main,
-                                        fontSize: "14px"
-                                    }} type="primary" onPress={() => stripeNavigate()}>
-                                        <img src={premiumImage}/>
-                                    </AwesomeButton>
-                                </div>
-                                    )
-                                    }
+                                )
+                                }
 
                             </div>
                             <div>
-                                <img src={premiumGorilla} width={window.innerWidth <= 280 ? 200 : ""}/>
+                                <img src={premiumGorilla} width={window.innerWidth <= 280 ? 200 : ""} />
                             </div>
                         </div>
                     </Box>
-                    <div style={window.innerWidth > 1000 ? {height: "200px"} : {height: "100px"}}/>
+                    <div style={window.innerWidth > 1000 ? { height: "200px" } : { height: "100px" }} />
                     <Box>
-                        <div style={window.innerWidth > 1000 ? {display: "flex", flexDirection: "row", width: "100%", justifyContent: "space-evenly"} : {display: "flex", flexDirection: "column", width: "100%", alignItems: "center"}}>
-                            <div style={window.innerWidth > 1000 ? {} : {marginBottom: "50px"}}>
-                                <Button disabled={true} style={{backgroundColor: theme.palette.primary.light}}>
-                                    <img src={codeTeacher} width={width} height={height}/>
+                        <div style={window.innerWidth > 1000 ? { display: "flex", flexDirection: "row", width: "100%", justifyContent: "space-evenly" } : { display: "flex", flexDirection: "column", width: "100%", alignItems: "center" }}>
+                            <div style={window.innerWidth > 1000 ? {} : { marginBottom: "50px" }}>
+                                <Button disabled={true} style={{ backgroundColor: theme.palette.primary.light }}>
+                                    <img src={codeTeacher} width={width} height={height} />
                                 </Button>
-                                <div style={window.innerWidth > 1000 ? {width: textWidth} : {width: textWidth, wordWrap: "break-word"}}>
+                                <div style={window.innerWidth > 1000 ? { width: textWidth } : { width: textWidth, wordWrap: "break-word" }}>
                                     <h4>Access to Code Teacher</h4>
-                                    <body>Magic Bot that can answer questions and write code.</body>
+                                    <body>Your personal Magic tutor. Code Teacher works along side you to help you learn to code and solve problems.</body>
                                 </div>
                             </div>
-                            <div style={window.innerWidth > 1000 ? {} : {marginBottom: "50px"}}>
-                                <Button disabled={true} style={{backgroundColor: theme.palette.primary.light}}>
-                                    <img src={privateWorkspace} width={width} height={height}/>
+                            <div style={window.innerWidth > 1000 ? {} : { marginBottom: "50px" }}>
+                                <Button disabled={true} style={{ backgroundColor: theme.palette.primary.light }}>
+                                    <img src={privateWorkspace} width={width} height={height} />
                                 </Button>
-                                <div style={window.innerWidth > 1000 ? {width: textWidth} : {width: textWidth, wordWrap: "break-word"}}>
+                                <div style={window.innerWidth > 1000 ? { width: textWidth } : { width: textWidth, wordWrap: "break-word" }}>
                                     <h4>Private Workspaces</h4>
-                                    <body>Keep your code personal.</body>
+                                    <body>Keep your code personal. Work on projects privately, developing your skills in stealth mode.</body>
                                 </div>
                             </div>
-                            <div style={window.innerWidth > 1000 ? {} : {marginBottom: "50px"}}>
-                                <Button disabled={true} style={{backgroundColor: theme.palette.primary.light}}>
-                                    <img src={resources} width={width} height={height}/>
+                            <div style={window.innerWidth > 1000 ? {} : { marginBottom: "50px" }}>
+                                <Button disabled={true} style={{ backgroundColor: theme.palette.primary.light }}>
+                                    <img src={resources} width={width} height={height} />
                                 </Button>
-                                <div style={window.innerWidth > 1000 ? {width: textWidth} : {width: textWidth, wordWrap: "break-word"}}>
+                                <div style={window.innerWidth > 1000 ? { width: textWidth } : { width: textWidth, wordWrap: "break-word" }}>
                                     <h4>More Workspace Resources</h4>
-                                    <body>Get Access to 8cpu cores, 8gbu ram and 50gb disk.</body>
+                                    <body>Get Access to 8 cpu cores, 8GB ram and 50GB disk. Run projects faster, reduce build times, and get the best experience.</body>
                                 </div>
                             </div>
                         </div>
-                        <div style={{height: "100px"}}/>
-                        <div style={window.innerWidth > 1000 ? {display: "flex", flexDirection: "row", width: "100%", justifyContent: "space-evenly"} : {display: "flex", flexDirection: "column", width: "100%", alignItems: "center"}}>
-                            <div style={window.innerWidth > 1000 ? {} : {marginBottom: "50px"}}>
-                                <Button disabled={true} style={{backgroundColor: theme.palette.primary.light}}>
-                                    <img src={workspaces} width={width} height={height}/>
+                        <div style={{ height: "100px" }} />
+                        <div style={window.innerWidth > 1000 ? { display: "flex", flexDirection: "row", width: "100%", justifyContent: "space-evenly" } : { display: "flex", flexDirection: "column", width: "100%", alignItems: "center" }}>
+                            <div style={window.innerWidth > 1000 ? {} : { marginBottom: "50px" }}>
+                                <Button disabled={true} style={{ backgroundColor: theme.palette.primary.light }}>
+                                    <img src={workspaces} width={width} height={height} />
                                 </Button>
-                                <div style={window.innerWidth > 1000 ? {width: textWidth} : {width: textWidth, wordWrap: "break-word"}}>
-                                    <h4>Three Concurrent Workspaces</h4>
-                                    <body>Run all the code you need, as much as you need.</body>
+                                <div style={window.innerWidth > 1000 ? { width: textWidth } : { width: textWidth, wordWrap: "break-word" }}>
+                                    <h4>Three Concurrent DevSpaces</h4>
+                                    <body>Run all the code you need, as much as you need. Work on multiple projects at the same time or with up to three concurrent DevSpaces.</body>
                                 </div>
                             </div>
-                            <div style={window.innerWidth > 1000 ? {} : {marginBottom: "50px"}}>
-                                <Button disabled={true} style={{backgroundColor: theme.palette.primary.light}}>
-                                    <img src={streakFreeze} width={width} height={height}/>
+                            <div style={window.innerWidth > 1000 ? {} : { marginBottom: "50px" }}>
+                                <Button disabled={true} style={{ backgroundColor: theme.palette.primary.light }}>
+                                    <img src={streakFreeze} width={width} height={height} />
                                 </Button>
-                                <div style={window.innerWidth > 1000 ? {width: textWidth} : {width: textWidth, wordWrap: "break-word"}}>
+                                <div style={window.innerWidth > 1000 ? { width: textWidth } : { width: textWidth, wordWrap: "break-word" }}>
                                     <h4>Two Streak Freezes a Week</h4>
-                                    <body>Keep your streak longer.</body>
+                                    <body>Keep your streak longer. Don't let a bad week kill your awesome streak! Streak freezes preserve your streak on days that you can't find the time.</body>
                                 </div>
                             </div>
-                            <div style={window.innerWidth > 1000 ? {} : {marginBottom: "50px"}}>
-                                <Button disabled={true} style={{backgroundColor: theme.palette.primary.light}}>
-                                    <img src={vscodeTheme} width={width} height={height}/>
+                            <div style={window.innerWidth > 1000 ? {} : { marginBottom: "50px" }}>
+                                <Button disabled={true} style={{ backgroundColor: theme.palette.primary.light }}>
+                                    <img src={vscodeTheme} width={width} height={height} />
                                 </Button>
-                                <div style={window.innerWidth > 1000 ? {width: textWidth} : {width: textWidth, wordWrap: "break-word"}}>
+                                <div style={window.innerWidth > 1000 ? { width: textWidth } : { width: textWidth, wordWrap: "break-word" }}>
                                     <h4>Premium VsCode Theme</h4>
-                                    <body>A unique code theme to help you see the errors faster.</body>
+                                    <body>A unique code theme to help you see the errors faster. Code the GIGO way with the custom GIGO editor theme!</body>
                                 </div>
                             </div>
                         </div>
                     </Box>
-                    <div style={window.innerWidth > 1000 ? {height: "200px"} : {height: "100px"}}/>
+                    <div style={window.innerWidth > 1000 ? { height: "200px" } : { height: "100px" }} />
                 </div>
             </CssBaseline>
         </ThemeProvider>
