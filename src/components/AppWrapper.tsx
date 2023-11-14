@@ -1725,7 +1725,59 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                             </Toolbar>
                         </Container>
                     </AppBar>
-                ) : null}
+                ) : (
+                    <AppBar
+                        position="fixed"
+                        // open={open && !homePageLockedDrawer}
+                        leftopen={false}
+                        elevation={5}
+                        sx={{
+                            height: "50px",
+                            zIndex: 1000,
+                            border: "none",
+                            boxShadow: (mode === 'dark') ? "0px 3px 5px -1px #ffffff20, 0px 5px 8px 0px #ffffff14, 0px 1px 14px 0px #ffffff12" :
+                                "0px 3px 5px -1px #00000020, 0px 5px 8px 0px #00000014, 0px 1px 14px 0px #00000012",
+                            top: 'auto',
+                            bottom: 0,
+                            backgroundImage: `conic-gradient(from 0deg at 50% 50%, #FEDC5A20 0deg, #FFFCAB20 73.13deg, #29C18C20 155.62deg, #3D8EF720 249.37deg, #84E8A220 339.37deg, #FEDC5A20 360deg)`,
+                        }}
+                    >
+                        <Container>
+                            <Toolbar
+                                sx={{
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    paddingX: '0px',
+                                }}
+                            >
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', height: '60px', overflow: 'hidden' }}>
+                                    <IconButton color="inherit" href={"/about"} onClick={() => {
+                                        let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
+                                        appWrapperState.chatOpen = false
+                                        dispatch(updateAppWrapper(appWrapperState));
+                                    }}>
+                                        <InfoOutlined style={{ color: theme.palette.text.primary, fontSize: 25 }} />
+                                    </IconButton>
+                                    <Typography variant="caption" noWrap sx={{ marginTop: '-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px' }}>
+                                        About
+                                    </Typography>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', height: '60px', overflow: 'hidden' }}>
+                                    <IconButton color="inherit" href={"/home"} onClick={() => {
+                                        let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
+                                        appWrapperState.chatOpen = false
+                                        dispatch(updateAppWrapper(appWrapperState));
+                                    }}>
+                                        <HomeOutlined style={{ color: theme.palette.text.primary, fontSize: 25 }} />
+                                    </IconButton>
+                                    <Typography variant="caption" noWrap sx={{ marginTop: '-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px' }}>
+                                        Home
+                                    </Typography>
+                                </div>
+                            </Toolbar>
+                        </Container>
+                    </AppBar>
+                )}
             </>
         )
     }
@@ -2151,9 +2203,6 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     }
 
     const renderChatSideBar = () => {
-        // if (window.innerWidth <= 1000) {
-        //     return null
-        // }
 
         return (
             <>
