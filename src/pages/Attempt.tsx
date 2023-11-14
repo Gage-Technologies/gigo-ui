@@ -116,7 +116,7 @@ function AttemptPage() {
             swal("Please add a unique title for your attempt!")
         } else {
             setConfirm(false)
-            // closeAttempt()
+            closeAttempt()
         }
     }
     const styles = {
@@ -150,7 +150,7 @@ function AttemptPage() {
             null,
             null,
             //@ts-ignore
-            { attempt_id: id },
+            { attempt_id: id, title: attemptTitle },
             null,
             config.rootPath
         )
