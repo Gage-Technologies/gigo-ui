@@ -581,7 +581,11 @@ function AttemptPage() {
         // setAttemptDesc(res["description"])
         setAttemptDesc(res["evaluation"])
         setClosedState(res["post"]["closed"])
-        setProjectName("Attempt: " + res["post"]["title"] !== null ? res["post"]["title"] : res["post"]["post_title"])
+        if (res["post"]["title"] === null) {
+            setProjectName("Attempt:  " + res["post"]["post_title"])
+        } else {
+            setProjectName("Attempt:  " + res["post"]["title"])
+        }
         setProjectTitle(res["post"]["title"] !== null ? res["post"]["title"] : res["post"]["post_title"])
     }
 
@@ -1806,6 +1810,7 @@ function AttemptPage() {
                             />
                         ) : (
                             <div>
+                                {console.log("projectname: ", projectName)}
                                 {projectName}
                             </div>
                         )}
