@@ -581,8 +581,8 @@ function AttemptPage() {
         // setAttemptDesc(res["description"])
         setAttemptDesc(res["evaluation"])
         setClosedState(res["post"]["closed"])
-        setProjectName("Attempt: " + res["post"]["post_title"])
-        setProjectTitle(res["post"]["post_title"])
+        setProjectName("Attempt: " + res["post"]["title"] !== null ? res["post"]["title"] : res["post"]["post_title"])
+        setProjectTitle(res["post"]["title"] !== null ? res["post"]["title"] : res["post"]["post_title"])
     }
 
     const authState = useAppSelector(selectAuthState);
@@ -1772,8 +1772,8 @@ function AttemptPage() {
                     {attempt !== null ? (
                         <HelmetProvider>
                             <Helmet>
-                                <title>{attempt["post_title"]}</title>
-                                <meta property="og:title" content={attempt["post_title"]} data-rh="true" />
+                                <title>{attempt["title"] !== null ? attempt["title"] : attempt["post_title"]}</title>
+                                <meta property="og:title" content={attempt["title"] !== null ? attempt["title"] : attempt["post_title"]} data-rh="true" />
                                 <meta property="og:description" content={attempt["description"]} data-rh="true" />
                                 <meta property="og:image" content={config.rootPath + attempt["thumbnail"]} data-rh="true" />
                             </Helmet>
@@ -1828,10 +1828,12 @@ function AttemptPage() {
                                     </Button>
                                 ) : (
                                     <div>
-                                        <Button onClick={() => editProject(
-                                            projectTitle !== projectName ? projectTitle : null,
-                                            null
-                                        )}>
+                                        <Button onClick={() => {
+                                            editProject(
+                                                projectTitle !== projectName ? projectTitle : null,
+                                                null
+                                            )
+                                        }}>
                                             Submit
                                         </Button>
                                         <Button onClick={() => setEditTitle(false)}>
