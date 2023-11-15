@@ -297,8 +297,8 @@ function Home() {
                                             <ProjectCard
                                                 height={"23vh"}
                                                 imageHeight={"23vh"}
-                                                width={(chatOpen) ? "16vw" : (document.documentElement.clientWidth < 1000 ? 'fit-content' : '21vw')}
-                                                imageWidth={(chatOpen) ? "16vw" : "21vw"}
+                                                width={(chatOpen || sidebarOpen) ? "16vw" : (document.documentElement.clientWidth < 1000 ? 'fit-content' : '20vw')}
+                                                imageWidth={(chatOpen || sidebarOpen) ? "16vw" : "23vw"}
                                                 projectId={project["_id"]}
                                                 projectTitle={project["title"]}
                                                 projectDesc={project["description"]}
@@ -483,8 +483,8 @@ function Home() {
                                                 height={"23vh"}
                                                 imageHeight={"23vh"}
                                                 // TODO mobile => make width 'fit-content'
-                                                width={(chatOpen) ? "16vw" : (document.documentElement.clientWidth < 1000 ? 'fit-content' : '21vw')}
-                                                imageWidth={(chatOpen) ? "16vw" : "21vw"}
+                                                width={(chatOpen || sidebarOpen) ? "16vw" : (document.documentElement.clientWidth < 1000 ? 'fit-content' : '20vw')}
+                                                imageWidth={(chatOpen || sidebarOpen) ? "16vw" : "23vw"}
                                                 projectId={project["_id"]}
                                                 projectTitle={project["title"] !== null ? project["title"] : project["post_title"]}
                                                 projectDesc={project["description"]}
@@ -562,8 +562,8 @@ function Home() {
                                             height={"20vh"}
                                             imageHeight={"20vh"}
                                             // TODO mobile => make width 'fit-content'
-                                            width={(chatOpen) ? "16vw" : (document.documentElement.clientWidth < 1000 ? 'fit-content' : '21vw')}
-                                            imageWidth={(chatOpen) ? "16vw" : "20vw"}
+                                            width={(chatOpen || sidebarOpen) ? "16vw" : (document.documentElement.clientWidth < 1000 ? 'fit-content' : '20vw')}
+                                            imageWidth={(chatOpen || sidebarOpen) ? "16vw" : "23vw"}
                                             projectId={project["_id"]}
                                             projectTitle={project["title"]}
                                             projectDesc={project["description"]}

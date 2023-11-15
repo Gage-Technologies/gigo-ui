@@ -284,7 +284,7 @@ function Streak() {
         const children = (
             <div>
                 <Typography variant="h5" component="div"
-                            style={{width: "100%", display: "flex", justifyContent: "center"}}>
+                            style={{width: "100%", display: "flex", justifyContent: "center", fontSize: "1em"}}>
                     {"Current Streak"}
                 </Typography>
                 <div style={{width: "100%", display: "flex", justifyContent: "center"}}>
@@ -293,7 +293,7 @@ function Streak() {
                             height={"50%"}/>
                 </div>
                 <Typography color="#FF7A0E" variant="h1" component="div"
-                            style={{width: "100%", display: "flex", justifyContent: "center"}}>
+                            style={{width: "100%", display: "flex", justifyContent: "center", fontSize: "3em"}}>
                     {/*@ts-ignore*/}
                     {stats !== undefined && stats["current_streak"] === undefined ? 0 : stats["current_streak"]}
                 </Typography>
