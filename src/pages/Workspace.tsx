@@ -312,9 +312,12 @@ const WorkspacePage = () => {
         // handle status updates
         setWorkspace(workspace)
 
+
+        console.log("ws vnc: ", workspace.is_vnc, " is vnc: ", isVNC)
         // update isVNC ref
         if (!isVNC && workspace.is_vnc) {
             setVNC(true)
+
         }
 
         // calculate the updated expiratoion time
@@ -1293,14 +1296,18 @@ const WorkspacePage = () => {
         let lastStates = lastWS;
 
         if (currentStates === null || lastStates === null || currentStates.init_state === undefined || lastStates.init_state === undefined) {
+            console.log("inside empty handleAnimationTriggers currentStates: ", currentStates, "lastStates: ", lastStates)
             return;
         }
 
         if (currentStates.state === 1 && currentStates.state !== lastStates.state) {
+            console.log("inside handleAnimationTriggers currentStates: ", currentStates, "lastStates:")
             lpAnimPropsActiveRef.update({ reset: true });
             lpAnimPropsActiveRef.start();
             lpAnimPropsActiveRef.update({ reset: false });
         }
+
+        console.log("currenstate: " + currentStates.init_state + " laststate: " + lastStates.init_state);
 
         if (currentStates.init_state > 0 && lastStates.init_state === 0) {
             satAnimPropsActiveRef.update({ reset: true });
@@ -1313,7 +1320,9 @@ const WorkspacePage = () => {
     }
 
     useEffect(() => {
+        console.log("handle animation triggers current workspace: ", workspace, "last workspace: ", lastWorkspace);
         handleAnimationTriggers(workspace, lastWorkspace);
+        setLastWorkspace(workspace);
     }, [workspace, lastWorkspace]);
 
     const renderProvisioningSatAnim = () => {
