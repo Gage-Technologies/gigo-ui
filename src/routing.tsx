@@ -123,7 +123,7 @@ export default function Routing() {
                         <Route path={"/canceled"} element={<StripeCancel />}/>
                         <Route path={"/reauth"} element={<StripeReauth />}/>
                         <Route path="/streak" element={<Streak />}/>
-                        <Route path="/nemesis" element={<Nemesis />}/>
+                        {/*<Route path="/nemesis" element={<Nemesis />}/>*/}
                         <Route path={"/curateAdmin"} element={<CurateAdminPage/>}/>
                     </Route >
                     <Route path="*" element={<NotFoundPage />} />
