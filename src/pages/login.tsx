@@ -441,13 +441,13 @@ function Login(this: any) {
     let renderLogin = () => {
         return (
             <Grid container justifyContent="center" sx={{
-                paddingTop: window.innerWidth > 1000 ? "220px" : "34%",
+                paddingTop: window.innerWidth > 1000 ? "7%" : "34%",
             }}>
                 <Grid container
                       sx={{
                           justifyContent: "center",
                           outlineColor: "black",
-                          width: window.innerWidth > 1000 ? "35%" : "80vw",
+                          width: window.innerWidth > 1000 ? "34%" : "80vw",
                           minWidth:  window.innerWidth > 1000 ? "600px" : "0px",
                           height: window.innerWidth > 1000? "auto" : "auto",
                           borderRadius: 1,
@@ -801,10 +801,10 @@ function Login(this: any) {
                 variant="body1"
                 style={{
                     position: 'absolute',
-                    top: window.innerWidth > 1000 ? '120px' : '6%', // Adjust the top position as needed (slightly below the logo)
+                    top: window.innerWidth > 1000 ? '5%' : '6%', // Adjust the top position as needed (slightly below the logo)
                     left: window.innerWidth > 1000 ? '360px' : '32%', // Adjust the left position as needed (to the right of the logo)
                     fontWeight: 'bold', // Customize the text style,
-                    fontSize: window.innerWidth > 1000 ? '50px' : '5vw', // Adjust the font size,
+                    fontSize: window.innerWidth > 1000 ? '2em' : '5vw', // Adjust the font size,
                     // fontFamily: 'Kanit',
                     color: '#208562',
                 }}

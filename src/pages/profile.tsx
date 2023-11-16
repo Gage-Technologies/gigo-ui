@@ -1781,11 +1781,11 @@ function User() {
                                                                 style={{
                                                                     color: "white",
                                                                     position: "absolute",
-                                                                    top: "85%",
+                                                                    top: "75%",
                                                                     left: "-50%",
                                                                     transform: "translate(-50%, -50%)",
                                                                     zIndex: 2,
-                                                                    width: "200%"
+                                                                    width: "200%",
                                                                 }}
                                                             >
                                                                 Coffee Collected
@@ -1836,7 +1836,7 @@ function User() {
                                     <div style={{
                                         display: "flex",
                                         justifyContent: "left",
-                                        width: "100%",
+                                        width: "107%",
                                         transform: `scale(${scaleFactor})`,
                                         marginLeft: chatOpened ? "-7.5%" : (sidebarOpen ? "-9%" : "0%"),
                                         paddingRight: chatOpened ? "10%" : 0,
@@ -1996,8 +1996,9 @@ function User() {
                                             onChange={handleChange}
                                             aria-label="Vertical tabs"
                                             style={{
-                                                marginLeft: "auto",
-                                                marginRight: "20px",
+                                                // marginLeft: "auto",
+                                                // marginRight: "20px",
+                                                marginLeft: "20px",
                                                 width: "fit-content",
                                                 height: "42px",
                                                 overflowY: "auto",
