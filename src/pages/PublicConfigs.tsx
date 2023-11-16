@@ -694,7 +694,7 @@ function PublicConfigs() {
                                                     </Box>
                                                 ) : null}
                                             </Button>
-                                            <Divider sx={{ width: '80%', marginBottom: '20px', marginTop: "20px" }} />
+                                            <div style={{height: "15px"}}/>
                                         </React.Fragment>
                                     ))}
                                 </Box>
