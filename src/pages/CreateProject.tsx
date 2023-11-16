@@ -2166,7 +2166,7 @@ function CreateProject() {
                                 {renderPriceExplanationPopover()}
                             </div>
                             <Button
-                                variant={`contained`}
+                                variant={`outlined`}
                                 color={"primary"}
                                 sx={{
                                     width: "20vw",
@@ -2297,7 +2297,7 @@ function CreateProject() {
                     <Grid item xs={12}>
                         <Tooltip title="Generate a unique image for your project using Magic">
                             <GenerateImageButton
-                                variant={`contained`}
+                                variant={`outlined`}
                                 color={"primary"}
                                 sx={{
                                     width: "10vw",
@@ -2392,7 +2392,7 @@ function CreateProject() {
                     </Grid>
                     <Grid item xs={12}>
                         <Button
-                            variant={`contained`}
+                            variant={`outlined`}
                             color={"primary"}
                             sx={{
                                 width: "30vw",
@@ -2448,7 +2448,7 @@ function CreateProject() {
                     </Grid>
                     <Grid item xs={"auto"}>
                         <Button
-                            variant={`contained`}
+                            variant={`outlined`}
                             color={"primary"}
                             sx={{
                                 width: "20vw",
@@ -2687,7 +2687,7 @@ function CreateProject() {
                     </Grid>
                     <Grid item xs={"auto"}>
                         <Button
-                            variant={`contained`}
+                            variant={`outlined`}
                             color={"primary"}
                             sx={{
                                 width: "20vw",
@@ -3088,7 +3088,7 @@ function CreateProject() {
                             <Grid item xs={"auto"}>
                                 <LoadingButton
                                     loading={changeLock}
-                                    variant={`contained`}
+                                    variant={`outlined`}
                                     color={"primary"}
                                     sx={{
                                         width: "20vw",
@@ -3106,7 +3106,7 @@ function CreateProject() {
                                 <Grid item xs={"auto"}>
                                     <LoadingButton
                                         loading={changeLock}
-                                        variant={`contained`}
+                                        variant={`outlined`}
                                         color={"primary"}
                                         sx={{
                                             width: "20vw",
@@ -3122,7 +3122,7 @@ function CreateProject() {
                                 <Grid item xs={"auto"}>
                                     <Button
                                         disabled={changeLock}
-                                        variant={`contained`}
+                                        variant={`outlined`}
                                         color={"error"}
                                         sx={{
                                             width: "20vw",
