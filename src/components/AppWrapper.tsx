@@ -45,6 +45,7 @@ import {
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import FeedIcon from '@mui/icons-material/Feed';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
+import CalculateIcon from '@mui/icons-material/Calculate';
 import FolderIcon from '@mui/icons-material/Folder';
 import UserIcon from "./UserIcon";
 import { themeHelpers, getAllTokens, isHoliday } from "../theme";
@@ -1900,6 +1901,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
 
 
     const renderSidebar = () => {
+        // @ts-ignore
         return (
             <Drawer
                 sx={{
@@ -2049,6 +2051,22 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 sx={{ fontSize: "0.8em" }}
                             >
                                 About
+                            </Typography>
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton color={"primary"} sx={{
+                            borderRadius: 2,
+                        }} href={"/configs"}>
+                            <ListItemIcon>
+                                <CalculateIcon style={{ color: theme.palette.text.primary }} />
+                            </ListItemIcon>
+                            <Typography
+                                component={"div"}
+                                variant={"body1"}
+                                sx={{ fontSize: "0.8em" }}
+                            >
+                                Configs
                             </Typography>
                         </ListItemButton>
                     </ListItem>
