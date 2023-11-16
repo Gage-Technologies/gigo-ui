@@ -526,8 +526,16 @@ function CreateProject() {
             return
         }
 
-        if (typeof e.target.value !== "string") {
+        if (e !== "" && typeof e.target.value !== "string") {
             return
+        }
+
+        let queryValue;
+
+        if (e.target === undefined){
+            queryValue = ""
+        } else {
+            queryValue = e.target.value;
         }
 
         let res = await call(
@@ -538,7 +546,7 @@ function CreateProject() {
             null,
             // @ts-ignore
             {
-                query: e.target.value,
+                query: queryValue,
                 skip: 0,
                 limit: 5,
             }
@@ -3049,6 +3057,7 @@ function CreateProject() {
                                 <TextField {...params} label="Workspace Config Templates"
                                     placeholder="Workspace Config Templates" />
                             )}
+                            onOpen={() => handleWorkspaceConfigSearch("")}
                             onInputChange={(e) => {
                                 handleWorkspaceConfigSearch(e)
                             }}
