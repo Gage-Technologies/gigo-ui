@@ -165,7 +165,7 @@ function Active() {
                         flexDirection: `row`,
                         alignContent: `center`,
                         overflowX: "auto",
-                        width: "85vw"
+                        width: "83vw"
                     } :{
                         display: "flex",
                         justifyContent: "start",
@@ -282,7 +282,7 @@ function Active() {
                         flexDirection: `row`,
                         alignContent: `center`,
                         overflowX: "auto",
-                        width: "85vw"
+                        width: "83vw"
                     } : {
                         display: "flex",
                         justifyContent: "start",
@@ -375,7 +375,7 @@ function Active() {
                                 flexDirection: `row`,
                                 alignContent: `center`,
                                 overflowX: "auto",
-                                width: "85vw"
+                                width: "83vw"
                             } : {
                                 display: "flex",
                                 justifyContent: "start",
