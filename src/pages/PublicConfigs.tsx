@@ -402,11 +402,12 @@ function PublicConfigs() {
                         </Box>
                     ) : (
                         <Box style={{
-                            display: "flex",
-                            alignItems: "right"
+                            position: "absolute",
+                            right: "15%",
+                            top: "10%"
                         }}>
-                            <Tooltip title={"Add A New Public Config"}>
-                                <Button onClick={() => {setAdd(!add)}}>
+                            <Tooltip title={add ? "Go Back" : "Add A New Public Config"}>
+                                <Button onClick={() => {setAdd(!add)}} variant={"contained"}>
                                     {
                                         add ? (
                                             <Cancel/>
@@ -644,7 +645,7 @@ function PublicConfigs() {
                                     }}
                                 >
                                     <Typography variant="h4">Public Configs</Typography>
-                                    <div style={{ width: '30%' }}>
+                                    <div style={{ width: '30%', marginBottom: "15px" }}>
                                         <SearchBar handleWorkspaceConfigSearch={(e: any) => {
                                             console.log("e is: ", e)
                                             handleWorkspaceConfigSearch(e, 0)
@@ -669,10 +670,10 @@ function PublicConfigs() {
                                             <Button
                                                 variant="outlined"
                                                 sx={{
-                                                    bgcolor: 'grey.900',
+                                                    bgcolor: theme.palette.background.default,
                                                     mb: 1,
                                                     borderRadius: '10px', // Full rounded outline
-                                                    color: 'white',
+                                                    color: theme.palette.text.primary,
                                                     justifyContent: 'space-between',
                                                     padding: '10px 20px',
                                                     textTransform: 'none', // Prevents the button text from being uppercase
