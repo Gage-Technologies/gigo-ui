@@ -1516,7 +1516,7 @@ function Challenge() {
                                             <Grid item xs={12}>
                                                 <Tooltip title="Generate a unique image for your project using Magic">
                                                     <Button
-                                                        variant={`contained`}
+                                                        variant={`outlined`}
                                                         color={"primary"}
                                                         sx={{
                                                             width: "10vw",
