@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import JourneyPageIcon from "../components/Icons/JourneyPage";
 import {themeHelpers, getAllTokens, isHoliday} from "../theme";
-import {Card, createTheme, CssBaseline, InputBase, PaletteMode, ThemeProvider} from "@mui/material";
+import {Card, createTheme, CssBaseline, InputBase, PaletteMode, Tab, Tabs, ThemeProvider} from "@mui/material";
 import JourneyPageCampIcon from "../components/Icons/JourneyPageCamp";
 import {Grid} from "@material-ui/core";
 import JourneyPagePumpIcon from "../components/Icons/JourneyPageGasPump";
@@ -15,6 +15,9 @@ import { Box, Typography, Button, List, ListItem, ListItemText, Divider } from '
 import { styled, alpha } from '@mui/material/styles';
 import DownloadIcon from '@mui/icons-material/Download';
 import SearchIcon from "@mui/icons-material/Search";
+import call from "../services/api-call";
+import swal from "sweetalert";
+import {DefaultWorkspaceConfig, WorkspaceConfig} from "../models/workspace";
 
 interface Config {
     id: string;
@@ -23,30 +26,6 @@ interface Config {
     downloads: number; // Assuming downloads should be a number
     hoursPlayed: string;
 }
-
-const configs: Config[] = [
-    {
-        id: "1",
-        title: "Journey Page",
-        description: "The Journey Page is a game where you can explore the world of the GIGO. It is a 2D adventure where you can explore the world of the GIGO and find new ways to explore the world of the GIGO.",
-        downloads: 42, // Assuming a placeholder number for downloads
-        hoursPlayed: "24/7"
-    },
-    {
-        id: "2",
-        title: "Journey Page",
-        description: "The Journey Page is a game where you can explore the world of the GIGO. It is a 2D adventure where you can explore the world of the GIGO and find new ways to explore the world of the GIGO.",
-        downloads: 42, // Assuming a placeholder number for downloads
-        hoursPlayed: "24/7"
-    },
-    {
-        id: "3",
-        title: "Journey Page",
-        description: "The Journey Page is a game where you can explore the world of the GIGO. It is a 2D adventure where you can explore the world of the GIGO and find new ways to explore the world of the GIGO.",
-        downloads: 42, // Assuming a placeholder number for downloads
-        hoursPlayed: "24/7"
-    },
-];
 
 // Styled components based on your existing search bar styles
 const Search = styled('div')(({ theme }) => ({
@@ -85,7 +64,8 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 // SearchBar component
-const SearchBar = () => {
+// @ts-ignore
+const SearchBar = ({ handleWorkspaceConfigSearch }) => {
     return (
         <Search>
             <SearchIconWrapper>
@@ -94,6 +74,7 @@ const SearchBar = () => {
             <StyledInputBase
                 placeholder="Search…"
                 inputProps={{ 'aria-label': 'search' }}
+                onChange={(e) => handleWorkspaceConfigSearch(e.target.value)}
             />
         </Search>
     );
@@ -108,6 +89,8 @@ function PublicConfigs() {
     let userPref = localStorage.getItem('theme')
     const [mode, setMode] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
+    const [minorTab, setMinorTab] = React.useState<string>("Community")
+    const [skip, setSkip] = React.useState(0);
     const colorMode = React.useMemo(
         () => ({
             // The dark mode switch would invoke this method
@@ -120,6 +103,18 @@ function PublicConfigs() {
         [mode],
     );
 
+    // const wsConfigOptionsBaseState = [
+    //     {
+    //         _id: "0",
+    //         title: "Default",
+    //         content: DefaultWorkspaceConfig,
+    //         description: "Default workspace configuration provided by GIGO."
+    //     } as WorkspaceConfig
+    // ]
+    // const wsConfigOptionsBaseState = [
+    // ]
+    const [wsConfigOptions, setWsConfigOptions] = React.useState<WorkspaceConfig[]>([])
+
     const aspectRatio = useAspectRatio();
     console.log("aspectRatio: ", aspectRatio);
     const handleTheme = () => {
@@ -128,13 +123,117 @@ function PublicConfigs() {
         window.location.reload()
     };
 
+    const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+        setSkip(0)
+        setMinorTab(newValue)
+    };
 
+    const handleWorkspaceConfigSearch = async (e: any, skip: number) => {
+        if (e === null) {
+            return
+        }
 
+        console.log("e stuff: ", e)
 
+        if (e !== "" && typeof e !== "string") {
+            return
+        }
 
+        // let queryValue = e
+
+        // if (e.target === undefined){
+        //     queryValue = ""
+        // } else {
+        //     queryValue = e.target.value;
+        // }
+
+        let params = {
+            query: e,
+            skip: skip,
+            limit: 5
+        }
+
+        if (minorTab === "Personal") {
+            //@ts-ignore
+            params["search_user"] = true
+        }
+
+        let res = await call(
+            "/api/search/workspaceConfigs",
+            "post",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            params
+        )
+
+        if (res === undefined) {
+            swal("Server Error", "We can't get in touch with the GIGO servers right now. Sorry about that! " +
+                "We'll get crackin' on that right away!")
+            return
+        }
+
+        if (res["workspace_configs"] === undefined) {
+            if (res["message"] === undefined) {
+                swal("Server Error", "Man... We don't know what happened, but there's some weird stuff going on. " +
+                    "We'll get working on this, come back in a few minutes")
+                return
+            }
+            if (res["message"] === "incorrect type passed for field query") {
+                return
+            }
+            swal("Server Error", res["message"])
+            return
+        }
+
+        // extract workspace configs from response
+        let workspaceConfigs = res["workspace_configs"];
+
+        // iterate over workspace configs loading the full tag data for each tags id from the responses
+        for (let i = 0; i < workspaceConfigs.length; i++) {
+            // create array to hold full tags
+            let fullTags = []
+
+            // iterate over tag ids in tag loading the full tags from the response
+            for (let j = 0; j < workspaceConfigs[i].tags.length; j++) {
+                // skip if tag doesn't exit
+                if (res["tags"][workspaceConfigs[i].tags[j]] === undefined) {
+                    continue
+                }
+                fullTags.push(res["tags"][workspaceConfigs[i].tags[j]])
+            }
+            console.log("configs second: ", workspaceConfigs)
+
+            // assign full tags to workspace
+            workspaceConfigs[i].fullTags = fullTags
+        }
+
+        if (skip === 0){
+            setWsConfigOptions(workspaceConfigs)
+        } else {
+            let wsConfigOption = [
+                ...wsConfigOptions,
+                ...workspaceConfigs
+            ]
+            setWsConfigOptions(wsConfigOption)
+        }
+
+        // let wsConfigOption = [
+        //     ...workspaceConfigs
+        // ]
+
+        setSkip(skip + 5)
+    }
+
+    useEffect(() => {
+        //null
+        handleWorkspaceConfigSearch("", 0)
+    }, [minorTab])
 
 
     const navigate = useNavigate();
+    const minorValues = ["Community", "Personal"]
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
@@ -152,16 +251,44 @@ function PublicConfigs() {
                     >
                         <Typography variant="h4">Public Configs</Typography>
                         <div style={{ width: '30%' }}>
-                            <SearchBar /> {/* SearchBar component */}
+                            <SearchBar handleWorkspaceConfigSearch={(e: any) => {
+                                console.log("e is: ", e)
+                                handleWorkspaceConfigSearch(e, 0)
+                            }}
+                            /> {/* SearchBar component */}
                         </div>
+                        <Tabs
+                            orientation="horizontal"
+                            value={minorTab}
+                            onChange={handleChange}
+                            aria-label="Horizontal tabs"
+                        >
+                            {minorValues.map((minorValue) => {
+                                return <Tab label={minorValue} value={minorValue} key={minorValue}
+                                            sx={{color: "text.primary", borderRadius: 1}}/>;
+                            })}
+                        </Tabs>
                     </Box>
+                    {/*<Box>*/}
+                    {/*    <Tabs*/}
+                    {/*        orientation="horizontal"*/}
+                    {/*        value={minorTab}*/}
+                    {/*        onChange={handleChange}*/}
+                    {/*        aria-label="Horizontal tabs"*/}
+                    {/*    >*/}
+                    {/*        {minorValues.map((minorValue) => {*/}
+                    {/*            return <Tab label={minorValue} value={minorValue} key={minorValue}*/}
+                    {/*                        sx={{color: "text.primary", borderRadius: 1}}/>;*/}
+                    {/*        })}*/}
+                    {/*    </Tabs>*/}
+                    {/*</Box>*/}
 
 
 
                     {/* Configs List */}
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        {configs.map((config) => (
-                            <React.Fragment key={config.id}>
+                        {wsConfigOptions.map((config) => (
+                            <React.Fragment key={config._id}>
                                 <Button
                                     variant="outlined"
                                     sx={{
@@ -179,11 +306,11 @@ function PublicConfigs() {
                                         <Typography variant="subtitle1">{config.title}</Typography>
                                         <Typography variant="body2">{config.description}</Typography>
                                     </Box>
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <DownloadIcon />
-                                        <Typography variant="body2">{config.downloads}</Typography>
-                                        <Typography variant="body2">{config.hoursPlayed} HOURS PLAYED</Typography>
-                                    </Box>
+                                    {/*<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>*/}
+                                    {/*    <DownloadIcon />*/}
+                                    {/*    /!*<Typography variant="body2">{config.downloads}</Typography>*!/*/}
+                                    {/*    /!*<Typography variant="body2">{config.hoursPlayed} HOURS PLAYED</Typography>*!/*/}
+                                    {/*</Box>*/}
                                 </Button>
                                 <Divider sx={{ width: '80%', marginBottom: '20px', marginTop: "20px" }} />
                             </React.Fragment>
