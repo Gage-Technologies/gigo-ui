@@ -407,7 +407,7 @@ function PublicConfigs() {
                             top: "10%"
                         }}>
                             <Tooltip title={add ? "Go Back" : "Add A New Public Config"}>
-                                <Button onClick={() => {setAdd(!add)}} variant={"contained"}>
+                                <Button onClick={() => {setAdd(!add)}} variant={"outlined"}>
                                     {
                                         add ? (
                                             <Cancel/>
