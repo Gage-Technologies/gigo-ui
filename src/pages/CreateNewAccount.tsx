@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import * as moment from 'moment-timezone';
-import {SyntheticEvent, useEffect, useState} from "react";
+import { SyntheticEvent, useEffect, useState } from "react";
 import {
     Autocomplete, Box,
     Button,
@@ -15,8 +15,8 @@ import {
     ThemeProvider,
     Typography
 } from "@mui/material";
-import {getAllTokens} from "../theme";
-import {useAppDispatch, useAppSelector} from "../app/hooks";
+import { getAllTokens } from "../theme";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
 import {
     DefaultTutorialState,
     initialAuthStateUpdate,
@@ -24,7 +24,7 @@ import {
     TutorialState,
     updateAuthState
 } from "../reducers/auth/auth";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import LockPersonIcon from '@mui/icons-material/LockPerson';
 import call from "../services/api-call";
 import config from "../config";
@@ -40,30 +40,30 @@ import googleDark from "../img/login/google-logo-white.png"
 import googleLight from "../img/login/google_light.png"
 import googleLogo from "../img/login/google_g.png"
 import loginImg from "../img/login/login_background.png";
-import {useGoogleLogin} from "@react-oauth/google";
+import { useGoogleLogin } from "@react-oauth/google";
 import SendIcon from "@mui/icons-material/Send";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import {authorize, authorizeGithub, authorizeGoogle} from "../services/auth";
-import {LoadingButton} from "@mui/lab";
+import { authorize, authorizeGithub, authorizeGoogle } from "../services/auth";
+import { LoadingButton } from "@mui/lab";
 import Tag from "../models/tag";
 import swal from "sweetalert";
 import TagsInput from "react-tagsinput";
 import Input from "@material-ui/core/Input";
 import {
-Select, MenuItem
+    Select, MenuItem
 } from "@mui/material";
-import {ArrowBack, Cancel} from "@material-ui/icons";
-import {InputLabel} from "@material-ui/core";
-import {programmingLanguages} from "../services/vars";
-import {ArrowBackIosNew} from "@mui/icons-material";
+import { ArrowBack, Cancel } from "@material-ui/icons";
+import { InputLabel } from "@material-ui/core";
+import { programmingLanguages } from "../services/vars";
+import { ArrowBackIosNew } from "@mui/icons-material";
 import Avataaar from "../components/Avatar/avatar";
 import ReactDOM from "react-dom";
-import {generateRandomAvatarOptions} from "../components/Avatar/avatarRandomize";
-import {clearProjectState, updateCreateProjectState} from "../reducers/createProject/createProject";
-import {DefaultWorkspaceConfig, WorkspaceConfig} from "../models/workspace";
+import { generateRandomAvatarOptions } from "../components/Avatar/avatarRandomize";
+import { clearProjectState, updateCreateProjectState } from "../reducers/createProject/createProject";
+import { DefaultWorkspaceConfig, WorkspaceConfig } from "../models/workspace";
 import loginImg219 from "../img/login/login_background-21-9.jpg";
-import {useParams} from "react-router";
+import { useParams } from "react-router";
 import { useTracking } from 'react-tracking';
 import { RecordWebUsage, WebTrackingEvent } from "../models/web_usage";
 import { useLocation } from 'react-router-dom';
@@ -76,10 +76,27 @@ interface TimezoneOption {
 }
 
 
+const formatTz = (tz: string): TimezoneOption => {
+    const tzOffset = moment.tz(tz).format('Z');
+    const value: string = parseInt(
+        tzOffset
+            .replace(':00', '.00')
+            .replace(':15', '.25')
+            .replace(':30', '.50')
+            .replace(':45', '.75')
+    ).toFixed(2);
+
+    return {
+        label: `${tz} (GMT${tzOffset})`,
+        value: tz,
+    };
+};
+
+
 function CreateNewAccount() {
     let userPref = localStorage.getItem('theme')
     const [mode, _] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
-        const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
+    const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
 
     const { trackEvent } = useTracking({}, {
         dispatch: (data: any) => {
@@ -129,7 +146,7 @@ function CreateNewAccount() {
     const [usage, setUsage] = React.useState("")
     const [proficiency, setProficiency] = React.useState<string>("")
     const [step, setStep] = React.useState(0)
-    const [timezone, setTimezone] = React.useState<TimezoneOption | null>(null)
+    const [timezone, setTimezone] = React.useState<TimezoneOption | null>(formatTz(moment.tz.guess()))
     const [tagOptions, setTagOptions] = React.useState<Tag[]>([])
     const [bsTags, setBsTags] = React.useState<boolean>(false)
     const [interestTags, setInterestTags] = React.useState<Tag[]>([])
@@ -172,12 +189,12 @@ function CreateNewAccount() {
     const ShowButton = () => (
         <Button
             onClick={() => setShowPass(!showPass)}>
-            {showPass ? <VisibilityIcon/> : <VisibilityOffIcon/>}
+            {showPass ? <VisibilityIcon /> : <VisibilityOffIcon />}
         </Button>
     )
 
     // retrieve url params
-    let {name} = useParams();
+    let { name } = useParams();
 
     ReactGA.initialize("G-38KBFJZ6M6");
 
@@ -239,7 +256,7 @@ function CreateNewAccount() {
             return
         }
 
-        if (password.length < 5){
+        if (password.length < 5) {
             //@ts-ignore
             swal("Sorry!", "Your password is too short. Try Another!", "error")
             setLoading(false)
@@ -269,7 +286,7 @@ function CreateNewAccount() {
             null,
             null,
             // @ts-ignore
-            {user_name: username, password: password, email: email, phone: number, timezone: timezone.value, force_pass: forcePass},
+            { user_name: username, password: password, email: email, phone: number, timezone: timezone.value, force_pass: forcePass },
         )
 
         if (res["message"] === "a username is required for user creation") {
@@ -335,14 +352,14 @@ function CreateNewAccount() {
         }
         trackEvent(payload);
 
-        if (password!== confirmPass) {
+        if (password !== confirmPass) {
             //@ts-ignore
             swal("Passwords do not match")
             setLoading(false)
             return
         }
 
-        if (password.length < 5){
+        if (password.length < 5) {
             //@ts-ignore
             swal("Passwords do not match")
             setLoading(false)
@@ -358,7 +375,7 @@ function CreateNewAccount() {
 
         let tagStringArray = interestTags.map(tag => tag.value).join(",")
 
-        if (username.length > 50){
+        if (username.length > 50) {
             swal("Username must be less than 50 characters.")
             return
         }
@@ -378,9 +395,9 @@ function CreateNewAccount() {
             first_name: firstName,
             last_name: lastName,
             external_auth: "",
-            start_user_info: {usage: usage, proficiency: proficiency, tags: tagStringArray, preferred_language: preferredLanguage},
+            start_user_info: { usage: usage, proficiency: proficiency, tags: tagStringArray, preferred_language: preferredLanguage },
             timezone: timezone.value,
-            avatar_settings: {topType: Attributes.topType, accessoriesType: Attributes.accessoriesType, hairColor: Attributes.hairColor, facialHairType: Attributes.facialHairType, clotheType: Attributes.clotheType, clotheColor: Attributes.clotheColor, eyeType: Attributes.eyeType, eyebrowType: Attributes.eyebrowType, mouthType: Attributes.mouthType, avatarStyle: Attributes.avatarStyle, skinColor: Attributes.skinColor},
+            avatar_settings: { topType: Attributes.topType, accessoriesType: Attributes.accessoriesType, hairColor: Attributes.hairColor, facialHairType: Attributes.facialHairType, clotheType: Attributes.clotheType, clotheColor: Attributes.clotheColor, eyeType: Attributes.eyeType, eyebrowType: Attributes.eyebrowType, mouthType: Attributes.mouthType, avatarStyle: Attributes.avatarStyle, skinColor: Attributes.skinColor },
             force_pass: forcePass
         }
 
@@ -435,7 +452,7 @@ function CreateNewAccount() {
             create,
         ])
 
-        if (createRes["message"] === "You must be logged in to access the GIGO system."){
+        if (createRes["message"] === "You must be logged in to access the GIGO system.") {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
@@ -472,14 +489,14 @@ function CreateNewAccount() {
             if (sessionStorage.getItem("alive") === null)
                 //@ts-ignore
                 swal("Sorry, we failed to log you in, please try again on login page");
-                setLoading(false)
+            setLoading(false)
         }
     }
 
     /**
      * Handles a search for tags given a query string via the remote GIGO servers
      */
-    const handleTagSearch =  async (e : any) => {
+    const handleTagSearch = async (e: any) => {
         if (typeof e.target.value !== "string") {
             return
         }
@@ -536,7 +553,7 @@ function CreateNewAccount() {
     }
 
     const googleButton = useGoogleLogin({
-        onSuccess: (usr : any) => onSuccessGoogle(usr)
+        onSuccess: (usr: any) => onSuccessGoogle(usr)
     });
 
     const googleCreate = async () => {
@@ -549,7 +566,7 @@ function CreateNewAccount() {
             path: location.pathname,
             latitude: null,
             longitude: null,
-            metadata: {"auth_provider": "google"},
+            metadata: { "auth_provider": "google" },
         }
         trackEvent(payload);
 
@@ -557,7 +574,7 @@ function CreateNewAccount() {
         //@ts-ignore
         let data = svgNode.outerHTML;
         let svg = new Blob([data], { type: "image/svg+xml" });
-        if (password!== confirmPass || password.length < 5) {
+        if (password !== confirmPass || password.length < 5) {
             //@ts-ignore
             swal("Passwords do not match")
             setLoading(false)
@@ -576,9 +593,9 @@ function CreateNewAccount() {
         let params = {
             external_auth: externalToken,
             password: password,
-            start_user_info: {usage: usage, proficiency: proficiency, tags: tagStringArray, preferred_language: preferredLanguage},
+            start_user_info: { usage: usage, proficiency: proficiency, tags: tagStringArray, preferred_language: preferredLanguage },
             timezone: timezone.value,
-            avatar_settings: {topType: Attributes.topType, accessoriesType: Attributes.accessoriesType, hairColor: Attributes.hairColor, facialHairType: Attributes.facialHairType, clotheType: Attributes.clotheType, clotheColor: Attributes.clotheColor, eyeType: Attributes.eyeType, eyebrowType: Attributes.eyebrowType, mouthType: Attributes.mouthType, avatarStyle: Attributes.avatarStyle, skinColor: Attributes.skinColor}
+            avatar_settings: { topType: Attributes.topType, accessoriesType: Attributes.accessoriesType, hairColor: Attributes.hairColor, facialHairType: Attributes.facialHairType, clotheType: Attributes.clotheType, clotheColor: Attributes.clotheColor, eyeType: Attributes.eyeType, eyebrowType: Attributes.eyebrowType, mouthType: Attributes.mouthType, avatarStyle: Attributes.avatarStyle, skinColor: Attributes.skinColor }
         }
 
         if (name !== "" && name !== undefined) {
@@ -621,7 +638,7 @@ function CreateNewAccount() {
                         path: location.pathname,
                         latitude: null,
                         longitude: null,
-                        metadata: {"auth_provider": "google"},
+                        metadata: { "auth_provider": "google" },
                     }
                     trackEvent(payload);
 
@@ -665,7 +682,7 @@ function CreateNewAccount() {
             res,
         ])
 
-        if (createRes["message"] === "You must be logged in to access the GIGO system."){
+        if (createRes["message"] === "You must be logged in to access the GIGO system.") {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
@@ -690,7 +707,7 @@ function CreateNewAccount() {
             path: location.pathname,
             latitude: null,
             longitude: null,
-            metadata: {"auth_provider": "github"},
+            metadata: { "auth_provider": "github" },
         }
         trackEvent(payload);
 
@@ -698,7 +715,7 @@ function CreateNewAccount() {
         //@ts-ignore
         let data = svgNode.outerHTML;
         let svg = new Blob([data], { type: "image/svg+xml" });
-        if (password!== confirmPass) {
+        if (password !== confirmPass) {
             //@ts-ignore
             swal("Passwords do not match")
             setLoading(false)
@@ -724,9 +741,9 @@ function CreateNewAccount() {
         let params = {
             external_auth: externalToken,
             password: password,
-            start_user_info: {usage: usage, proficiency: proficiency, tags: tagStringArray, preferred_language: preferredLanguage},
+            start_user_info: { usage: usage, proficiency: proficiency, tags: tagStringArray, preferred_language: preferredLanguage },
             timezone: timezone.value,
-            avatar_settings: {topType: Attributes.topType, accessoriesType: Attributes.accessoriesType, hairColor: Attributes.hairColor, facialHairType: Attributes.facialHairType, clotheType: Attributes.clotheType, clotheColor: Attributes.clotheColor, eyeType: Attributes.eyeType, eyebrowType: Attributes.eyebrowType, mouthType: Attributes.mouthType, avatarStyle: Attributes.avatarStyle, skinColor: Attributes.skinColor}
+            avatar_settings: { topType: Attributes.topType, accessoriesType: Attributes.accessoriesType, hairColor: Attributes.hairColor, facialHairType: Attributes.facialHairType, clotheType: Attributes.clotheType, clotheColor: Attributes.clotheColor, eyeType: Attributes.eyeType, eyebrowType: Attributes.eyebrowType, mouthType: Attributes.mouthType, avatarStyle: Attributes.avatarStyle, skinColor: Attributes.skinColor }
         }
 
         if (name !== "" && name !== undefined) {
@@ -768,7 +785,7 @@ function CreateNewAccount() {
                         path: location.pathname,
                         latitude: null,
                         longitude: null,
-                        metadata: {"auth_provider": "github"},
+                        metadata: { "auth_provider": "github" },
                     }
                     trackEvent(payload);
 
@@ -813,7 +830,7 @@ function CreateNewAccount() {
             res,
         ])
 
-        if (createRes["message"] === "You must be logged in to access the GIGO system."){
+        if (createRes["message"] === "You must be logged in to access the GIGO system.") {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
@@ -890,13 +907,13 @@ function CreateNewAccount() {
         setUnsafe(false)
     }
 
-    const renderInput = ({...props}) => {
+    const renderInput = ({ ...props }) => {
         let { onChange, value, ...other } = props;
         return (
             <Input
                 onChange={onChange}
                 value={value}
-                style={{color: theme.palette.text.primary, width: "100%"}}
+                style={{ color: theme.palette.text.primary, width: "100%" }}
                 {...other}
             />
         );
@@ -1098,7 +1115,7 @@ function CreateNewAccount() {
             >
                 <Stack direction='row' gap={1}>
                     <Typography>Tags</Typography>
-                    <Cancel/>
+                    <Cancel />
                 </Stack>
             </Box>
         );
@@ -1119,23 +1136,23 @@ function CreateNewAccount() {
         return (
             <form>
 
-                <Avataaar id={"avatar-container"} value={Attributes} sx={{width: window.innerWidth > 1000 ? "auto" : "80%"}} onChange={(e: React.SetStateAction<{ topType: string; accessoriesType: string; avatarRef: object, hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; }>) => setAvatar(e)}/>
-                <div style={window.innerWidth > 1000 ? {width: "100%", display: "flex", justifyContent: "center", paddingTop: "1vh",} : {width: "80%", display: "flex", justifyContent: "space-evenly", paddingTop: "1vh", flexDirection: "row"}}>
+                <Avataaar id={"avatar-container"} value={Attributes} sx={{ width: window.innerWidth > 1000 ? "auto" : "80%" }} onChange={(e: React.SetStateAction<{ topType: string; accessoriesType: string; avatarRef: object, hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; }>) => setAvatar(e)} />
+                <div style={window.innerWidth > 1000 ? { width: "100%", display: "flex", justifyContent: "center", paddingTop: "1vh", } : { width: "80%", display: "flex", justifyContent: "space-evenly", paddingTop: "1vh", flexDirection: "row" }}>
                     <Button id={"last-step"}
-                            onClick={() => {
-                                setStep(0)
-                            }}
-                            sx={window.innerWidth > 1000 ?{
-                                // paddingLeft: "5vw",
-                                // paddingTop: "1vh",
-                                // marginLeft: "1vw",
-                                // width: window.innerWidth > 1000 ? "auto" : "1vw",
-                                // color: theme.palette.primary.main,
-                                // top: "53vh",
-                                // left: "5vw",
-                            } : {}}
+                        onClick={() => {
+                            setStep(0)
+                        }}
+                        sx={window.innerWidth > 1000 ? {
+                            // paddingLeft: "5vw",
+                            // paddingTop: "1vh",
+                            // marginLeft: "1vw",
+                            // width: window.innerWidth > 1000 ? "auto" : "1vw",
+                            // color: theme.palette.primary.main,
+                            // top: "53vh",
+                            // left: "5vw",
+                        } : {}}
                     >
-                        <ArrowBack style={{color: theme.palette.primary.main}}/> Back
+                        <ArrowBack style={{ color: theme.palette.primary.main }} /> Back
                     </Button>
                     <LoadingButton
                         loading={loading}
@@ -1164,7 +1181,7 @@ function CreateNewAccount() {
                         Last Step
                     </LoadingButton>
                 </div>
-                <div style={{height: "10px"}}/>
+                <div style={{ height: "10px" }} />
             </form>
         )
     }
@@ -1210,9 +1227,9 @@ function CreateNewAccount() {
                         marginLeft: "1vw",
                     }}
                 >
-                    <ArrowBack/> Go Back
+                    <ArrowBack /> Go Back
                 </Button>
-                <div style={{background: hexToRGBA(theme.palette.primary.light, 0.7), color: theme.palette.text.primary, padding: "20px", textAlign: "center", fontWeight: "bold", fontSize: "16px", boxShadow: "0px 0px 10px 2px black"}}>
+                <div style={{ background: hexToRGBA(theme.palette.primary.light, 0.7), color: theme.palette.text.primary, padding: "20px", textAlign: "center", fontWeight: "bold", fontSize: "16px", boxShadow: "0px 0px 10px 2px black" }}>
                     We use cutting edge Magic to understand your input and serve you personalized projects.
                 </div>
                 <TextField
@@ -1232,7 +1249,7 @@ function CreateNewAccount() {
                         width: "28vw",
                         marginLeft: "3.5vw",
                         mt: "2.5vh"
-                    } : {width: "90%", marginLeft: "4.5vw", mt: "2.5vh"}}
+                    } : { width: "90%", marginLeft: "4.5vw", mt: "2.5vh" }}
                     onChange={e => setUsage(e.target.value)}
                 >
                 </TextField>
@@ -1248,7 +1265,7 @@ function CreateNewAccount() {
                         return option._id === value._id;
                     }}
                     renderInput={(params) => (
-                        <TextField {...params} label="Interest Tags" placeholder="Interest Tags"/>
+                        <TextField {...params} label="Interest Tags" placeholder="Interest Tags" />
                     )}
                     onInputChange={(e) => {
                         handleTagSearch(e)
@@ -1263,7 +1280,7 @@ function CreateNewAccount() {
                         width: "28vw",
                         marginLeft: "3.5vw",
                         mt: "2.5vh"
-                    } : {width: "90%", marginLeft: "4.5vw", mt: "2.5vh"}}
+                    } : { width: "90%", marginLeft: "4.5vw", mt: "2.5vh" }}
                 />
                 {renderTagsExplanationPopover()}
                 <TextField
@@ -1273,11 +1290,11 @@ function CreateNewAccount() {
                     required={true}
                     value={proficiency}
                     onChange={e => setProficiency(e.target.value as string)}
-                    sx={window.innerWidth > 1000? {
+                    sx={window.innerWidth > 1000 ? {
                         width: "28vw",
                         marginLeft: "3.5vw",
                         mt: "2.5vh"
-                    } : {width: "90%", marginLeft: "4.5vw", mt: "2.5vh"}}
+                    } : { width: "90%", marginLeft: "4.5vw", mt: "2.5vh" }}
                 >
                     <MenuItem value={"Beginner"}>Beginner</MenuItem>
                     <MenuItem value={"Intermediate"}>Intermediate</MenuItem>
@@ -1295,7 +1312,7 @@ function CreateNewAccount() {
                         width: "28vw",
                         marginLeft: "3.5vw",
                         mt: "2.5vh"
-                    } : {width: "90%", marginLeft: "4.5vw", mt: "2.5vh"}}
+                    } : { width: "90%", marginLeft: "4.5vw", mt: "2.5vh" }}
                     SelectProps={{
                         MenuProps: {
                             PaperProps: {
@@ -1322,7 +1339,7 @@ function CreateNewAccount() {
                     variant={`contained`}
                     color={"primary"}
                     // endIcon={<LockPersonIcon/>}
-                    sx={window.innerWidth > 1000? {
+                    sx={window.innerWidth > 1000 ? {
                         width: '15vw',
                         borderRadius: 1,
                         height: "5vh",
@@ -1352,22 +1369,22 @@ function CreateNewAccount() {
                 paddingTop: "25px",
             }}>
                 <Grid container
-                      sx={{
-                          justifyContent: "center",
-                          outlineColor: "black",
-                          width: window.innerWidth > 1000 ? "35%" : "90%",
-                          height: window.innerWidth > 1000 ? "100%" : "60%",
-                          borderRadius: 1,
-                          backgroundColor: theme.palette.background.default,
-                      }} direction="column" alignItems="center"
+                    sx={{
+                        justifyContent: "center",
+                        outlineColor: "black",
+                        width: window.innerWidth > 1000 ? "35%" : "90%",
+                        height: window.innerWidth > 1000 ? "100%" : "60%",
+                        borderRadius: 1,
+                        backgroundColor: theme.palette.background.default,
+                    }} direction="column" alignItems="center"
                 >
-                    <Typography component={"div"} variant={"h5"} sx={window.innerWidth > 1000 ?{
-                        width:  "100%",
+                    <Typography component={"div"} variant={"h5"} sx={window.innerWidth > 1000 ? {
+                        width: "100%",
                         display: "flex",
                         justifyContent: "center",
                         paddingTop: "10px"
                     } : {
-                        width:  "80%",
+                        width: "80%",
                         display: "flex",
                         justifyContent: "center",
                         paddingTop: "10px",
@@ -1377,7 +1394,7 @@ function CreateNewAccount() {
                         Register New Account
                     </Typography>
                     {step === 0 ? (
-                        <form style={{height: window.innerWidth > 1000 ? '89vh' : "auto"}}>
+                        <form style={{ height: window.innerWidth > 1000 ? '89vh' : "auto" }}>
                             <TextField
                                 id={"FirstName"}
                                 error={firstName === "" ? missingFirst : false}
@@ -1489,8 +1506,8 @@ function CreateNewAccount() {
                                 value={password}
                                 onChange={e => setPassword(e.target.value)}
                                 InputProps={{
-                                    endAdornment: <ShowButton/>
-                            }}
+                                    endAdornment: <ShowButton />
+                                }}
                             >
                             </TextField>
                             <TextField
@@ -1561,23 +1578,23 @@ function CreateNewAccount() {
                             >
                                 Next Step
                             </LoadingButton>
-                                <Dialog
-                                    open={unsafe}
-                                    onClose={() => setUnsafe(false)}
-                                >
-                                    <DialogTitle>{"Unsafe Password"}</DialogTitle>
-                                    <DialogContent>
-                                        <DialogContentText>
-                                            Hey, we found that your password is included in a list of compromised passwords. It's important to keep your account secure, so we strongly suggest that you change your password. You can still continue using your current password, but just know that it carries a higher risk.
-                                        </DialogContentText>
-                                    </DialogContent>
-                                    <DialogActions>
-                                        <Button onClick={() => setUnsafe(false)} color="primary">Change Password</Button>
-                                        <Button onClick={handleForce} color={"error"}>
-                                            Force Un-Safe Password
-                                        </Button>
-                                    </DialogActions>
-                                </Dialog>
+                            <Dialog
+                                open={unsafe}
+                                onClose={() => setUnsafe(false)}
+                            >
+                                <DialogTitle>{"Unsafe Password"}</DialogTitle>
+                                <DialogContent>
+                                    <DialogContentText>
+                                        Hey, we found that your password is included in a list of compromised passwords. It's important to keep your account secure, so we strongly suggest that you change your password. You can still continue using your current password, but just know that it carries a higher risk.
+                                    </DialogContentText>
+                                </DialogContent>
+                                <DialogActions>
+                                    <Button onClick={() => setUnsafe(false)} color="primary">Change Password</Button>
+                                    <Button onClick={handleForce} color={"error"}>
+                                        Force Un-Safe Password
+                                    </Button>
+                                </DialogActions>
+                            </Dialog>
                             <Typography component={"div"} variant={"h6"} sx={{
                                 width: "100%",
                                 display: "flex",
@@ -1592,7 +1609,7 @@ function CreateNewAccount() {
                                 marginBottom: "5px"
                             }} direction="row" alignItems="center">
                                 <Button onClick={() => googleButton()}>
-                                    <Grid container spacing={{xs: 2}} justifyContent="center" sx={{
+                                    <Grid container spacing={{ xs: 2 }} justifyContent="center" sx={{
                                         flexGrow: 1,
                                         paddingRight: ".5vh"
                                     }}>
@@ -1631,7 +1648,7 @@ function CreateNewAccount() {
                                     onSuccess={onSuccessGithub}
                                     onFailure={onFailureGithub}
                                 >
-                                    <Grid container spacing={{xs: 2}} justifyContent="center" sx={{
+                                    <Grid container spacing={{ xs: 2 }} justifyContent="center" sx={{
                                         flexGrow: 1,
                                         paddingTop: ".1vh",
                                         marginLeft: "10px",
@@ -1669,7 +1686,7 @@ function CreateNewAccount() {
                                 alignItems: "center"
                             }}>
                                 <Typography variant="h5" component="div"
-                                            sx={{fontSize: "75%"}}
+                                    sx={{ fontSize: "75%" }}
                                 >
                                     Already have an account?
                                 </Typography>
@@ -1700,14 +1717,14 @@ function CreateNewAccount() {
                     paddingTop: "220px",
                 }}>
                     <Grid container
-                          sx={{
-                              justifyContent: "center",
-                              outlineColor: "black",
-                              width: window.innerWidth > 1000 ? "35%" : "90%",
-                              borderRadius: 1,
-                              backgroundColor: theme.palette.background.default,
-                              paddingBottom: "1.5vw"
-                          }} direction="column" alignItems="center"
+                        sx={{
+                            justifyContent: "center",
+                            outlineColor: "black",
+                            width: window.innerWidth > 1000 ? "35%" : "90%",
+                            borderRadius: 1,
+                            backgroundColor: theme.palette.background.default,
+                            paddingBottom: "1.5vw"
+                        }} direction="column" alignItems="center"
                     >
                         <Typography component={"div"} variant={"h5"} sx={{
                             width: "100%",
@@ -1734,7 +1751,7 @@ function CreateNewAccount() {
                             value={password}
                             onChange={e => setPassword(e.target.value)}
                             InputProps={{
-                                endAdornment: <ShowButton/>
+                                endAdornment: <ShowButton />
                             }}
                         >
                         </TextField>
@@ -1793,7 +1810,7 @@ function CreateNewAccount() {
                             }}
                             variant={`contained`}
                             color={"primary"}
-                            endIcon={<SendIcon/>}
+                            endIcon={<SendIcon />}
                             sx={{
                                 borderRadius: 1,
                                 minHeight: "5vh",
@@ -1806,7 +1823,7 @@ function CreateNewAccount() {
                             Next Step
                         </Button>
                         <Typography variant="h5" component="div"
-                                    sx={{fontSize: "75%"}}
+                            sx={{ fontSize: "75%" }}
                         >
                             Already linked your account?
                         </Typography>
@@ -1827,14 +1844,14 @@ function CreateNewAccount() {
                     paddingTop: "25px",
                 }}>
                     <Grid container
-                          sx={{
-                              justifyContent: "center",
-                              outlineColor: "black",
-                              width: "35%",
-                              borderRadius: 1,
-                              backgroundColor: theme.palette.background.default,
-                              height: "100%",
-                          }} direction="column" alignItems="center"
+                        sx={{
+                            justifyContent: "center",
+                            outlineColor: "black",
+                            width: "35%",
+                            borderRadius: 1,
+                            backgroundColor: theme.palette.background.default,
+                            height: "100%",
+                        }} direction="column" alignItems="center"
                     >
                         {renderAvatar()}
                     </Grid>
@@ -1844,14 +1861,14 @@ function CreateNewAccount() {
                     paddingTop: "25px",
                 }}>
                     <Grid container
-                          sx={{
-                              justifyContent: "center",
-                              outlineColor: "black",
-                              width: "35%",
-                              borderRadius: 1,
-                              backgroundColor: theme.palette.background.default,
-                              height: "100%",
-                          }} direction="column" alignItems="center"
+                        sx={{
+                            justifyContent: "center",
+                            outlineColor: "black",
+                            width: "35%",
+                            borderRadius: 1,
+                            backgroundColor: theme.palette.background.default,
+                            height: "100%",
+                        }} direction="column" alignItems="center"
                     >
                         {renderQuestions()}
                     </Grid>
@@ -1862,7 +1879,7 @@ function CreateNewAccount() {
     // initialize tags if there are no values
     if (tagOptions.length === 0 && !bsTags) {
         setBsTags(true)
-        handleTagSearch({target: {value: ""}})
+        handleTagSearch({ target: { value: "" } })
     }
 
     return (
