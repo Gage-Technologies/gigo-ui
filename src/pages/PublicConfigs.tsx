@@ -15,7 +15,7 @@ import {
     Tooltip
 } from "@mui/material";
 import JourneyPageCampIcon from "../components/Icons/JourneyPageCamp";
-import {Grid} from "@material-ui/core";
+import {Chip, Grid} from "@material-ui/core";
 import JourneyPagePumpIcon from "../components/Icons/JourneyPageGasPump";
 import {useAppSelector} from "../app/hooks";
 import {selectAppWrapperChatOpen, selectAppWrapperSidebarOpen} from "../reducers/appWrapper/appWrapper";
@@ -116,9 +116,20 @@ function PublicConfigs() {
     const[createLanguage, setCreateLanguage] = useState<Tag[]>([]);
     const [tagOptions, setTagOptions] = React.useState<Tag[]>([])
 
+    const [revision, setRevision] = React.useState<boolean>(false);
+    const [revisionTitle, setRevisionTitle] = useState<string>("");
+    const [revisionDescription, setRevisionDescription] = useState<string>("");
+    const [revisionTags, setRevisionTags] = useState<Tag[]>([]);
+    const[revisionLanguage, setRevisionLanguage] = useState<number[]>([]);
+    const [revisionContent, setRevisionContent] = useState<string>("");
+    const [revisionId, setRevisionId] = useState<string>("");
+    const [extraRevisions, setExtraRevisions] = useState([]);
+    const [revisionUses, setRevisionUses] = useState<number>(0);
+    const [revisionCompletions, setRevisionCompletions] = useState<number>(0);
+
     const [editTitle, setEditTitle] = React.useState("");
     const [editDescription, setEditDescription] = React.useState("");
-    const [editTags, setEditTags] = React.useState<String[]>([]);
+    const [editTags, setEditTags] = React.useState<Tag[]>([]);
     const [editLanguage, setEditLanguage] = React.useState<number[]>([]);
     const [editContent, setEditContent] = React.useState<string>("");
     const [editId, setEditId] = React.useState<string>("");
@@ -136,14 +147,13 @@ function PublicConfigs() {
         [mode],
     );
 
-    const editButton = (title: string, description: string, tags: string[], languages: number[], id: string, content: string) => {
+    const editButton = (title: string, description: string, tags: Tag[], languages: number[], id: string, content: string) => {
         setEditMode(true)
         setEditTitle(title)
         setEditDescription(description)
         setEditTags(tags)
         setEditId(id)
         setEditContent(content)
-        console.log("langugae: ", languages)
         setEditLanguage(languages)
     }
 
@@ -160,7 +170,6 @@ function PublicConfigs() {
     const [wsConfigOptions, setWsConfigOptions] = React.useState<WorkspaceConfig[]>([])
 
     const aspectRatio = useAspectRatio();
-    console.log("aspectRatio: ", aspectRatio);
     const handleTheme = () => {
         colorMode.toggleColorMode();
         localStorage.setItem('theme', mode === 'light' ? "dark" : 'light')
@@ -177,7 +186,6 @@ function PublicConfigs() {
             return
         }
 
-        console.log("e stuff: ", e)
 
         if (e !== "" && typeof e !== "string") {
             return
@@ -234,6 +242,25 @@ function PublicConfigs() {
         // extract workspace configs from response
         let workspaceConfigs = res["workspace_configs"];
 
+        // // iterate over workspace configs loading the full tag data for each tags id from the responses
+        // for (let i = 0; i < workspaceConfigs.length; i++) {
+        //     // create array to hold full tags
+        //     let fullTags = []
+        //
+        //     // iterate over tag ids in tag loading the full tags from the response
+        //     for (let j = 0; j < workspaceConfigs[i].tags.length; j++) {
+        //         // skip if tag doesn't exit
+        //         if (res["tags"][workspaceConfigs[i].tags[j]] === undefined) {
+        //             continue
+        //         }
+        //         fullTags.push(res["tags"][workspaceConfigs[i].tags[j]])
+        //     }
+        //     console.log("configs second: ", fullTags)
+        //
+        //     // assign full tags to workspace
+        //     workspaceConfigs[i].fullTags = fullTags
+        // }
+
         // iterate over workspace configs loading the full tag data for each tags id from the responses
         for (let i = 0; i < workspaceConfigs.length; i++) {
             // create array to hold full tags
@@ -241,17 +268,22 @@ function PublicConfigs() {
 
             // iterate over tag ids in tag loading the full tags from the response
             for (let j = 0; j < workspaceConfigs[i].tags.length; j++) {
+                if (workspaceConfigs[i].tags[j] === undefined || workspaceConfigs[i].tags[j].toString() === "0") {
+                    continue
+                }
                 // skip if tag doesn't exit
                 if (res["tags"][workspaceConfigs[i].tags[j]] === undefined) {
                     continue
                 }
                 fullTags.push(res["tags"][workspaceConfigs[i].tags[j]])
             }
-            console.log("configs second: ", workspaceConfigs)
+
 
             // assign full tags to workspace
             workspaceConfigs[i].fullTags = fullTags
         }
+
+
 
         if (skip === 0){
             setWsConfigOptions(workspaceConfigs)
@@ -281,6 +313,10 @@ function PublicConfigs() {
 
     const handleValueChangeEdit = (v: React.SetStateAction<string>) => {
         setEditContent(v)
+    }
+
+    const handleValueChangeRevision = (v: React.SetStateAction<string>) => {
+        setRevisionContent(v)
     }
 
     const handleTagSearch = async (e: any) => {
@@ -327,19 +363,10 @@ function PublicConfigs() {
 
     const createPublicConfig = async() => {
 
-        console.log("title: ", createTitle)
-        console.log("description: ", createDescription)
-        console.log("tags: ", createTags)
-        console.log("language: ", createLanguage)
-        console.log("workspaceConfig: ", workspaceConfigValue)
-
         if (createTitle === "" || createDescription === "" || createTags.length === 0 || createLanguage.length === 0 || workspaceConfigValue === "") {
             swal("Error", "Please fill out all fields!")
             return
         }
-
-        console.log("value: ", programmingLanguages.indexOf(createLanguage[0].value))
-        console.log("language: ", programmingLanguages.indexOf(createLanguage[0].toString()))
 
         let language = programmingLanguages.indexOf(createLanguage[0].toString())
 
@@ -360,6 +387,7 @@ function PublicConfigs() {
         )
 
         if (res !== undefined && res["message"] !== undefined && res["message"] === "workspace config template created successfully"){
+            setAdd(false)
             swal("Success", "Your workspace config template has been created successfully!")
         } else {
             swal("Error", "There was an error creating the workspace config template. Please try again later.")
@@ -367,6 +395,10 @@ function PublicConfigs() {
     }
 
     const editConfig = async() => {
+        // console.log("description: ", editDescription)
+        // console.log("contnet: ", editContent)
+        // console.log("tags: ", editTags)
+        // console.log("id: ", editId)
 
         if (editTitle === "" || editDescription === "" || editContent === "" || editId === ""){
             swal("Error", "Please fill out all fields!")
@@ -383,14 +415,54 @@ function PublicConfigs() {
             {
                 description: editDescription,
                 config_id: editId,
-                content: editContent
+                content: editContent,
+                tags: editTags
             }
         )
 
-        if (res !== undefined && res["message"] !== undefined && res["message"] === "sucessfully updated workspace config"){
+        if (res !== undefined && res["message"] !== undefined && res["message"] === "successfully updated workspace config"){
+            setEditMode(false)
             swal("Success", "Your workspace config template has been created successfully!")
         } else {
             swal("Error", "There was an error creating the workspace config template. Please try again later.")
+        }
+    }
+
+    const getRevisions = async(config: WorkspaceConfig) => {
+        console.log("lang is: ", config)
+        setRevision(true)
+        setRevisionContent(config.content)
+        setRevisionTitle(config.title)
+        setRevisionId(config._id)
+        setRevisionDescription(config.description)
+        setRevisionTags(config.fullTags)
+        setRevisionLanguage(config.languages)
+        setRevisionUses(config.uses)
+        setRevisionCompletions(config.completions)
+
+        if (config._id == undefined || config._id === ""){
+            swal("Error", "We were unable to fulfill this request at this time!")
+            return
+        }
+
+        let res = await call(
+            "/api/workspace/config/getWsConfig",
+            "post",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {
+                id: config._id
+            }
+        )
+
+        if (res !== undefined && res["revisions"] !== undefined){
+            let revisions = res["revisions"]
+            revisions.shift()
+            setExtraRevisions(revisions)
+        } else {
+            swal("Error", "There was an issue getting other revisions. Please try again later.")
         }
     }
 
@@ -408,13 +480,16 @@ function PublicConfigs() {
             <CssBaseline>
                 <Box sx={{ bgcolor: 'background.paper', minHeight: '10vh', p: 2 }}>
                     {/* Header and Search Bar */}
-                    {editMode ? (
+                    {editMode || revision ? (
                         <Box style={{
                             display: "flex",
                             alignItems: "right",
                             flexDirection: "row"
                         }}>
-                            <Button onClick={() => {setEditMode(false)}}>
+                            <Button onClick={() => {
+                                setEditMode(false)
+                                setRevision(false)
+                            }}>
                                 <Cancel/>
                                 <h5>Go Back</h5>
                             </Button>
@@ -624,26 +699,26 @@ function PublicConfigs() {
                                                 handleTagSearch(e);
                                             }}
                                             onChange={(event, value: (Tag | string)[], reason) => {
-                                                // set update state tags to empty array
-                                                let editTagsNew = createTags;
+                                                // Create a new array instead of modifying the existing one
+                                                let editTagsNew = [];
 
-                                                // handle any values that may be strings from user input
-                                                for (let i = 0; i < value.length; i++) {
-                                                    // append to the update state tags if this is an object
-                                                    if (typeof value[i] === "object") {
-                                                        // @ts-ignore
-                                                        editTagsNew.push(value[i]);
-                                                        continue
+                                                // If a tag is removed, handle accordingly
+                                                if (reason === 'removeOption') {
+                                                    editTagsNew = value.map(v => typeof v === "string" ? { _id: "-1", value: v } : v);
+                                                } else {
+                                                    // handle any values that may be strings from user input
+                                                    for (let i = 0; i < value.length; i++) {
+                                                        if (typeof value[i] === "object") {
+                                                            editTagsNew.push(value[i]);
+                                                        } else {
+                                                            editTagsNew.push({ _id: "-1", value: value[i] });
+                                                        }
                                                     }
-
-                                                    // wrap the value in an object with -1 for an id to mark
-                                                    editTagsNew.push({
-                                                        _id: "-1",
-                                                        value: value[i],
-                                                    } as Tag)
                                                 }
-                                                // @ts-ignore
-                                                setEditTags(editTagsNew)
+
+                                                // Update the state with the new array
+                                                //@ts-ignore
+                                                setEditTags(editTagsNew);
                                             }}
                                             //@ts-ignore
                                             value={editTags}
@@ -683,7 +758,135 @@ function PublicConfigs() {
                                     </Button>
                                 </div>
                             </div>
-                            ) : (
+                            ) : revision ? (
+                                <div style={{display: "flex", flexDirection: "row"}}>
+                                    <div style={{display: "flex", flexDirection: "column"}}>
+                                        <Grid item xs={"auto"}>
+                                            <TextField
+                                                id={"template-title"}
+                                                variant="outlined"
+                                                color="primary"
+                                                label="Title"
+                                                required={true}
+                                                margin="normal"
+                                                type="text"
+                                                sx={{
+                                                    width: "20vw",
+                                                }}
+                                                value={revisionTitle}
+                                                InputProps={{
+                                                    readOnly: true,
+                                                }}
+                                            />
+                                            <TextField
+                                                id={"languages"}
+                                                variant="outlined"
+                                                color="primary"
+                                                label="Languages"
+                                                required={true}
+                                                margin="normal"
+                                                type={"text"}
+                                                value={revisionLanguage !== undefined && revisionLanguage[0] !== -1 ? programmingLanguages[revisionLanguage[0]].toString() : ""}
+                                                sx={{width: "auto", paddingLeft: "10px"}}
+                                                InputProps={{
+                                                    readOnly: true,
+                                                }}
+                                            />
+                                        </Grid>
+                                        <WorkspaceConfigEditor
+                                            value={revisionContent}
+                                            setValue={handleValueChangeRevision}
+                                            style={{
+                                                float: "left",
+                                                marginTop: "10px",
+                                                // marginLeft: "40px"
+                                            }}
+                                            width={"40vw"}
+                                            height={"50vh"}
+                                        />
+                                        <Grid item xs={"auto"} style={{display: "flex", flexDirection: "row"}}>
+                                            <TextField
+                                                id={"template-description"}
+                                                variant="outlined"
+                                                color="primary"
+                                                label="Description"
+                                                required={true}
+                                                margin="normal"
+                                                multiline={true}
+                                                minRows={3}
+                                                maxRows={5}
+                                                sx={{
+                                                    width: "20vw",
+                                                    paddingBottom: "10px",
+                                                    paddingTop: "10px"
+                                                }}
+                                                value={revisionDescription}
+                                                InputProps={{
+                                                    readOnly: true,
+                                                }}
+                                            />
+                                            <Autocomplete
+                                                multiple
+                                                limitTags={5}
+                                                id="wsConfigTagSearchAutocomplete"
+                                                options={revisionTags}
+                                                getOptionLabel={(option) => typeof option === "string" ? option : option.value}
+                                                renderTags={(tagValue, getTagProps) =>
+                                                    tagValue.map((option, index) => (
+                                                        <Chip
+                                                            variant="outlined"
+                                                            label={typeof option === "string" ? option : option.value}
+                                                            {...getTagProps({ index })}
+                                                            disabled
+                                                            style={{color: theme.palette.text.primary}}
+                                                        />
+                                                    ))
+                                                }
+                                                renderInput={(params) => (
+                                                    <TextField {...params} label="Tags" placeholder="Template Tags" />
+                                                )}
+                                                value={revisionTags}
+                                                sx={{ width: "20vw", paddingBottom: "10px", paddingTop: "30px", paddingLeft: "10px" }}
+                                                readOnly
+                                            />
+                                        </Grid>
+                                    </div>
+                                    <div style={{ position: "absolute", top: 80, right: 20, display: 'flex', justifyContent: 'space-between' }}>
+                                        <span style={{ marginRight: '20px' }}>{"Uses: " + revisionUses}</span>
+                                        <span>{"Completions: " + revisionCompletions}</span>
+                                    </div>
+                                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "75%", width: "50%" }}>
+                                        <div>
+                                            Revision
+                                        </div>
+                                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                            {extraRevisions.map((config) => (
+                                                <React.Fragment key={config["_id"]}>
+                                                    <Button
+                                                        variant="outlined"
+                                                        sx={{
+                                                            bgcolor: theme.palette.background.default,
+                                                            mb: 1,
+                                                            borderRadius: '10px', // Full rounded outline
+                                                            color: theme.palette.text.primary,
+                                                            justifyContent: 'space-between',
+                                                            padding: '10px 20px',
+                                                            textTransform: 'none', // Prevents the button text from being uppercase
+                                                            width: '78%', // Set width to 78% of the parent container
+                                                        }}
+                                                    >
+                                                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                                            <Typography variant="subtitle1">{config["title"]}</Typography>
+                                                            <Typography variant="body2">{config["description"]}</Typography>
+                                                        </Box>
+                                                    </Button>
+                                                    <div style={{height: "15px"}}/>
+                                                </React.Fragment>
+                                            ))}
+                                        </Box>
+                                    </div>
+                                </div>
+                        ) : (
                             <div>
                                 <Box
                                     sx={{
@@ -698,7 +901,6 @@ function PublicConfigs() {
                                     <Typography variant="h4">Public Configs</Typography>
                                     <div style={{ width: '30%', marginBottom: "15px" }}>
                                         <SearchBar handleWorkspaceConfigSearch={(e: any) => {
-                                            console.log("e is: ", e)
                                             handleWorkspaceConfigSearch(e, 0)
                                         }}
                                         /> {/* SearchBar component */}
@@ -730,6 +932,7 @@ function PublicConfigs() {
                                                     textTransform: 'none', // Prevents the button text from being uppercase
                                                     width: '78%', // Set width to 78% of the parent container
                                                 }}
+                                                onClick={() => getRevisions(config)}
                                             >
                                                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                                                     <Typography variant="subtitle1">{config.title}</Typography>
@@ -738,7 +941,7 @@ function PublicConfigs() {
                                                 {minorTab === "Personal" ? (
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                                         {/*<DownloadIcon />*/}
-                                                        <Button onClick={() => editButton(config.title, config.description, config.tags, config.languages, config._id, config.content)}>
+                                                        <Button onClick={() => editButton(config.title, config.description, config.fullTags, config.languages, config._id, config.content)}>
                                                             <Edit/>
                                                         </Button>
                                                         {/*<Typography variant="body2">{config.downloads}</Typography>*/}
@@ -779,7 +982,6 @@ function useAspectRatio() {
             const width = window.screen.width;
             const height = window.screen.height;
             let divisor = gcd(width, height);
-            console.log("divisor: ", divisor);
             // Dividing by GCD and truncating into integers
             let simplifiedWidth = Math.trunc(width / divisor);
             let simplifiedHeight = Math.trunc(height / divisor);
@@ -793,7 +995,6 @@ function useAspectRatio() {
         calculateAspectRatio();
 
         window.addEventListener('resize', calculateAspectRatio);
-        console.log("aspectRatio: ", aspectRatio);
 
         return () => {
             window.removeEventListener('resize', calculateAspectRatio);
