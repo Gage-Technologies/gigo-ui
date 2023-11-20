@@ -39,6 +39,8 @@ export interface WorkspaceConfig {
     fullTags: Tag[];
     languages: number[];
     language_strings: string[];
+    uses: number;
+    completions: number;
 }
 
 export const DefaultWorkspaceConfig = `# version of configuration format

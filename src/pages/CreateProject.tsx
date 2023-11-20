@@ -54,7 +54,7 @@ import {
     updateCreateProjectState
 } from "../reducers/createProject/createProject";
 import { programmingLanguages } from "../services/vars";
-import { TaskAlt } from "@mui/icons-material";
+import {Close, TaskAlt} from "@mui/icons-material";
 import call from "../services/api-call";
 import config from "../config";
 import { LoadingButton } from "@mui/lab";
@@ -76,6 +76,8 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import Slider from '@mui/material/Slider';
 import CardTutorial from "../components/CardTutorial";
 import styled from "@emotion/styled";
+import CheckIcon from "@mui/icons-material/Check";
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 
 
 function CreateProject() {
@@ -3048,7 +3050,12 @@ function CreateProject() {
                             id="wsConfigSearchAutocomplete"
                             options={wsConfigOptions}
                             getOptionLabel={(option: WorkspaceConfig) => {
-                                return option.title
+                                // Assuming 'uses' and 'completions' are properties of WorkspaceConfig
+                                if (option.title === "Default" || option.title === "Custom") {
+                                    return option.title;
+                                } else {
+                                    return `${option.title} (Uses: ${option.uses}, Completions: ${option.completions})`;
+                                }
                             }}
                             isOptionEqualToValue={(option: WorkspaceConfig, value: WorkspaceConfig) => {
                                 return option._id === value._id;
@@ -3079,6 +3086,27 @@ function CreateProject() {
                                 width: "20vw",
                                 zIndex: "6000000"
                             } : { width: "20vw" }} className={'workspace_config'}
+                            renderOption={(props, option: WorkspaceConfig) => (
+                                <li {...props}>
+                                    <Grid container alignItems="center" justifyContent="space-between">
+                                        <Grid item xs>
+                                            <Typography noWrap>{option.title}</Typography>
+                                        </Grid>
+                                        {option.title !== "Default" && option.title !== "Custom" && (
+                                            <Grid item container xs="auto" alignItems="center">
+                                                <Tooltip title={"Uses"}>
+                                                    <ArrowUpwardIcon />
+                                                </Tooltip>
+                                                <Typography align="right" style={{ marginLeft: 4 }}>{option.uses}</Typography>
+                                                <Tooltip title={"Completions"} style={{ marginLeft: 8 }}>
+                                                    <CheckIcon />
+                                                </Tooltip>
+                                                <Typography align="right" style={{ marginLeft: 4 }}>{option.completions}</Typography>
+                                            </Grid>
+                                        )}
+                                    </Grid>
+                                </li>
+                            )}
                         />
                         {renderWsConfigTemplateExplanationPopover()}
                     </Grid>
