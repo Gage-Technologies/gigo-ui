@@ -333,46 +333,65 @@ function PublicConfigs() {
         console.log("language: ", createLanguage)
         console.log("workspaceConfig: ", workspaceConfigValue)
 
-        // let res = await call(
-        //     "/api/search/tags",
-        //     "post",
-        //     null,
-        //     null,
-        //     null,
-        //     // @ts-ignore
-        //     {
-        //         title: createTitle,
-        //         description: createDescription,
-        //         tags: createTags,
-        //         language: createLanguage,
-        //         content: workspaceConfigValue
-        //     }
-        // )
+        if (createTitle === "" || createDescription === "" || createTags.length === 0 || createLanguage.length === 0 || workspaceConfigValue === "") {
+            swal("Error", "Please fill out all fields!")
+            return
+        }
+
+        console.log("value: ", programmingLanguages.indexOf(createLanguage[0].value))
+        console.log("language: ", programmingLanguages.indexOf(createLanguage[0].toString()))
+
+        let language = programmingLanguages.indexOf(createLanguage[0].toString())
+
+        let res = await call(
+            "/api/public_config/create",
+            "post",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {
+                title: createTitle,
+                description: createDescription,
+                tags: createTags,
+                languages: language,
+                content: workspaceConfigValue
+            }
+        )
+
+        if (res !== undefined && res["message"] !== undefined && res["message"] === "workspace config template created successfully"){
+            swal("Success", "Your workspace config template has been created successfully!")
+        } else {
+            swal("Error", "There was an error creating the workspace config template. Please try again later.")
+        }
     }
 
     const editConfig = async() => {
 
-        console.log("title: ", editTitle)
-        console.log("description: ", editDescription)
-        console.log("tags: ", editTags)
-        console.log("language: ", editLanguage)
-        console.log("workspaceConfig: ", editContent)
+        if (editTitle === "" || editDescription === "" || editContent === "" || editId === ""){
+            swal("Error", "Please fill out all fields!")
+            return
+        }
 
-        // let res = await call(
-        //     "/api/search/tags",
-        //     "post",
-        //     null,
-        //     null,
-        //     null,
-        //     // @ts-ignore
-        //     {
-        //         title: createTitle,
-        //         description: createDescription,
-        //         tags: createTags,
-        //         language: createLanguage,
-        //         content: workspaceConfigValue
-        //     }
-        // )
+        let res = await call(
+            "/api/public_config/edit",
+            "post",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {
+                description: editDescription,
+                config_id: editId,
+                content: editContent
+            }
+        )
+
+        if (res !== undefined && res["message"] !== undefined && res["message"] === "sucessfully updated workspace config"){
+            swal("Success", "Your workspace config template has been created successfully!")
+        } else {
+            swal("Error", "There was an error creating the workspace config template. Please try again later.")
+        }
     }
 
 
@@ -488,8 +507,26 @@ function PublicConfigs() {
                                                 handleTagSearch(e);
                                             }}
                                             onChange={(event, value: (Tag | string)[], reason) => {
+                                                // set update state tags to empty array
+                                                let createTagNew = [];
+
+                                                // handle any values that may be strings from user input
+                                                for (let i = 0; i < value.length; i++) {
+                                                    // append to the update state tags if this is an object
+                                                    if (typeof value[i] === "object") {
+                                                        // @ts-ignore
+                                                        createTagNew.push(value[i]);
+                                                        continue
+                                                    }
+
+                                                    // wrap the value in an object with -1 for an id to mark
+                                                    createTagNew.push({
+                                                        _id: "-1",
+                                                        value: value[i],
+                                                    } as Tag)
+                                                }
                                                 // @ts-ignore
-                                                setCreateTags(value)
+                                                setCreateTags(createTagNew)
                                             }}
                                             value={createTags}
                                             sx={{ width: "20vw", paddingBottom: "10px" }}
@@ -533,24 +570,24 @@ function PublicConfigs() {
                                     height={"70vh"}
                                 />
                                 <div style={{display: "flex", justifyContent: "center", width: "50%", alignItems: "center", flexDirection: "column"}}>
-                                    <Grid item xs={"auto"}>
-                                        <TextField
-                                            id={"template-title"}
-                                            variant={`outlined`}
-                                            color={"primary"}
-                                            label={"Template Title"}
-                                            required={true}
-                                            margin={`normal`}
-                                            type={`text`}
-                                            sx={{
-                                                width: "20vw",
-                                            }}
-                                            value={editTitle}
-                                            onChange={(e) => {
-                                                setEditTitle(e.target.value)
-                                            }}
-                                        />
-                                    </Grid>
+                                    {/*<Grid item xs={"auto"}>*/}
+                                    {/*    <TextField*/}
+                                    {/*        id={"template-title"}*/}
+                                    {/*        variant={`outlined`}*/}
+                                    {/*        color={"primary"}*/}
+                                    {/*        label={"Template Title"}*/}
+                                    {/*        required={true}*/}
+                                    {/*        margin={`normal`}*/}
+                                    {/*        type={`text`}*/}
+                                    {/*        sx={{*/}
+                                    {/*            width: "20vw",*/}
+                                    {/*        }}*/}
+                                    {/*        value={editTitle}*/}
+                                    {/*        onChange={(e) => {*/}
+                                    {/*            setEditTitle(e.target.value)*/}
+                                    {/*        }}*/}
+                                    {/*    />*/}
+                                    {/*</Grid>*/}
                                     <Grid item xs={"auto"}>
                                         <TextField
                                             id={"template-description"}
@@ -587,46 +624,60 @@ function PublicConfigs() {
                                                 handleTagSearch(e);
                                             }}
                                             onChange={(event, value: (Tag | string)[], reason) => {
-                                                // if (reason === 'selectOption' || reason === 'createOption') {
-                                                //     // @ts-ignore
-                                                //     setEditTags(value); // Assuming setCreateTags is your state updater function
-                                                // }
+                                                // set update state tags to empty array
+                                                let editTagsNew = createTags;
+
+                                                // handle any values that may be strings from user input
+                                                for (let i = 0; i < value.length; i++) {
+                                                    // append to the update state tags if this is an object
+                                                    if (typeof value[i] === "object") {
+                                                        // @ts-ignore
+                                                        editTagsNew.push(value[i]);
+                                                        continue
+                                                    }
+
+                                                    // wrap the value in an object with -1 for an id to mark
+                                                    editTagsNew.push({
+                                                        _id: "-1",
+                                                        value: value[i],
+                                                    } as Tag)
+                                                }
                                                 // @ts-ignore
-                                                setEditTags(value)
+                                                setEditTags(editTagsNew)
                                             }}
                                             //@ts-ignore
                                             value={editTags}
                                             sx={{ width: "20vw", paddingBottom: "10px" }}
                                         />
                                     </Grid>
-                                    <Grid item xs={"auto"}>
-                                        <Autocomplete
-                                            multiple
-                                            limitTags={5}
-                                            id="wsConfigLanguagesInputSelect"
-                                            options={programmingLanguages.map((_, i) => i)}
-                                            getOptionLabel={(option) => programmingLanguages[option]}
-                                            onChange={(event, value: number[]) => {
-                                                let language = value
+                                    {/*<Grid item xs={"auto"}>*/}
+                                    {/*    <Autocomplete*/}
+                                    {/*        multiple*/}
+                                    {/*        limitTags={5}*/}
+                                    {/*        id="wsConfigLanguagesInputSelect"*/}
+                                    {/*        options={programmingLanguages.map((_, i) => i)}*/}
+                                    {/*        getOptionLabel={(option) => programmingLanguages[option]}*/}
+                                    {/*        onChange={(event, value: number[]) => {*/}
+                                    {/*            let language = value*/}
 
-                                                console.log("language is: ", language)
+                                    {/*            console.log("language is: ", language)*/}
 
-                                                if (language === undefined) {
-                                                    setEditLanguage([])
-                                                } else {
-                                                    // @ts-ignore
-                                                    setEditLanguage(value)
-                                                }
-                                            }}
-                                            //@ts-ignore
-                                            // value={editLanguage === null ? [] : editLanguage.map(lang => programmingLanguages[lang])}
-                                            value={editLanguage}
-                                            renderInput={(params) => (
-                                                <TextField {...params} label="Template Languages" placeholder="Template Languages" />
-                                            )}
-                                            sx={{ width: "20vw", paddingBottom: "10px" }}
-                                        />
-                                    </Grid>
+                                    {/*            if (language === undefined) {*/}
+                                    {/*                setEditLanguage([])*/}
+                                    {/*            } else {*/}
+                                    {/*                // @ts-ignore*/}
+                                    {/*                setEditLanguage(value)*/}
+                                    {/*            }*/}
+                                    {/*        }}*/}
+                                    {/*        //@ts-ignore*/}
+                                    {/*        // value={editLanguage === null ? [] : editLanguage.map(lang => programmingLanguages[lang])}*/}
+                                    {/*        value={editLanguage}*/}
+                                    {/*        renderInput={(params) => (*/}
+                                    {/*            <TextField {...params} label="Template Languages" placeholder="Template Languages" />*/}
+                                    {/*        )}*/}
+                                    {/*        sx={{ width: "20vw", paddingBottom: "10px" }}*/}
+                                    {/*    />*/}
+                                    {/*</Grid>*/}
                                     <Button variant={"contained"} style={{height: "fit-content"}} onClick={() => editConfig()}>
                                         Submit
                                     </Button>
