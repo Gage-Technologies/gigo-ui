@@ -126,6 +126,9 @@ function PublicConfigs() {
     const [extraRevisions, setExtraRevisions] = useState([]);
     const [revisionUses, setRevisionUses] = useState<number>(0);
     const [revisionCompletions, setRevisionCompletions] = useState<number>(0);
+    const [revisionRevisions, setRevisionRevisions] = useState<number>(0);
+
+    const [revisionObject, setRevisionObject] = useState<any>(null);
 
     const [editTitle, setEditTitle] = React.useState("");
     const [editDescription, setEditDescription] = React.useState("");
@@ -422,6 +425,7 @@ function PublicConfigs() {
 
         if (res !== undefined && res["message"] !== undefined && res["message"] === "successfully updated workspace config"){
             setEditMode(false)
+            setRevision(false)
             swal("Success", "Your workspace config template has been created successfully!")
         } else {
             swal("Error", "There was an error creating the workspace config template. Please try again later.")
@@ -439,6 +443,8 @@ function PublicConfigs() {
         setRevisionLanguage(config.languages)
         setRevisionUses(config.uses)
         setRevisionCompletions(config.completions)
+        setRevisionRevisions(config.revision)
+        setRevisionObject(config)
 
         if (config._id == undefined || config._id === ""){
             swal("Error", "We were unable to fulfill this request at this time!")
@@ -856,34 +862,46 @@ function PublicConfigs() {
                                         <span>{"Completions: " + revisionCompletions}</span>
                                     </div>
                                     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "75%", width: "50%" }}>
-                                        <div>
-                                            Revision
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                            <div style={{ marginBottom: '20px' }}>
+                                                <h2>Revision</h2>
+                                            </div>
+                                            <div>
+                                                {extraRevisions.length > 0 ? (
+                                                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                                        {extraRevisions.map((config) => (
+                                                            <React.Fragment key={config["_id"]}>
+                                                                <Button
+                                                                    variant="outlined"
+                                                                    sx={{
+                                                                        bgcolor: theme.palette.background.default,
+                                                                        mb: 1,
+                                                                        borderRadius: '10px',
+                                                                        color: theme.palette.text.primary,
+                                                                        justifyContent: 'space-between',
+                                                                        padding: '10px 20px',
+                                                                        textTransform: 'none',
+                                                                        width: '100%',
+                                                                    }}
+                                                                    onClick={() => getRevisions(config)}
+                                                                >
+                                                                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                                                                        <Typography variant="subtitle1">{config["title"]}</Typography>
+                                                                        <Typography variant="body2">{config["description"]}</Typography>
+                                                                    </Box>
+                                                                </Button>
+                                                                <div style={{height: "15px"}}/>
+                                                            </React.Fragment>
+                                                        ))}
+                                                    </Box>
+                                                ) : (
+                                                    <h3>There are no revisions.</h3>
+                                                )}
+                                            </div>
+                                            <div style={{position: "absolute", bottom: "15%"}}>
+                                                <Button variant={"outlined"} onClick={() => navigate('/create-challenge', {state: {workspace_config: revisionObject}})}>Create Project With config</Button>
+                                            </div>
                                         </div>
-                                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                            {extraRevisions.map((config) => (
-                                                <React.Fragment key={config["_id"]}>
-                                                    <Button
-                                                        variant="outlined"
-                                                        sx={{
-                                                            bgcolor: theme.palette.background.default,
-                                                            mb: 1,
-                                                            borderRadius: '10px', // Full rounded outline
-                                                            color: theme.palette.text.primary,
-                                                            justifyContent: 'space-between',
-                                                            padding: '10px 20px',
-                                                            textTransform: 'none', // Prevents the button text from being uppercase
-                                                            width: '78%', // Set width to 78% of the parent container
-                                                        }}
-                                                    >
-                                                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                                            <Typography variant="subtitle1">{config["title"]}</Typography>
-                                                            <Typography variant="body2">{config["description"]}</Typography>
-                                                        </Box>
-                                                    </Button>
-                                                    <div style={{height: "15px"}}/>
-                                                </React.Fragment>
-                                            ))}
-                                        </Box>
                                     </div>
                                 </div>
                         ) : (

@@ -59,7 +59,7 @@ import call from "../services/api-call";
 import config from "../config";
 import { LoadingButton } from "@mui/lab";
 import Post from "../models/post";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { DefaultWorkspaceConfig, Workspace, WorkspaceConfig } from "../models/workspace";
 import {
     initialAuthStateUpdate,
@@ -79,6 +79,11 @@ import styled from "@emotion/styled";
 import CheckIcon from "@mui/icons-material/Check";
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 
+
+
+interface LocationState {
+    workspace_config: any
+}
 
 function CreateProject() {
     // initialize navigation access
@@ -275,6 +280,8 @@ function CreateProject() {
     const [visibility, setVisibility] = React.useState(false)
     const [showPopupConnect, setShowPopupConnect] = React.useState(false)
     const [connectedAccountLink, setConnectedAccount] = React.useState(null)
+
+    const location = useLocation() as { state: LocationState };
 
     const wsConfigOptionsBaseState = [
         {
@@ -752,6 +759,24 @@ function CreateProject() {
 
         // window.sessionStorage.setItem("createXP", JSON.stringify(res["xp"]))
     }
+
+
+    useEffect(() => {
+        console.log("location is: ", location)
+        if(location.state) {
+            // let updateState = Object.assign({}, initialCreateProjectStateUpdate);
+            // //@ts-ignore
+            // updateState.workspaceConfig._id = location.state.workspace_config_id
+            // //@ts-ignore
+            // updateState.workspaceConfig.revision = location.state.workspace_config_revision
+            // updateFormState(updateState)
+
+            let form = createProjectForm.workspaceConfig
+            form = location.state.workspace_config
+            // form.revision = parseInt(location.state.workspace_config_revision, 10);
+            setCreateProjectForm({...createProjectForm, workspaceConfig: form})
+        }
+    }, [location]);
 
     /**
      * Creates project on via the remote GIGO server and updates the local & redux state
