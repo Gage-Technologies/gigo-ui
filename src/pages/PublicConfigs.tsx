@@ -384,7 +384,7 @@ function PublicConfigs() {
                 title: createTitle,
                 description: createDescription,
                 tags: createTags,
-                languages: language,
+                languages: [language],
                 content: workspaceConfigValue
             }
         )
