@@ -439,6 +439,7 @@ function PublicConfigs() {
         setRevisionTitle(config.title)
         setRevisionId(config._id)
         setRevisionDescription(config.description)
+        console.log("tags are: ", config.fullTags)
         setRevisionTags(config.fullTags)
         setRevisionLanguage(config.languages)
         setRevisionUses(config.uses)
@@ -463,10 +464,91 @@ function PublicConfigs() {
             }
         )
 
-        if (res !== undefined && res["revisions"] !== undefined){
-            let revisions = res["revisions"]
+        if (res !== undefined && res["revisions_and_tags"] !== undefined){
+            let revisions = res["revisions_and_tags"]
             revisions.shift()
             setExtraRevisions(revisions)
+        } else {
+            swal("Error", "There was an issue getting other revisions. Please try again later.")
+        }
+    }
+
+    function areObjectsEqual(obj1: any, obj2: any) {
+        const obj1Keys = Object.keys(obj1);
+        const obj2Keys = Object.keys(obj2);
+
+        if (obj1Keys.length !== obj2Keys.length) {
+            return false;
+        }
+
+        for (let key of obj1Keys) {
+            if (obj1[key] !== obj2[key]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    const getRevisionsOfRevision = async(config: WorkspaceConfig) => {
+        console.log("lang is: ", config)
+        setRevision(true)
+        // @ts-ignore
+        setRevisionContent(config["revision"].content)
+        // @ts-ignore
+        setRevisionTitle(config["revision"].title)
+        // @ts-ignore
+        setRevisionId(config["revision"]._id)
+        // @ts-ignore
+        setRevisionDescription(config["revision"].description)
+        // @ts-ignore
+        setRevisionTags(config["tags"])
+        // @ts-ignore
+        setRevisionLanguage(config["revision"].languages)
+        // @ts-ignore
+        setRevisionUses(config["revision"].uses)
+        // @ts-ignore
+        setRevisionCompletions(config["revision"].completions)
+        // @ts-ignore
+        setRevisionRevisions(config["revision"].revision)
+        setRevisionObject(config["revision"])
+
+        //@ts-ignore
+        if (config["revision"]._id == undefined || config["revision"]._id === ""){
+            swal("Error", "We were unable to fulfill this request at this time!")
+            return
+        }
+
+        let res = await call(
+            "/api/workspace/config/getWsConfig",
+            "post",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {
+                //@ts-ignore
+                id: config["revision"]._id
+            }
+        )
+
+        if (res !== undefined && res["revisions_and_tags"] !== undefined){
+            let revisions = res["revisions_and_tags"]
+            console.log("revisions are: ", revisions)
+            console.log("config ones: ", config)
+            let revisionFull = []
+            for (let i = 0; i < revisions.length; i++) {
+                if (revisions[i] !== config){
+                    console.log("here: ", revisions[i])
+                    console.log("here why: ", config)
+                    revisionFull.push(revisions[i])
+                } else {
+                    console.log("here 2")
+                }
+            }
+            // revisions.pop();
+            //@ts-ignore
+            setExtraRevisions(revisionFull)
         } else {
             swal("Error", "There was an issue getting other revisions. Please try again later.")
         }
@@ -864,13 +946,13 @@ function PublicConfigs() {
                                     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "75%", width: "50%" }}>
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                             <div style={{ marginBottom: '20px' }}>
-                                                <h2>Revision</h2>
+                                                <h2>Previous Versions</h2>
                                             </div>
                                             <div>
                                                 {extraRevisions.length > 0 ? (
                                                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                                         {extraRevisions.map((config) => (
-                                                            <React.Fragment key={config["_id"]}>
+                                                            <React.Fragment key={config["revision"]["_id"]}>
                                                                 <Button
                                                                     variant="outlined"
                                                                     sx={{
@@ -883,11 +965,11 @@ function PublicConfigs() {
                                                                         textTransform: 'none',
                                                                         width: '100%',
                                                                     }}
-                                                                    onClick={() => getRevisions(config)}
+                                                                    onClick={() => getRevisionsOfRevision(config)}
                                                                 >
                                                                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                                                                        <Typography variant="subtitle1">{config["title"]}</Typography>
-                                                                        <Typography variant="body2">{config["description"]}</Typography>
+                                                                        <Typography variant="subtitle1">{config["revision"]["title"]}</Typography>
+                                                                        <Typography variant="body2">{config["revision"]["description"]}</Typography>
                                                                     </Box>
                                                                 </Button>
                                                                 <div style={{height: "15px"}}/>
