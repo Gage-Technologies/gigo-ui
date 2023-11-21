@@ -467,27 +467,11 @@ function PublicConfigs() {
         if (res !== undefined && res["revisions_and_tags"] !== undefined){
             let revisions = res["revisions_and_tags"]
             revisions.shift()
+            console.log("revisions are: ", revisions)
             setExtraRevisions(revisions)
         } else {
             swal("Error", "There was an issue getting other revisions. Please try again later.")
         }
-    }
-
-    function areObjectsEqual(obj1: any, obj2: any) {
-        const obj1Keys = Object.keys(obj1);
-        const obj2Keys = Object.keys(obj2);
-
-        if (obj1Keys.length !== obj2Keys.length) {
-            return false;
-        }
-
-        for (let key of obj1Keys) {
-            if (obj1[key] !== obj2[key]) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     const getRevisionsOfRevision = async(config: WorkspaceConfig) => {
@@ -534,21 +518,21 @@ function PublicConfigs() {
 
         if (res !== undefined && res["revisions_and_tags"] !== undefined){
             let revisions = res["revisions_and_tags"]
-            console.log("revisions are: ", revisions)
-            console.log("config ones: ", config)
-            let revisionFull = []
-            for (let i = 0; i < revisions.length; i++) {
-                if (revisions[i] !== config){
-                    console.log("here: ", revisions[i])
-                    console.log("here why: ", config)
-                    revisionFull.push(revisions[i])
-                } else {
-                    console.log("here 2")
-                }
-            }
+            // console.log("revisions are: ", revisions)
+            // console.log("config ones: ", config)
+            // let revisionFull = []
+            // for (let i = 0; i < revisions.length; i++) {
+            //     if (revisions[i]["tags"] !== config["tags"]){
+            //         console.log("here: ", revisions[i]["revision"])
+            //         console.log("here why: ", config)
+            //         revisionFull.push(revisions[i])
+            //     } else {
+            //         console.log("here 2")
+            //     }
+            // }
             // revisions.pop();
             //@ts-ignore
-            setExtraRevisions(revisionFull)
+            setExtraRevisions(revisions)
         } else {
             swal("Error", "There was an issue getting other revisions. Please try again later.")
         }
@@ -577,6 +561,7 @@ function PublicConfigs() {
                             <Button onClick={() => {
                                 setEditMode(false)
                                 setRevision(false)
+                                setExtraRevisions([])
                             }}>
                                 <Cancel/>
                                 <h5>Go Back</h5>
