@@ -423,10 +423,20 @@ function PublicConfigs() {
             }
         )
 
-        if (res !== undefined && res["message"] !== undefined && res["message"] === "successfully updated workspace config"){
-            setEditMode(false)
-            setRevision(false)
-            swal("Success", "Your workspace config template has been created successfully!")
+        if (res !== undefined && res["message"] !== undefined){
+            if (res["message"] === "successfully updated workspace config"){
+                setEditMode(false)
+                setRevision(false)
+                swal("Success", "Your workspace config template has been created successfully!")
+            } else if (res["message"] === "workspace config template not found"){
+                setEditMode(false)
+                setRevision(false)
+                swal("There were no changes made!")
+            } else {
+                setEditMode(false)
+                setRevision(false)
+                swal(res["message"])
+            }
         } else {
             swal("Error", "There was an error creating the workspace config template. Please try again later.")
         }
