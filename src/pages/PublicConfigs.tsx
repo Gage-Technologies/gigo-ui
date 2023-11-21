@@ -484,6 +484,57 @@ function PublicConfigs() {
         }
     }
 
+    function isObject(obj: any) {
+        return obj !== null && typeof obj === 'object';
+    }
+
+    function compareArrays(array1: any, array2: any) {
+        if (array1.length !== array2.length) {
+            return false;
+        }
+
+        for (let i = 0; i < array1.length; i++) {
+            if (!compareStructs(array1[i], array2[i])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    function compareStructs(struct1: any, struct2: any) {
+        if (!isObject(struct1) || !isObject(struct2)) {
+            return struct1 === struct2;
+        }
+
+        if (Array.isArray(struct1) && Array.isArray(struct2)) {
+            return compareArrays(struct1, struct2);
+        }
+
+        const keys1 = Object.keys(struct1);
+        const keys2 = Object.keys(struct2);
+
+        if (keys1.length !== keys2.length) {
+            return false;
+        }
+
+        for (let key of keys1) {
+            if (!keys2.includes(key)) {
+                return false;
+            }
+
+            if (isObject(struct1[key]) || Array.isArray(struct1[key])) {
+                if (!compareStructs(struct1[key], struct2[key])) {
+                    return false;
+                }
+            } else if (struct1[key] !== struct2[key]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     const getRevisionsOfRevision = async(config: WorkspaceConfig) => {
         console.log("lang is: ", config)
         setRevision(true)
@@ -530,19 +581,17 @@ function PublicConfigs() {
             let revisions = res["revisions_and_tags"]
             // console.log("revisions are: ", revisions)
             // console.log("config ones: ", config)
-            // let revisionFull = []
-            // for (let i = 0; i < revisions.length; i++) {
-            //     if (revisions[i]["tags"] !== config["tags"]){
-            //         console.log("here: ", revisions[i]["revision"])
-            //         console.log("here why: ", config)
-            //         revisionFull.push(revisions[i])
-            //     } else {
-            //         console.log("here 2")
-            //     }
-            // }
+            let revisionFull = []
+            for (let i = 0; i < revisions.length; i++) {
+                if (!compareStructs(revisions[i], config)){
+                    revisionFull.push(revisions[i])
+                }
+            }
             // revisions.pop();
+            console.log("revisions are: ", revisions)
+            console.log("config ones: ", config)
             //@ts-ignore
-            setExtraRevisions(revisions)
+            setExtraRevisions(revisionFull)
         } else {
             swal("Error", "There was an issue getting other revisions. Please try again later.")
         }
