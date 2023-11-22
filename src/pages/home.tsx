@@ -1,7 +1,7 @@
 
 
 import * as React from "react";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import {
     Box,
     Button,
@@ -13,14 +13,14 @@ import {
     ThemeProvider,
     Typography
 } from "@mui/material";
-import {getAllTokens, isHoliday, themeHelpers} from "../theme";
+import { getAllTokens, isHoliday, themeHelpers } from "../theme";
 import ProjectCard from "../components/ProjectCard";
 import AppWrapper from "../components/AppWrapper";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import config from "../config";
 import call from "../services/api-call";
 import swal from "sweetalert";
-import {ThreeDots} from "react-loading-icons";
+import { ThreeDots } from "react-loading-icons";
 import Lottie from "react-lottie";
 import * as animationData from '../img/85023-no-data.json'
 import Carousel from "../components/Carousel";
@@ -30,16 +30,16 @@ import {
     selectAuthState,
     selectAuthStateId, selectAuthStateTutorialState, updateAuthState,
 } from "../reducers/auth/auth";
-import {useAppDispatch, useAppSelector} from "../app/hooks";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
 import XpPopup from "../components/XpPopup";
-import Joyride, {ACTIONS, CallBackProps, EVENTS, STATUS} from 'react-joyride';
-import {string} from "prop-types";
+import Joyride, { ACTIONS, CallBackProps, EVENTS, STATUS } from 'react-joyride';
+import { string } from "prop-types";
 import MoonLoader from "react-spinners/MoonLoader";
 import useInfiniteScroll from "../hooks/infiniteScroll";
 import { fontGrid } from "@mui/material/styles/cssUtils";
 import { FontDownload } from "@mui/icons-material";
 import LazyLoad from 'react-lazyload';
-import {selectAppWrapperChatOpen, selectAppWrapperSidebarOpen} from "../reducers/appWrapper/appWrapper";
+import { selectAppWrapperChatOpen, selectAppWrapperSidebarOpen } from "../reducers/appWrapper/appWrapper";
 //@ts-ignore
 import ReactGA from "react-ga4";
 import ProjectCardLongStyle from "../components/ProjectCardLongStyle";
@@ -180,7 +180,7 @@ function Home() {
                 null,
                 null,
                 //@ts-ignore
-                {skip: 0, limit: 10},
+                { skip: 0, limit: 10 },
                 null,
                 config.rootPath
             )
@@ -206,8 +206,8 @@ function Home() {
 
             if (
                 (res === undefined || res["projects"] === undefined ||
-                res2 === undefined || res["projects"] === undefined ||
-                res3 === undefined || res["projects"] === undefined) ||
+                    res2 === undefined || res["projects"] === undefined ||
+                    res3 === undefined || res["projects"] === undefined) ||
                 res4 === undefined || res["projects"] === undefined && loggedIn
             ) {
                 swal("There has been an issue loading data. Please try again later.")
@@ -225,7 +225,7 @@ function Home() {
         let xpLogin = window.sessionStorage.getItem('loginXP')
         setLoading(true)
 
-        if (authState.authenticated !== false){
+        if (authState.authenticated !== false) {
             apiLoad().then(r => console.log("here: ", r))
         }
         // if (tutorial === true && window.sessionStorage.getItem("help") === "true") {
@@ -249,7 +249,7 @@ function Home() {
 
     const ProjectsBox = () => {
         if (userProjects === null || userProjects === undefined || userProjects.length === 0) {
-            return (<div/>)
+            return (<div />)
         }
 
         return (
@@ -262,7 +262,7 @@ function Home() {
                 width: "100%",
                 paddingBottom: "10px"
             }}>
-                <div style={{display: "inline-flex", marginTop: "25px"}}>
+                <div style={{ display: "inline-flex", marginTop: "25px" }}>
                     <Typography variant="h6" gutterBottom sx={{
                         paddingLeft: "10px",
                         paddingTop: "6px",
@@ -292,7 +292,7 @@ function Home() {
                             //@ts-ignore
                             userProjects.map((project, index) => {
                                 return (
-                                    <div className={'attempt'} style={{paddingBottom: "10px"}}>
+                                    <div className={'attempt'} style={{ paddingBottom: "10px" }}>
                                         <LazyLoad once scroll unmountIfInvisible>
                                             <ProjectCard
                                                 height={"23vh"}
@@ -330,14 +330,42 @@ function Home() {
     }
 
     const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
+    const [currentProjectTimeout, setCurrentProjectTimeout] = useState<NodeJS.Timer | null>(null)
 
     const nextProject = () => {
+        // disable auto scroll if the user click
+        if (currentProjectTimeout) {
+            clearInterval(currentProjectTimeout)
+            setCurrentProjectTimeout(null)
+        }
         setCurrentProjectIndex((prevIndex) => (prevIndex + 1) % topRec.length);
     };
 
     const prevProject = () => {
+        // disable auto scroll if the user click
+        if (currentProjectTimeout) {
+            clearInterval(currentProjectTimeout)
+            setCurrentProjectTimeout(null)
+        }
         setCurrentProjectIndex((prevIndex) => (prevIndex - 1 + topRec.length) % topRec.length);
     };
+
+    const cycleProjects = React.useCallback(() => {
+        let index = currentProjectIndex + 1;
+        if (index > topRec.length - 1) {
+            index = 0;
+        }
+        setCurrentProjectIndex(index)
+    }, [currentProjectIndex, topRec])
+
+    useEffect(() => {
+        // Set up an interval to cycle through projects every 10 seconds
+        const intervalId = setInterval(cycleProjects, 10000);
+        setCurrentProjectTimeout(intervalId);
+    
+        // Clear the interval when the component is unmounted
+        return () => clearInterval(intervalId);
+    }, [cycleProjects]);
 
     const project = topRec[currentProjectIndex];
 
@@ -379,7 +407,7 @@ function Home() {
                         gap: "5%"
                     }}>
                         {document.documentElement.clientWidth > 1000 && topRec.length > 0 && currentProjectIndex < topRec.length ? (
-                            <IconButton onClick={prevProject}>
+                            <IconButton onClick={() => prevProject()}>
                                 <ArrowBackIosNewSharpIcon />
                             </IconButton>
                         ) : null}
@@ -417,7 +445,7 @@ function Home() {
                             ) : null
                         }
                         {document.documentElement.clientWidth > 1000 && topRec.length > 0 && currentProjectIndex < topRec.length ? (
-                            <IconButton onClick={nextProject}>
+                            <IconButton onClick={() => nextProject()}>
                                 <ArrowForwardIosSharpIcon />
                             </IconButton>
                         ) : null}
@@ -430,7 +458,7 @@ function Home() {
 
     const ActiveProjects = () => {
         if (activeData === null || activeData === undefined || activeData.length === 0) {
-            return (<div/>)
+            return (<div />)
         }
 
         // @ts-ignore
@@ -444,7 +472,7 @@ function Home() {
                 width: "100%",
                 paddingBottom: "10px"
             }}>
-                <div style={{display: "inline-flex"}}>
+                <div style={{ display: "inline-flex" }}>
                     <Typography variant="h6" gutterBottom sx={{
                         paddingLeft: "10px",
                         paddingTop: "6px",
@@ -453,12 +481,12 @@ function Home() {
                         Active Challenges
                     </Typography>
                     <Button variant="text"
-                            href={"/active"}
-                            sx={{
-                                fontSize: "0.8em",
-                                fontWeight: "light",
-                                textTransform: "lowercase",
-                            }}
+                        href={"/active"}
+                        sx={{
+                            fontSize: "0.8em",
+                            fontWeight: "light",
+                            textTransform: "lowercase",
+                        }}
                     >
                         (show all)
                     </Button>
@@ -477,7 +505,7 @@ function Home() {
                             //@ts-ignore
                             activeData.map((project, index) => {
                                 return (
-                                    <div style={{paddingBottom: "10px"}}>
+                                    <div style={{ paddingBottom: "10px" }}>
                                         <LazyLoad once scroll unmountIfInvisible>
                                             <ProjectCard
                                                 height={"23vh"}
@@ -538,7 +566,7 @@ function Home() {
                 paddingBottom: "10px",
                 marginLeft: "1%",
             }}>
-                <div style={{display: "inline-flex"}}>
+                <div style={{ display: "inline-flex" }}>
                     <Typography variant="h6" gutterBottom sx={{
                         paddingLeft: "10px",
                         paddingTop: "6px",
@@ -556,7 +584,7 @@ function Home() {
                     {
                         recData.map((project, index) => {
                             return (
-                                <Grid item xs={12} sm={6} md={4} lg={3} key={"rec-"+project["_id"]}>
+                                <Grid item xs={12} sm={6} md={4} lg={3} key={"rec-" + project["_id"]}>
                                     <LazyLoad once scroll unmountIfInvisible>
                                         <ProjectCard
                                             height={"20vh"}
@@ -593,7 +621,7 @@ function Home() {
                 {
                     isFetching ? (
                         <Grid container spacing={2} justifyContent="center" alignItems="center"
-                            style={{marginTop: "10px"}}
+                            style={{ marginTop: "10px" }}
                         >
                             <Grid item xs={12}>
                                 <div
@@ -604,7 +632,7 @@ function Home() {
                                         width: "100%"
                                     }}
                                 >
-                                    <MoonLoader color={theme.palette.primary.main} loading={true} size={35}/>
+                                    <MoonLoader color={theme.palette.primary.main} loading={true} size={35} />
                                 </div>
                             </Grid>
                         </Grid>
@@ -697,51 +725,51 @@ function Home() {
                         </Button>
                     )}
                     {tutorialStepIndex === steps.length - 1 ? (
-                            <Button
-                                onClick={async () => {
-                                    setRunTutorial(false)
-                                    let authState = Object.assign({}, initialAuthStateUpdate)
-                                    // copy the existing state
-                                    let state = Object.assign({}, tutorialState)
-                                    // update the state
-                                    state.home = true
-                                    authState.tutorialState = state
-                                    // @ts-ignore
-                                    dispatch(updateAuthState(authState))
+                        <Button
+                            onClick={async () => {
+                                setRunTutorial(false)
+                                let authState = Object.assign({}, initialAuthStateUpdate)
+                                // copy the existing state
+                                let state = Object.assign({}, tutorialState)
+                                // update the state
+                                state.home = true
+                                authState.tutorialState = state
+                                // @ts-ignore
+                                dispatch(updateAuthState(authState))
 
-                                    // send api call to backend to mark the challenge tutorial as completed
-                                    await call(
-                                        "/api/user/markTutorial",
-                                        "post",
-                                        null,
-                                        null,
-                                        null,
-                                        // @ts-ignore
-                                        {
-                                            tutorial_key: "home"
-                                        }
-                                    )
-                                }}
-                                variant="contained"
-                                color="success"
-                                sx={{
-                                    fontSize: "0.8rem",
-                                }}
-                            >
-                                Finish
-                            </Button>
-                        ): (
-                            <Button
-                                onClick={() => setTutorialStepIndex(tutorialStepIndex + 1)}
-                                variant="contained"
-                                color="primary"
-                                sx={{
-                                    fontSize: "0.8rem",
-                                }}
-                            >
-                                Next
-                            </Button>
-                        )
+                                // send api call to backend to mark the challenge tutorial as completed
+                                await call(
+                                    "/api/user/markTutorial",
+                                    "post",
+                                    null,
+                                    null,
+                                    null,
+                                    // @ts-ignore
+                                    {
+                                        tutorial_key: "home"
+                                    }
+                                )
+                            }}
+                            variant="contained"
+                            color="success"
+                            sx={{
+                                fontSize: "0.8rem",
+                            }}
+                        >
+                            Finish
+                        </Button>
+                    ) : (
+                        <Button
+                            onClick={() => setTutorialStepIndex(tutorialStepIndex + 1)}
+                            variant="contained"
+                            color="primary"
+                            sx={{
+                                fontSize: "0.8rem",
+                            }}
+                        >
+                            Next
+                        </Button>
+                    )
                     }
                 </DialogActions>
             </Dialog>
@@ -759,19 +787,19 @@ function Home() {
                     {xpPopup ? (<XpPopup oldXP={
                         //@ts-ignore
                         (xpData["xp_update"]["old_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]} levelUp={
+                            //@ts-ignore
+                            xpData["level_up_reward"] === null ? false : true} maxXP={100}
                         //@ts-ignore
-                        xpData["level_up_reward"] === null ? false : true} maxXP={100}
+                        newXP={(xpData["xp_update"]["new_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]}
                         //@ts-ignore
-                                         newXP={(xpData["xp_update"]["new_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]}
+                        nextLevel={xpData["xp_update"]["old_level"] !== undefined ? xpData["xp_update"]["new_level"] : xpData["xp_update"]["next_level"]}
                         //@ts-ignore
-                                         nextLevel={xpData["xp_update"]["old_level"] !== undefined ? xpData["xp_update"]["new_level"] : xpData["xp_update"]["next_level"]}
+                        gainedXP={xpData["xp_update"]["new_xp"] - xpData["xp_update"]["old_xp"]}
                         //@ts-ignore
-                                         gainedXP={xpData["xp_update"]["new_xp"] - xpData["xp_update"]["old_xp"]}
+                        reward={xpData["level_up_reward"]}
                         //@ts-ignore
-                                         reward={xpData["level_up_reward"]}
-                        //@ts-ignore
-                                         renown={xpData["xp_update"]["current_renown"]} popupClose={PopupClose}
-                                         homePage={true}/>) : null}
+                        renown={xpData["xp_update"]["current_renown"]} popupClose={PopupClose}
+                        homePage={true} />) : null}
                     {loading ? <Grid container sx={{
                         display: "flex",
                         justifyContent: "center",
@@ -785,7 +813,7 @@ function Home() {
                             height: window.innerHeight,
                             alignItems: "center"
                         }}>
-                            <ThreeDots/>
+                            <ThreeDots />
                         </Typography>
                     </Grid> : <Grid container sx={{
                         display: "flex",
@@ -809,51 +837,51 @@ function Home() {
                             {isHoliday() === "Halloween" && window.innerWidth > 1000 && loggedIn ?
                                 <>
                                     <div id="happy-halloween"
-                                         style={
-                                           chatOpen ?
-                                                    {
-                                                        width: "18%",
-                                                        height: "20%",
-                                                        left: "11%",
-                                                        position: "absolute",
-                                                    }
-                                            :
-                                                    {
-                                                        width: "25%",
-                                                        height: "25%",
-                                                        left: "10%",
-                                                        position: "absolute",
-                                                    }
-                                         }>
-                                        <HappyHalloweenIcon/>
+                                        style={
+                                            chatOpen ?
+                                                {
+                                                    width: "18%",
+                                                    height: "20%",
+                                                    left: "11%",
+                                                    position: "absolute",
+                                                }
+                                                :
+                                                {
+                                                    width: "25%",
+                                                    height: "25%",
+                                                    left: "10%",
+                                                    position: "absolute",
+                                                }
+                                        }>
+                                        <HappyHalloweenIcon />
                                     </div>
                                     <div id="happy-halloween-pumpkin"
-                                         style={chatOpen ?
-                                                 {width: "15%", height: "15%", left: "67%", position: "absolute"}
-                                                :
-                                                 {width: "17%", height: "17%", left: "80%", position: "absolute"}
-                                                }>
-                                        <PumpkinIcon/>
+                                        style={chatOpen ?
+                                            { width: "15%", height: "15%", left: "67%", position: "absolute" }
+                                            :
+                                            { width: "17%", height: "17%", left: "80%", position: "absolute" }
+                                        }>
+                                        <PumpkinIcon />
                                     </div>
                                     <div id="happy-halloween-pumpkin2"
-                                         style={
-                                        chatOpen ?
-                                            aspectRatio === "21:9" ?
-                                                {width: "8%", height: "8%", left: "67%", top:"36%", position: "absolute"}
-                                            :
-                                                {width: "8%", height: "8%", left: "67%", top:"32%", position: "absolute"}
-                                        :
-                                            aspectRatio === "21:9" ?
-                                                {width: "10%", height: "10%", left: "80%", top:"36%", position: "absolute"}
-                                            :
-                                                {width: "10%", height: "10%", left: "80%", top:"32%", position: "absolute"}
+                                        style={
+                                            chatOpen ?
+                                                aspectRatio === "21:9" ?
+                                                    { width: "8%", height: "8%", left: "67%", top: "36%", position: "absolute" }
+                                                    :
+                                                    { width: "8%", height: "8%", left: "67%", top: "32%", position: "absolute" }
+                                                :
+                                                aspectRatio === "21:9" ?
+                                                    { width: "10%", height: "10%", left: "80%", top: "36%", position: "absolute" }
+                                                    :
+                                                    { width: "10%", height: "10%", left: "80%", top: "32%", position: "absolute" }
                                         }>
-                                        <Pumpkin2Icon/>
+                                        <Pumpkin2Icon />
                                     </div>
                                 </>
 
                                 :
-                                    <></>
+                                <></>
                             }
 
 
