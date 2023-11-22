@@ -50,7 +50,7 @@ export default function CardTutorial(props: TutorialProps) {
                 zIndex: 1000,
                 boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2);",
                 ...themeHelpers.frostedGlass,
-                backgroundColor: "rgba(206,206,206,0.31)",
+                backgroundColor: "rgba(19,19,19,0.31)",
                 // backgroundColor: theme.palette.primary.main + "30",
                 width: props.width ? props.width : 400,
             }}

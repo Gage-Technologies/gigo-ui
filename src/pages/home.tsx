@@ -676,7 +676,6 @@ function Home() {
                 PaperProps={{
                     sx: {
                         ...themeHelpers.frostedGlass,
-                        backgroundColor: "rgba(206,206,206,0.31)",
                     }
                 }}
                 disableEscapeKeyDown={true}

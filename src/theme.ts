@@ -836,7 +836,7 @@ export const themeHelpers = {
         backdropFilter: "blur(15px)",
         "-webkit-backdrop-filter": "blur(15px)",
         border: "1px solid rgba(255,255,255,0.18)",
-        backgroundColor: "rgba(255,255,255,0.4)",
+        backgroundColor: "rgba(19,19,19,0.31)"
     },
     blur: {
         backdropFilter: "blur(15px)",
