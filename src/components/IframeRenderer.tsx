@@ -1,14 +1,13 @@
-import React, { useState, useEffect, IframeHTMLAttributes, CSSProperties } from 'react';
+import React, { useState, IframeHTMLAttributes, CSSProperties, forwardRef } from 'react';
 import { CircularProgress, Box } from '@mui/material';
 
 interface IframeRendererProps extends IframeHTMLAttributes<HTMLIFrameElement> {
     src: string;
     title: string;
     style: CSSProperties | undefined;
-    ref: any;
 }
 
-const IframeRenderer: React.FC<IframeRendererProps> = ({ src, title, style, ref, ...rest }) => {
+const IframeRenderer = forwardRef<HTMLIFrameElement, IframeRendererProps>(({ src, title, style, ...rest }, ref) => {
     const [loading, setLoading] = useState(true);
 
     const handleLoad = () => {
@@ -51,6 +50,6 @@ const IframeRenderer: React.FC<IframeRendererProps> = ({ src, title, style, ref,
             )}
         </Box>
     );
-};
+});
 
 export default IframeRenderer;

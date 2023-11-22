@@ -569,6 +569,65 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         }
     };
 
+    const reportIssueMemo = React.useMemo(() => (
+        <Box
+            sx={{
+                width: "40vw",
+                height: "30vh",
+                justifyContent: "center",
+                marginLeft: "30vw",
+                marginTop: "30vh",
+                outlineColor: "black",
+                borderRadius: 1,
+                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1);",
+                backgroundColor: theme.palette.background.default,
+            }}
+        >
+            <div
+                style={{
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexDirection: "column",
+                    height: "100%",
+                }}
+            >
+                <Typography variant="h5"
+                    component="h2"
+                    align="center"
+                    style={{
+                        marginTop: "-10px",
+                        marginBottom: "10px",
+                        color: theme.palette.text.primary,
+                    }}>
+                    Report Issue
+                </Typography>
+                <TextField
+                    inputRef={textFieldRef}
+                    id="errorReport"
+                    variant="outlined"
+                    color="primary"
+                    label="Describe your issue or just give us feedback!"
+                    required={true}
+                    margin="normal"
+                    multiline={true}
+                    minRows={3}
+                    maxRows={15}
+                    sx={{
+                        width: "30vw",
+                        marginBottom: "25px",
+                    }}
+                />
+                <Button
+                    sx={{
+                        marginBottom: "-15px",
+                    }}
+                    onClick={() => reportIssue()}>Submit</Button>
+            </div>
+        </Box>
+    ), [])
+
     if (
         (queryParams.has("embed") && queryParams.get("embed") === "true") ||
         (
@@ -1839,6 +1898,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         )
     }
 
+
     const renderSidebar = () => {
         return (
             <Drawer
@@ -2033,62 +2093,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                             Report Issue
                         </Button>
                         <Modal open={reportPopup} onClose={() => setReportPopup(false)}>
-                            <Box
-                                sx={{
-                                    width: "40vw",
-                                    height: "30vh",
-                                    justifyContent: "center",
-                                    marginLeft: "30vw",
-                                    marginTop: "30vh",
-                                    outlineColor: "black",
-                                    borderRadius: 1,
-                                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1);",
-                                    backgroundColor: theme.palette.background.default,
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        width: "100%",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        flexDirection: "column",
-                                        height: "100%",
-                                    }}
-                                >
-                                    <Typography variant="h5"
-                                        component="h2"
-                                        align="center"
-                                        style={{
-                                            marginTop: "-10px",
-                                            marginBottom: "10px",
-                                            color: theme.palette.text.primary,
-                                        }}>
-                                        Report Issue
-                                    </Typography>
-                                    <TextField
-                                        inputRef={textFieldRef}
-                                        id="errorReport"
-                                        variant="outlined"
-                                        color="primary"
-                                        label="Describe your issue or just give us feedback!"
-                                        required={true}
-                                        margin="normal"
-                                        multiline={true}
-                                        minRows={3}
-                                        maxRows={15}
-                                        sx={{
-                                            width: "30vw",
-                                            marginBottom: "25px",
-                                        }}
-                                    />
-                                    <Button
-                                        sx={{
-                                            marginBottom: "-15px",
-                                        }}
-                                        onClick={() => reportIssue()}>Submit</Button>
-                                </div>
-                            </Box>
+                            {reportIssueMemo}
                         </Modal>
                         <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
                             <Button sx={{ ml: 1, mb: 1 }} size={"small"} onClick={handleTheme} color="primary" variant="text">
