@@ -38,6 +38,7 @@ import {useAppDispatch, useAppSelector} from "../app/hooks";
 import CardTutorial from "../components/CardTutorial";
 import styled from "@emotion/styled";
 import {selectAppWrapperChatOpen, selectAppWrapperSidebarOpen} from "../reducers/appWrapper/appWrapper";
+import LottieAnimation from "../components/LottieAnimation";
 
 
 function Streak() {
@@ -93,14 +94,14 @@ function Streak() {
     document.documentElement.style.setProperty('--app-border-color', `${theme.palette.primary.dark}75`);
 
 
-    const defaultOptions = {
-        loop: true,
-        autoplay: true,
-        animationData: flame,
-        rendererSettings: {
-            preserveAspectRatio: 'xMidYMid slice'
-        }
-    };
+    // const defaultOptions = {
+    //     loop: true,
+    //     autoplay: true,
+    //     animationData: flame,
+    //     rendererSettings: {
+    //         preserveAspectRatio: 'xMidYMid slice'
+    //     }
+    // };
 
     ReactGA.initialize("G-38KBFJZ6M6");
 
@@ -288,9 +289,18 @@ function Streak() {
                     {"Current Streak"}
                 </Typography>
                 <div style={{width: "100%", display: "flex", justifyContent: "center"}}>
-                    <Lottie options={defaultOptions}
-                            width={"50%"}
-                            height={"50%"}/>
+                    <LottieAnimation 
+                        animationData={flame}
+                        loop={true}
+                        autoplay={true}
+                        renderer={"svg"}
+                        width={"50%"}
+                        height={"50%"}
+                        style={{
+                            width: '60%',
+                            height: '60%',
+                        }}
+                    />
                 </div>
                 <Typography color="#FF7A0E" variant="h1" component="div"
                             style={{width: "100%", display: "flex", justifyContent: "center", fontSize: "3em"}}>
@@ -354,10 +364,19 @@ function Streak() {
                     //@ts-ignore
                     xpData["Count"] === 0 || xpData["Count"] === undefined}>
                     <Box display={"flex"} flexDirection={"column"}>
-                        <Lottie options={xpBoostOptions} isClickToPauseDisabled={true}
-                                width={"75%"}
-                                height={"75%"}
-                                style={{zIndex: 4, display: "flex", height: "100%", alignItems: "center"}}/>
+                            <LottieAnimation 
+                                animationData={XPBoost}
+                                autoplay={true}
+                                loop={true}
+                                style={{
+                                    width: "75%",
+                                    height: "75%",
+                                    zIndex: 4, 
+                                    display: "flex", 
+                                    // height: "100%", 
+                                    alignItems: "center"
+                                }}
+                            />
                         <h3>{
                             //@ts-ignore
                             xpData["Count"] === undefined ? "0   XP Tokens" : xpData["Count"] + "   XP Tokens"}</h3>
