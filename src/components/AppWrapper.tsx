@@ -849,6 +849,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     backgroundRender={authState.backgroundRenderInFront}
                                     profileButton={false}
                                     pro={authState.role.toString() === "1"}
+                                    mouseMove={false}
                                 />
                                 {inTrial && !hasPaymentInfo && (
                                     <ErrorIcon
@@ -1410,6 +1411,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     backgroundRender={authState.backgroundRenderInFront}
                                     profileButton={false}
                                     pro={authState.role.toString() === "1"}
+                                    mouseMove={false}
                                 />
                             </Button>
                             <Menu
@@ -1519,6 +1521,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                         backgroundRender={authState.backgroundRenderInFront}
                                         profileButton={false}
                                         pro={authState.role.toString() === "1"}
+                                        mouseMove={false}
                                     />
                                 </Button>
                                 <Menu

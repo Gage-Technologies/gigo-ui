@@ -1254,6 +1254,7 @@ function User() {
                                             backgroundRender={authState.backgroundRenderInFront}
                                             profileButton={false}
                                             pro={authState.role.toString() === "1"}
+                                            mouseMove={false}
                                         />
                                     </Box>
                                 ) : (
@@ -1276,6 +1277,7 @@ function User() {
                                             backgroundRender={authState.backgroundRenderInFront}
                                             profileButton={false}
                                             pro={authState.role.toString() === "1"}
+                                            mouseMove={false}
                                         />
                                         <Typography variant={"h4"} style={{
                                             marginTop: "10px",

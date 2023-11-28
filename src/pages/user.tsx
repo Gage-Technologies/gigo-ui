@@ -843,6 +843,7 @@ function User() {
                                             backgroundRender={userData["render_in_front"]}
                                             profileButton={false}
                                             pro={userData["user_status"] === 1}
+                                            mouseMove={false}
                                         />
                                     </Box>
                                 ) : (
@@ -865,6 +866,7 @@ function User() {
                                             backgroundRender={userData["render_in_front"]}
                                             profileButton={false}
                                             pro={userData["user_status"] === 1}
+                                            mouseMove={false}
                                         />
                                         <Typography variant={"h3"}>
                                             {userData !== null ?  userData["user_name"].charAt(0).toUpperCase() + userData["user_name"].slice(1).toLowerCase() : "N/A"}
