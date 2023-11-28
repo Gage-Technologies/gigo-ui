@@ -21,6 +21,7 @@ interface IProps {
     backgroundRender: boolean | null,
     profileButton: boolean | null,
     pro: boolean | null,
+    mouseMove: boolean,
 }
 
 export default function UserIcon(props: IProps) {
@@ -118,8 +119,9 @@ export default function UserIcon(props: IProps) {
                         <LottieAnimation
                             animationData={lottieBackground}
                             loop={true}
-                            autoplay={true}
+                            autoplay={!props.mouseMove}
                             renderer="svg"
+                            mouseMove={props.mouseMove}
                             style={{
                                 width: scaleSize(2),
                                 height: scaleSize(2),
@@ -197,4 +199,5 @@ UserIcon.defaultProps = {
     imageTop: null,
     profileButton: true,
     pro: false,
+    mouseMove: true
 }

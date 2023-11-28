@@ -216,6 +216,7 @@ export default function PostOverview(props: IProps) {
                                     backgroundRender={props.backgroundRender}
                                     size={50}
                                     imageTop={2}
+                                    mouseMove={false}
                                 />
                             </div>
                             <Typography variant="h5" component="div" color="white">

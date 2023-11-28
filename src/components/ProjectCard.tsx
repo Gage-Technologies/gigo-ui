@@ -100,7 +100,7 @@ export default function ProjectCard(props: IProps) {
             WebkitBoxOrient: 'vertical',
             color: theme.palette.text.secondary,
             fontWeight: 200,
-            fontSize: "0.8em",
+            fontSize: "0.6em",
             textAlign: "left",
             // paddingLeft: "10px",
         },
