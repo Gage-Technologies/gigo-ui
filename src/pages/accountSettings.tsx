@@ -289,7 +289,7 @@ function AccountSettings() {
             (res: any) => {
                 //@ts-ignore
                 if (res !== undefined && res["message"] === "avatar settings edited successfully") {
-                    swal("Your avatar was edited successfully.")
+                    swal("Your avatar was edited successfully. Please give it a few minutes for the changes to take effect!")
                     setIsLoading(false)
                 }
             }

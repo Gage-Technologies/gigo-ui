@@ -22,6 +22,7 @@ import {
 import { DownloadIcon } from "./svg";
 import {IconButton} from "@material-ui/core";
 import {ArrowBackIos, ArrowForwardIos} from "@material-ui/icons";
+import ShuffleIcon from '@mui/icons-material/Shuffle';
 
 export default function Avataaar(props) {
   const canvasRef = useRef(null);
@@ -120,12 +121,26 @@ export default function Avataaar(props) {
 
   return (
       <div>
-        <Button onClick={randomizeAvatar} x={{color: 'red',
-          borderRadius: 1,
-          p: 1,
-          backgroundColor: "secondary",
-          width: "auto",
-          paddingTop: "10px"}}>Randomize Avatar</Button>
+        <Button onClick={randomizeAvatar} style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 'auto',
+          gap: '5px',
+          backgroundColor: '#007bff', // Background color
+          color: 'white',              // Text color
+          borderRadius: '8px',         // Rounded edges
+          fontFamily: 'Poppins, sans-serif', // Poppins font
+          position: "absolute",
+          top: 420,
+          left: 150
+        }}>
+          <h5 style={{
+            margin: 0,
+            fontFamily: 'Poppins, sans-serif', // Ensure h5 also uses Poppins
+          }}>Randomize Avatar</h5>
+          <ShuffleIcon/>
+        </Button>
         <div style={{ display: 'flex', flexDirection: 'row', position: 'relative', width: "90%", justifyContent: "center" }}>
           <StyledAvatar style={window.innerWidth > 1000 ? {} : {width: "auto", marginRight: "50px"}}>
             <Avatar
