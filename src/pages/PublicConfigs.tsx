@@ -208,7 +208,7 @@ function PublicConfigs() {
             limit: 50
         }
 
-        if (minorTab === "Personal") {
+        if (minorTab === "My Public Configs") {
             //@ts-ignore
             params["search_user"] = true
         }
@@ -605,7 +605,7 @@ function PublicConfigs() {
 
 
     const navigate = useNavigate();
-    const minorValues = ["Community", "Personal"]
+    const minorValues = ["Community", "My Public Configs"]
     // @ts-ignore
     // @ts-ignore
     // @ts-ignore
@@ -1088,7 +1088,7 @@ function PublicConfigs() {
                                                     <Typography variant="subtitle1">{config.title}</Typography>
                                                     <Typography variant="body2">{config.description}</Typography>
                                                 </Box>
-                                                {minorTab === "Personal" ? (
+                                                {minorTab === "My Public Configs" ? (
                                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                                         {/*<DownloadIcon />*/}
                                                         <Button onClick={() => editButton(config.title, config.description, config.fullTags, config.languages, config._id, config.content)}>
