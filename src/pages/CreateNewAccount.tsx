@@ -185,6 +185,7 @@ function CreateNewAccount() {
         skinColor: "Light",
     });
     const [preferredLanguage, setPreferredLanguage] = useState<string>("");
+    const [isAvatarInitialized, setIsAvatarInitialized] = useState<number>(0)
 
     const ShowButton = () => (
         <Button
@@ -341,6 +342,8 @@ function CreateNewAccount() {
         let svg = new Blob([data], { type: "image/svg+xml" });
         setLoading(true)
 
+        console.log("svg is: ", svg)
+
         let payload: RecordWebUsage = {
             host: window.location.host,
             event: WebTrackingEvent.SignupStart,
@@ -405,6 +408,8 @@ function CreateNewAccount() {
             //@ts-ignore
             params["referral_user"] = name
         }
+        console.log("params: ", params)
+        console.log("attributes are: ", Attributes)
 
         let create = await call(
             "/api/user/createNewUser",
@@ -1124,67 +1129,70 @@ function CreateNewAccount() {
     const setAvatar = (e: { topType: string; accessoriesType: string; avatarRef: {}; hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; } | ((prevState: { topType: string; accessoriesType: string; avatarRef: {}; hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; }) => { topType: string; accessoriesType: string; avatarRef: {}; hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; }) | ((prevState: { topType: string; accessoriesType: string; avatarRef: object; hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; }) => { topType: string; accessoriesType: string; avatarRef: object; hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; })) => {
 
         setAttributes(e)
+
+        console.log("e for setting is: ", e)
         setAvatarRef(
             //@ts-ignore
             ReactDOM.findDOMNode(
                 //@ts-ignore
                 e.avatarRef.current))
-        setLastStepDisabled(false)
+        setIsAvatarInitialized(isAvatarInitialized + 1)
+        // setLastStepDisabled(false)
     }
 
-    let renderAvatar = () => {
-        return (
-            <form>
-
-                <Avataaar id={"avatar-container"} value={Attributes} sx={{ width: window.innerWidth > 1000 ? "auto" : "80%" }} onChange={(e: React.SetStateAction<{ topType: string; accessoriesType: string; avatarRef: object, hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; }>) => setAvatar(e)} />
-                <div style={window.innerWidth > 1000 ? { width: "100%", display: "flex", justifyContent: "center", paddingTop: "1vh", } : { width: "80%", display: "flex", justifyContent: "space-evenly", paddingTop: "1vh", flexDirection: "row" }}>
-                    <Button id={"last-step"}
-                        onClick={() => {
-                            setStep(0)
-                        }}
-                        sx={window.innerWidth > 1000 ? {
-                            // paddingLeft: "5vw",
-                            // paddingTop: "1vh",
-                            // marginLeft: "1vw",
-                            // width: window.innerWidth > 1000 ? "auto" : "1vw",
-                            // color: theme.palette.primary.main,
-                            // top: "53vh",
-                            // left: "5vw",
-                        } : {}}
-                    >
-                        <ArrowBack style={{ color: theme.palette.primary.main }} /> Back
-                    </Button>
-                    <LoadingButton
-                        loading={loading}
-                        onClick={() => {
-                            setStep(2)
-                        }}
-                        variant={`contained`}
-                        color={"primary"}
-                        // endIcon={<LockPersonIcon/>}
-                        style={window.innerWidth > 1000 ? {
-                            width: '15vw',
-                            borderRadius: 100,
-                            height: "5vh",
-                            paddingTop: "1vh",
-                            justifyContent: "center",
-                            paddingBottom: "5px"
-                        } : {
-                            width: '100px',
-                            borderRadius: 100,
-                            height: "5vh",
-                            paddingTop: "1vh",
-                            paddingBottom: "5px"
-                        }}
-                        disabled={lastStepDisabled}
-                    >
-                        Last Step
-                    </LoadingButton>
-                </div>
-                <div style={{ height: "10px" }} />
-            </form>
-        )
-    }
+    // let renderAvatar = () => {
+    //     return (
+    //         <form>
+    //
+    //             <Avataaar id={"avatar-container"} value={Attributes} sx={{ width: window.innerWidth > 1000 ? "auto" : "80%" }} onChange={(e: React.SetStateAction<{ topType: string; accessoriesType: string; avatarRef: object, hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; }>) => setAvatar(e)} />
+    //             <div style={window.innerWidth > 1000 ? { width: "100%", display: "flex", justifyContent: "center", paddingTop: "1vh", } : { width: "80%", display: "flex", justifyContent: "space-evenly", paddingTop: "1vh", flexDirection: "row" }}>
+    //                 <Button id={"last-step"}
+    //                     onClick={() => {
+    //                         setStep(0)
+    //                     }}
+    //                     sx={window.innerWidth > 1000 ? {
+    //                         // paddingLeft: "5vw",
+    //                         // paddingTop: "1vh",
+    //                         // marginLeft: "1vw",
+    //                         // width: window.innerWidth > 1000 ? "auto" : "1vw",
+    //                         // color: theme.palette.primary.main,
+    //                         // top: "53vh",
+    //                         // left: "5vw",
+    //                     } : {}}
+    //                 >
+    //                     <ArrowBack style={{ color: theme.palette.primary.main }} /> Back
+    //                 </Button>
+    //                 <LoadingButton
+    //                     loading={loading}
+    //                     onClick={() => {
+    //                         setStep(2)
+    //                     }}
+    //                     variant={`contained`}
+    //                     color={"primary"}
+    //                     // endIcon={<LockPersonIcon/>}
+    //                     style={window.innerWidth > 1000 ? {
+    //                         width: '15vw',
+    //                         borderRadius: 100,
+    //                         height: "5vh",
+    //                         paddingTop: "1vh",
+    //                         justifyContent: "center",
+    //                         paddingBottom: "5px"
+    //                     } : {
+    //                         width: '100px',
+    //                         borderRadius: 100,
+    //                         height: "5vh",
+    //                         paddingTop: "1vh",
+    //                         paddingBottom: "5px"
+    //                     }}
+    //                     disabled={lastStepDisabled}
+    //                 >
+    //                     Last Step
+    //                 </LoadingButton>
+    //             </div>
+    //             <div style={{ height: "10px" }} />
+    //         </form>
+    //     )
+    // }
 
     function hexToRGBA(hex: string, alpha: string | number) {
         let r = parseInt(hex.slice(1, 3), 16),
@@ -1221,7 +1229,7 @@ function CreateNewAccount() {
             <form>
                 <Button
                     onClick={() => {
-                        setStep(1)
+                        setStep(0)
                     }}
                     sx={{
                         marginLeft: "1vw",
@@ -1701,7 +1709,7 @@ function CreateNewAccount() {
                                 </Button>
                             </Typography>
                         </form>
-                    ) : step === 1 ? renderAvatar() : renderQuestions()
+                    ) : renderQuestions()
                     }
                 </Grid>
             </Grid>
@@ -1838,41 +1846,24 @@ function CreateNewAccount() {
                         </Button>
                     </Grid>
                 </Grid>
-            ) : step === 1
-                ?
+            ) : (
                 <Grid container justifyContent="center" sx={{
                     paddingTop: "25px",
                 }}>
                     <Grid container
-                        sx={{
-                            justifyContent: "center",
-                            outlineColor: "black",
-                            width: "35%",
-                            borderRadius: 1,
-                            backgroundColor: theme.palette.background.default,
-                            height: "100%",
-                        }} direction="column" alignItems="center"
-                    >
-                        {renderAvatar()}
-                    </Grid>
-                </Grid>
-                :
-                <Grid container justifyContent="center" sx={{
-                    paddingTop: "25px",
-                }}>
-                    <Grid container
-                        sx={{
-                            justifyContent: "center",
-                            outlineColor: "black",
-                            width: "35%",
-                            borderRadius: 1,
-                            backgroundColor: theme.palette.background.default,
-                            height: "100%",
-                        }} direction="column" alignItems="center"
+                          sx={{
+                              justifyContent: "center",
+                              outlineColor: "black",
+                              width: "35%",
+                              borderRadius: 1,
+                              backgroundColor: theme.palette.background.default,
+                              height: "100%",
+                          }} direction="column" alignItems="center"
                     >
                         {renderQuestions()}
                     </Grid>
                 </Grid>
+            )
         )
     }
 
@@ -1893,6 +1884,11 @@ function CreateNewAccount() {
                 width: '100vw',
                 height: '100vh'
             }}>
+            {isAvatarInitialized <= 2 && (
+                <div style={{display: 'none'}}>
+                    <Avataaar id={"avatar-container"} value={Attributes} sx={{ width: window.innerWidth > 1000 ? "auto" : "80%" }} onChange={(e: React.SetStateAction<{ topType: string; accessoriesType: string; avatarRef: object, hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; }>) => setAvatar(e)} creation={true}/>
+                </div>
+            )}
             <ThemeProvider theme={theme}>
                 <CssBaseline>
                     {(!external) ? renderCreateForm() : renderExternal()}

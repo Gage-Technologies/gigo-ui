@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, {useState, useRef, useEffect} from "react";
 import ReactDOM from "react-dom";
 import { Piece } from "avataaars";
 import Avatar from "avataaars";
@@ -36,7 +36,6 @@ export default function Avataaar(props) {
       [attr]: val,
       avatarRef
     };
-    console.log("new attributes are: ", newAttributes)
     if (props.onChange) {
       props.onChange(newAttributes);
     }
@@ -45,12 +44,8 @@ export default function Avataaar(props) {
   const randomizeAvatar = () => {
     let newAttributes = {};
 
-    console.log("options are: ", options)
-
     map(options, (option) => {
-      console.log("option is: ", option)
       const randomValue = option.values[Math.floor(Math.random() * option.values.length)];
-      console.log("random value is: ", randomValue)
       newAttributes[option.attribute] = randomValue;
     });
     newAttributes["avatarRef"] = avatarRef
@@ -116,6 +111,13 @@ export default function Avataaar(props) {
     });
   };
 
+  useEffect(() => {
+    //@ts-ignore
+    if (props.creation !== undefined && props.creation) {
+      randomizeAvatar();
+    }
+  }, []);
+
   return (
       <div>
         <Button onClick={randomizeAvatar} x={{color: 'red',
@@ -149,8 +151,6 @@ export default function Avataaar(props) {
             const endIndex = visibleIndices[type]?.endIndex || 3;
             const canScrollLeft = startIndex > 0;
             const canScrollRight = endIndex < option.values.length;
-
-            console.log("current type is: ", option.type)
 
             return (
                 <Tabpane selectedTab={selectedTab} type={option.type}>
