@@ -705,7 +705,7 @@ function PublicConfigs() {
                                             limitTags={5}
                                             freeSolo
                                             id="wsConfigTagSearchAutocomplete"
-                                            options={createTags}
+                                            options={tagOptions}
                                             getOptionLabel={(option: Tag | string) => typeof option === "string" ? option : option.value}
                                             renderInput={(params) => (
                                                 <TextField {...params} label="Template Tags" placeholder="Template Tags" />
@@ -822,7 +822,7 @@ function PublicConfigs() {
                                             limitTags={5}
                                             freeSolo
                                             id="wsConfigTagSearchAutocomplete"
-                                            options={createTags}
+                                            options={tagOptions}
                                             getOptionLabel={(option: Tag | string) => typeof option === "string" ? option : option.value}
                                             renderInput={(params) => (
                                                 <TextField {...params} label="Template Tags" placeholder="Template Tags" />
