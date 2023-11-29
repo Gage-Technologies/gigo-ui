@@ -205,7 +205,7 @@ function PublicConfigs() {
         let params = {
             query: e,
             skip: skip,
-            limit: 5
+            limit: 50
         }
 
         if (minorTab === "Personal") {
@@ -302,8 +302,14 @@ function PublicConfigs() {
         //     ...workspaceConfigs
         // ]
 
-        setSkip(skip + 5)
+        setSkip(skip + 50)
     }
+
+    // window.onscroll = function() {
+    //     if (window.innerHeight + window.pageYOffset >= document.body.offsetHeight) {
+    //         handleWorkspaceConfigSearch("", skip).then(r => console.log("searching"))
+    //     }
+    // }
 
     useEffect(() => {
         //null
