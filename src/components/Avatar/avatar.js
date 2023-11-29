@@ -28,6 +28,7 @@ export default function Avataaar(props) {
   const avatarRef = useRef(null);
   const [selectedTab, setSelectedTab] = useState('top');
   const [visibleIndices, setVisibleIndices] = useState({});
+  const [avatarAttributes, setAvatarAttributes] = useState(props.value);
 
   const pieceClicked = (attr, val) => {
     var newAttributes = {
@@ -35,10 +36,33 @@ export default function Avataaar(props) {
       [attr]: val,
       avatarRef
     };
+    console.log("new attributes are: ", newAttributes)
     if (props.onChange) {
       props.onChange(newAttributes);
     }
   };
+
+  const randomizeAvatar = () => {
+    let newAttributes = {};
+
+    console.log("options are: ", options)
+
+    map(options, (option) => {
+      console.log("option is: ", option)
+      const randomValue = option.values[Math.floor(Math.random() * option.values.length)];
+      console.log("random value is: ", randomValue)
+      newAttributes[option.attribute] = randomValue;
+    });
+    newAttributes["avatarRef"] = avatarRef
+
+    console.log("new attributes are on random: ", newAttributes)
+
+    setAvatarAttributes(newAttributes);
+    if (props.onChange) {
+      props.onChange(newAttributes);
+    }
+  };
+
 
   const triggerDownload = (imageBlob, fileName) => {
     FileSaver.saveAs(imageBlob, fileName);
@@ -94,6 +118,12 @@ export default function Avataaar(props) {
 
   return (
       <div>
+        <Button onClick={randomizeAvatar} x={{color: 'red',
+          borderRadius: 1,
+          p: 1,
+          backgroundColor: "secondary",
+          width: "auto",
+          paddingTop: "10px"}}>Randomize Avatar</Button>
         <div style={{ display: 'flex', flexDirection: 'row', position: 'relative', width: "90%", justifyContent: "center" }}>
           <StyledAvatar style={window.innerWidth > 1000 ? {} : {width: "auto", marginRight: "50px"}}>
             <Avatar
