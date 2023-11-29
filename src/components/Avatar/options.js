@@ -224,7 +224,14 @@ var options = [
     label: "Skin",
     type: "skinColor",
     attribute: "skinColor",
-    values: [],
+    values: [
+      "Tanned",
+        "Pale",
+        "Light",
+        "Brown",
+        "DarkBrown",
+        "Black",
+    ],
     colorAttribute: "skinColor",
     colors: {
       Tanned: "#FD9841",

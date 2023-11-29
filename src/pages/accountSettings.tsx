@@ -260,6 +260,7 @@ function AccountSettings() {
     const setAvatar = (e: { topType: string; accessoriesType: string; avatarRef: {}; hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; } | ((prevState: { topType: string; accessoriesType: string; avatarRef: {}; hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; }) => { topType: string; accessoriesType: string; avatarRef: {}; hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; }) | ((prevState: { topType: string; accessoriesType: string; avatarRef: object; hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; }) => { topType: string; accessoriesType: string; avatarRef: object; hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; })) => {
 
         setAttributes(e)
+        console.log("e is: ", e)
         setAvatarRef(
             //@ts-ignore
             ReactDOM.findDOMNode(
