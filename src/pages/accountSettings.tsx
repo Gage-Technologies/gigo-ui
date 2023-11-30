@@ -260,6 +260,7 @@ function AccountSettings() {
     const setAvatar = (e: { topType: string; accessoriesType: string; avatarRef: {}; hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; } | ((prevState: { topType: string; accessoriesType: string; avatarRef: {}; hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; }) => { topType: string; accessoriesType: string; avatarRef: {}; hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; }) | ((prevState: { topType: string; accessoriesType: string; avatarRef: object; hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; }) => { topType: string; accessoriesType: string; avatarRef: object; hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; })) => {
 
         setAttributes(e)
+        console.log("e is: ", e)
         setAvatarRef(
             //@ts-ignore
             ReactDOM.findDOMNode(
@@ -288,7 +289,7 @@ function AccountSettings() {
             (res: any) => {
                 //@ts-ignore
                 if (res !== undefined && res["message"] === "avatar settings edited successfully") {
-                    swal("Your avatar was edited successfully.")
+                    swal("Your avatar was edited successfully. Please give it a few minutes for the changes to take effect!")
                     setIsLoading(false)
                 }
             }

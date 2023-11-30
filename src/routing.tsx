@@ -5,6 +5,7 @@ import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import { initialAuthState, initialAuthStateUpdate, selectAuthState, updateAuthState } from "./reducers/auth/auth";
 import TrackedOutlet from './components/OutletTracking';
+import PublicConfigs from "./pages/PublicConfigs";
 const CurateAdminPage = React.lazy(() => import("./pages/curateAdmin"));
 const Home = React.lazy(() => import("./pages/home"));
 const Challenge = React.lazy(() => import("./pages/Challenge"));
@@ -125,6 +126,7 @@ export default function Routing() {
                         <Route path="/streak" element={<Streak />}/>
                         {/*<Route path="/nemesis" element={<Nemesis />}/>*/}
                         <Route path={"/curateAdmin"} element={<CurateAdminPage/>}/>
+                        <Route path={"/configs"} element={<PublicConfigs />}/>
                     </Route >
                     <Route path="*" element={<NotFoundPage />} />
                 </Route>

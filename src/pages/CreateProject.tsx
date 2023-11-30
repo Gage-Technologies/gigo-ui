@@ -54,12 +54,12 @@ import {
     updateCreateProjectState
 } from "../reducers/createProject/createProject";
 import { programmingLanguages } from "../services/vars";
-import { TaskAlt } from "@mui/icons-material";
+import {Close, TaskAlt} from "@mui/icons-material";
 import call from "../services/api-call";
 import config from "../config";
 import { LoadingButton } from "@mui/lab";
 import Post from "../models/post";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { DefaultWorkspaceConfig, Workspace, WorkspaceConfig } from "../models/workspace";
 import {
     initialAuthStateUpdate,
@@ -76,7 +76,14 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import Slider from '@mui/material/Slider';
 import CardTutorial from "../components/CardTutorial";
 import styled from "@emotion/styled";
+import CheckIcon from "@mui/icons-material/Check";
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 
+
+
+interface LocationState {
+    workspace_config: any
+}
 
 function CreateProject() {
     // initialize navigation access
@@ -273,6 +280,8 @@ function CreateProject() {
     const [visibility, setVisibility] = React.useState(false)
     const [showPopupConnect, setShowPopupConnect] = React.useState(false)
     const [connectedAccountLink, setConnectedAccount] = React.useState(null)
+
+    const location = useLocation() as { state: LocationState };
 
     const wsConfigOptionsBaseState = [
         {
@@ -526,8 +535,16 @@ function CreateProject() {
             return
         }
 
-        if (typeof e.target.value !== "string") {
+        if (e !== "" && typeof e.target.value !== "string") {
             return
+        }
+
+        let queryValue;
+
+        if (e.target === undefined){
+            queryValue = ""
+        } else {
+            queryValue = e.target.value;
         }
 
         let res = await call(
@@ -538,7 +555,7 @@ function CreateProject() {
             null,
             // @ts-ignore
             {
-                query: e.target.value,
+                query: queryValue,
                 skip: 0,
                 limit: 5,
             }
@@ -742,6 +759,24 @@ function CreateProject() {
 
         // window.sessionStorage.setItem("createXP", JSON.stringify(res["xp"]))
     }
+
+
+    useEffect(() => {
+        console.log("location is: ", location)
+        if(location.state) {
+            // let updateState = Object.assign({}, initialCreateProjectStateUpdate);
+            // //@ts-ignore
+            // updateState.workspaceConfig._id = location.state.workspace_config_id
+            // //@ts-ignore
+            // updateState.workspaceConfig.revision = location.state.workspace_config_revision
+            // updateFormState(updateState)
+
+            let form = createProjectForm.workspaceConfig
+            form = location.state.workspace_config
+            // form.revision = parseInt(location.state.workspace_config_revision, 10);
+            setCreateProjectForm({...createProjectForm, workspaceConfig: form})
+        }
+    }, [location]);
 
     /**
      * Creates project on via the remote GIGO server and updates the local & redux state
@@ -2158,7 +2193,7 @@ function CreateProject() {
                                 {renderPriceExplanationPopover()}
                             </div>
                             <Button
-                                variant={`contained`}
+                                variant={`outlined`}
                                 color={"primary"}
                                 sx={{
                                     width: "20vw",
@@ -2289,7 +2324,7 @@ function CreateProject() {
                     <Grid item xs={12}>
                         <Tooltip title="Generate a unique image for your project using Magic">
                             <GenerateImageButton
-                                variant={`contained`}
+                                variant={`outlined`}
                                 color={"primary"}
                                 sx={{
                                     width: "10vw",
@@ -2384,7 +2419,7 @@ function CreateProject() {
                     </Grid>
                     <Grid item xs={12}>
                         <Button
-                            variant={`contained`}
+                            variant={`outlined`}
                             color={"primary"}
                             sx={{
                                 width: "30vw",
@@ -2440,7 +2475,7 @@ function CreateProject() {
                     </Grid>
                     <Grid item xs={"auto"}>
                         <Button
-                            variant={`contained`}
+                            variant={`outlined`}
                             color={"primary"}
                             sx={{
                                 width: "20vw",
@@ -2679,7 +2714,7 @@ function CreateProject() {
                     </Grid>
                     <Grid item xs={"auto"}>
                         <Button
-                            variant={`contained`}
+                            variant={`outlined`}
                             color={"primary"}
                             sx={{
                                 width: "20vw",
@@ -3040,7 +3075,12 @@ function CreateProject() {
                             id="wsConfigSearchAutocomplete"
                             options={wsConfigOptions}
                             getOptionLabel={(option: WorkspaceConfig) => {
-                                return option.title
+                                // Assuming 'uses' and 'completions' are properties of WorkspaceConfig
+                                if (option.title === "Default" || option.title === "Custom") {
+                                    return option.title;
+                                } else {
+                                    return `${option.title} (Uses: ${option.uses}, Completions: ${option.completions})`;
+                                }
                             }}
                             isOptionEqualToValue={(option: WorkspaceConfig, value: WorkspaceConfig) => {
                                 return option._id === value._id;
@@ -3049,6 +3089,7 @@ function CreateProject() {
                                 <TextField {...params} label="Workspace Config Templates"
                                     placeholder="Workspace Config Templates" />
                             )}
+                            onOpen={() => handleWorkspaceConfigSearch("")}
                             onInputChange={(e) => {
                                 handleWorkspaceConfigSearch(e)
                             }}
@@ -3070,6 +3111,27 @@ function CreateProject() {
                                 width: "20vw",
                                 zIndex: "6000000"
                             } : { width: "20vw" }} className={'workspace_config'}
+                            renderOption={(props, option: WorkspaceConfig) => (
+                                <li {...props}>
+                                    <Grid container alignItems="center" justifyContent="space-between">
+                                        <Grid item xs>
+                                            <Typography noWrap>{option.title}</Typography>
+                                        </Grid>
+                                        {option.title !== "Default" && option.title !== "Custom" && (
+                                            <Grid item container xs="auto" alignItems="center">
+                                                <Tooltip title={"Uses"}>
+                                                    <ArrowUpwardIcon />
+                                                </Tooltip>
+                                                <Typography align="right" style={{ marginLeft: 4 }}>{option.uses}</Typography>
+                                                <Tooltip title={"Completions"} style={{ marginLeft: 8 }}>
+                                                    <CheckIcon />
+                                                </Tooltip>
+                                                <Typography align="right" style={{ marginLeft: 4 }}>{option.completions}</Typography>
+                                            </Grid>
+                                        )}
+                                    </Grid>
+                                </li>
+                            )}
                         />
                         {renderWsConfigTemplateExplanationPopover()}
                     </Grid>
@@ -3079,7 +3141,7 @@ function CreateProject() {
                             <Grid item xs={"auto"}>
                                 <LoadingButton
                                     loading={changeLock}
-                                    variant={`contained`}
+                                    variant={`outlined`}
                                     color={"primary"}
                                     sx={{
                                         width: "20vw",
@@ -3097,7 +3159,7 @@ function CreateProject() {
                                 <Grid item xs={"auto"}>
                                     <LoadingButton
                                         loading={changeLock}
-                                        variant={`contained`}
+                                        variant={`outlined`}
                                         color={"primary"}
                                         sx={{
                                             width: "20vw",
@@ -3113,7 +3175,7 @@ function CreateProject() {
                                 <Grid item xs={"auto"}>
                                     <Button
                                         disabled={changeLock}
-                                        variant={`contained`}
+                                        variant={`outlined`}
                                         color={"error"}
                                         sx={{
                                             width: "20vw",

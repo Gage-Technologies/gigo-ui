@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, {useState, useRef, useEffect} from "react";
 import ReactDOM from "react-dom";
 import { Piece } from "avataaars";
 import Avatar from "avataaars";
@@ -22,12 +22,14 @@ import {
 import { DownloadIcon } from "./svg";
 import {IconButton} from "@material-ui/core";
 import {ArrowBackIos, ArrowForwardIos} from "@material-ui/icons";
+import ShuffleIcon from '@mui/icons-material/Shuffle';
 
 export default function Avataaar(props) {
   const canvasRef = useRef(null);
   const avatarRef = useRef(null);
   const [selectedTab, setSelectedTab] = useState('top');
   const [visibleIndices, setVisibleIndices] = useState({});
+  const [avatarAttributes, setAvatarAttributes] = useState(props.value);
 
   const pieceClicked = (attr, val) => {
     var newAttributes = {
@@ -39,6 +41,24 @@ export default function Avataaar(props) {
       props.onChange(newAttributes);
     }
   };
+
+  const randomizeAvatar = () => {
+    let newAttributes = {};
+
+    map(options, (option) => {
+      const randomValue = option.values[Math.floor(Math.random() * option.values.length)];
+      newAttributes[option.attribute] = randomValue;
+    });
+    newAttributes["avatarRef"] = avatarRef
+
+    console.log("new attributes are on random: ", newAttributes)
+
+    setAvatarAttributes(newAttributes);
+    if (props.onChange) {
+      props.onChange(newAttributes);
+    }
+  };
+
 
   const triggerDownload = (imageBlob, fileName) => {
     FileSaver.saveAs(imageBlob, fileName);
@@ -92,8 +112,35 @@ export default function Avataaar(props) {
     });
   };
 
+  useEffect(() => {
+    //@ts-ignore
+    if (props.creation !== undefined && props.creation) {
+      randomizeAvatar();
+    }
+  }, []);
+
   return (
       <div>
+        <Button onClick={randomizeAvatar} style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 'auto',
+          gap: '5px',
+          backgroundColor: '#007bff', // Background color
+          color: 'white',              // Text color
+          borderRadius: '8px',         // Rounded edges
+          fontFamily: 'Poppins, sans-serif', // Poppins font
+          position: "absolute",
+          top: 420,
+          left: 150
+        }}>
+          <h5 style={{
+            margin: 0,
+            fontFamily: 'Poppins, sans-serif', // Ensure h5 also uses Poppins
+          }}>Randomize Avatar</h5>
+          <ShuffleIcon/>
+        </Button>
         <div style={{ display: 'flex', flexDirection: 'row', position: 'relative', width: "90%", justifyContent: "center" }}>
           <StyledAvatar style={window.innerWidth > 1000 ? {} : {width: "auto", marginRight: "50px"}}>
             <Avatar
@@ -119,8 +166,6 @@ export default function Avataaar(props) {
             const endIndex = visibleIndices[type]?.endIndex || 3;
             const canScrollLeft = startIndex > 0;
             const canScrollRight = endIndex < option.values.length;
-
-            console.log("current type is: ", option.type)
 
             return (
                 <Tabpane selectedTab={selectedTab} type={option.type}>
