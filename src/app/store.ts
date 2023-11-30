@@ -10,6 +10,7 @@ import journeyFormReducer from '../reducers/journeyForm/journeyForm'
 import pageCacheReducer, {CacheItem} from '../reducers/pageCache/pageCache'
 import chatMessageCacheReducer from '../reducers/chat/cache'
 import chatReducer from '../reducers/chat/chat'
+import devSpaceUsageCacheReducer from '../reducers/devSpace/usageCache';
 
 const persistConfig = {
     key: 'root',
@@ -31,7 +32,8 @@ const reducers = combineReducers({
     journeyForm: journeyFormReducer,
     pageCache: pageCacheReducer,
     chatMessageCache: chatMessageCacheReducer,
-    chat: chatReducer
+    chat: chatReducer,
+    devSpaceUsageCache: devSpaceUsageCacheReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, reducers)

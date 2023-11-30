@@ -12,10 +12,13 @@ import DesktopAccessDisabledIcon from '@mui/icons-material/DesktopAccessDisabled
 import QueuePlayNextIcon from '@mui/icons-material/QueuePlayNext';
 import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
 import call from '../services/api-call';
+import { DevSpaceUsageCache, selectDevSpaceUsageCacheState, setDevSpaceUsageCache } from '../reducers/devSpace/usageCache';
+import { useAppDispatch, useAppSelector } from '../app/hooks';
 
 interface IProps {
     openCallback: ((open: boolean) => void);
     isOpen?: boolean;
+    wsId: string;
 };
 
 
@@ -24,12 +27,21 @@ const DevSpaceControls = React.forwardRef<HTMLAnchorElement, IProps>((props: Rea
     const [mode, _] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
 
-    const [cpuUsagePercentage, setCpuUsagePercentage] = React.useState<number>(0);
-    const [memoryUsagePercentage, setMemoryUsagePercentage] = React.useState<number>(0);
-    const [cpuLimit, setCpuLimit] = React.useState<number>(0);
-    const [memoryLimit, setMemoryLimit] = React.useState<number>(0);
-    const [cpuUsage, setCpuUsage] = React.useState<number>(0);
-    const [memoryUsage, setMemoryUsage] = React.useState<number>(0);
+    const dispatch = useAppDispatch();
+
+    const usageCache = useAppSelector(selectDevSpaceUsageCacheState);
+    let cachedValues = (
+        usageCache[props.wsId] !== undefined &&
+        usageCache[props.wsId].usage !== undefined &&
+        usageCache[props.wsId].usage.timestamp > Date.now() - 30_000
+    ) ? usageCache[props.wsId].usage as DevSpaceUsageCache : null
+
+    const [cpuUsagePercentage, setCpuUsagePercentage] = React.useState<number>(cachedValues ? cachedValues.cpuPercentage : 0);
+    const [memoryUsagePercentage, setMemoryUsagePercentage] = React.useState<number>(cachedValues ? cachedValues.memoryPercentage : 0);
+    const [cpuLimit, setCpuLimit] = React.useState<number>(cachedValues ? cachedValues.cpuLimit : 0);
+    const [memoryLimit, setMemoryLimit] = React.useState<number>(cachedValues ? cachedValues.memoryLimit : 0);
+    const [cpuUsage, setCpuUsage] = React.useState<number>(cachedValues ? cachedValues.cpuUsage : 0);
+    const [memoryUsage, setMemoryUsage] = React.useState<number>(cachedValues ? cachedValues.memoryUsage : 0);
 
     let globalWs = useGlobalWebSocket();
 
@@ -75,6 +87,16 @@ const DevSpaceControls = React.forwardRef<HTMLAnchorElement, IProps>((props: Rea
         setMemoryUsage(jsonMessage["resources"]["memory_usage"] / 1_000_000_000)
         setCpuLimit(jsonMessage["resources"]["cpu_limit"] / 1000)
         setMemoryLimit(jsonMessage["resources"]["memory_limit"] / 1_000_000_000)
+
+        dispatch(setDevSpaceUsageCache(props.wsId, {
+            cpuUsage: jsonMessage["resources"]["cpu_usage"] / 1000,
+            cpuPercentage: jsonMessage["resources"]["cpu"] * 100,
+            cpuLimit: jsonMessage["resources"]["cpu_limit"] / 1000,
+            memoryUsage: jsonMessage["resources"]["memory_usage"] / 1_000_000_000,
+            memoryPercentage: jsonMessage["resources"]["memory"] * 100,
+            memoryLimit: jsonMessage["resources"]["memory_limit"] / 1_000_000_000,
+            timestamp: Date.now(),
+        }));
     }
 
     globalWs.registerCallback(
@@ -84,8 +106,6 @@ const DevSpaceControls = React.forwardRef<HTMLAnchorElement, IProps>((props: Rea
     );
 
     const stopWorkspace = async () => {
-        let wsId = window.location.href.split("/launchpad/")[1].split('?')[0]
-
         let res = await call(
             "/api/workspace/stopWorkspace",
             "post",
@@ -94,7 +114,7 @@ const DevSpaceControls = React.forwardRef<HTMLAnchorElement, IProps>((props: Rea
             null,
             // @ts-ignore
             {
-                workspace_id: wsId,
+                workspace_id: props.wsId,
             }
         )
 
