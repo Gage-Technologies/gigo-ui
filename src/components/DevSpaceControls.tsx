@@ -16,13 +16,11 @@ import { DevSpaceUsageCache, selectDevSpaceUsageCacheState, setDevSpaceUsageCach
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 
 interface IProps {
-    openCallback: ((open: boolean) => void);
-    isOpen?: boolean;
     wsId: string;
 };
 
 
-const DevSpaceControls = React.forwardRef<HTMLAnchorElement, IProps>((props: React.PropsWithChildren<IProps>, ref) => {
+const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
     let userPref = localStorage.getItem('theme')
     const [mode, _] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
@@ -35,6 +33,8 @@ const DevSpaceControls = React.forwardRef<HTMLAnchorElement, IProps>((props: Rea
         usageCache[props.wsId].usage !== undefined &&
         usageCache[props.wsId].usage.timestamp > Date.now() - 30_000
     ) ? usageCache[props.wsId].usage as DevSpaceUsageCache : null
+
+    const [isOpen, setIsOpen] = React.useState(false);
 
     const [cpuUsagePercentage, setCpuUsagePercentage] = React.useState<number>(cachedValues ? cachedValues.cpuPercentage : 0);
     const [memoryUsagePercentage, setMemoryUsagePercentage] = React.useState<number>(cachedValues ? cachedValues.memoryPercentage : 0);
@@ -234,19 +234,17 @@ const DevSpaceControls = React.forwardRef<HTMLAnchorElement, IProps>((props: Rea
             </style>
             <Tooltip title="Open DevSpace Controls">
                 <IconButton
-                    ref={ref}
-                    onClick={() => props.openCallback(!props.isOpen)}
+                    onClick={() => setIsOpen(!isOpen)}
                     color={((cpuUsagePercentage >= 90 || memoryUsagePercentage >= 90) ? "error" : (cpuUsagePercentage >= 75 || memoryUsagePercentage >= 75) ? "warning" : "inherit")}
                     sx={{
                         ...((cpuUsagePercentage >= 75 || memoryUsagePercentage >= 75) ? { animation: 'fade 1s infinite' } : {})
                     }}
-                    href={""}
                 >
                     <SettingsApplicationsIcon />
                 </IconButton>
             </Tooltip>
 
-            {props.isOpen && (
+            {isOpen && (
                 <Paper elevation={3} style={{
                     padding: '8px',
                     display: 'flex',
@@ -336,6 +334,6 @@ const DevSpaceControls = React.forwardRef<HTMLAnchorElement, IProps>((props: Rea
             )}
         </>
     )
-});
+};
 
 export default DevSpaceControls;

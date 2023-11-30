@@ -1078,9 +1078,6 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     zIndex: 1000,
                 }}>
                     <DevSpaceControls
-                        openCallback={(x) => setIsOpen(x)}
-                        isOpen={isOpen}
-                        ref={toggleButtonRef}
                         wsId={window.location.href.split("/launchpad/")[1].split('?')[0]}
                     />
                 </div>
