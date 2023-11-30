@@ -44,7 +44,7 @@ class Mutex {
     private mutex = Promise.resolve();
 
     lock(): PromiseLike<() => void> {
-        let begin: (unlock: () => void) => void = unlock => {};
+        let begin: (unlock: () => void) => void = unlock => { };
 
         this.mutex = this.mutex.then(() => {
             return new Promise(begin);
@@ -95,43 +95,43 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     let websocketRoot = config.rootPath.replace("https://", "wss://").replace("http://", "ws://");
     const { sendMessage } = useWebSocket(
         `${websocketRoot}/api/ws`, {
-            // Will attempt to reconnect on all close events, such as server shutting down
-            shouldReconnect: (closeEvent) => true,
-            onClose: () => console.log("global socket closed"),
-            onError: (error) => console.log("global socket error: ", error),
-            onOpen: (event: WebSocketEventMap['open']) => console.log("global socket open"),
-            onMessage: (event: WebSocketEventMap['message']) => {
-                // skip if this is a ping
-                if (event.data === "ping") {
-                    return;
+        // Will attempt to reconnect on all close events, such as server shutting down
+        shouldReconnect: (closeEvent) => true,
+        onClose: () => console.log("global socket closed"),
+        onError: (error) => console.log("global socket error: ", error),
+        onOpen: (event: WebSocketEventMap['open']) => console.log("global socket open"),
+        onMessage: (event: WebSocketEventMap['message']) => {
+            // skip if this is a ping
+            if (event.data === "ping") {
+                return;
+            }
+
+            let msg: models.WsMessage<any> = JSON.parse(event.data);
+
+            // check if this is a response to a message we sent
+            mutex.dispatch(() => {
+                let c = messageCallbacks.current;
+                if (c[msg.sequence_id]) {
+                    // call the callback and delete it from the map
+                    c[msg.sequence_id].callback(msg);
+                    delete c[msg.sequence_id];
+                    messageCallbacks.current = c;
                 }
+            });
 
-                let msg: models.WsMessage<any> = JSON.parse(event.data);
+            // call any global callbacks
+            mutex.dispatch(() => {
+                let gc = globalCallbacks.current;
+                if (gc[msg.type]) {
+                    gc[msg.type].forEach((callback) => {
+                        callback.callback(msg);
+                    });
+                }
+            });
+        },
+    });
 
-                // check if this is a response to a message we sent
-                mutex.dispatch(() => {
-                    let c = messageCallbacks.current;
-                    if (c[msg.sequence_id]) {
-                        // call the callback and delete it from the map
-                        c[msg.sequence_id].callback(msg);
-                        delete c[msg.sequence_id];
-                        messageCallbacks.current = c;
-                    }
-                });
-
-                // call any global callbacks
-                mutex.dispatch(() => {
-                    let gc = globalCallbacks.current;
-                    if (gc[msg.type]) {
-                        gc[msg.type].forEach((callback) => {
-                            callback.callback(msg);
-                        });
-                    }
-                });
-            },
-        });
-
-    const sendWebsocketMessage = async (msg: models.WsMessage<any>, callback: WebSocketResponseCallback | null = null) => {
+    const sendWebsocketMessage = React.useCallback(async (msg: models.WsMessage<any>, callback: WebSocketResponseCallback | null = null) => {
         // generate a random alphanumeric id
         msg.sequence_id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
         // add callback to callback map
@@ -148,9 +148,9 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
             });
         }
         sendMessage(JSON.stringify(msg));
-    };
+    }, []);
 
-    const registerCallback = async (type: models.WsMessageType, key: string, callback: WebSocketResponseCallback) => {
+    const registerCallback = React.useCallback(async (type: models.WsMessageType, key: string, callback: WebSocketResponseCallback) => {
         // add callback to global callback map
         await mutex.dispatch(() => {
             let gc = globalCallbacks.current;
@@ -169,16 +169,20 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
             });
             globalCallbacks.current = gc;
         });
-    }
+    }, []);
 
-    const value = {
-        sendWebsocketMessage,
-        registerCallback,
-    };
+    const WrappedApp = React.useMemo(() => {
+        const value = {
+            sendWebsocketMessage,
+            registerCallback,
+        };
 
-    return (
-        <WebSocketContext.Provider value={value}>
-            {children}
-        </WebSocketContext.Provider>
-    );
+        return (
+            <WebSocketContext.Provider value={value}>
+                {children}
+            </WebSocketContext.Provider>
+        )
+    }, [children, sendWebsocketMessage, registerCallback])
+
+    return WrappedApp
 };

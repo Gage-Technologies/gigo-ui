@@ -102,20 +102,13 @@ import { clearCache } from "../reducers/pageCache/pageCache";
 import CloseIcon from "@material-ui/icons/Close";
 import { clearChatState } from "../reducers/chat/chat";
 import { clearMessageCache } from "../reducers/chat/cache";
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import StopIcon from '@mui/icons-material/Stop';
-import DesktopWindowsIcon from '@mui/icons-material/DesktopWindows';
-import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
-import DesktopAccessDisabledIcon from '@mui/icons-material/DesktopAccessDisabled';
-import QueuePlayNextIcon from '@mui/icons-material/QueuePlayNext';
 import { SocialIcon } from 'react-social-icons'
 import Snackbar from '@material-ui/core/Snackbar';
 import { RecordWebUsage, WebTrackingEvent } from '../models/web_usage';
 import { useLocation } from 'react-router-dom';
 import { useTracking } from 'react-tracking';
-import { useGlobalWebSocket } from '../services/websocket';
-import { WsMessage, WsMessageType } from '../models/websocket';
 import Pro from './Icons/Pro';
+import DevSpaceControls from './DevSpaceControls';
 
 
 interface IProps {
@@ -204,14 +197,6 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     const [isOpen, setIsOpen] = React.useState(false);
     const [openSetup, setOpenSetup] = React.useState(false)
     const toggleButtonRef = React.useRef(null);
-    const [cpuUsagePercentage, setCpuUsagePercentage] = React.useState<number>(0);
-    const [memoryUsagePercentage, setMemoryUsagePercentage] = React.useState<number>(0);
-    const [cpuLimit, setCpuLimit] = React.useState<number>(0);
-    const [memoryLimit, setMemoryLimit] = React.useState<number>(0);
-    const [cpuUsage, setCpuUsage] = React.useState<number>(0);
-    const [memoryUsage, setMemoryUsage] = React.useState<number>(0);
-
-    let globalWs = useGlobalWebSocket();
 
     const styles = {
         regular: {
@@ -628,50 +613,6 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         </Box>
     ), [])
 
-    if (
-        (queryParams.has("embed") && queryParams.get("embed") === "true") ||
-        (
-            window.location.pathname.startsWith('/login') ||
-            window.location.pathname.startsWith('/forgotPassword') ||
-            window.location.pathname.startsWith('/signup') ||
-            window.location.pathname.startsWith('/resetPassword') ||
-            window.location.pathname.startsWith('/referral')
-        )
-    ) {
-        return (
-            <div>
-                {props.children}
-            </div>
-        )
-    }
-
-    const stopWorkspace = async () => {
-        let wsId = window.location.href.split("/launchpad/")[1].split('?')[0]
-
-        let res = await call(
-            "/api/workspace/stopWorkspace",
-            "post",
-            null,
-            null,
-            null,
-            // @ts-ignore
-            {
-                workspace_id: wsId,
-            }
-        )
-
-        if (res["message"] !== undefined && res["message"] === "You must be logged in to access the GIGO system.") {
-
-            let authState = Object.assign({}, initialAuthStateUpdate)
-            // @ts-ignore
-            dispatch(updateAuthState(authState))
-            navigate("/login")
-        }
-
-        window.history.replaceState({}, "", window.location.href.split("?")[0]);
-
-    }
-        ;
     const renderTutorialButton = () => {
         if (!(
             window.location.pathname.startsWith('/home') ||
@@ -752,6 +693,41 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
             console.log('Failed to copy text: ', err);
         }
     }
+
+
+    const userIconMemoLarge = React.useMemo(() => {
+        return (
+            <UserIcon
+                userId={authState.id}
+                userTier={authState.tier}
+                userThumb={config.rootPath + thumbnail}
+                size={40}
+                backgroundName={authState.backgroundName}
+                backgroundPalette={authState.backgroundColor}
+                backgroundRender={authState.backgroundRenderInFront}
+                profileButton={false}
+                pro={authState.role.toString() === "1"}
+                mouseMove={false}
+            />
+        )
+    }, [authState, thumbnail])
+
+    const userIconMemoSmall = React.useMemo(() => {
+        return (
+            <UserIcon
+                userId={authState.id}
+                userTier={authState.tier}
+                userThumb={config.rootPath + thumbnail}
+                size={25}
+                backgroundName={authState.backgroundName}
+                backgroundPalette={authState.backgroundColor}
+                backgroundRender={authState.backgroundRenderInFront}
+                profileButton={false}
+                pro={authState.role.toString() === "1"}
+                mouseMove={false}
+            />
+        )
+    }, [authState, thumbnail])
 
 
     const renderAppBar = () => {
@@ -839,18 +815,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 <Typography sx={{ color: theme.palette.primary.contrastText, mr: 2, textTransform: "none" }}>
                                     {username}
                                 </Typography>
-                                <UserIcon
-                                    userId={authState.id}
-                                    userTier={authState.tier}
-                                    userThumb={config.rootPath + thumbnail}
-                                    size={40}
-                                    backgroundName={authState.backgroundName}
-                                    backgroundPalette={authState.backgroundColor}
-                                    backgroundRender={authState.backgroundRenderInFront}
-                                    profileButton={false}
-                                    pro={authState.role.toString() === "1"}
-                                    mouseMove={false}
-                                />
+                                {userIconMemoLarge}
                                 {inTrial && !hasPaymentInfo && (
                                     <ErrorIcon
                                         style={{
@@ -1105,218 +1070,17 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     const renderDevSpaceControls = () => {
         return (
             <>
-                <style>
-                    {`
-                        @keyframes glitch {
-                            0% {
-                                transform: translate(0);
-                                opacity: 1;
-                            }
-                            20% {
-                                transform: translate(-1px, 1px);
-                                opacity: 0.4;
-                            }
-                            40% {
-                                transform: translate(1px, -1px);
-                                opacity: 0.9;
-                            }
-                            60% {
-                                transform: translate(-1px, -1px);
-                                opacity: 0.6;
-                            }
-                            80% {
-                                transform: translate(1px, 1px);
-                                opacity: 0.95;
-                            }
-                            100% {
-                                transform: translate(0);
-                                opacity: 1;
-                            }
-                        }
-                    `}
-                </style>
-                <style>
-                    {`
-                        @keyframes fade {
-                            0% {
-                                opacity: 1;
-                            }
-                            50% {
-                                opacity: 0.6;
-                            }
-                            100% {
-                                opacity: 1;
-                            }
-                        }
-                    `}
-                </style>
                 <div style={{
                     position: 'fixed',
                     left: '50%',
                     transform: 'translateX(-50%)',
                     zIndex: 1000,
                 }}>
-                    <Tooltip title="Open DevSpace Controls">
-
-                        <IconButton
-                            ref={toggleButtonRef}
-                            onClick={() => setIsOpen(!isOpen)}
-                            color={((cpuUsagePercentage >= 90 || memoryUsagePercentage >= 90) ? "error" : (cpuUsagePercentage >= 75 || memoryUsagePercentage >= 75) ? "warning" : "inherit")}
-                            sx={{
-                                ...((cpuUsagePercentage >= 75 || memoryUsagePercentage >= 75) ? { animation: 'fade 1s infinite' } : {})
-                            }}
-                        >
-                            <SettingsApplicationsIcon />
-                        </IconButton>
-                    </Tooltip>
-
-                    {isOpen && (
-                        <Paper elevation={3} style={{
-                            padding: '8px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'space-between',
-                            position: 'absolute',
-                            top: '70%',
-                            left: "50%",
-                            transform: 'translate(-50%, 0)',
-                            width: '30vw',
-                            minWidth: "150px",
-                            maxWidth: "400px"
-                        }}>
-                            <Box sx={{ display: "flex", width: "100%", flexDirection: "row", justifyContent: "center" }}>
-                                <Tooltip title="Go Back">
-                                    <IconButton color="error" onClick={async () => {
-                                        window.history.replaceState({}, "", window.location.href.split("?")[0]);
-                                        window.location.reload();
-                                    }}>
-                                        <ArrowBackIcon />
-                                    </IconButton>
-                                </Tooltip>
-
-                                <Tooltip title="Stop Workspace">
-                                    <IconButton color="warning" onClick={() => stopWorkspace()}>
-                                        <StopIcon />
-                                    </IconButton>
-                                </Tooltip>
-
-                                {
-                                    window.location.pathname.startsWith("/launchpad/") ? (
-                                        new URLSearchParams(window.location.search).get("desktop") === "none" ? (
-                                            <>
-                                                <Tooltip title="View Desktop">
-                                                    <IconButton color="success" onClick={async () => {
-                                                        window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=side");
-                                                        window.location.reload();
-                                                    }}>
-                                                        <DesktopWindowsIcon />
-                                                    </IconButton>
-                                                </Tooltip>
-                                                <Tooltip title="Open Desktop In New Tab">
-                                                    <IconButton color="success" onClick={async () => {
-                                                        window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=popped-out");
-                                                        window.location.reload();
-                                                    }}>
-                                                        <QueuePlayNextIcon />
-                                                    </IconButton>
-                                                </Tooltip>
-                                            </>
-                                        ) : new URLSearchParams(window.location.search).get("desktop") === "side" ? (
-                                            <>
-                                                <Tooltip title="Close Desktop">
-                                                    <IconButton color="error" onClick={async () => {
-                                                        window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=none");
-                                                        window.location.reload();
-                                                    }}>
-                                                        <DesktopAccessDisabledIcon />
-                                                    </IconButton>
-                                                </Tooltip>
-                                                <Tooltip title="Open Desktop In New Tab">
-                                                    <IconButton color="success" onClick={async () => {
-                                                        window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=popped-out");
-                                                        window.location.reload();
-                                                    }}>
-                                                        <QueuePlayNextIcon />
-                                                    </IconButton>
-                                                </Tooltip>
-                                            </>
-                                        ) : new URLSearchParams(window.location.search).get("desktop") === "popped-out" ? (
-                                            <>
-                                                <Tooltip title="View Desktop">
-                                                    <IconButton color="success" onClick={async () => {
-                                                        window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=side");
-                                                        window.location.reload();
-                                                    }}>
-                                                        <DesktopWindowsIcon />
-                                                    </IconButton>
-                                                </Tooltip>
-                                            </>
-                                        ) : null
-                                    ) : null
-                                }
-                            </Box>
-
-                            {/* CPU Usage Progress Bar */}
-                            <div style={{ marginTop: '8px', position: 'relative' }}>
-                                <div
-                                    style={{
-                                        color: cpuUsagePercentage < 75 ? theme.palette.text.primary : cpuUsagePercentage < 90 ? theme.palette.warning.main : theme.palette.error.main
-                                    }}
-                                >
-                                    CPU
-                                </div>
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={cpuUsagePercentage}
-                                    color={cpuUsagePercentage < 75 ? "primary" : cpuUsagePercentage < 90 ? "warning" : "error"}
-                                    sx={{
-                                        height: "10px",
-                                        borderRadius: "10px",
-                                        ...(cpuUsagePercentage >= 90 && { animation: 'glitch 1s infinite' })
-                                    }}
-                                />
-                                <div style={{
-                                    position: 'absolute',
-                                    bottom: 5,
-                                    right: 0,
-                                    fontSize: '0.8em',
-                                    color: cpuUsagePercentage < 75 ? theme.palette.text.primary : cpuUsagePercentage < 90 ? theme.palette.warning.main : theme.palette.error.main
-                                }}>
-                                    {cpuUsage.toFixed(2)}/{cpuLimit} Cores
-                                </div>
-                            </div>
-
-                            {/* Memory Usage Progress Bar */}
-                            <div style={{ marginTop: '8px', position: 'relative' }}>
-                                <div
-                                    style={{
-                                        color: memoryUsagePercentage < 75 ? theme.palette.text.primary : memoryUsagePercentage < 90 ? theme.palette.warning.main : theme.palette.error.main
-                                    }}
-                                >
-                                    Memory
-                                </div>
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={memoryUsagePercentage}
-                                    color={memoryUsagePercentage < 75 ? "secondary" : memoryUsagePercentage < 90 ? "warning" : "error"}
-                                    sx={{
-                                        height: "10px",
-                                        borderRadius: "10px",
-                                        ...(memoryUsagePercentage >= 90 && { animation: 'glitch 1s infinite' })
-                                    }}
-                                />
-                                <div style={{
-                                    position: 'absolute',
-                                    bottom: 5,
-                                    right: 0,
-                                    fontSize: '0.8em',
-                                    color: memoryUsagePercentage < 75 ? theme.palette.text.primary : memoryUsagePercentage < 90 ? theme.palette.warning.main : theme.palette.error.main
-                                }}>
-                                    {Math.round(memoryUsage)}/{memoryLimit}MB
-                                </div>
-                            </div>
-                        </Paper>
-                    )}
+                    <DevSpaceControls
+                        openCallback={(x) => setIsOpen(x)}
+                        isOpen={isOpen}
+                        ref={toggleButtonRef}
+                    />
                 </div>
             </>
         )
@@ -1401,18 +1165,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 <Typography sx={{ color: theme.palette.primary.contrastText, mr: 2, textTransform: "none" }}>
                                     {username}
                                 </Typography>
-                                <UserIcon
-                                    userId={authState.id}
-                                    userTier={authState.tier}
-                                    userThumb={config.rootPath + thumbnail}
-                                    size={25}
-                                    backgroundName={authState.backgroundName}
-                                    backgroundPalette={authState.backgroundColor}
-                                    backgroundRender={authState.backgroundRenderInFront}
-                                    profileButton={false}
-                                    pro={authState.role.toString() === "1"}
-                                    mouseMove={false}
-                                />
+                                {userIconMemoSmall}
                             </Button>
                             <Menu
                                 id="menu-appbar"
@@ -1511,18 +1264,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     variant="text"
                                     style={{ position: "absolute", right: 0 }}
                                 >
-                                    <UserIcon
-                                        userId={authState.id}
-                                        userTier={authState.tier}
-                                        userThumb={config.rootPath + thumbnail}
-                                        size={40}
-                                        backgroundName={authState.backgroundName}
-                                        backgroundPalette={authState.backgroundColor}
-                                        backgroundRender={authState.backgroundRenderInFront}
-                                        profileButton={false}
-                                        pro={authState.role.toString() === "1"}
-                                        mouseMove={false}
-                                    />
+                                    {userIconMemoLarge}
                                 </Button>
                                 <Menu
                                     id="menu-appbar"
@@ -2277,60 +2019,28 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         )
     }
 
-    const handleWsMessage = (message: WsMessage<any>) => {
-        // attempt to parse json message
-        let jsonMessage: any | null = null
-        try {
-            jsonMessage = message.payload;
-        } catch (e) {
-            console.log("websocket json decode error: ", e);
-            return
-        }
-
-        if (jsonMessage === null) {
-            console.log("unexpected null message")
-            return
-        }
-
-        // exit if there's no resource utilization
-        if (!jsonMessage["resources"]) {
-            return
-        }
-
-        // exit if this is not the launchpad
-        if (!window.location.pathname.startsWith("/launchpad/")) {
-            return
-        }
-
-        // load the id from the path
-        let id = window.location.pathname.split("/launchpad/")[1]
-        if (id.endsWith("/")) {
-            // trim final slash
-            id = id.replaceAll("/", "")
-        }
-        // skip if the workspace isn't the same one
-        if (!jsonMessage["workspace"] || !jsonMessage["workspace"]["_id"] || jsonMessage["workspace"]["_id"] !== id) {
-            return
-        }
-
-        setCpuUsagePercentage(jsonMessage["resources"]["cpu"] * 100)
-        setMemoryUsagePercentage(jsonMessage["resources"]["memory"] * 100)
-        setCpuUsage(jsonMessage["resources"]["cpu_usage"] / 1000)
-        setMemoryUsage(jsonMessage["resources"]["memory_usage"] / 1_000_000_000)
-        setCpuLimit(jsonMessage["resources"]["cpu_limit"] / 1000)
-        setMemoryLimit(jsonMessage["resources"]["memory_limit"] / 1_000_000_000)
-    }
-
     let appBarRenderer = renderAppBar
     if (window.location.pathname.startsWith("/launchpad/") && query.get("editor") === "true") {
-        globalWs.registerCallback(
-            WsMessageType.WorkspaceStatusUpdate,
-            `workspace:usage:${window.location.pathname.split("/launchpad/")[1]}`,
-            handleWsMessage
-        );
         appBarRenderer = renderWorkspaceAppBar
     } else if (window.innerWidth < 1000) {
         appBarRenderer = mobileAppBar
+    }
+
+    if (
+        (queryParams.has("embed") && queryParams.get("embed") === "true") ||
+        (
+            window.location.pathname.startsWith('/login') ||
+            window.location.pathname.startsWith('/forgotPassword') ||
+            window.location.pathname.startsWith('/signup') ||
+            window.location.pathname.startsWith('/resetPassword') ||
+            window.location.pathname.startsWith('/referral')
+        )
+    ) {
+        return (
+            <div>
+                {props.children}
+            </div>
+        )
     }
 
     return (
