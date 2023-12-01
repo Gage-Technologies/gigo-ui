@@ -52,6 +52,8 @@ import Pumpkin2Icon from "../components/Icons/Pumpkin2";
 import HalloweenBannerIcon from "../components/Icons/HalloweenBanner";
 import GIGOLandingPage from "../components/Landing";
 import GIGOLandingPageMobile from "../components/LandingMobile";
+import GIGOLandingPageChristmas from "../components/LandingChristmas";
+import GIGOLandingPageChristmasMobile from "../components/LandingChristmasMobile";
 
 
 function Home() {
@@ -62,6 +64,7 @@ function Home() {
 
     const dispatch = useAppDispatch();
     const aspectRatio = useAspectRatio();
+    const holiday = isHoliday()
 
     const authState = useAppSelector(selectAuthState);
     const [activeData, setActiveData] = React.useState<Array<never>>([])
@@ -775,12 +778,31 @@ function Home() {
         )
     }
 
+    const renderLanding = () => {
+        if (loggedIn) {
+            return null
+        }
+
+        if (window.innerWidth < 1000) {
+            if (holiday === "Christmas") {
+                return (<GIGOLandingPageChristmasMobile />)
+            }
+            return (<GIGOLandingPageMobile />)
+        }
+
+        if (holiday === "Christmas") {
+            return (<GIGOLandingPageChristmas />)
+        }
+
+        return (<GIGOLandingPage />)
+    }
+
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
                 <div>
                     {renderWelcomePopup()}
-                    {loggedIn ? null : window.innerWidth > 1000 ? <GIGOLandingPage /> : <GIGOLandingPageMobile />}
+                    {renderLanding()}
                     <Typography component={"div"}>
                     </Typography>
                     {xpPopup ? (<XpPopup oldXP={

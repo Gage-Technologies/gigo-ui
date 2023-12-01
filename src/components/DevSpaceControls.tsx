@@ -3,7 +3,7 @@ import { useGlobalWebSocket } from '../services/websocket';
 import { WsMessage, WsMessageType } from '../models/websocket';
 import LinearProgress from '@mui/material/LinearProgress';
 import { Box, IconButton, PaletteMode, Paper, Tooltip, createTheme } from '@mui/material';
-import { getAllTokens } from '../theme';
+import { getAllTokens, isHoliday } from '../theme';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import StopIcon from '@mui/icons-material/Stop';
@@ -26,6 +26,7 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
 
     const dispatch = useAppDispatch();
+    const holiday = isHoliday();
 
     const usageCache = useAppSelector(selectDevSpaceUsageCacheState);
     let cachedValues = (
@@ -237,7 +238,7 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
                     onClick={() => setIsOpen(!isOpen)}
                     color={((cpuUsagePercentage >= 90 || memoryUsagePercentage >= 90) ? "error" : (cpuUsagePercentage >= 75 || memoryUsagePercentage >= 75) ? "warning" : "inherit")}
                     sx={{
-                        ...((cpuUsagePercentage >= 75 || memoryUsagePercentage >= 75) ? { animation: 'fade 1s infinite' } : {})
+                        ...((cpuUsagePercentage >= 75 || memoryUsagePercentage >= 75) ? { animation: 'fade 1s infinite' } : { color: "black" })
                     }}
                 >
                     <SettingsApplicationsIcon />

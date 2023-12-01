@@ -2059,20 +2059,32 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         )
     }
 
+    const renderChristmasSnow = () => {
+        if (window.location.pathname.includes("/launchpad")) {
+            return null
+        }
+
+        if (holiday === "Christmas" && (!onHomePage || loggedIn)) {
+            return (<Snowfall />)
+        }
+        return null
+    }
+
+    const renderNewYearConfetti = () => {
+        if (window.location.pathname.includes("/launchpad")) {
+            return null
+        }
+        
+        if (holiday === "New Years" && (!onHomePage || loggedIn)) {
+            return (<Confetti gravity={0.01} numberOfPieces={100} wind={0.001} colors={['#ad7832', '#dcb468', '#716c6c', '#8e8888']} friction={1} />)
+        }
+        return null
+    }
+
     return (
         <ThemeProvider theme={theme}>
-            {holiday === "Christmas"
-                ?
-                <Snowfall />
-                :
-                <></>
-            }
-            {holiday === "New Years"
-                ?
-                <Confetti gravity={0.01} numberOfPieces={100} wind={0.001} colors={['#ad7832', '#dcb468', '#716c6c', '#8e8888']} friction={1} />
-                :
-                <></>
-            }
+            {renderChristmasSnow()}
+            {renderNewYearConfetti()}
             <CssBaseline>
                 <Box sx={{
                     mb: window.location.pathname.startsWith("/launchpad/") && query.get("editor") === "true" ? "0px" : "20px",
