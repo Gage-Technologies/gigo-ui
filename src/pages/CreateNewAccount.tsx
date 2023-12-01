@@ -1570,25 +1570,27 @@ function CreateNewAccount() {
                                     mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
                                 }}
                             />
-                            <LoadingButton
-                                loading={loading}
-                                onClick={() => {
-                                    validateUser()
-                                }}
-                                variant={`contained`}
-                                color={"primary"}
-                                // endIcon={<LockPersonIcon/>}
-                                sx={{
-                                    width: window.innerWidth > 1000 ? '15vw' : "40%",
-                                    borderRadius: 1,
-                                    height: "5vh",
-                                    justifyContent: "center",
-                                    marginLeft: window.innerWidth > 1000 ? "10vw" : "25vw",
-                                    mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
-                                }}
-                            >
-                                Next Step
-                            </LoadingButton>
+                            <div style={{width: "100%", justifyContent: "center", zIndex: 3000}}>
+                                <LoadingButton
+                                    loading={loading}
+                                    onClick={() => {
+                                        validateUser()
+                                    }}
+                                    variant={`contained`}
+                                    color={"primary"}
+                                    // endIcon={<LockPersonIcon/>}
+                                    sx={{
+                                        width: window.innerWidth > 1000 ? '15vw' : "40%",
+                                        borderRadius: 1,
+                                        height: "5vh",
+                                        justifyContent: "center",
+                                        marginLeft: window.innerWidth > 1000 ? "10vw" : "25vw",
+                                        mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
+                                    }}
+                                >
+                                    Next Step
+                                </LoadingButton>
+                            </div>
                             <Dialog
                                 open={unsafe}
                                 onClose={() => setUnsafe(false)}

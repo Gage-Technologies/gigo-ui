@@ -157,94 +157,94 @@ export default function Avataaar(props) {
             ))}
           </Tabs>
         </div>
+        {props.creation === undefined && (
+            <Tabpanes style={window.innerWidth > 1000 ? { position: 'relative', top: '15px' } : {display: "flex", width: "85%", justifyContent: "center", top: "15px"}}>
+              {options.map((option) => {
+                const { type } = option;
+                const startIndex = visibleIndices[type]?.startIndex || 0;
+                const endIndex = visibleIndices[type]?.endIndex || 3;
+                const canScrollLeft = startIndex > 0;
+                const canScrollRight = endIndex < option.values.length;
 
+                return (
+                    <Tabpane selectedTab={selectedTab} type={option.type}>
+                      {option.type !== 'avatarStyle' && option.type !== 'skin' && option.type !== 'skinColor' ? (
+                          <IconButton disabled={!canScrollLeft} onClick={() => scrollPieces(type, 'prev')}>
+                            <ArrowBackIos style={userPref === 'light' ? {color: "black"} : {color: "white"}}/>
+                          </IconButton>
+                      ) : null}
 
-        <Tabpanes style={window.innerWidth > 1000 ? { position: 'relative', top: '15px' } : {display: "flex", width: "85%", justifyContent: "center", top: "15px"}}>
-          {options.map((option) => {
-            const { type } = option;
-            const startIndex = visibleIndices[type]?.startIndex || 0;
-            const endIndex = visibleIndices[type]?.endIndex || 3;
-            const canScrollLeft = startIndex > 0;
-            const canScrollRight = endIndex < option.values.length;
-
-            return (
-                <Tabpane selectedTab={selectedTab} type={option.type}>
-                  {option.type !== 'avatarStyle' && option.type !== 'skin' && option.type !== 'skinColor' ? (
-                                      <IconButton disabled={!canScrollLeft} onClick={() => scrollPieces(type, 'prev')}>
-                                      <ArrowBackIos style={userPref === 'light' ? {color: "black"} : {color: "white"}}/>
-                                    </IconButton>
-                  ) : null}
-
-                  {option.values.slice(startIndex, endIndex).map((val) => {
-                    var attr = {};
-                    attr[option.attribute] = val;
-                    if (option.transform) {
-                      attr.style = { transform: option.transform };
-                    }
-
-                    return (
-                        <Pieces onClick={() => pieceClicked(option.attribute, val)}>
-                          {option.type === 'avatarStyle' ? (
-                              <span style={{ margin: '5px' }}>{val}</span>
-                          ) : (
-                              <Piece pieceSize='50' pieceType={option.type} {...attr} />
-                          )}
-
-                          {(val === 'Blank' || val === 'NoHair') && <None>(none)</None>}
-                        </Pieces>
-                    );
-                  })}
-                  {
-                    option.type !== 'avatarStyle' && option.type !== 'skin' && option.type !== 'skinColor' ? (
-                      <IconButton disabled={!canScrollRight} onClick={() => scrollPieces(type, 'next')}>
-                      <ArrowForwardIos style={userPref === 'light' ? {color: "black"} : {color: "white"}}/>
-                    </IconButton>
-                    ) : null
-                  }
-              {/*{this is the color selector for things like shirt or skin tone, that's why its only for a few'}*/}
-              <ColorContainer>
-                {option.colors &&
-                  (option.type !== "top" ||
-                    option.hats.indexOf(props.value.topType) === -1) &&
-                  map(option.colors, (color, colorName) => {
-                    return (
-                      <Color
-                        style={{
-                          backgroundColor: color,
-                          border:
-                            color === "#FFFFFF"
-                              ? "1px solid #ccc"
-                              : "1px solid " + color,
-                        }}
-                        onClick={() =>
-                          pieceClicked(option.colorAttribute, colorName)
+                      {option.values.slice(startIndex, endIndex).map((val) => {
+                        var attr = {};
+                        attr[option.attribute] = val;
+                        if (option.transform) {
+                          attr.style = { transform: option.transform };
                         }
-                      ></Color>
-                    );
-                  })}
 
-                {option.hatColors &&
-                  option.hats.indexOf(props.value.topType) !== -1 &&
-                  props.value.topType !== "Hat" &&
-                  map(option.hatColors, (color, colorName) => {
-                    return (
-                      <Color
-                        style={{
-                          backgroundColor: color,
-                          border:
-                            color === "#FFFFFF"
-                              ? "1px solid #ccc"
-                              : "1px solid " + color,
-                        }}
-                        onClick={() => pieceClicked("hatColor", colorName)}
-                      ></Color>
-                    );
-                  })}
-              </ColorContainer>
-            </Tabpane>
-          );
-        })}
-      </Tabpanes>
+                        return (
+                            <Pieces onClick={() => pieceClicked(option.attribute, val)}>
+                              {option.type === 'avatarStyle' ? (
+                                  <span style={{ margin: '5px' }}>{val}</span>
+                              ) : (
+                                  <Piece pieceSize='50' pieceType={option.type} {...attr} />
+                              )}
+
+                              {(val === 'Blank' || val === 'NoHair') && <None>(none)</None>}
+                            </Pieces>
+                        );
+                      })}
+                      {
+                        option.type !== 'avatarStyle' && option.type !== 'skin' && option.type !== 'skinColor' ? (
+                            <IconButton disabled={!canScrollRight} onClick={() => scrollPieces(type, 'next')}>
+                              <ArrowForwardIos style={userPref === 'light' ? {color: "black"} : {color: "white"}}/>
+                            </IconButton>
+                        ) : null
+                      }
+                      {/*{this is the color selector for things like shirt or skin tone, that's why its only for a few'}*/}
+                      <ColorContainer>
+                        {option.colors &&
+                            (option.type !== "top" ||
+                                option.hats.indexOf(props.value.topType) === -1) &&
+                            map(option.colors, (color, colorName) => {
+                              return (
+                                  <Color
+                                      style={{
+                                        backgroundColor: color,
+                                        border:
+                                            color === "#FFFFFF"
+                                                ? "1px solid #ccc"
+                                                : "1px solid " + color,
+                                      }}
+                                      onClick={() =>
+                                          pieceClicked(option.colorAttribute, colorName)
+                                      }
+                                  ></Color>
+                              );
+                            })}
+
+                        {option.hatColors &&
+                            option.hats.indexOf(props.value.topType) !== -1 &&
+                            props.value.topType !== "Hat" &&
+                            map(option.hatColors, (color, colorName) => {
+                              return (
+                                  <Color
+                                      style={{
+                                        backgroundColor: color,
+                                        border:
+                                            color === "#FFFFFF"
+                                                ? "1px solid #ccc"
+                                                : "1px solid " + color,
+                                      }}
+                                      onClick={() => pieceClicked("hatColor", colorName)}
+                                  ></Color>
+                              );
+                            })}
+                      </ColorContainer>
+                    </Tabpane>
+                );
+              })}
+            </Tabpanes>
+        ) }
       {/*<DownloadRow>*/}
       {/*  <Button onClick={onDownloadSVG}>*/}
       {/*    <DownloadIcon /> SVG*/}
