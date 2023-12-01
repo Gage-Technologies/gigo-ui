@@ -3,6 +3,7 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
 import {
+    Box,
     Button,
     createTheme,
     CssBaseline,
@@ -447,288 +448,300 @@ function Login(this: any) {
 
     let renderLogin = () => {
         return (
-            <Grid container justifyContent="center" sx={{
-                paddingTop: window.innerWidth > 1000 ? "7%" : "34%",
+            <Box sx={{
+                display: 'flex', // Enable Flexbox
+                flexDirection: 'column', // Stack children vertically
+                justifyContent: 'center', // Center children vertically in the container
+                alignItems: 'center', // Center children horizontally in the container
+                height: '100vh', // Full viewport height
             }}>
-                <Grid container
-                      sx={{
-                          justifyContent: "center",
-                          outlineColor: "black",
-                          width: window.innerWidth > 1000 ? "34%" : "80vw",
-                          minWidth:  window.innerWidth > 1000 ? "600px" : "0px",
-                          height: window.innerWidth > 1000? "auto" : "auto",
-                          borderRadius: 1,
-                          backgroundColor: theme.palette.background.paper,
-                          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1);"
-                      }} direction="column" alignItems="center"
-                >
-                    <Typography component={"div"} variant={"h5"} sx={{
-                        width: "100%",
-                        display: "flex",
-                        justifyContent: "center",
-                        paddingTop: "10px"
-                    }}>
-                        Sign In
-                    </Typography>
-                    <TextField
-                        label={"Username"}
-                        variant={`outlined`}
-                        size={window.innerWidth > 1000 ? `medium` : `small`}
-                        color={"primary"}
-                        helperText={"Please enter your username"}
-                        inputProps={
-                            styles.textField
-                        }
-                        onChange={e => setUsername(e.target.value)}
+                <Grid container justifyContent="center">
+                    <Grid container
                         sx={{
-                            width: window.innerWidth > 1000 ? "28vw" : "60vw",
-                            marginLeft: "3.5vw",
-                            marginRight: "3.5vw",
-                            mt: "3.5vh",
-                        }}
-                    >
-                    </TextField>
-                    <TextField
-                        label={"Password"}
-                        variant={`outlined`}
-                        size={window.innerWidth > 1000 ? `medium` : `small`}
-                        type={showPass ? `text` : `password`}
-                        color={`primary`}
-                        helperText={"Please enter your password"}
-                        onKeyDown={
-                            e => {
-                                if (e.key === "Enter") {
-                                    loginFunction()
-                                }
-                            }}
-                        onChange={e => setPassword(e.target.value)}
-                        sx={{
-                            width: window.innerWidth > 1000 ? "28vw" : "60vw",
-                            marginLeft: "3.5vw",
-                            marginRight: "3.5vw",
-                            mt: "3.5vh",
-                            paddingBottom: "1.5vw"
-                        }}
-                        InputProps={{
-                            endAdornment: <ShowButton/>
-                        }}
-                    >
-                    </TextField>
-                    <LoadingButton
-                        loading={loading}
-                        onClick={async () => {
-                            await loginFunction()
-                        }}
-                        variant={`contained`}
-                        color={"primary"}
-                        endIcon={<SendIcon/>}
-                        sx={{
+                            justifyContent: "center",
+                            outlineColor: "black",
+                            width: window.innerWidth > 1000 ? "34%" : "80vw",
+                            minWidth:  window.innerWidth > 1000 ? "600px" : "0px",
+                            height: window.innerWidth > 1000? "auto" : "auto",
                             borderRadius: 1,
-                            minHeight: "5vh",
-                            minWidth: '10vw',
-                            justifyContent: "center",
-                            lineHeight: "35px",
-                            width: window.innerWidth > 1000 ? '' : '50vw',
-                        }}
+                            backgroundColor: theme.palette.background.default,
+                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1);"
+                        }} direction="column" alignItems="center"
                     >
-                        Login
-                    </LoadingButton>
-                    <Button
-                        onClick={async () => {
-                            navigate("/forgotPassword")
-                        }}
-                        variant={`text`}
-                        color={"primary"}
-                        sx={{
-                            width: window.innerWidth > 1000 ? '15vw' : '80vw',
+                        <Typography component={"div"} variant={"h5"} sx={{
+                            width: "100%",
+                            display: "flex",
                             justifyContent: "center",
-                            paddingTop: window.innerWidth > 1000 ? '' : "8%",
-                        }}
-                    >
-                        Forgot Password
-                    </Button>
-                    <Button
-                        onClick={async () => {
-                            navigate("/signup")
-                        }}
-                        variant={`text`}
-                        color={"primary"}
-                        sx={{
-                            width: window.innerWidth > 1000 ? '15vw' : '60vw',
+                            paddingTop: "10px"
+                        }}>
+                            Sign In
+                        </Typography>
+                        <TextField
+                            label={"Username"}
+                            variant={`outlined`}
+                            size={window.innerWidth > 1000 ? `medium` : `small`}
+                            color={"primary"}
+                            helperText={"Please enter your username"}
+                            inputProps={
+                                styles.textField
+                            }
+                            onChange={e => setUsername(e.target.value)}
+                            sx={{
+                                width: window.innerWidth > 1000 ? "28vw" : "60vw",
+                                marginLeft: "3.5vw",
+                                marginRight: "3.5vw",
+                                mt: "3.5vh",
+                            }}
+                        >
+                        </TextField>
+                        <TextField
+                            label={"Password"}
+                            variant={`outlined`}
+                            size={window.innerWidth > 1000 ? `medium` : `small`}
+                            type={showPass ? `text` : `password`}
+                            color={`primary`}
+                            helperText={"Please enter your password"}
+                            onKeyDown={
+                                e => {
+                                    if (e.key === "Enter") {
+                                        loginFunction()
+                                    }
+                                }}
+                            onChange={e => setPassword(e.target.value)}
+                            sx={{
+                                width: window.innerWidth > 1000 ? "28vw" : "60vw",
+                                marginLeft: "3.5vw",
+                                marginRight: "3.5vw",
+                                mt: "3.5vh",
+                                paddingBottom: "1.5vw"
+                            }}
+                            InputProps={{
+                                endAdornment: <ShowButton/>
+                            }}
+                        >
+                        </TextField>
+                        <LoadingButton
+                            loading={loading}
+                            onClick={async () => {
+                                await loginFunction()
+                            }}
+                            variant={`contained`}
+                            color={"primary"}
+                            endIcon={<SendIcon/>}
+                            sx={{
+                                borderRadius: 1,
+                                minHeight: "5vh",
+                                minWidth: '10vw',
+                                justifyContent: "center",
+                                lineHeight: "35px",
+                                width: window.innerWidth > 1000 ? '' : '50vw',
+                            }}
+                        >
+                            Login
+                        </LoadingButton>
+                        <Button
+                            onClick={async () => {
+                                navigate("/forgotPassword")
+                            }}
+                            variant={`text`}
+                            color={"primary"}
+                            sx={{
+                                width: window.innerWidth > 1000 ? '15vw' : '80vw',
+                                justifyContent: "center",
+                                paddingTop: window.innerWidth > 1000 ? '' : "8%",
+                            }}
+                        >
+                            Forgot Password
+                        </Button>
+                        <Button
+                            onClick={async () => {
+                                navigate("/signup")
+                            }}
+                            variant={`text`}
+                            color={"primary"}
+                            sx={{
+                                width: window.innerWidth > 1000 ? '15vw' : '60vw',
+                                justifyContent: "center",
+                                paddingTop: window.innerWidth > 1000 ? '' : "5%",
+                            }}
+                        >
+                            No Account? Register
+                        </Button>
+                        <Typography component={"div"} variant={"h6"} sx={{
+                            width:  window.innerWidth > 1000 ? "85%" : "90%",
+                            display: "flex",
                             justifyContent: "center",
-                            paddingTop: window.innerWidth > 1000 ? '' : "5%",
-                        }}
-                    >
-                        No Account? Register
-                    </Button>
-                    <Typography component={"div"} variant={"h6"} sx={{
-                        width:  window.innerWidth > 1000 ? "85%" : "90%",
-                        display: "flex",
-                        justifyContent: "center",
-                        paddingTop: "25px"
-                    }}>
-                        or sign in with linked account:
-                    </Typography>
-                    <Grid container sx={{
-                        justifyContent: "center",
-                        width: "100%",
-                        paddingBottom: "10px"
-                    }} direction="row" alignItems="center">
-                        <Button onClick={() => startGoogle()}>
-                            <Grid container spacing={{xs: 2}} justifyContent="center" sx={{
-                                flexGrow: 1,
-                                paddingRight: window.innerWidth > 1000 ? '.5vw' : "4vh"
-                            }}>
-                                <Grid item xs={"auto"}>
+                            paddingTop: "25px"
+                        }}>
+                            or sign in with linked account:
+                        </Typography>
+                        <Grid container sx={{
+                            justifyContent: "center",
+                            width: "100%",
+                            paddingBottom: "10px"
+                        }} direction="row" alignItems="center">
+                            <Button onClick={() => startGoogle()}>
+                                <Grid container spacing={{xs: 2}} justifyContent="center" sx={{
+                                    flexGrow: 1,
+                                    paddingRight: window.innerWidth > 1000 ? '.5vw' : "4vh"
+                                }}>
+                                    <Grid item xs={"auto"}>
+                                        <img
+                                            style={{
+                                                width: window.innerWidth > 1000 ? "2vw" : "8vw",
+                                                height: "auto",
+                                                marginTop: "10px"
+                                            }}
+                                            alt={"Google Logo"}
+                                            src={googleLogo}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={"auto"}>
+                                        <img
+                                            style={{
+                                                width: window.innerWidth > 1000 ? "5vw" : "10vw",
+                                                height: "auto",
+                                                paddingTop: "1.5vh",
+                                                left: window.innerWidth > 1000 ? '0vw' : "11vw",
+                                                bottom: window.innerWidth > 1000 ? "0vh" : "2.3vh",
+                                                position: window.innerWidth > 1000 ? "relative" : "absolute"
+                                            }}
+                                            alt={"Google Name"}
+                                            src={theme.palette.mode === "light" ? googleLight : googleDark}
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </Button>
+                            <LoginGithub
+                                color={"primary"}
+                                sx={{
+                                    // width: window.innerWidth > 1000 ? '7vw' : '25vw',
+                                    justifyContent: "center",
+                                    padding: "15px"
+                                }}
+                                clientId="9ac1616be22aebfdeb3e"
+                                // this redirect URI is for production, testing on dev will not work
+                                redirectUri={""}
+                                onSuccess={onSuccessGithub}
+                                onFailure={onFailureGithub}
+                            >
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
                                     <img
                                         style={{
                                             width: window.innerWidth > 1000 ? "2vw" : "8vw",
-                                            height: "auto",
-                                            marginTop: "10px"
+                                            height: "auto"
                                         }}
-                                        alt={"Google Logo"}
-                                        src={googleLogo}
+                                        alt={"Github Logo"}
+                                        src={theme.palette.mode === "light" ? githubLogoDark : githubLogoLight}
                                     />
-                                </Grid>
-                                <Grid item xs={"auto"}>
-                                     <img
+                                    <img
                                         style={{
                                             width: window.innerWidth > 1000 ? "5vw" : "10vw",
                                             height: "auto",
-                                            paddingTop: "1.5vh",
-                                            left: window.innerWidth > 1000 ? '0vw' : "11vw",
-                                            bottom: window.innerWidth > 1000 ? "0vh" : "2.3vh",
-                                            position: window.innerWidth > 1000 ? "relative" : "absolute"
+                                            marginLeft: '0.5rem' // Adjust the margin as needed
                                         }}
-                                        alt={"Google Name"}
-                                        src={theme.palette.mode === "light" ? googleLight : googleDark}
+                                        alt={"Github Name"}
+                                        src={theme.palette.mode === "light" ? githubNameDark : githubNameLight}
                                     />
-                                </Grid>
-                            </Grid>
-                        </Button>
-                        <LoginGithub
-                            color={"primary"}
-                            sx={{
-                                // width: window.innerWidth > 1000 ? '7vw' : '25vw',
-                                justifyContent: "center",
-                                padding: "15px"
-                            }}
-                            clientId="9ac1616be22aebfdeb3e"
-                            // this redirect URI is for production, testing on dev will not work
-                            redirectUri={""}
-                            onSuccess={onSuccessGithub}
-                            onFailure={onFailureGithub}
-                        >
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <img
-                                    style={{
-                                        width: window.innerWidth > 1000 ? "2vw" : "8vw",
-                                        height: "auto"
-                                    }}
-                                    alt={"Github Logo"}
-                                    src={theme.palette.mode === "light" ? githubLogoDark : githubLogoLight}
-                                />
-                                <img
-                                    style={{
-                                        width: window.innerWidth > 1000 ? "5vw" : "10vw",
-                                        height: "auto",
-                                        marginLeft: '0.5rem' // Adjust the margin as needed
-                                    }}
-                                    alt={"Github Name"}
-                                    src={theme.palette.mode === "light" ? githubNameDark : githubNameLight}
-                                />
-                            </div>
-                        </LoginGithub>
+                                </div>
+                            </LoginGithub>
+                        </Grid>
                     </Grid>
                 </Grid>
-            </Grid>
+            </Box>
         )
     }
 
     let renderExternal = () => {
         return (
-            <Grid container justifyContent="center" sx={{
-                paddingTop: "220px",
+            <Box sx={{
+                display: 'flex', // Enable Flexbox
+                flexDirection: 'column', // Stack children vertically
+                justifyContent: 'center', // Center children vertically in the container
+                alignItems: 'center', // Center children horizontally in the container
+                height: '100vh', // Full viewport height
             }}>
-                <Grid container
-                      sx={{
-                          justifyContent: "center",
-                          outlineColor: "black",
-                          width: window.innerWidth > 1000 ? "35%" : "70%",
-                          borderRadius: 1,
-                          backgroundColor: theme.palette.background.default,
-                          paddingBottom: "1.5vw"
-                      }} direction="column" alignItems="center"
-                >
-                    <Typography component={"div"} variant={"h5"} sx={{
-                        width: "100%",
-                        display: "flex",
-                        justifyContent: "center",
-                        paddingTop: "10px",
-                    }}>
-                        Enter Password
-                    </Typography>
-
-                    <TextField
-                        label={"Password"}
-                        variant={`outlined`}
-                        size={`medium`}
-                        type={showPass ? `text` : `password`}
-                        color={`primary`}
-                        helperText={"Please enter your password"}
-                        onKeyDown={
-                            e => {
-                                if (e.key === "Enter") {
-                                    externalLogin === "Google" ? googleSignIn() : githubConfirm()
-                                }
-                            }}
-                        onChange={e => setPassword(e.target.value)}
+                <Grid container justifyContent="center">
+                    <Grid container
                         sx={{
-                            width: window.innerWidth > 1000 ? "28vw" : "60vw",
-                            marginLeft: "3.5vw",
-                            marginRight: "3.5vw",
-                            mt: "3.5vh",
-                            paddingBottom: window.innerWidth > 1000 ? "1.5vh" : "3.0vh"
-                        }}
-                        InputProps={{
-                            endAdornment: <ShowButton/>
-                        }}
-                    >
-                    </TextField>
-                    <LoadingButton
-                        loading={loading}
-                        onClick={() => {
-                            externalLogin === "Google" ? googleSignIn() : githubConfirm()
-                        }}
-                        variant={`contained`}
-                        color={"primary"}
-                        endIcon={<SendIcon/>}
-                        sx={{
-                            borderRadius: 1,
-                            minHeight: "5vh",
-                            minWidth: '15vw',
                             justifyContent: "center",
-                            lineHeight: "35px",
-                        }}
+                            outlineColor: "black",
+                            width: window.innerWidth > 1000 ? "35%" : "70%",
+                            borderRadius: 1,
+                            backgroundColor: theme.palette.background.default,
+                            paddingBottom: "1.5vw"
+                        }} direction="column" alignItems="center"
                     >
-                        Login
-                    </LoadingButton>
-                    <Typography variant="h5" component="div"
-                                sx={{fontSize: "75%"}}
-                    >
-                        Haven't linked your account yet?
-                    </Typography>
-                    <Button
-                        onClick={async () => {
-                            navigate("/signup")
-                        }}
-                        variant={`text`}
-                        color={"primary"}
-                    >
-                        sign up
-                    </Button>
+                        <Typography component={"div"} variant={"h5"} sx={{
+                            width: "100%",
+                            display: "flex",
+                            justifyContent: "center",
+                            paddingTop: "10px",
+                        }}>
+                            Enter Password
+                        </Typography>
+
+                        <TextField
+                            label={"Password"}
+                            variant={`outlined`}
+                            size={`medium`}
+                            type={showPass ? `text` : `password`}
+                            color={`primary`}
+                            helperText={"Please enter your password"}
+                            onKeyDown={
+                                e => {
+                                    if (e.key === "Enter") {
+                                        externalLogin === "Google" ? googleSignIn() : githubConfirm()
+                                    }
+                                }}
+                            onChange={e => setPassword(e.target.value)}
+                            sx={{
+                                width: window.innerWidth > 1000 ? "28vw" : "60vw",
+                                marginLeft: "3.5vw",
+                                marginRight: "3.5vw",
+                                mt: "3.5vh",
+                                paddingBottom: window.innerWidth > 1000 ? "1.5vh" : "3.0vh"
+                            }}
+                            InputProps={{
+                                endAdornment: <ShowButton/>
+                            }}
+                        >
+                        </TextField>
+                        <LoadingButton
+                            loading={loading}
+                            onClick={() => {
+                                externalLogin === "Google" ? googleSignIn() : githubConfirm()
+                            }}
+                            variant={`contained`}
+                            color={"primary"}
+                            endIcon={<SendIcon/>}
+                            sx={{
+                                borderRadius: 1,
+                                minHeight: "5vh",
+                                minWidth: '15vw',
+                                justifyContent: "center",
+                                lineHeight: "35px",
+                            }}
+                        >
+                            Login
+                        </LoadingButton>
+                        <Typography variant="h5" component="div"
+                                    sx={{fontSize: "75%"}}
+                        >
+                            Haven't linked your account yet?
+                        </Typography>
+                        <Button
+                            onClick={async () => {
+                                navigate("/signup")
+                            }}
+                            variant={`text`}
+                            color={"primary"}
+                        >
+                            sign up
+                        </Button>
+                    </Grid>
                 </Grid>
-            </Grid>
+            </Box>
         )
     }
 

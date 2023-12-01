@@ -335,7 +335,6 @@ function CreateNewAccount() {
 
         if (res["message"] === "User Cleared.") {
             // setStep(1)
-            setLoading(false)
             return true
         }
         return false
@@ -405,9 +404,9 @@ function CreateNewAccount() {
             last_name: lastName,
             external_auth: "",
             start_user_info: { 
-                usage: "I want to learn how to program.", 
+                usage: "I want to learn how to code by doing really cool projects.", 
                 proficiency: "Beginner", 
-                tags: ["python", "javascript", "golang", "web development", "game development", "machine learning", "artificial intelligence"], 
+                tags: "python,javascript,golang,web development,game development,machine learning,artificial intelligence", 
                 preferred_language: "Python, Javascript, Golang, Typescript" 
             },
             timezone: timezone ? timezone.value : "America/Chicago",
@@ -610,9 +609,9 @@ function CreateNewAccount() {
             external_auth: externalToken,
             password: password,
             start_user_info: { 
-                usage: "I want to learn how to program.", 
+                usage: "I want to learn how to code by doing really cool projects.", 
                 proficiency: "Beginner", 
-                tags: ["python", "javascript", "golang", "web development", "game development", "machine learning", "artificial intelligence"], 
+                tags: "python,javascript,golang,web development,game development,machine learning,artificial intelligence",
                 preferred_language: "Python, Javascript, Golang, Typescript" 
             },
             timezone: timezone ? timezone.value : "America/Chicago",
@@ -686,6 +685,9 @@ function CreateNewAccount() {
                         authState.tutorialState = auth["tutorials"] as TutorialState
                         authState.tier = auth["tier"]
                         dispatch(updateAuthState(authState))
+
+                        // this makes sure the dispatch occurs
+                        await sleep(500)
 
                         window.location.href = "/home";
 
@@ -763,9 +765,9 @@ function CreateNewAccount() {
             external_auth: externalToken,
             password: password,
             start_user_info: { 
-                usage: "I want to learn how to program.", 
+                usage: "I want to learn how to code by doing really cool projects.", 
                 proficiency: "Beginner", 
-                tags: ["python", "javascript", "golang", "web development", "game development", "machine learning", "artificial intelligence"], 
+                tags: "python,javascript,golang,web development,game development,machine learning,artificial intelligence", 
                 preferred_language: "Python, Javascript, Golang, Typescript" 
             },
             timezone: timezone ? timezone.value : "America/Chicago",
@@ -838,6 +840,8 @@ function CreateNewAccount() {
                         authState.tutorialState = auth["tutorials"] as TutorialState
                         authState.tier = auth["tier"]
                         dispatch(updateAuthState(authState))
+
+                        await sleep(500)
 
                         window.location.href = "/home";
 
@@ -1669,131 +1673,141 @@ function CreateNewAccount() {
     let renderExternal = () => {
         return (
             step === 0 ? (
-                <Grid container justifyContent="center" sx={{
-                    paddingTop: "220px",
+                <Box sx={{
+                    display: 'flex', // Enable Flexbox
+                    flexDirection: 'column', // Stack children vertically
+                    justifyContent: 'center', // Center children vertically in the container
+                    alignItems: 'center', // Center children horizontally in the container
+                    height: '100vh', // Full viewport height
                 }}>
-                    <Grid container
-                        sx={{
-                            justifyContent: "center",
-                            outlineColor: "black",
-                            width: window.innerWidth > 1000 ? "35%" : "90%",
-                            borderRadius: 1,
-                            backgroundColor: theme.palette.background.default,
-                            paddingBottom: "1.5vw"
-                        }} direction="column" alignItems="center"
-                    >
-                        <Typography component={"div"} variant={"h5"} sx={{
-                            width: "100%",
-                            display: "flex",
-                            justifyContent: "center",
-                            paddingTop: "10px",
-                        }}>
-                            Create a Password
-                        </Typography>
-                        <TextField
-                            id={"Password"}
-                            variant={`outlined`}
-                            type={showPass ? `text` : `password`}
-                            color={
-                                (password.length > 5 && password !== "") ? "success" : "error"
-                            }
-                            label={"Password"}
-                            required={true}
-                            margin={`normal`}
+                    <Grid container justifyContent="center">
+                        <Grid container
                             sx={{
-                                width: window.innerWidth > 1000 ? "28vw" : "80vw",
-                                mt: "2.5vh"
-                            }}
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            InputProps={{
-                                endAdornment: <ShowButton />
-                            }}
-                        >
-                        </TextField>
-                        <TextField
-                            id={"ReTypePassword"}
-                            variant={`outlined`}
-                            type={showPass ? `text` : `password`}
-                            color={
-                                (password === confirmPass && password !== "") ? "success" : "error"
-                            }
-                            label={"Confirm Password"}
-                            required={true}
-                            margin={`normal`}
-                            onKeyDown={
-                                e => {
-                                    if (e.key === "Enter") {
-                                        setStep(1)
-                                    }
-                                }}
-                            sx={{
-                                width: window.innerWidth > 1000 ? "28vw" : "80vw",
-                                mt: "2.5vh"
-                            }}
-                            value={confirmPass}
-                            onChange={e => setConfirmPass(e.target.value)}
-                        >
-                        </TextField>
-                        <Autocomplete
-                            id="timezoneInputSelect"
-                            options={getTimeZoneOptions(true)}
-                            getOptionLabel={(option) => option.label}
-                            onChange={(e: SyntheticEvent, value: TimezoneOption | null) => {
-                                if (value === null) {
-                                    setTimezone(null)
-                                }
-                                setTimezone(value)
-                            }}
-                            isOptionEqualToValue={(option: TimezoneOption, value: TimezoneOption) => {
-                                return option.value === value.value;
-                            }}
-                            value={timezone}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    placeholder="Timezone"
-                                />
-                            )}
-                            sx={{
-                                width: window.innerWidth > 1000 ? "28vw" : "80vw",
-                                mt: "2.5vh"
-                            }}
-                        />
-                        <Button
-                            onClick={() => {
-                                setStep(1)
-                            }}
-                            variant={`contained`}
-                            color={"primary"}
-                            endIcon={<SendIcon />}
-                            sx={{
-                                borderRadius: 1,
-                                minHeight: "5vh",
-                                minWidth: '15vw',
                                 justifyContent: "center",
-                                lineHeight: "35px",
-                                mt: "2.5vh"
-                            }}
+                                outlineColor: "black",
+                                width: window.innerWidth > 1000 ? "35%" : "90%",
+                                borderRadius: 1,
+                                backgroundColor: theme.palette.background.default,
+                                paddingBottom: "1.5vw"
+                            }} direction="column" alignItems="center"
                         >
-                            Next Step
-                        </Button>
-                        <Typography variant="h5" component="div"
-                            sx={{ fontSize: "75%" }}
-                        >
-                            Already linked your account?
-                        </Typography>
-                        <Button
-                            onClick={async () => {
-                                navigate("/login")
-                            }}
-                            variant={`text`}
-                            color={"primary"}
-                        >
-                            sign in
-                        </Button>
+                            <Typography component={"div"} variant={"h5"} sx={{
+                                width: "100%",
+                                display: "flex",
+                                justifyContent: "center",
+                                paddingTop: "10px",
+                            }}>
+                                Create a Password
+                            </Typography>
+                            <TextField
+                                id={"Password"}
+                                variant={`outlined`}
+                                type={showPass ? `text` : `password`}
+                                color={
+                                    (password.length > 5 && password !== "") ? "success" : "error"
+                                }
+                                label={"Password"}
+                                required={true}
+                                margin={`normal`}
+                                sx={{
+                                    width: window.innerWidth > 1000 ? "28vw" : "80vw",
+                                    mt: "2.5vh"
+                                }}
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
+                                InputProps={{
+                                    endAdornment: <ShowButton />
+                                }}
+                            >
+                            </TextField>
+                            <TextField
+                                id={"ReTypePassword"}
+                                variant={`outlined`}
+                                type={showPass ? `text` : `password`}
+                                color={
+                                    (password === confirmPass && password !== "") ? "success" : "error"
+                                }
+                                label={"Confirm Password"}
+                                required={true}
+                                margin={`normal`}
+                                onKeyDown={
+                                    e => {
+                                        if (e.key === "Enter") {
+                                            // setStep(1)
+                                            externalLogin === "Google" ? googleCreate() : githubCreate()
+                                        }
+                                    }}
+                                sx={{
+                                    width: window.innerWidth > 1000 ? "28vw" : "80vw",
+                                    mt: "2.5vh"
+                                }}
+                                value={confirmPass}
+                                onChange={e => setConfirmPass(e.target.value)}
+                                helperText={"We use this password to encrypt sensitive information."}
+                            >
+                            </TextField>
+                            {/* <Autocomplete
+                                id="timezoneInputSelect"
+                                options={getTimeZoneOptions(true)}
+                                getOptionLabel={(option) => option.label}
+                                onChange={(e: SyntheticEvent, value: TimezoneOption | null) => {
+                                    if (value === null) {
+                                        setTimezone(null)
+                                    }
+                                    setTimezone(value)
+                                }}
+                                isOptionEqualToValue={(option: TimezoneOption, value: TimezoneOption) => {
+                                    return option.value === value.value;
+                                }}
+                                value={timezone}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        placeholder="Timezone"
+                                    />
+                                )}
+                                sx={{
+                                    width: window.innerWidth > 1000 ? "28vw" : "80vw",
+                                    mt: "2.5vh"
+                                }}
+                            /> */}
+                            <Button
+                                onClick={() => {
+                                    // setStep(1)
+                                    externalLogin === "Google" ? googleCreate() : githubCreate()
+                                }}
+                                variant={`contained`}
+                                color={"primary"}
+                                endIcon={<SendIcon />}
+                                sx={{
+                                    borderRadius: 1,
+                                    minHeight: "5vh",
+                                    minWidth: '15vw',
+                                    justifyContent: "center",
+                                    lineHeight: "35px",
+                                    mt: "2.5vh"
+                                }}
+                                disabled={loading}
+                            >
+                                Create Account
+                            </Button>
+                            <Typography variant="h5" component="div"
+                                sx={{ fontSize: "75%" }}
+                            >
+                                Already linked your account?
+                            </Typography>
+                            <Button
+                                onClick={async () => {
+                                    navigate("/login")
+                                }}
+                                variant={`text`}
+                                color={"primary"}
+                            >
+                                sign in
+                            </Button>
+                        </Grid>
                     </Grid>
-                </Grid>
+                </Box>
             ) : (
                 <Grid container justifyContent="center" sx={{
                     paddingTop: "25px",

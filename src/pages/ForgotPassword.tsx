@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import {
+    Box,
     Button,
     createTheme,
     CssBaseline,
@@ -12,10 +13,10 @@ import {
     Typography,
     useMediaQuery
 } from "@mui/material";
-import {getAllTokens, isHoliday} from "../theme";
-import {useAppDispatch, useAppSelector} from "../app/hooks";
-import {initialAuthStateUpdate, selectAuthState, updateAuthState} from "../reducers/auth/auth";
-import {useNavigate} from "react-router-dom";
+import { getAllTokens, isHoliday } from "../theme";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
+import { initialAuthStateUpdate, selectAuthState, updateAuthState } from "../reducers/auth/auth";
+import { useNavigate } from "react-router-dom";
 import LockPersonIcon from '@mui/icons-material/LockPerson';
 import loginImg from "../img/login/login_background.png";
 import call from "../services/api-call";
@@ -25,7 +26,7 @@ import Post from "../models/post";
 import christmasLogin219 from "../img/christmas-login-21-9.png";
 import loginImg219 from "../img/login/login_background-21-9.jpg";
 import christmasLogin from "../img/christmas-login.png";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 
 
 function ForgotPassword() {
@@ -33,7 +34,7 @@ function ForgotPassword() {
     const [mode, _] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
 
     // Update the theme only if the mode changes
-        const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
+    const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
 
     const CurrentBgColor = theme.palette.background
 
@@ -99,7 +100,7 @@ function ForgotPassword() {
             null,
             null,
             //@ts-ignore
-            {email: email, url: url},
+            { email: email, url: url },
             null,
             config.rootPath
         )
@@ -114,25 +115,25 @@ function ForgotPassword() {
             return;
         }
 
-        if (res["message"] === "must provide email for password recovery"){
+        if (res["message"] === "must provide email for password recovery") {
             //@ts-ignore
             swal("Account Not Found", "We could not find an account with that email address and username. Please try again, or create an account if you don't already have one.")
             return
         }
 
-        if (res["message"] === "account not found"){
+        if (res["message"] === "account not found") {
             //@ts-ignore
             swal("Account Not Found", "We could not find an account with that email address and username. Please try again, or create an account if you don't already have one.")
             return
         }
 
-        if (res["message"] === "failed to store reset token" || res["message"] === "failed to send password reset email"){
+        if (res["message"] === "failed to store reset token" || res["message"] === "failed to send password reset email") {
             //@ts-ignore
-            swal("Server Error",  "We are having an issue with the GIGO servers at this time. We're sorry for the inconvenience! Please try again later.")
+            swal("Server Error", "We are having an issue with the GIGO servers at this time. We're sorry for the inconvenience! Please try again later.")
             return
         }
 
-        if (res["message"] === "Password reset email sent"){
+        if (res["message"] === "Password reset email sent") {
             //@ts-ignore
             swal("Check your Email", "We have sent an email with instructions on how to reset your password.")
             navigate("/login")
@@ -172,91 +173,99 @@ function ForgotPassword() {
             }}>
             <ThemeProvider theme={theme}>
                 <CssBaseline>
-                    <Grid container justifyContent="center" sx={{ paddingTop: "220px", }}>
-                        <Grid container
-                              sx={{
-                                  justifyContent: "center",
-                                  outlineColor: "black",
-                                  width: window.innerWidth > 1000 ? "35%" : "55%",
-                                  borderRadius: 1,
-                                  backgroundColor: theme.palette.background.default
-                              }} direction="column" alignItems="center"
-                        >
-                            <Typography component={"div"} variant={"h6"} sx={{
-                                width: window.innerWidth > 1000 ? `28vw` : `100%`,
-                                display: "flex",
-                                justifyContent: "center",
-                                paddingTop: "10px"
-                            }}>
-                                Forgot Password
-                            </Typography>
-                            <TextField
-                                label={"Email"}
-                                variant={`outlined`}
-                                color={"primary"}
-                                size={window.innerWidth > 1000 ? `medium` : `small`}
-                                helperText={"Please enter the email associated with your account"}
-                                required={true}
-                                inputProps={
-                                    styles.textField
-                                }
-                                onChange={handleEmailChange}
+                    <Box sx={{
+                        display: 'flex', // Enable Flexbox
+                        flexDirection: 'column', // Stack children vertically
+                        justifyContent: 'center', // Center children vertically in the container
+                        alignItems: 'center', // Center children horizontally in the container
+                        height: '100vh', // Full viewport height
+                    }}>
+                        <Grid container justifyContent="center">
+                            <Grid container
                                 sx={{
-                                    width: window.innerWidth > 1000 ? "23vw" : "90%",
-                                    marginLeft: "3.5vw",
-                                    marginRight: "3.5vw",
-                                    mt: "3.5vh",
-                                    mb: "20px"
-                                }}
-                            >
-                            </TextField>
-                            <Button
-                                disabled={!isEmailValid}
-                                onClick={sendResetValidation}
-                                variant={`contained`}
-                                color={"primary"}
-                                endIcon={<LockPersonIcon />}
-                                sx={{
+                                    justifyContent: "center",
+                                    outlineColor: "black",
+                                    width: window.innerWidth > 1000 ? "35%" : "55%",
                                     borderRadius: 1,
-                                    minHeight: "5vh",
-                                    minWidth: '15vw',
-                                    justifyContent: "center",
-                                    lineHeight: "35px",
-                                    marginBottom: "5px"
-                                }}
+                                    backgroundColor: theme.palette.background.default
+                                }} direction="column" alignItems="center"
                             >
-                                Submit
-                            </Button>
+                                <Typography component={"div"} variant={"h6"} sx={{
+                                    width: window.innerWidth > 1000 ? `28vw` : `100%`,
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    paddingTop: "10px"
+                                }}>
+                                    Forgot Password
+                                </Typography>
+                                <TextField
+                                    label={"Email"}
+                                    variant={`outlined`}
+                                    color={"primary"}
+                                    size={window.innerWidth > 1000 ? `medium` : `small`}
+                                    helperText={"Please enter the email associated with your account"}
+                                    required={true}
+                                    inputProps={
+                                        styles.textField
+                                    }
+                                    onChange={handleEmailChange}
+                                    sx={{
+                                        width: window.innerWidth > 1000 ? "23vw" : "90%",
+                                        marginLeft: "3.5vw",
+                                        marginRight: "3.5vw",
+                                        mt: "3.5vh",
+                                        mb: "20px"
+                                    }}
+                                >
+                                </TextField>
+                                <Button
+                                    disabled={!isEmailValid}
+                                    onClick={sendResetValidation}
+                                    variant={`contained`}
+                                    color={"primary"}
+                                    endIcon={<LockPersonIcon />}
+                                    sx={{
+                                        borderRadius: 1,
+                                        minHeight: "5vh",
+                                        minWidth: '15vw',
+                                        justifyContent: "center",
+                                        lineHeight: "35px",
+                                        marginBottom: "5px"
+                                    }}
+                                >
+                                    Submit
+                                </Button>
 
-                            <Button
-                                onClick={async () => {
-                                    navigate("/login")
-                                }}
-                                variant={`text`}
-                                color={"primary"}
-                                sx={{
-                                    width: window.innerWidth > 1000 ? '7vw' : "20vw",
-                                    justifyContent: "center",
-                                }}
-                            >
-                                Login
-                            </Button>
-                            <Button
-                                onClick={async () => {
-                                    navigate("/signup")
-                                }}
-                                variant={`text`}
-                                color={"primary"}
-                                sx={{
-                                    width: window.innerWidth > 1000 ? '7vw' : "40vw",
-                                    justifyContent: "center",
-                                    paddingBottom: "15px"
-                                }}
-                            >
-                                Sign Up
-                            </Button>
+                                <Button
+                                    onClick={async () => {
+                                        navigate("/login")
+                                    }}
+                                    variant={`text`}
+                                    color={"primary"}
+                                    sx={{
+                                        width: window.innerWidth > 1000 ? '7vw' : "20vw",
+                                        justifyContent: "center",
+                                    }}
+                                >
+                                    Login
+                                </Button>
+                                <Button
+                                    onClick={async () => {
+                                        navigate("/signup")
+                                    }}
+                                    variant={`text`}
+                                    color={"primary"}
+                                    sx={{
+                                        width: window.innerWidth > 1000 ? '7vw' : "40vw",
+                                        justifyContent: "center",
+                                        paddingBottom: "15px"
+                                    }}
+                                >
+                                    Sign Up
+                                </Button>
+                            </Grid>
                         </Grid>
-                    </Grid>
+                    </Box>
                 </CssBaseline>
             </ThemeProvider>
         </div>
