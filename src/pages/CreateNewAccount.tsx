@@ -206,16 +206,16 @@ function CreateNewAccount() {
         return /[a-zA-Z]/.test(str);
     }
 
-    const validateUser = async () => {
+    const validateUser = async (): Promise<boolean> => {
         let missingFields = [];
-        if (firstName === "") {
-            setMissingFirst(true);
-            missingFields.push('First Name');
-        }
-        if (lastName === "") {
-            setMissingLast(true);
-            missingFields.push('Last Name');
-        }
+        // if (firstName === "") {
+        //     setMissingFirst(true);
+        //     missingFields.push('First Name');
+        // }
+        // if (lastName === "") {
+        //     setMissingLast(true);
+        //     missingFields.push('Last Name');
+        // }
         if (username === "") {
             setMissingUser(true);
             missingFields.push('Username');
@@ -225,10 +225,10 @@ function CreateNewAccount() {
             setMissingEmail(true);
             missingFields.push('Email');
         }
-        if (number === "") {
-            setMissingPhone(true);
-            missingFields.push('Number');
-        }
+        // if (number === "") {
+        //     setMissingPhone(true);
+        //     missingFields.push('Number');
+        // }
         if (password === "") {
             setMissingPassword(true);
             missingFields.push('Password');
@@ -237,49 +237,49 @@ function CreateNewAccount() {
             setMissingConfirm(true);
             missingFields.push('Confirm Password');
         }
-        if (timezone === null) {
-            setMissingTimezone(true);
-            missingFields.push('Timezone');
-        }
+        // if (timezone === null) {
+        //     setMissingTimezone(true);
+        //     missingFields.push('Timezone');
+        // }
         if (missingFields.length > 0) {
             setLoading(false);
             swal(`Please fill in the following fields:`, `${missingFields.join(', ')}`, "error");
-            return;
+            return false;
         }
 
         if (!hasLetters(username)) {
             swal("Username Invalid", "Username must contain at least one letter!", "error");
             setLoading(false)
-            return
+            return false
         }
 
         if (password !== confirmPass) {
             //@ts-ignore
             swal("Passwords do not match", "", "error");
             setLoading(false)
-            return
+            return false
         }
 
         if (password.length < 5) {
             //@ts-ignore
             swal("Sorry!", "Your password is too short. Try Another!", "error")
             setLoading(false)
-            return
+            return false
         }
 
-        if (timezone === null) {
-            //@ts-ignore
-            swal("Timezone must be filled", "", "error")
-            setLoading(false)
-            return
-        }
+        // if (timezone === null) {
+        //     //@ts-ignore
+        //     swal("Timezone must be filled", "", "error")
+        //     setLoading(false)
+        //     return
+        // }
 
         if (email !== "") {
             const emailIsValid = await verifyEmail(email);
             if (!emailIsValid) {
                 setLoading(false);
                 setMissingEmail(true);
-                return;
+                return false;
             }
         }
 
@@ -290,7 +290,7 @@ function CreateNewAccount() {
             null,
             null,
             // @ts-ignore
-            { user_name: username, password: password, email: email, phone: number, timezone: timezone.value, force_pass: forcePass },
+            { user_name: username, password: password, email: email, phone: "N/A", timezone: timezone ? timezone.value : "America/Chicago", force_pass: forcePass },
         )
 
         if (res["message"] === "a username is required for user creation") {
@@ -334,8 +334,11 @@ function CreateNewAccount() {
         }
 
         if (res["message"] === "User Cleared.") {
-            setStep(1)
+            // setStep(1)
+            setLoading(false)
+            return true
         }
+        return false
     }
 
     const accountCreation = async () => {
@@ -390,7 +393,7 @@ function CreateNewAccount() {
             user_name: username,
             password: password,
             email: email,
-            phone: number,
+            phone: "N/A",
             status: "basic",
             pfp_path: "",
             badges: [],
@@ -401,8 +404,13 @@ function CreateNewAccount() {
             first_name: firstName,
             last_name: lastName,
             external_auth: "",
-            start_user_info: { usage: usage, proficiency: proficiency, tags: tagStringArray, preferred_language: preferredLanguage },
-            timezone: timezone.value,
+            start_user_info: { 
+                usage: "I want to learn how to program.", 
+                proficiency: "Beginner", 
+                tags: ["python", "javascript", "golang", "web development", "game development", "machine learning", "artificial intelligence"], 
+                preferred_language: "Python, Javascript, Golang, Typescript" 
+            },
+            timezone: timezone ? timezone.value : "America/Chicago",
             avatar_settings: { topType: Attributes.topType, accessoriesType: Attributes.accessoriesType, hairColor: Attributes.hairColor, facialHairType: Attributes.facialHairType, clotheType: Attributes.clotheType, clotheColor: Attributes.clotheColor, eyeType: Attributes.eyeType, eyebrowType: Attributes.eyebrowType, mouthType: Attributes.mouthType, avatarStyle: Attributes.avatarStyle, skinColor: Attributes.skinColor },
             force_pass: forcePass
         }
@@ -601,8 +609,13 @@ function CreateNewAccount() {
         let params = {
             external_auth: externalToken,
             password: password,
-            start_user_info: { usage: usage, proficiency: proficiency, tags: tagStringArray, preferred_language: preferredLanguage },
-            timezone: timezone.value,
+            start_user_info: { 
+                usage: "I want to learn how to program.", 
+                proficiency: "Beginner", 
+                tags: ["python", "javascript", "golang", "web development", "game development", "machine learning", "artificial intelligence"], 
+                preferred_language: "Python, Javascript, Golang, Typescript" 
+            },
+            timezone: timezone ? timezone.value : "America/Chicago",
             avatar_settings: { topType: Attributes.topType, accessoriesType: Attributes.accessoriesType, hairColor: Attributes.hairColor, facialHairType: Attributes.facialHairType, clotheType: Attributes.clotheType, clotheColor: Attributes.clotheColor, eyeType: Attributes.eyeType, eyebrowType: Attributes.eyebrowType, mouthType: Attributes.mouthType, avatarStyle: Attributes.avatarStyle, skinColor: Attributes.skinColor }
         }
 
@@ -749,8 +762,13 @@ function CreateNewAccount() {
         let params = {
             external_auth: externalToken,
             password: password,
-            start_user_info: { usage: usage, proficiency: proficiency, tags: tagStringArray, preferred_language: preferredLanguage },
-            timezone: timezone.value,
+            start_user_info: { 
+                usage: "I want to learn how to program.", 
+                proficiency: "Beginner", 
+                tags: ["python", "javascript", "golang", "web development", "game development", "machine learning", "artificial intelligence"], 
+                preferred_language: "Python, Javascript, Golang, Typescript" 
+            },
+            timezone: timezone ? timezone.value : "America/Chicago",
             avatar_settings: { topType: Attributes.topType, accessoriesType: Attributes.accessoriesType, hairColor: Attributes.hairColor, facialHairType: Attributes.facialHairType, clotheType: Attributes.clotheType, clotheColor: Attributes.clotheColor, eyeType: Attributes.eyeType, eyebrowType: Attributes.eyebrowType, mouthType: Attributes.mouthType, avatarStyle: Attributes.avatarStyle, skinColor: Attributes.skinColor }
         }
 
@@ -1227,354 +1245,279 @@ function CreateNewAccount() {
         "Other"
     ].sort();
 
-    let renderQuestions = () => {
-        return (
-            <form>
-                <Button
-                    onClick={() => {
-                        setStep(0)
-                    }}
-                    sx={{
-                        marginLeft: "1vw",
-                    }}
-                >
-                    <ArrowBack /> Go Back
-                </Button>
-                <div style={{ background: hexToRGBA(theme.palette.primary.light, 0.7), color: theme.palette.text.primary, padding: "20px", textAlign: "center", fontWeight: "bold", fontSize: "16px", boxShadow: "0px 0px 10px 2px black" }}>
-                    We use cutting edge Magic to understand your input and serve you personalized projects.
-                </div>
-                <TextField
-                    id={"Usage"}
-                    variant={`outlined`}
-                    color={"primary"}
-                    label={"Why are you using GIGO?"}
-                    required={true}
-                    margin={`normal`}
-                    type={`text`}
-                    multiline={true}
-                    value={usage}
-                    placeholder={"A short summary of what you want to get out of GIGO. This will help us provide you with relevant content."}
-                    fullWidth={true}
-                    minRows={3}
-                    sx={window.innerWidth > 1000 ? {
-                        width: "28vw",
-                        marginLeft: "3.5vw",
-                        mt: "2.5vh"
-                    } : { width: "90%", marginLeft: "4.5vw", mt: "2.5vh" }}
-                    onChange={e => setUsage(e.target.value)}
-                >
-                </TextField>
-                <Autocomplete
-                    multiple
-                    limitTags={5}
-                    id="tagInputAutocomplete"
-                    options={tagOptions}
-                    getOptionLabel={(option: Tag) => {
-                        return option.value
-                    }}
-                    isOptionEqualToValue={(option: Tag, value: Tag) => {
-                        return option._id === value._id;
-                    }}
-                    renderInput={(params) => (
-                        <TextField {...params} label="Interest Tags" placeholder="Interest Tags" />
-                    )}
-                    onInputChange={(e) => {
-                        handleTagSearch(e)
-                    }}
-                    // @ts-ignore
-                    onChange={(e: SyntheticEvent, value: Array<Tag>) => {
-                        setInterestTags(value)
-                    }}
-                    // @ts-ignore
-                    value={interestTags}
-                    sx={window.innerWidth > 1000 ? {
-                        width: "28vw",
-                        marginLeft: "3.5vw",
-                        mt: "2.5vh"
-                    } : { width: "90%", marginLeft: "4.5vw", mt: "2.5vh" }}
-                />
-                {renderTagsExplanationPopover()}
-                <TextField
-                    select
-                    id={"newUserExperienceLevel"}
-                    label={"Experience Level"}
-                    required={true}
-                    value={proficiency}
-                    onChange={e => setProficiency(e.target.value as string)}
-                    sx={window.innerWidth > 1000 ? {
-                        width: "28vw",
-                        marginLeft: "3.5vw",
-                        mt: "2.5vh"
-                    } : { width: "90%", marginLeft: "4.5vw", mt: "2.5vh" }}
-                >
-                    <MenuItem value={"Beginner"}>Beginner</MenuItem>
-                    <MenuItem value={"Intermediate"}>Intermediate</MenuItem>
-                    <MenuItem value={"Advanced"}>Advanced</MenuItem>
-                </TextField>
-                {renderExperienceExplanationPopover()}
-                <TextField
-                    select
-                    id={"newUserPreferredLanguage"}
-                    label={"Preferred Language"}
-                    required={true}
-                    value={preferredLanguage}
-                    onChange={e => setPreferredLanguage(e.target.value as string)}
-                    sx={window.innerWidth > 1000 ? {
-                        width: "28vw",
-                        marginLeft: "3.5vw",
-                        mt: "2.5vh"
-                    } : { width: "90%", marginLeft: "4.5vw", mt: "2.5vh" }}
-                    SelectProps={{
-                        MenuProps: {
-                            PaperProps: {
-                                style: {
-                                    maxHeight: '20%',
-                                    overflow: 'auto',
-                                }
-                            }
-                        }
-                    }}
-                >
-                    {languageOptions.map((lang, index) => (
-                        <MenuItem key={index} value={lang}>
-                            {lang}
-                        </MenuItem>
-                    ))}
-                </TextField>
-                {renderLanguageExplanationPopover()}
-                <LoadingButton
-                    loading={loading}
-                    onClick={() => {
-                        (!external) ? accountCreation() : externalLogin === "Google" ? googleCreate() : githubCreate()
-                    }}
-                    variant={`contained`}
-                    color={"primary"}
-                    // endIcon={<LockPersonIcon/>}
-                    sx={window.innerWidth > 1000 ? {
-                        width: '15vw',
-                        borderRadius: 1,
-                        height: "5vh",
-                        justifyContent: "center",
-                        marginLeft: "10vw",
-                        mt: "2.5vh",
-                        marginBottom: "30px",
-                    } : {
-                        width: 'auto',
-                        borderRadius: 1,
-                        height: "5vh",
-                        justifyContent: "center",
-                        marginLeft: "23vw",
-                        mt: "2.5vh",
-                        marginBottom: "30px",
-                    }}
-                >
-                    Create Account
-                </LoadingButton>
-            </form>
-        )
-    }
+    // let renderQuestions = () => {
+    //     return (
+    //         <form>
+    //             <Button
+    //                 onClick={() => {
+    //                     setStep(0)
+    //                 }}
+    //                 sx={{
+    //                     marginLeft: "1vw",
+    //                 }}
+    //             >
+    //                 <ArrowBack /> Go Back
+    //             </Button>
+    //             <div style={{ background: hexToRGBA(theme.palette.primary.light, 0.7), color: theme.palette.text.primary, padding: "20px", textAlign: "center", fontWeight: "bold", fontSize: "16px", boxShadow: "0px 0px 10px 2px black" }}>
+    //                 We use cutting edge Magic to understand your input and serve you personalized projects.
+    //             </div>
+    //             <TextField
+    //                 id={"Usage"}
+    //                 variant={`outlined`}
+    //                 color={"primary"}
+    //                 label={"Why are you using GIGO?"}
+    //                 required={true}
+    //                 margin={`normal`}
+    //                 type={`text`}
+    //                 multiline={true}
+    //                 value={usage}
+    //                 placeholder={"A short summary of what you want to get out of GIGO. This will help us provide you with relevant content."}
+    //                 fullWidth={true}
+    //                 minRows={3}
+    //                 sx={window.innerWidth > 1000 ? {
+    //                     width: "28vw",
+    //                     marginLeft: "3.5vw",
+    //                     mt: "2.5vh"
+    //                 } : { width: "90%", marginLeft: "4.5vw", mt: "2.5vh" }}
+    //                 onChange={e => setUsage(e.target.value)}
+    //             >
+    //             </TextField>
+    //             <Autocomplete
+    //                 multiple
+    //                 limitTags={5}
+    //                 id="tagInputAutocomplete"
+    //                 options={tagOptions}
+    //                 getOptionLabel={(option: Tag) => {
+    //                     return option.value
+    //                 }}
+    //                 isOptionEqualToValue={(option: Tag, value: Tag) => {
+    //                     return option._id === value._id;
+    //                 }}
+    //                 renderInput={(params) => (
+    //                     <TextField {...params} label="Interest Tags" placeholder="Interest Tags" />
+    //                 )}
+    //                 onInputChange={(e) => {
+    //                     handleTagSearch(e)
+    //                 }}
+    //                 // @ts-ignore
+    //                 onChange={(e: SyntheticEvent, value: Array<Tag>) => {
+    //                     setInterestTags(value)
+    //                 }}
+    //                 // @ts-ignore
+    //                 value={interestTags}
+    //                 sx={window.innerWidth > 1000 ? {
+    //                     width: "28vw",
+    //                     marginLeft: "3.5vw",
+    //                     mt: "2.5vh"
+    //                 } : { width: "90%", marginLeft: "4.5vw", mt: "2.5vh" }}
+    //             />
+    //             {renderTagsExplanationPopover()}
+    //             <TextField
+    //                 select
+    //                 id={"newUserExperienceLevel"}
+    //                 label={"Experience Level"}
+    //                 required={true}
+    //                 value={proficiency}
+    //                 onChange={e => setProficiency(e.target.value as string)}
+    //                 sx={window.innerWidth > 1000 ? {
+    //                     width: "28vw",
+    //                     marginLeft: "3.5vw",
+    //                     mt: "2.5vh"
+    //                 } : { width: "90%", marginLeft: "4.5vw", mt: "2.5vh" }}
+    //             >
+    //                 <MenuItem value={"Beginner"}>Beginner</MenuItem>
+    //                 <MenuItem value={"Intermediate"}>Intermediate</MenuItem>
+    //                 <MenuItem value={"Advanced"}>Advanced</MenuItem>
+    //             </TextField>
+    //             {renderExperienceExplanationPopover()}
+    //             <TextField
+    //                 select
+    //                 id={"newUserPreferredLanguage"}
+    //                 label={"Preferred Language"}
+    //                 required={true}
+    //                 value={preferredLanguage}
+    //                 onChange={e => setPreferredLanguage(e.target.value as string)}
+    //                 sx={window.innerWidth > 1000 ? {
+    //                     width: "28vw",
+    //                     marginLeft: "3.5vw",
+    //                     mt: "2.5vh"
+    //                 } : { width: "90%", marginLeft: "4.5vw", mt: "2.5vh" }}
+    //                 SelectProps={{
+    //                     MenuProps: {
+    //                         PaperProps: {
+    //                             style: {
+    //                                 maxHeight: '20%',
+    //                                 overflow: 'auto',
+    //                             }
+    //                         }
+    //                     }
+    //                 }}
+    //             >
+    //                 {languageOptions.map((lang, index) => (
+    //                     <MenuItem key={index} value={lang}>
+    //                         {lang}
+    //                     </MenuItem>
+    //                 ))}
+    //             </TextField>
+    //             {renderLanguageExplanationPopover()}
+    //             <LoadingButton
+    //                 loading={loading}
+    //                 onClick={() => {
+    //                     (!external) ? accountCreation() : externalLogin === "Google" ? googleCreate() : githubCreate()
+    //                 }}
+    //                 variant={`contained`}
+    //                 color={"primary"}
+    //                 // endIcon={<LockPersonIcon/>}
+    //                 sx={window.innerWidth > 1000 ? {
+    //                     width: '15vw',
+    //                     borderRadius: 1,
+    //                     height: "5vh",
+    //                     justifyContent: "center",
+    //                     marginLeft: "10vw",
+    //                     mt: "2.5vh",
+    //                     marginBottom: "30px",
+    //                 } : {
+    //                     width: 'auto',
+    //                     borderRadius: 1,
+    //                     height: "5vh",
+    //                     justifyContent: "center",
+    //                     marginLeft: "23vw",
+    //                     mt: "2.5vh",
+    //                     marginBottom: "30px",
+    //                 }}
+    //             >
+    //                 Create Account
+    //             </LoadingButton>
+    //         </form>
+    //     )
+    // }
 
     let renderCreateForm = () => {
         return (
-            <Grid container justifyContent="center" sx={{
-                paddingTop: "25px",
+            <Box sx={{
+                display: 'flex', // Enable Flexbox
+                flexDirection: 'column', // Stack children vertically
+                justifyContent: 'center', // Center children vertically in the container
+                alignItems: 'center', // Center children horizontally in the container
+                height: '100vh', // Full viewport height
             }}>
-                <Grid container
-                    sx={{
-                        justifyContent: "center",
-                        outlineColor: "black",
-                        width: window.innerWidth > 1000 ? "35%" : "90%",
-                        height: window.innerWidth > 1000 ? "100%" : "60%",
-                        borderRadius: 1,
-                        backgroundColor: theme.palette.background.default,
-                    }} direction="column" alignItems="center"
-                >
-                    <Typography component={"div"} variant={"h5"} sx={window.innerWidth > 1000 ? {
-                        width: "100%",
-                        display: "flex",
-                        justifyContent: "center",
-                        paddingTop: "10px"
-                    } : {
-                        width: "80%",
-                        display: "flex",
-                        justifyContent: "center",
-                        paddingTop: "10px",
-                        fontSize: "26px",
-                        marginBottom: "15px"
-                    }}>
-                        Register New Account
-                    </Typography>
-                    {step === 0 ? (
-                        <form style={{ height: window.innerWidth > 1000 ? '89vh' : "auto" }}>
-                            <TextField
-                                id={"FirstName"}
-                                error={firstName === "" ? missingFirst : false}
-                                variant={`outlined`}
-                                color={"primary"}
-                                size={window.innerWidth > 1000 ? `small` : `small`}
-                                label={"First Name"}
-                                required={false}
-                                margin={`normal`}
-                                sx={{
-                                    width: window.innerWidth > 1000 ? "12vw" : "40%",
-                                    marginLeft: "3.5vw",
-                                    mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
-                                }}
-                                value={firstName}
-                                onChange={e => setFirstName(e.target.value)}
-                            >
-                            </TextField>
-                            <TextField
-                                id={"LastName"}
-                                error={lastName === "" ? missingLast : false}
-                                variant={`outlined`}
-                                color={"primary"}
-                                size={window.innerWidth > 1000 ? `small` : `small`}
-                                label={"Last Name"}
-                                required={false}
-                                margin={`normal`}
-                                sx={{
-                                    width: window.innerWidth > 1000 ? "12vw" : "40%",
-                                    marginLeft: "4vw",
-                                    mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
-                                }}
-                                value={lastName}
-                                onChange={e => setLastName(e.target.value)}
-                            >
-                            </TextField>
-                            <TextField
-                                id={"UserName"}
-                                error={username === "" ? missingUser : false}
-                                variant={`outlined`}
-                                color={"primary"}
-                                size={window.innerWidth > 1000 ? `small` : `small`}
-                                label={"UserName"}
-                                required={true}
-                                margin={`normal`}
-                                sx={{
-                                    width: window.innerWidth > 1000 ? "28vw" : "85%",
-                                    marginLeft: "3.5vw",
-                                    mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
-                                }}
-                                value={username}
-                                onChange={e => setUsername(e.target.value)}
-                            >
-                            </TextField>
-                            <TextField
-                                id={"Email"}
-                                error={email === "" ? missingEmail : false}
-                                variant={`outlined`}
-                                color={"primary"}
-                                size={window.innerWidth > 1000 ? `small` : `small`}
-                                label={"Email"}
-                                required={true}
-                                margin={`normal`}
-                                type={`text`}
-                                sx={{
-                                    width: window.innerWidth > 1000 ? "28vw" : "85%",
-                                    marginLeft: "3.5vw",
-                                    mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
-                                }}
-                                value={email}
-                                onChange={e => setEmail(e.target.value)}
-                            >
-                            </TextField>
-                            <TextField
-                                id={"Phone Number"}
-                                error={number === "" ? missingPhone : false}
-                                variant={`outlined`}
-                                color={"primary"}
-                                size={window.innerWidth > 1000 ? `small` : `small`}
-                                label={"Phone Number"}
-                                required={true}
-                                margin={`normal`}
-                                sx={{
-                                    width: window.innerWidth > 1000 ? "28vw" : "85%",
-                                    marginLeft: "3.5vw",
-                                    mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
-                                }}
-                                value={number}
-                                onChange={e => setNumber(e.target.value)}
-                            >
-                            </TextField>
-                            <TextField
-                                id={"Password"}
-                                error={password === "" ? missingPassword : false}
-                                variant={`outlined`}
-                                size={window.innerWidth > 1000 ? `small` : `small`}
-                                type={showPass ? `text` : `password`}
-                                color={
-                                    (password.length > 5 && password !== "") ? "success" : "error"
-                                }
-                                label={"Password"}
-                                required={true}
-                                margin={`normal`}
-                                sx={{
-                                    width: window.innerWidth > 1000 ? "28vw" : "85%",
-                                    marginLeft: "3.5vw",
-                                    mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
-                                }}
-                                value={password}
-                                onChange={e => setPassword(e.target.value)}
-                                InputProps={{
-                                    endAdornment: <ShowButton />
-                                }}
-                            >
-                            </TextField>
-                            <TextField
-                                id={"ReTypePassword"}
-                                error={confirmPass === "" ? missingConfirm : false}
-                                variant={`outlined`}
-                                type={showPass ? `text` : `password`}
-                                color={
-                                    (password === confirmPass && password !== "") ? "success" : "error"
-                                }
-                                size={window.innerWidth > 1000 ? `small` : `small`}
-                                label={"Confirm Password"}
-                                required={true}
-                                margin={`normal`}
-                                sx={{
-                                    width: window.innerWidth > 1000 ? "28vw" : "85%",
-                                    marginLeft: "3.5vw",
-                                    mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
-                                }}
-                                value={confirmPass}
-                                onChange={e => setConfirmPass(e.target.value)}
-                            >
-                            </TextField>
-                            <Autocomplete
-                                id="timezoneInputSelect"
-                                options={getTimeZoneOptions(true)}
-                                getOptionLabel={(option) => option.label}
-                                onChange={(e: SyntheticEvent, value: TimezoneOption | null) => {
-                                    if (value === null) {
-                                        setTimezone(null)
+                <Grid container justifyContent="center">
+                    <Grid container
+                        sx={{
+                            justifyContent: "center",
+                            outlineColor: "black",
+                            width: window.innerWidth > 1000 ? "35%" : "90%",
+                            // height: window.innerWidth > 1000 ? "100%" : "60%",
+                            borderRadius: 1,
+                            backgroundColor: theme.palette.background.default,
+                        }} direction="column" alignItems="center"
+                    >
+                        <Typography component={"div"} variant={"h5"} sx={window.innerWidth > 1000 ? {
+                            width: "100%",
+                            display: "flex",
+                            justifyContent: "center",
+                            paddingTop: "10px"
+                        } : {
+                            width: "80%",
+                            display: "flex",
+                            justifyContent: "center",
+                            paddingTop: "10px",
+                            fontSize: "26px",
+                            marginBottom: "15px"
+                        }}>
+                            Create Account
+                        </Typography>
+                        {step === 0 ? (
+                            <form style={{ height: "auto" }}>
+                                <TextField
+                                    id={"Username"}
+                                    error={username === "" ? missingUser : false}
+                                    variant={`outlined`}
+                                    color={"primary"}
+                                    size={window.innerWidth > 1000 ? `small` : `small`}
+                                    label={"Username"}
+                                    required={true}
+                                    margin={`normal`}
+                                    sx={{
+                                        width: window.innerWidth > 1000 ? "28vw" : "85%",
+                                        marginLeft: "3.5vw",
+                                        mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
+                                    }}
+                                    value={username}
+                                    onChange={e => setUsername(e.target.value)}
+                                >
+                                </TextField>
+                                <TextField
+                                    id={"Email"}
+                                    error={email === "" ? missingEmail : false}
+                                    variant={`outlined`}
+                                    color={"primary"}
+                                    size={window.innerWidth > 1000 ? `small` : `small`}
+                                    label={"Email"}
+                                    required={true}
+                                    margin={`normal`}
+                                    type={`text`}
+                                    sx={{
+                                        width: window.innerWidth > 1000 ? "28vw" : "85%",
+                                        marginLeft: "3.5vw",
+                                        mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
+                                    }}
+                                    value={email}
+                                    onChange={e => setEmail(e.target.value)}
+                                >
+                                </TextField>
+                                <TextField
+                                    id={"Password"}
+                                    error={password === "" ? missingPassword : false}
+                                    variant={`outlined`}
+                                    size={window.innerWidth > 1000 ? `small` : `small`}
+                                    type={showPass ? `text` : `password`}
+                                    color={
+                                        (password.length > 5 && password !== "") ? "success" : "error"
                                     }
-                                    setTimezone(value)
-                                }}
-                                isOptionEqualToValue={(option: TimezoneOption, value: TimezoneOption) => {
-                                    return option.value === value.value;
-                                }}
-                                value={timezone}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        size={window.innerWidth > 1000 ? `small` : `small`}
-                                        error={timezone === null ? missingTimezone : false}
-                                        placeholder="Timezone"
-                                    />
-                                )}
-                                sx={{
-                                    width: window.innerWidth > 1000 ? "28vw" : "85%",
-                                    marginLeft: "3.5vw",
-                                    mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
-                                }}
-                            />
-                            <div style={{width: "100%", justifyContent: "center", zIndex: 3000}}>
+                                    label={"Password"}
+                                    required={true}
+                                    margin={`normal`}
+                                    sx={{
+                                        width: window.innerWidth > 1000 ? "28vw" : "85%",
+                                        marginLeft: "3.5vw",
+                                        mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
+                                    }}
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                    InputProps={{
+                                        endAdornment: <ShowButton />
+                                    }}
+                                >
+                                </TextField>
+                                <TextField
+                                    id={"ReTypePassword"}
+                                    error={confirmPass === "" ? missingConfirm : false}
+                                    variant={`outlined`}
+                                    type={showPass ? `text` : `password`}
+                                    color={
+                                        (password === confirmPass && password !== "") ? "success" : "error"
+                                    }
+                                    size={window.innerWidth > 1000 ? `small` : `small`}
+                                    label={"Confirm Password"}
+                                    required={true}
+                                    margin={`normal`}
+                                    sx={{
+                                        width: window.innerWidth > 1000 ? "28vw" : "85%",
+                                        marginLeft: "3.5vw",
+                                        mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
+                                    }}
+                                    value={confirmPass}
+                                    onChange={e => setConfirmPass(e.target.value)}
+                                >
+                                </TextField>
                                 <LoadingButton
                                     loading={loading}
-                                    onClick={() => {
-                                        validateUser()
+                                    onClick={async () => {
+                                        let ok = await validateUser()
+                                        if (ok) {
+                                            accountCreation()
+                                        }
                                     }}
                                     variant={`contained`}
                                     color={"primary"}
@@ -1588,136 +1531,136 @@ function CreateNewAccount() {
                                         mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
                                     }}
                                 >
-                                    Next Step
+                                    Create Account
                                 </LoadingButton>
-                            </div>
-                            <Dialog
-                                open={unsafe}
-                                onClose={() => setUnsafe(false)}
-                            >
-                                <DialogTitle>{"Unsafe Password"}</DialogTitle>
-                                <DialogContent>
-                                    <DialogContentText>
-                                        Hey, we found that your password is included in a list of compromised passwords. It's important to keep your account secure, so we strongly suggest that you change your password. You can still continue using your current password, but just know that it carries a higher risk.
-                                    </DialogContentText>
-                                </DialogContent>
-                                <DialogActions>
-                                    <Button onClick={() => setUnsafe(false)} color="primary">Change Password</Button>
-                                    <Button onClick={handleForce} color={"error"}>
-                                        Force Un-Safe Password
-                                    </Button>
-                                </DialogActions>
-                            </Dialog>
-                            <Typography component={"div"} variant={"h6"} sx={{
-                                width: "100%",
-                                display: "flex",
-                                justifyContent: "center",
-                                paddingTop: "15px"
-                            }}>
-                                or register with:
-                            </Typography>
-                            <Grid container sx={{
-                                justifyContent: "center",
-                                width: "100%",
-                                marginBottom: "5px"
-                            }} direction="row" alignItems="center">
-                                <Button onClick={() => googleButton()}>
-                                    <Grid container spacing={{ xs: 2 }} justifyContent="center" sx={{
-                                        flexGrow: 1,
-                                        paddingRight: ".5vh"
-                                    }}>
-                                        <Grid item xs={"auto"}>
-                                            <img
-                                                style={{
-                                                    width: window.innerWidth > 1000 ? "2vw" : "6vw",
-                                                    height: "auto",
-                                                }}
-                                                alt={"Google Logo"}
-                                                src={googleLogo}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={"auto"}>
-                                            <img
-                                                style={{
-                                                    width: window.innerWidth > 1000 ? "5vw" : "10vw",
-                                                    height: "auto",
-                                                    paddingTop: ".5vh"
-                                                }}
-                                                alt={"Google Name"}
-                                                src={theme.palette.mode === "light" ? googleLight : googleDark}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                </Button>
-                                <LoginGithub
-                                    color={"primary"}
-                                    sx={{
-                                        // width: window.innerWidth > 1000 ? '5vw' : "20vw",
-                                        justifyContent: "center",
-                                    }}
-                                    clientId="9ac1616be22aebfdeb3e"
-                                    // TODO change redirect URI for production
-                                    redirectUri={""}
-                                    onSuccess={onSuccessGithub}
-                                    onFailure={onFailureGithub}
+                                <Dialog
+                                    open={unsafe}
+                                    onClose={() => setUnsafe(false)}
                                 >
-                                    <Grid container spacing={{ xs: 2 }} justifyContent="center" sx={{
-                                        flexGrow: 1,
-                                        paddingTop: ".1vh",
-                                        marginLeft: "10px",
-                                        // marginRight: "10px",
-                                    }}>
-                                        <Grid item xs={4}>
-                                            <img
-                                                style={{
-                                                    width: window.innerWidth > 1000 ? "2vw" : "6vw",
-                                                    height: "auto",
-                                                }}
-                                                alt={"Github Logo"}
-                                                src={theme.palette.mode === "light" ? githubLogoDark : githubLogoLight}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={8}>
-                                            <img
-                                                style={{
-                                                    width: window.innerWidth > 1000 ? "5vw" : "10vw",
-                                                    height: "auto"
-                                                }}
-                                                alt={"Github Name"}
-                                                src={theme.palette.mode === "light" ? githubNameDark : githubNameLight}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                </LoginGithub>
-                            </Grid>
-                            <Typography sx={{
-                                display: "flex",
-                                flexDirection: "row",
-                                width: "100%",
-                                height: "1%",
-                                justifyContent: "center",
-                                alignItems: "center"
-                            }}>
-                                <Typography variant="h5" component="div"
-                                    sx={{ fontSize: "75%" }}
-                                >
-                                    Already have an account?
+                                    <DialogTitle>{"Unsafe Password"}</DialogTitle>
+                                    <DialogContent>
+                                        <DialogContentText>
+                                            Hey, we found that your password is included in a list of compromised passwords. It's important to keep your account secure, so we strongly suggest that you change your password. You can still continue using your current password, but just know that it carries a higher risk.
+                                        </DialogContentText>
+                                    </DialogContent>
+                                    <DialogActions>
+                                        <Button onClick={() => setUnsafe(false)} color="primary">Change Password</Button>
+                                        <Button onClick={handleForce} color={"error"}>
+                                            Force Un-Safe Password
+                                        </Button>
+                                    </DialogActions>
+                                </Dialog>
+                                <Typography component={"div"} variant={"h6"} sx={{
+                                    width: "100%",
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    paddingTop: "15px"
+                                }}>
+                                    or register with:
                                 </Typography>
-                                <Button
-                                    onClick={async () => {
-                                        navigate("/login")
-                                    }}
-                                    variant={`text`}
-                                    color={"primary"}
-                                >
-                                    Login
-                                </Button>
-                            </Typography>
-                        </form>
-                    ) : renderQuestions()
-                    }
+                                <Grid container sx={{
+                                    justifyContent: "center",
+                                    width: "100%",
+                                    marginBottom: "5px"
+                                }} direction="row" alignItems="center">
+                                    <Button onClick={() => googleButton()}>
+                                        <Grid container spacing={{ xs: 2 }} justifyContent="center" sx={{
+                                            flexGrow: 1,
+                                            paddingRight: ".5vh"
+                                        }}>
+                                            <Grid item xs={"auto"}>
+                                                <img
+                                                    style={{
+                                                        width: window.innerWidth > 1000 ? "2vw" : "6vw",
+                                                        height: "auto",
+                                                    }}
+                                                    alt={"Google Logo"}
+                                                    src={googleLogo}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={"auto"}>
+                                                <img
+                                                    style={{
+                                                        width: window.innerWidth > 1000 ? "5vw" : "10vw",
+                                                        height: "auto",
+                                                        paddingTop: ".5vh"
+                                                    }}
+                                                    alt={"Google Name"}
+                                                    src={theme.palette.mode === "light" ? googleLight : googleDark}
+                                                />
+                                            </Grid>
+                                        </Grid>
+                                    </Button>
+                                    <LoginGithub
+                                        color={"primary"}
+                                        sx={{
+                                            // width: window.innerWidth > 1000 ? '5vw' : "20vw",
+                                            justifyContent: "center",
+                                        }}
+                                        clientId="9ac1616be22aebfdeb3e"
+                                        // TODO change redirect URI for production
+                                        redirectUri={""}
+                                        onSuccess={onSuccessGithub}
+                                        onFailure={onFailureGithub}
+                                    >
+                                        <Grid container spacing={{ xs: 2 }} justifyContent="center" sx={{
+                                            flexGrow: 1,
+                                            paddingTop: ".1vh",
+                                            marginLeft: "10px",
+                                            // marginRight: "10px",
+                                        }}>
+                                            <Grid item xs={4}>
+                                                <img
+                                                    style={{
+                                                        width: window.innerWidth > 1000 ? "2vw" : "6vw",
+                                                        height: "auto",
+                                                    }}
+                                                    alt={"Github Logo"}
+                                                    src={theme.palette.mode === "light" ? githubLogoDark : githubLogoLight}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={8}>
+                                                <img
+                                                    style={{
+                                                        width: window.innerWidth > 1000 ? "5vw" : "10vw",
+                                                        height: "auto"
+                                                    }}
+                                                    alt={"Github Name"}
+                                                    src={theme.palette.mode === "light" ? githubNameDark : githubNameLight}
+                                                />
+                                            </Grid>
+                                        </Grid>
+                                    </LoginGithub>
+                                </Grid>
+                                <Typography sx={{
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    width: "100%",
+                                    height: "1%",
+                                    justifyContent: "center",
+                                    alignItems: "center"
+                                }}>
+                                    <Typography variant="h5" component="div"
+                                        sx={{ fontSize: "75%" }}
+                                    >
+                                        Already have an account?
+                                    </Typography>
+                                    <Button
+                                        onClick={async () => {
+                                            navigate("/login")
+                                        }}
+                                        variant={`text`}
+                                        color={"primary"}
+                                    >
+                                        Login
+                                    </Button>
+                                </Typography>
+                            </form>
+                        ) : null //renderQuestions()
+                        }
+                    </Grid>
                 </Grid>
-            </Grid>
+            </Box>
         )
     }
 
@@ -1865,7 +1808,7 @@ function CreateNewAccount() {
                               height: "100%",
                           }} direction="column" alignItems="center"
                     >
-                        {renderQuestions()}
+                        {/* {renderQuestions()} */}
                     </Grid>
                 </Grid>
             )
