@@ -236,6 +236,10 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
 
     switch (holiday) {
         case "Christmas":
+            if (mode === 'light'){
+                gigoColor = theme.palette.text.primary
+                break
+            }
             holidayStyle = styles.christmas;
             break;
         case "Independence":
@@ -779,13 +783,13 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     {loggedIn ? (
                         <Button onClick={async () => {
                             navigate("/premium")
-                        }} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '18%', height: '55px', left: '8% ', color: theme.palette.primary.contrastText }}>
+                        }} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '18%', height: '55px', left: '8% ', color: holiday === "Christmas" && mode === "light" ? theme.palette.text.primary : theme.palette.primary.contrastText }}>
                             Your Pro Perks
                         </Button>
                     ) : (
                         <Button onClick={async () => {
                             navigate("/signup")
-                        }} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '18%', height: '55px', left: '8% ', color: theme.palette.primary.contrastText }}>
+                        }} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '18%', height: '55px', left: '8% ', color: holiday === "Christmas" && mode === "light" ? theme.palette.text.primary : theme.palette.primary.contrastText }}>
                             New accounts get 1 month of Pro!
                         </Button>
                     )}
