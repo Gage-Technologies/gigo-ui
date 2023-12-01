@@ -615,7 +615,7 @@ function PublicConfigs() {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
-                <Box sx={{ bgcolor: 'background.paper', minHeight: '10vh', p: 2 }}>
+                <Box sx={{ bgcolor: 'theme.palette.background.default', minHeight: '10vh', p: 2 }}>
                     {/* Header and Search Bar */}
                     {editMode || revision ? (
                         <Box style={{
