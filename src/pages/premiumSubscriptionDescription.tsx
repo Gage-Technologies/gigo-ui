@@ -13,7 +13,7 @@ import {
     ThemeProvider,
     Typography
 } from "@mui/material";
-import { getAllTokens } from "../theme";
+import {getAllTokens, isHoliday} from "../theme";
 import ProjectCard from "../components/ProjectCard";
 import AppWrapper from "../components/AppWrapper";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
@@ -39,6 +39,9 @@ import workspaces from "../img/premiumPageIcons/settings.svg"
 import resources from "../img/premiumPageIcons/technology.svg"
 import privateWorkspace from "../img/premiumPageIcons/padlock.svg"
 import vscodeTheme from "../img/premiumPageIcons/coding.svg"
+import christmasLogin219 from "../img/christmas-login-21-9.png";
+import loginImg219 from "../img/login/login_background-21-9.jpg";
+import christmasLogin from "../img/christmas-login.png";
 
 function PremiumDescription() {
     let userPref = localStorage.getItem('theme')
@@ -165,12 +168,27 @@ function PremiumDescription() {
         }
     }
 
+    const holiday = isHoliday()
+
+    const renderThemeColor = () => {
+
+        if (holiday === "Christmas") {
+            if (mode === "light") {
+                return "#79bbd0"
+            } else {
+                return "#aa0000"
+            }
+        } else {
+            return "theme.palette.primary.light"
+        }
+    }
+
 
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
                 <div>
-                    <Box style={window.innerWidth > 1000 ? { width: "100%", height: "500px", backgroundColor: theme.palette.primary.light } : { width: "100%", height: "850px", backgroundColor: theme.palette.primary.light }}>
+                    <Box style={window.innerWidth > 1000 ? { width: "100%", height: "500px", backgroundColor: renderThemeColor() } : { width: "100%", height: "850px", backgroundColor: renderThemeColor() }}>
                         <div style={window.innerWidth > 1000 ? { width: "100%", display: "flex", flexDirection: "row", justifyContent: "space-evenly" } : { width: "100%", display: "flex", flexDirection: "column", height: "100%" }}>
                             <div style={window.innerWidth > 1000 ? { position: "relative", top: "150px" } : { position: "relative", height: "100%", top: "50px" }}>
                                 {inTrial ? (
@@ -273,7 +291,7 @@ function PremiumDescription() {
                     <Box>
                         <div style={window.innerWidth > 1000 ? { display: "flex", flexDirection: "row", width: "100%", justifyContent: "space-evenly" } : { display: "flex", flexDirection: "column", width: "100%", alignItems: "center" }}>
                             <div style={window.innerWidth > 1000 ? {} : { marginBottom: "50px" }}>
-                                <Button disabled={true} style={{ backgroundColor: theme.palette.primary.light }}>
+                                <Button disabled={true} style={{ backgroundColor: renderThemeColor() }}>
                                     <img src={codeTeacher} width={width} height={height} />
                                 </Button>
                                 <div style={window.innerWidth > 1000 ? { width: textWidth } : { width: textWidth, wordWrap: "break-word" }}>
@@ -282,7 +300,7 @@ function PremiumDescription() {
                                 </div>
                             </div>
                             <div style={window.innerWidth > 1000 ? {} : { marginBottom: "50px" }}>
-                                <Button disabled={true} style={{ backgroundColor: theme.palette.primary.light }}>
+                                <Button disabled={true} style={{ backgroundColor: renderThemeColor() }}>
                                     <img src={privateWorkspace} width={width} height={height} />
                                 </Button>
                                 <div style={window.innerWidth > 1000 ? { width: textWidth } : { width: textWidth, wordWrap: "break-word" }}>
@@ -291,7 +309,7 @@ function PremiumDescription() {
                                 </div>
                             </div>
                             <div style={window.innerWidth > 1000 ? {} : { marginBottom: "50px" }}>
-                                <Button disabled={true} style={{ backgroundColor: theme.palette.primary.light }}>
+                                <Button disabled={true} style={{ backgroundColor: renderThemeColor() }}>
                                     <img src={resources} width={width} height={height} />
                                 </Button>
                                 <div style={window.innerWidth > 1000 ? { width: textWidth } : { width: textWidth, wordWrap: "break-word" }}>
@@ -303,7 +321,7 @@ function PremiumDescription() {
                         <div style={{ height: "100px" }} />
                         <div style={window.innerWidth > 1000 ? { display: "flex", flexDirection: "row", width: "100%", justifyContent: "space-evenly" } : { display: "flex", flexDirection: "column", width: "100%", alignItems: "center" }}>
                             <div style={window.innerWidth > 1000 ? {} : { marginBottom: "50px" }}>
-                                <Button disabled={true} style={{ backgroundColor: theme.palette.primary.light }}>
+                                <Button disabled={true} style={{ backgroundColor: renderThemeColor() }}>
                                     <img src={workspaces} width={width} height={height} />
                                 </Button>
                                 <div style={window.innerWidth > 1000 ? { width: textWidth } : { width: textWidth, wordWrap: "break-word" }}>
@@ -312,7 +330,7 @@ function PremiumDescription() {
                                 </div>
                             </div>
                             <div style={window.innerWidth > 1000 ? {} : { marginBottom: "50px" }}>
-                                <Button disabled={true} style={{ backgroundColor: theme.palette.primary.light }}>
+                                <Button disabled={true} style={{ backgroundColor: renderThemeColor() }}>
                                     <img src={streakFreeze} width={width} height={height} />
                                 </Button>
                                 <div style={window.innerWidth > 1000 ? { width: textWidth } : { width: textWidth, wordWrap: "break-word" }}>
@@ -321,7 +339,7 @@ function PremiumDescription() {
                                 </div>
                             </div>
                             <div style={window.innerWidth > 1000 ? {} : { marginBottom: "50px" }}>
-                                <Button disabled={true} style={{ backgroundColor: theme.palette.primary.light }}>
+                                <Button disabled={true} style={{ backgroundColor: renderThemeColor() }}>
                                     <img src={vscodeTheme} width={width} height={height} />
                                 </Button>
                                 <div style={window.innerWidth > 1000 ? { width: textWidth } : { width: textWidth, wordWrap: "break-word" }}>
