@@ -14,7 +14,7 @@ import {
     Typography
 } from "@mui/material";
 import SendIcon from '@mui/icons-material/Send';
-import {getAllTokens} from "../theme";
+import {getAllTokens, isHoliday} from "../theme";
 import {useNavigate} from "react-router-dom";
 import call from "../services/api-call";
 import config from "../config";
@@ -46,6 +46,13 @@ import ReactGA from "react-ga4";
 import { useTracking } from 'react-tracking';
 import { RecordWebUsage, WebTrackingEvent } from "../models/web_usage";
 import { useLocation } from 'react-router-dom';
+import christmasLogin from "../img/christmas-login.png";
+import christmasLogin219 from "../img/christmas-login-21-9.png";
+// import GIGOLandingPageChristmasMobile from "../components/LandingChristmasMobile";
+import GIGOLandingPageMobile from "../components/LandingMobile";
+import GIGOLandingPageChristmas from "../components/LandingChristmas";
+import GIGOLandingPage from "../components/Landing";
+import GigoCircleIcon from "../components/Icons/GigoCircleLogo";
 
 
 function Login(this: any) {
@@ -764,6 +771,23 @@ function Login(this: any) {
         zIndex: 1, // Set a higher zIndex to appear above the SVG
     };
 
+    const holiday = isHoliday()
+
+    const renderLanding = () => {
+
+        if (aspectRatio === "21:9") {
+            if (holiday === "Christmas") {
+                return christmasLogin219
+            }
+            return loginImg219
+        } else {
+            if (holiday === "Christmas") {
+                return christmasLogin
+            }
+            return loginImg
+        }
+    }
+
 
 
 
@@ -774,7 +798,7 @@ function Login(this: any) {
         <div
             style={{
                 backgroundColor: `${theme.palette.background.default}`,
-                backgroundImage: aspectRatio === '21:9' ? `url(${loginImg219})` : `url(${loginImg})`,
+                backgroundImage: `url(${renderLanding()})`,
                 backgroundPosition: 'center',
                 backgroundSize: 'cover',
                 backgroundRepeat: 'no-repeat',
@@ -784,18 +808,27 @@ function Login(this: any) {
             }}
         >
             {/* Your Logo */}
-            <img
-                src={logoImg}
-                alt="Gigo Logo"
-                style={{
-                    position: 'absolute',
+            {holiday === "Christmas" ? (
+                <GigoCircleIcon sx={{position: 'absolute',
                     top: '20px', // Adjust the top position as needed
-                    left: '20px', // Adjust the left position as needed
-                    width: window.innerWidth > 1000 ? '350px' : '30vw', // Adjust the width as needed
-                    height: 'auto', // Maintain aspect ratio
-                }}
-            />
-
+                    left: '35px', // Adjust the left position as needed
+                    width: window.innerWidth > 1000 ? '250px' : '25vw', // Adjust the width as needed
+                    height: 'auto',
+                    color: "white"
+                }}/>
+            ) : (
+                <img
+                    src={logoImg}
+                    alt="Gigo Logo"
+                    style={{
+                        position: 'absolute',
+                        top: '20px', // Adjust the top position as needed
+                        left: '20px', // Adjust the left position as needed
+                        width: window.innerWidth > 1000 ? '350px' : '30vw', // Adjust the width as needed
+                        height: 'auto', // Maintain aspect ratio
+                    }}
+                />
+            )}
             {/* Slogan */}
             <Typography
                 variant="body1"
@@ -806,7 +839,7 @@ function Login(this: any) {
                     fontWeight: 'bold', // Customize the text style,
                     fontSize: window.innerWidth > 1000 ? '2em' : '5vw', // Adjust the font size,
                     // fontFamily: 'Kanit',
-                    color: '#208562',
+                    color: holiday === "Christmas" ? "#ffffff" : '#208562',
                 }}
             >
                 works on our machine.

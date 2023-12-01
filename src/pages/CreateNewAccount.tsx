@@ -15,7 +15,7 @@ import {
     ThemeProvider,
     Typography
 } from "@mui/material";
-import { getAllTokens } from "../theme";
+import {getAllTokens, isHoliday} from "../theme";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import {
     DefaultTutorialState,
@@ -65,9 +65,12 @@ import { DefaultWorkspaceConfig, WorkspaceConfig } from "../models/workspace";
 import loginImg219 from "../img/login/login_background-21-9.jpg";
 import { useParams } from "react-router";
 import { useTracking } from 'react-tracking';
+import christmasLogin from "../img/christmas-login.png";
+import christmasLogin219 from "../img/christmas-login-21-9.png";
 import { RecordWebUsage, WebTrackingEvent } from "../models/web_usage";
 import { useLocation } from 'react-router-dom';
 import { sleep } from "../services/utils";
+import GIGOLandingPageChristmasMobile from "../components/LandingChristmasMobile";
 
 
 interface TimezoneOption {
@@ -1873,11 +1876,28 @@ function CreateNewAccount() {
         handleTagSearch({ target: { value: "" } })
     }
 
+    const holiday = isHoliday()
+
+    const renderLanding = () => {
+
+        if (aspectRatio === "21:9") {
+            if (holiday === "Christmas") {
+                return christmasLogin219
+            }
+            return loginImg219
+        } else {
+            if (holiday === "Christmas") {
+                return christmasLogin
+            }
+            return loginImg
+        }
+    }
+
     return (
         <div
             style={{
                 backgroundColor: "black",
-                backgroundImage: aspectRatio === '21:9' ? `url(${loginImg219})` : `url(${loginImg})`,
+                backgroundImage: `url(${renderLanding()})`,
                 backgroundPosition: 'center',
                 backgroundSize: 'cover',
                 backgroundRepeat: 'no-repeat',

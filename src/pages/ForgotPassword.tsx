@@ -12,7 +12,7 @@ import {
     Typography,
     useMediaQuery
 } from "@mui/material";
-import {getAllTokens} from "../theme";
+import {getAllTokens, isHoliday} from "../theme";
 import {useAppDispatch, useAppSelector} from "../app/hooks";
 import {initialAuthStateUpdate, selectAuthState, updateAuthState} from "../reducers/auth/auth";
 import {useNavigate} from "react-router-dom";
@@ -22,6 +22,10 @@ import call from "../services/api-call";
 import config from "../config";
 import swal from "sweetalert";
 import Post from "../models/post";
+import christmasLogin219 from "../img/christmas-login-21-9.png";
+import loginImg219 from "../img/login/login_background-21-9.jpg";
+import christmasLogin from "../img/christmas-login.png";
+import {useEffect, useState} from "react";
 
 
 function ForgotPassword() {
@@ -136,11 +140,30 @@ function ForgotPassword() {
 
     }
 
+    const holiday = isHoliday()
+
+    const aspectRatio = useAspectRatio();
+
+    const renderLanding = () => {
+
+        if (aspectRatio === "21:9") {
+            if (holiday === "Christmas") {
+                return christmasLogin219
+            }
+            return loginImg219
+        } else {
+            if (holiday === "Christmas") {
+                return christmasLogin
+            }
+            return loginImg
+        }
+    }
+
     return (
         <div
             style={{
                 backgroundColor: "black",
-                backgroundImage: `url(${loginImg})`,
+                backgroundImage: `url(${renderLanding()})`,
                 backgroundPosition: 'center',
                 backgroundSize: 'cover',
                 backgroundRepeat: 'no-repeat',
@@ -239,6 +262,42 @@ function ForgotPassword() {
         </div>
     );
 
+}
+
+function useAspectRatio() {
+    const [aspectRatio, setAspectRatio] = useState('');
+
+    useEffect(() => {
+        function gcd(a: any, b: any): any {
+            return b === 0 ? a : gcd(b, a % b);
+        }
+
+        function calculateAspectRatio() {
+            const width = window.screen.width;
+            const height = window.screen.height;
+            let divisor = gcd(width, height);
+            console.log("divisor: ", divisor);
+            // Dividing by GCD and truncating into integers
+            let simplifiedWidth = Math.trunc(width / divisor);
+            let simplifiedHeight = Math.trunc(height / divisor);
+
+            divisor = Math.ceil(simplifiedWidth / simplifiedHeight);
+            simplifiedWidth = Math.trunc(simplifiedWidth / divisor);
+            simplifiedHeight = Math.trunc(simplifiedHeight / divisor);
+            setAspectRatio(`${simplifiedWidth}:${simplifiedHeight}`);
+        }
+
+        calculateAspectRatio();
+
+        window.addEventListener('resize', calculateAspectRatio);
+
+
+        return () => {
+            window.removeEventListener('resize', calculateAspectRatio);
+        };
+    }, []);
+
+    return aspectRatio;
 }
 
 export default ForgotPassword;
