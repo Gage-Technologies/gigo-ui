@@ -22,6 +22,7 @@ import { BoxProps as MuiBoxProps } from "@mui/material/Box/Box";
 import { AwesomeButton } from "react-awesome-button";
 import 'react-awesome-button/dist/styles.css';
 import premiumImage from "../img/croppedPremium.png"
+import premiumImageBlack from "../img/croppedPremiumBlack.png"
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import ErrorIcon from '@mui/icons-material/Error';
@@ -1843,7 +1844,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                         '--button-primary-color-hover': theme.palette.primary.main,
                                         fontSize: "14px"
                                     }} type="primary" href={"/premium"}>
-                                        <img src={premiumImage} />
+                                        <img src={ holiday == "Christmas" ? premiumImageBlack :  premiumImage} />
                                     </AwesomeButton>
                                 </div>
                                 <div style={{ height: "5vh" }} />
