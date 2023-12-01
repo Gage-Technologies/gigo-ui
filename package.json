@@ -182,6 +182,7 @@
     ]
   },
   "devDependencies": {
+    "@craco/craco": "^7.1.0",
     "@svgr/cli": "^8.0.1",
     "@svgr/webpack": "^8.0.1",
     "@types/react-custom-scrollbars": "^4.0.10",

@@ -1838,13 +1838,13 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
                                     <AwesomeButton style={{
                                         width: "100%",
-                                        '--button-primary-color': theme.palette.primary.main,
+                                        '--button-primary-color': theme.palette.background.paper,
                                         '--button-primary-color-dark': theme.palette.primary.dark,
                                         '--button-primary-color-light': theme.palette.text.primary,
-                                        '--button-primary-color-hover': theme.palette.primary.main,
+                                        '--button-primary-color-hover': theme.palette.primary.dark,
                                         fontSize: "14px"
                                     }} type="primary" href={"/premium"}>
-                                        <img src={ holiday == "Christmas" ? premiumImageBlack :  premiumImage} />
+                                        <img src={premiumImage} />
                                     </AwesomeButton>
                                 </div>
                                 <div style={{ height: "5vh" }} />
