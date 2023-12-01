@@ -217,10 +217,10 @@ function PremiumDescription() {
                                         <h4>Don't want to see it go? Only $15.00/month. Cancel anytime.</h4>
                                         <AwesomeButton style={{
                                             width: "auto",
-                                            '--button-primary-color': theme.palette.primary.main,
+                                            '--button-primary-color': theme.palette.background.paper,
                                             '--button-primary-color-dark': theme.palette.primary.dark,
                                             '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.main,
+                                            '--button-primary-color-hover': theme.palette.primary.dark,
                                             fontSize: "14px"
                                         }} type="primary" onPress={() => stripeNavigate()}>
                                             <img src={premiumImage} />
@@ -232,10 +232,10 @@ function PremiumDescription() {
                                         <h4>Only $15.00/month. Cancel anytime.</h4>
                                         <AwesomeButton style={{
                                             width: "auto",
-                                            '--button-primary-color': theme.palette.primary.main,
+                                            '--button-primary-color': theme.palette.background.paper,
                                             '--button-primary-color-dark': theme.palette.primary.dark,
                                             '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.main,
+                                            '--button-primary-color-hover': theme.palette.primary.dark,
                                             fontSize: "14px"
                                         }} type="primary" onPress={() => stripeNavigate()}>
                                             <img src={premiumImage} />
@@ -249,10 +249,10 @@ function PremiumDescription() {
                                         <h4>No Limits. No Restrictions. True Freedom.</h4>
                                         <AwesomeButton style={{
                                             width: "auto",
-                                            '--button-primary-color': theme.palette.primary.main,
+                                            '--button-primary-color': theme.palette.background.paper,
                                             '--button-primary-color-dark': theme.palette.primary.dark,
                                             '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.main,
+                                            '--button-primary-color-hover': theme.palette.primary.dark,
                                             fontSize: "14px"
                                         }} type="primary" href={"/settings"} onPress={() => {
                                             window.sessionStorage.setItem("accountsPage", "membership");
