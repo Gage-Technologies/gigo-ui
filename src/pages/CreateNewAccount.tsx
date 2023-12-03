@@ -71,6 +71,7 @@ import { RecordWebUsage, WebTrackingEvent } from "../models/web_usage";
 import { useLocation } from 'react-router-dom';
 import { sleep } from "../services/utils";
 import GIGOLandingPageChristmasMobile from "../components/LandingChristmasMobile";
+import { debounce } from "lodash";
 
 
 interface TimezoneOption {
@@ -207,6 +208,8 @@ function CreateNewAccount() {
     }
 
     const validateUser = async (): Promise<boolean> => {
+        setLoading(true);
+
         let missingFields = [];
         // if (firstName === "") {
         //     setMissingFirst(true);
@@ -475,6 +478,8 @@ function CreateNewAccount() {
         }
 
     }
+
+    const debouncedAccountCreation = debounce(accountCreation, 3000);
 
     const createLogin = async (newUser: boolean | null) => {
         let auth = await authorize(username, password);
@@ -1520,7 +1525,7 @@ function CreateNewAccount() {
                                     onClick={async () => {
                                         let ok = await validateUser()
                                         if (ok) {
-                                            accountCreation()
+                                            debouncedAccountCreation()
                                         }
                                     }}
                                     variant={`contained`}

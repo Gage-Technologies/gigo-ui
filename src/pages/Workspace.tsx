@@ -91,7 +91,6 @@ const WorkspacePage = () => {
         if (initialProgress === 0) {
             dispatch(deleteCache(`${cacheKey}:initial_progress`));
         } else {
-            console.log("initial_progress after set:", initialProgress);
             dispatch(setCache(`${cacheKey}:initial_progress`, initialProgress));
         }
     }, [initialProgress])
@@ -103,8 +102,6 @@ const WorkspacePage = () => {
     // initialize to true if editor mode is on
     const [showIframe, setShowIframe] = useState<boolean>(query.get("editor") === "true");
     const [showDesktopIframe, setShowDesktopIframe] = useState<string | null>(query.get("desktop"));
-
-    console.log("showDesktopIframe:", showDesktopIframe);
 
     let navigate = useNavigate();
 
@@ -135,31 +132,31 @@ const WorkspacePage = () => {
     const tutorialState = useAppSelector(selectAuthStateTutorialState)
     const [runTutorial, setRunTutorial] = React.useState(!tutorialState.vscode)
 
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    // const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
 
-    const playMicrowaveDing = () => {
-        const frequencies = [523.25, 659.25, 783.99]; // Two selected frequencies
-        const duration = 0.1; // 0.5 second duration for each chime
-        const delayTimes = [0, 0.25, 0.5]; // Start times for each chime
+    // const playMicrowaveDing = () => {
+    //     const frequencies = [523.25, 659.25, 783.99]; // Two selected frequencies
+    //     const duration = 0.1; // 0.5 second duration for each chime
+    //     const delayTimes = [0, 0.25, 0.5]; // Start times for each chime
 
-        frequencies.forEach((freq, index) => {
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
+    //     frequencies.forEach((freq, index) => {
+    //         const oscillator = audioContext.createOscillator();
+    //         const gainNode = audioContext.createGain();
 
-            oscillator.type = 'triangle';
-            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime + delayTimes[index]);
+    //         oscillator.type = 'triangle';
+    //         oscillator.frequency.setValueAtTime(freq, audioContext.currentTime + delayTimes[index]);
 
-            gainNode.gain.setValueAtTime(0, audioContext.currentTime + delayTimes[index]);
-            gainNode.gain.linearRampToValueAtTime(0.5, audioContext.currentTime + delayTimes[index] + 0.01);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + delayTimes[index] + duration);
+    //         gainNode.gain.setValueAtTime(0, audioContext.currentTime + delayTimes[index]);
+    //         gainNode.gain.linearRampToValueAtTime(0.5, audioContext.currentTime + delayTimes[index] + 0.01);
+    //         gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + delayTimes[index] + duration);
 
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
+    //         oscillator.connect(gainNode);
+    //         gainNode.connect(audioContext.destination);
 
-            oscillator.start(audioContext.currentTime + delayTimes[index]);
-            oscillator.stop(audioContext.currentTime + delayTimes[index] + duration);
-        });
-    };
+    //         oscillator.start(audioContext.currentTime + delayTimes[index]);
+    //         oscillator.stop(audioContext.currentTime + delayTimes[index] + duration);
+    //     });
+    // };
 
     const [hasPlayed, setHasPlayed] = useState(false);
 
@@ -170,7 +167,7 @@ const WorkspacePage = () => {
         }
 
         if (workspace.state === 1 && !hasPlayed && !window.location.href.includes("editor=true")) {
-            playMicrowaveDing();
+            // playMicrowaveDing();
             setHasPlayed(true);
         }
 
@@ -299,8 +296,6 @@ const WorkspacePage = () => {
             setLoadingWorkspaceTransition(false)
         }
 
-        console.log("workspace error found: ", workspace.state)
-
         // handle workspace failure
         if (workspace.init_failure !== null && workspace.init_failure.stderr !== "" && workspace.state === 5) {
 
@@ -312,8 +307,6 @@ const WorkspacePage = () => {
         // handle status updates
         setWorkspace(workspace)
 
-
-        console.log("ws vnc: ", workspace.is_vnc, " is vnc: ", isVNC)
         // update isVNC ref
         if (!isVNC && workspace.is_vnc) {
             setVNC(true)
@@ -403,10 +396,6 @@ const WorkspacePage = () => {
     }, [])
 
     useEffect(() => {
-        console.log('workspaceError after set:', workspaceError);
-    }, [workspaceError]);
-
-    useEffect(() => {
         if (!initialized) {
             setTimeout(() => {
                 setRun(tutorial)
@@ -436,7 +425,7 @@ const WorkspacePage = () => {
 
     useEffect(() => {
         let xpAttempt = window.sessionStorage.getItem('attemptXP')
-        console.log("attemptXP in workspace: ", xpAttempt)
+
         if (xpAttempt !== "undefined" && xpAttempt !== null) {
             setXpPopup(true)
             setXpData(JSON.parse(xpAttempt))
@@ -651,8 +640,6 @@ const WorkspacePage = () => {
     // const initialProgress = localStorage.getItem('currentProgress') ? parseInt(localStorage.getItem('currentProgress')) : 0;
     const [currentProgress, setCurrentProgress] = useState(initialProgress);
 
-    console.log("initialProgress: ", initialProgress)
-
     const targetProgress = progressValue(); // replace this with your actual target value function
     const progressIncrement = 1; // set the increment value
 
@@ -812,7 +799,6 @@ const WorkspacePage = () => {
 
     const handleLaunch = () => {
         // @ts-ignore
-        // console.log("workspace state before change", workspace.init_state)
         localStorage.setItem('currentProgress', "0");
         setCurrentProgress(0);
         setLaunchingAnim(true)
@@ -830,7 +816,6 @@ const WorkspacePage = () => {
     }
 
     useEffect(() => {
-        console.log("updating iframe url: ", isVNC)
         if (workspace !== null && workspace.init_state === 13 && workspace.state === 1 || workspaceUrl !== null) {
             if (isVNC) {
                 setIframeUrl(window.location.href.split("?")[0] + "?editor=true&desktop=none")
@@ -839,32 +824,6 @@ const WorkspacePage = () => {
             }
         }
     }, [workspace, workspaceUrl, isVNC])
-
-
-    // const handleMouseDown = (event: any) => {
-    //     console.log("button type: ", event.button)
-    //     switch (event.button) {
-    //         case undefined: // Mobile
-    //         case 0:  // Left click
-    //             console.log("vnc: ", isVNCRef.current)
-    //             // setShowIframe(true);
-    //             // update the current page url to set the query string
-    //             window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true");
-    //             if (isVNCRef.current) {
-    //                 setShowDesktopIframe("none")
-    //                 window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=none");
-    //             }
-    //
-    //             window.location.reload();
-    //             break;
-    //         case 1:  // Middle click
-    //             window.open(config.coderPath + workspaceUrl, '_blank');
-    //             break;
-    //         // No case for right click as the context menu will be handled by <a> tag
-    //         default:
-    //             break;
-    //     }
-    // };
 
     useEffect(() => {
         // Callback to run when workspace.state changes
@@ -969,16 +928,6 @@ const WorkspacePage = () => {
 
 
     const AnimatedAwesomeButton = styled(AwesomeButton)`
-      // border-radius: 25px;
-      // transition: box-shadow 0.3s ease;
-      // box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px ${theme.palette.primary.main}, 0 0 20px ${theme.palette.primary.main}, 0 0 25px ${theme.palette.primary.main}, 0 0 30px ${theme.palette.primary.main}, 0 0 35px ${theme.palette.primary.main};
-      //
-      // &:hover {
-      //   box-shadow: 0 0 3px #fff, 0 0 6px #fff, 0 0 9px ${theme.palette.primary.main}, 0 0 12px ${theme.palette.primary.main}, 0 0 15px ${theme.palette.primary.main}, 0 0 18px ${theme.palette.primary.main}, 0 0 21px ${theme.palette.primary.main};
-      // }
-
-     
-
       .aws-btn__wrapper:before {
             border-radius: 25px;
             transition: box-shadow 0.3s ease;
@@ -993,12 +942,6 @@ const WorkspacePage = () => {
             }
         }
     `;
-
-
-    // @ts-ignore
-    if (workspace !== null && workspace.init_state !== null) {
-        console.log("workspace sim state: ", workspace.init_state)
-    }
 
 
     let buttonsAndProgressBar = () => {
@@ -1234,10 +1177,6 @@ const WorkspacePage = () => {
         let ws = wsOverride !== null ? wsOverride : workspace;
 
         if (ws === null) {
-            console.log("workspace synced state: ", {
-                state: 0,
-                init_state: 0
-            })
             return {
                 state: 0,
                 init_state: 0
@@ -1245,20 +1184,11 @@ const WorkspacePage = () => {
         }
 
         if (ws.state === 0 && ws.init_state === 14) {
-            console.log("workspace synced state: ", {
-                state: 0,
-                init_state: 3
-            })
             return {
                 state: 0,
                 init_state: 3
             }
         }
-
-        console.log("workspace synced state: ", {
-            init_state: ws.init_state,
-            state: ws.state
-        })
         return {
             init_state: ws.init_state,
             state: ws.state
@@ -1296,18 +1226,14 @@ const WorkspacePage = () => {
         let lastStates = lastWS;
 
         if (currentStates === null || lastStates === null || currentStates.init_state === undefined || lastStates.init_state === undefined) {
-            console.log("inside empty handleAnimationTriggers currentStates: ", currentStates, "lastStates: ", lastStates)
             return;
         }
 
         if (currentStates.state === 1 && currentStates.state !== lastStates.state) {
-            console.log("inside handleAnimationTriggers currentStates: ", currentStates, "lastStates:")
             lpAnimPropsActiveRef.update({ reset: true });
             lpAnimPropsActiveRef.start();
             lpAnimPropsActiveRef.update({ reset: false });
         }
-
-        console.log("currenstate: " + currentStates.init_state + " laststate: " + lastStates.init_state);
 
         if (currentStates.init_state > 0 && lastStates.init_state === 0) {
             satAnimPropsActiveRef.update({ reset: true });
@@ -1320,7 +1246,6 @@ const WorkspacePage = () => {
     }
 
     useEffect(() => {
-        console.log("handle animation triggers current workspace: ", workspace, "last workspace: ", lastWorkspace);
         handleAnimationTriggers(workspace, lastWorkspace);
         setLastWorkspace(workspace);
     }, [workspace, lastWorkspace]);
@@ -1512,7 +1437,6 @@ const WorkspacePage = () => {
 
     // useEffect to refresh the page when the mode changes
     useEffect(() => {
-        console.log("Mode changed to " + pageMode + " from " + oldMode);
         if (pageMode === 'advanced' && oldMode !== 'advanced') {
             setOldMode('advanced');
             window.location.href = window.location.href.replace('launchpad', 'workspace');
@@ -2115,8 +2039,6 @@ const WorkspacePage = () => {
         )
     }, [xpData])
 
-    console.log("workspace url: ", workspaceUrl)
-
     const convertEditorUrlToDesktop = (url: any): string => {
         const regex = /^(\/editor\/\d+\/\d+-\w+)(\/.+)?(\?.+)?$/;
         const match = url.match(regex);
@@ -2124,8 +2046,6 @@ const WorkspacePage = () => {
         if (match) {
             return match[1].replace('/editor/', '/desktop/');
         }
-
-        console.log("workspace url2: ", url)
 
 
         return "Invalid URL"; // or throw an error, or return the original URL, based on your needs
@@ -2154,7 +2074,6 @@ const WorkspacePage = () => {
             };
 
             const handleMouseUp = () => {
-                console.log("handleMouseUp");
                 document.removeEventListener('mousemove', handleMouseMove);
                 document.removeEventListener('mouseup', handleMouseUp);
             };
@@ -2180,17 +2099,12 @@ const WorkspacePage = () => {
 
     const location = useLocation();
     useEffect(() => {
-        console.log("location: ", location);
-
         // Check if the URL contains the phrase "popped-out"
         if ((location.pathname.includes('popped-out') || location.search.includes('popped-out')) && workspaceUrl !== null && workspaceUrl !== undefined && workspaceUrl !== "") {
-            console.log("popped-out: ", location.pathname);
             // Execute your callback function
             window.open(config.coderPath + convertEditorUrlToDesktop(workspaceUrl), '_blank')
             window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=none");
             window.location.reload();
-        } else {
-            console.log("not popped-out: ", workspaceUrl);
         }
     }, [location.pathname, location.search, workspaceUrl]);
 
@@ -2707,7 +2621,7 @@ function useAspectRatio() {
             const width = window.screen.width;
             const height = window.screen.height;
             let divisor = gcd(width, height);
-            console.log("divisor: ", divisor);
+
             // Dividing by GCD and truncating into integers
             let simplifiedWidth = Math.trunc(width / divisor);
             let simplifiedHeight = Math.trunc(height / divisor);
@@ -2721,7 +2635,6 @@ function useAspectRatio() {
         calculateAspectRatio();
 
         window.addEventListener('resize', calculateAspectRatio);
-        console.log("aspectRatio: ", aspectRatio);
 
         return () => {
             window.removeEventListener('resize', calculateAspectRatio);
