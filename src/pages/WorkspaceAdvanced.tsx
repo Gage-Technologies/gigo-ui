@@ -980,11 +980,12 @@ const WorkspaceAdvancedPage = () => {
                                                 secondary={
                                                     <pre style={{
                                                         whiteSpace: "pre-wrap",
-                                                        wordWrap: "break-word",
                                                         fontFamily: "monospace",
                                                         backgroundColor: `#151515`,
                                                         padding: "10px",
-                                                        borderRadius: "5px"
+                                                        borderRadius: "5px",
+                                                        overflowX: "auto",
+                                                        maxWidth: "33vw"
                                                     }}>
                                                         {workspaceError.stderr.trim() !== "" ? workspaceError.stderr : "An unknown error has occurred."}
                                                     </pre>
@@ -999,11 +1000,12 @@ const WorkspaceAdvancedPage = () => {
                                                         secondary={
                                                             <pre style={{
                                                                 whiteSpace: "pre-wrap",
-                                                                wordWrap: "break-word",
                                                                 fontFamily: "monospace",
                                                                 backgroundColor: `#151515`,
                                                                 padding: "10px",
-                                                                borderRadius: "5px"
+                                                                borderRadius: "5px",
+                                                                overflowX: "auto",
+                                                                maxWidth: "33vw"
                                                             }}>
                                                                 {workspaceError.command}
                                                             </pre>
@@ -1030,11 +1032,12 @@ const WorkspaceAdvancedPage = () => {
                                                         secondary={
                                                             <pre style={{
                                                                 whiteSpace: "pre-wrap",
-                                                                wordWrap: "break-word",
                                                                 fontFamily: "monospace",
                                                                 backgroundColor: `#151515`,
                                                                 padding: "10px",
-                                                                borderRadius: "5px"
+                                                                borderRadius: "5px",
+                                                                overflowX: "auto",
+                                                                maxWidth: "33vw"
                                                             }}>
                                                                 {workspaceError.stdout}
                                                             </pre>

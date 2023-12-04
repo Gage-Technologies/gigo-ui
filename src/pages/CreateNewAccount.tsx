@@ -15,7 +15,7 @@ import {
     ThemeProvider,
     Typography
 } from "@mui/material";
-import {getAllTokens, isHoliday} from "../theme";
+import { getAllTokens, isHoliday } from "../theme";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import {
     DefaultTutorialState,
@@ -406,11 +406,11 @@ function CreateNewAccount() {
             first_name: firstName,
             last_name: lastName,
             external_auth: "",
-            start_user_info: { 
-                usage: "I want to learn how to code by doing really cool projects.", 
-                proficiency: "Beginner", 
-                tags: "python,javascript,golang,web development,game development,machine learning,artificial intelligence", 
-                preferred_language: "Python, Javascript, Golang, Typescript" 
+            start_user_info: {
+                usage: "I want to learn how to code by doing really cool projects.",
+                proficiency: "Beginner",
+                tags: "python,javascript,golang,web development,game development,machine learning,artificial intelligence",
+                preferred_language: "Python, Javascript, Golang, Typescript"
             },
             timezone: timezone ? timezone.value : "America/Chicago",
             avatar_settings: { topType: Attributes.topType, accessoriesType: Attributes.accessoriesType, hairColor: Attributes.hairColor, facialHairType: Attributes.facialHairType, clotheType: Attributes.clotheType, clotheColor: Attributes.clotheColor, eyeType: Attributes.eyeType, eyebrowType: Attributes.eyebrowType, mouthType: Attributes.mouthType, avatarStyle: Attributes.avatarStyle, skinColor: Attributes.skinColor },
@@ -613,11 +613,11 @@ function CreateNewAccount() {
         let params = {
             external_auth: externalToken,
             password: password,
-            start_user_info: { 
-                usage: "I want to learn how to code by doing really cool projects.", 
-                proficiency: "Beginner", 
+            start_user_info: {
+                usage: "I want to learn how to code by doing really cool projects.",
+                proficiency: "Beginner",
                 tags: "python,javascript,golang,web development,game development,machine learning,artificial intelligence",
-                preferred_language: "Python, Javascript, Golang, Typescript" 
+                preferred_language: "Python, Javascript, Golang, Typescript"
             },
             timezone: timezone ? timezone.value : "America/Chicago",
             avatar_settings: { topType: Attributes.topType, accessoriesType: Attributes.accessoriesType, hairColor: Attributes.hairColor, facialHairType: Attributes.facialHairType, clotheType: Attributes.clotheType, clotheColor: Attributes.clotheColor, eyeType: Attributes.eyeType, eyebrowType: Attributes.eyebrowType, mouthType: Attributes.mouthType, avatarStyle: Attributes.avatarStyle, skinColor: Attributes.skinColor }
@@ -769,11 +769,11 @@ function CreateNewAccount() {
         let params = {
             external_auth: externalToken,
             password: password,
-            start_user_info: { 
-                usage: "I want to learn how to code by doing really cool projects.", 
-                proficiency: "Beginner", 
-                tags: "python,javascript,golang,web development,game development,machine learning,artificial intelligence", 
-                preferred_language: "Python, Javascript, Golang, Typescript" 
+            start_user_info: {
+                usage: "I want to learn how to code by doing really cool projects.",
+                proficiency: "Beginner",
+                tags: "python,javascript,golang,web development,game development,machine learning,artificial intelligence",
+                preferred_language: "Python, Javascript, Golang, Typescript"
             },
             timezone: timezone ? timezone.value : "America/Chicago",
             avatar_settings: { topType: Attributes.topType, accessoriesType: Attributes.accessoriesType, hairColor: Attributes.hairColor, facialHairType: Attributes.facialHairType, clotheType: Attributes.clotheType, clotheColor: Attributes.clotheColor, eyeType: Attributes.eyeType, eyebrowType: Attributes.eyebrowType, mouthType: Attributes.mouthType, avatarStyle: Attributes.avatarStyle, skinColor: Attributes.skinColor }
@@ -940,6 +940,7 @@ function CreateNewAccount() {
     let handleForce = () => {
         setForcePass(true)
         setUnsafe(false)
+        setLoading(false)
     }
 
     const renderInput = ({ ...props }) => {
@@ -1437,7 +1438,7 @@ function CreateNewAccount() {
                             Create Account
                         </Typography>
                         {step === 0 ? (
-                            <form style={{ height: "auto" }}>
+                            <form style={{ height: "auto", alignContent: "center", justifyContent: "center" }}>
                                 <TextField
                                     id={"Username"}
                                     error={username === "" ? missingUser : false}
@@ -1448,8 +1449,9 @@ function CreateNewAccount() {
                                     required={true}
                                     margin={`normal`}
                                     sx={{
-                                        width: window.innerWidth > 1000 ? "28vw" : "85%",
+                                        width: window.innerWidth > 1000 ? "28vw" : undefined,
                                         marginLeft: "3.5vw",
+                                        marginRight: window.innerWidth <= 1000 ? "3.5vw" : undefined,
                                         mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
                                     }}
                                     value={username}
@@ -1467,8 +1469,9 @@ function CreateNewAccount() {
                                     margin={`normal`}
                                     type={`text`}
                                     sx={{
-                                        width: window.innerWidth > 1000 ? "28vw" : "85%",
+                                        width: window.innerWidth > 1000 ? "28vw" : undefined,
                                         marginLeft: "3.5vw",
+                                        marginRight: window.innerWidth <= 1000 ? "3.5vw" : undefined,
                                         mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
                                     }}
                                     value={email}
@@ -1488,8 +1491,9 @@ function CreateNewAccount() {
                                     required={true}
                                     margin={`normal`}
                                     sx={{
-                                        width: window.innerWidth > 1000 ? "28vw" : "85%",
+                                        width: window.innerWidth > 1000 ? "28vw" : undefined,
                                         marginLeft: "3.5vw",
+                                        marginRight: window.innerWidth <= 1000 ? "3.5vw" : undefined,
                                         mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
                                     }}
                                     value={password}
@@ -1512,8 +1516,9 @@ function CreateNewAccount() {
                                     required={true}
                                     margin={`normal`}
                                     sx={{
-                                        width: window.innerWidth > 1000 ? "28vw" : "85%",
+                                        width: window.innerWidth > 1000 ? "28vw" : undefined,
                                         marginLeft: "3.5vw",
+                                        marginRight: window.innerWidth <= 1000 ? "3.5vw" : undefined,
                                         mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
                                     }}
                                     value={confirmPass}
@@ -1533,10 +1538,11 @@ function CreateNewAccount() {
                                     // endIcon={<LockPersonIcon/>}
                                     sx={{
                                         width: window.innerWidth > 1000 ? '15vw' : "40%",
+                                        minWidth: "170px",
                                         borderRadius: 1,
                                         height: "5vh",
                                         justifyContent: "center",
-                                        marginLeft: window.innerWidth > 1000 ? "10vw" : "25vw",
+                                        marginLeft: window.innerWidth > 1000 ? "10vw" : "21vw",
                                         mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
                                     }}
                                 >
@@ -1818,14 +1824,14 @@ function CreateNewAccount() {
                     paddingTop: "25px",
                 }}>
                     <Grid container
-                          sx={{
-                              justifyContent: "center",
-                              outlineColor: "black",
-                              width: "35%",
-                              borderRadius: 1,
-                              backgroundColor: theme.palette.background.default,
-                              height: "100%",
-                          }} direction="column" alignItems="center"
+                        sx={{
+                            justifyContent: "center",
+                            outlineColor: "black",
+                            width: "35%",
+                            borderRadius: 1,
+                            backgroundColor: theme.palette.background.default,
+                            height: "100%",
+                        }} direction="column" alignItems="center"
                     >
                         {/* {renderQuestions()} */}
                     </Grid>
@@ -1869,8 +1875,8 @@ function CreateNewAccount() {
                 height: '100vh'
             }}>
             {isAvatarInitialized <= 2 && (
-                <div style={{display: 'none'}}>
-                    <Avataaar id={"avatar-container"} value={Attributes} sx={{ width: window.innerWidth > 1000 ? "auto" : "80%" }} onChange={(e: React.SetStateAction<{ topType: string; accessoriesType: string; avatarRef: object, hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; }>) => setAvatar(e)} creation={true}/>
+                <div style={{ display: 'none' }}>
+                    <Avataaar id={"avatar-container"} value={Attributes} sx={{ width: window.innerWidth > 1000 ? "auto" : "80%" }} onChange={(e: React.SetStateAction<{ topType: string; accessoriesType: string; avatarRef: object, hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; }>) => setAvatar(e)} creation={true} />
                 </div>
             )}
             <ThemeProvider theme={theme}>
