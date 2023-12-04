@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useGlobalWebSocket } from '../services/websocket';
 import { WsMessage, WsMessageType } from '../models/websocket';
 import LinearProgress from '@mui/material/LinearProgress';
-import { Box, IconButton, PaletteMode, Paper, Tooltip, createTheme } from '@mui/material';
+import { Box, Button, Grid, IconButton, PaletteMode, Paper, Tooltip, Typography, createTheme } from '@mui/material';
 import { getAllTokens, isHoliday } from '../theme';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -12,8 +12,9 @@ import DesktopAccessDisabledIcon from '@mui/icons-material/DesktopAccessDisabled
 import QueuePlayNextIcon from '@mui/icons-material/QueuePlayNext';
 import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
 import call from '../services/api-call';
-import { DevSpaceUsageCache, selectDevSpaceUsageCacheState, setDevSpaceUsageCache } from '../reducers/devSpace/usageCache';
+import { DevSpaceCache, selectDevSpaceCacheState, setDevSpaceCache } from '../reducers/devSpace/usageCache';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
+import { Workspace } from '../models/workspace';
 
 interface IProps {
     wsId: string;
@@ -28,15 +29,16 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
     const dispatch = useAppDispatch();
     const holiday = isHoliday();
 
-    const usageCache = useAppSelector(selectDevSpaceUsageCacheState);
+    const usageCache = useAppSelector(selectDevSpaceCacheState);
     let cachedValues = (
         usageCache[props.wsId] !== undefined &&
         usageCache[props.wsId].usage !== undefined &&
         usageCache[props.wsId].usage.timestamp > Date.now() - 30_000
-    ) ? usageCache[props.wsId].usage as DevSpaceUsageCache : null
+    ) ? usageCache[props.wsId].usage as DevSpaceCache : null
 
     const [isOpen, setIsOpen] = React.useState(false);
 
+    const [workspace, setWorkspace] = React.useState<Workspace | null>(cachedValues && cachedValues.workspace ? cachedValues.workspace : null);
     const [cpuUsagePercentage, setCpuUsagePercentage] = React.useState<number>(cachedValues ? cachedValues.cpuPercentage : 0);
     const [memoryUsagePercentage, setMemoryUsagePercentage] = React.useState<number>(cachedValues ? cachedValues.memoryPercentage : 0);
     const [cpuLimit, setCpuLimit] = React.useState<number>(cachedValues ? cachedValues.cpuLimit : 0);
@@ -61,48 +63,41 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
             return
         }
 
-        // exit if there's no resource utilization
-        if (!jsonMessage["resources"]) {
-            return
+        // handle workspace
+        if (jsonMessage["workspace"]) {
+            // only update if this is the same workspace
+            if (jsonMessage["workspace"] && jsonMessage["workspace"]["_id"] && jsonMessage["workspace"]["_id"] === props.wsId) {
+                setWorkspace(jsonMessage["workspace"])
+            }
         }
 
-        // exit if this is not the launchpad
-        if (!window.location.pathname.startsWith("/launchpad/")) {
-            return
-        }
+        // handle resource utilization
+        if (jsonMessage["resources"] && window.location.pathname.startsWith("/launchpad/")) {
+            // only update if this is the same workspace
+            if (jsonMessage["workspace"] && jsonMessage["workspace"]["_id"] && jsonMessage["workspace"]["_id"] === props.wsId) {
+                setCpuUsagePercentage(jsonMessage["resources"]["cpu"] * 100)
+                setMemoryUsagePercentage(jsonMessage["resources"]["memory"] * 100)
+                setCpuUsage(jsonMessage["resources"]["cpu_usage"] / 1000)
+                setMemoryUsage(jsonMessage["resources"]["memory_usage"] / 1_000_000_000)
+                setCpuLimit(jsonMessage["resources"]["cpu_limit"] / 1000)
+                setMemoryLimit(jsonMessage["resources"]["memory_limit"] / 1_000_000_000)
 
-        // load the id from the path
-        let id = window.location.pathname.split("/launchpad/")[1]
-        if (id.endsWith("/")) {
-            // trim final slash
-            id = id.replaceAll("/", "")
+                dispatch(setDevSpaceCache(props.wsId, {
+                    cpuUsage: jsonMessage["resources"]["cpu_usage"] / 1000,
+                    cpuPercentage: jsonMessage["resources"]["cpu"] * 100,
+                    cpuLimit: jsonMessage["resources"]["cpu_limit"] / 1000,
+                    memoryUsage: jsonMessage["resources"]["memory_usage"] / 1_000_000_000,
+                    memoryPercentage: jsonMessage["resources"]["memory"] * 100,
+                    memoryLimit: jsonMessage["resources"]["memory_limit"] / 1_000_000_000,
+                    timestamp: Date.now(),
+                }));
+            }
         }
-        // skip if the workspace isn't the same one
-        if (!jsonMessage["workspace"] || !jsonMessage["workspace"]["_id"] || jsonMessage["workspace"]["_id"] !== id) {
-            return
-        }
-
-        setCpuUsagePercentage(jsonMessage["resources"]["cpu"] * 100)
-        setMemoryUsagePercentage(jsonMessage["resources"]["memory"] * 100)
-        setCpuUsage(jsonMessage["resources"]["cpu_usage"] / 1000)
-        setMemoryUsage(jsonMessage["resources"]["memory_usage"] / 1_000_000_000)
-        setCpuLimit(jsonMessage["resources"]["cpu_limit"] / 1000)
-        setMemoryLimit(jsonMessage["resources"]["memory_limit"] / 1_000_000_000)
-
-        dispatch(setDevSpaceUsageCache(props.wsId, {
-            cpuUsage: jsonMessage["resources"]["cpu_usage"] / 1000,
-            cpuPercentage: jsonMessage["resources"]["cpu"] * 100,
-            cpuLimit: jsonMessage["resources"]["cpu_limit"] / 1000,
-            memoryUsage: jsonMessage["resources"]["memory_usage"] / 1_000_000_000,
-            memoryPercentage: jsonMessage["resources"]["memory"] * 100,
-            memoryLimit: jsonMessage["resources"]["memory_limit"] / 1_000_000_000,
-            timestamp: Date.now(),
-        }));
     }
 
     globalWs.registerCallback(
         WsMessageType.WorkspaceStatusUpdate,
-        `workspace:usage:${window.location.pathname.split("/launchpad/")[1]}`,
+        `workspace:usage:${props.wsId}`,
         handleWsMessage
     );
 
@@ -331,6 +326,41 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
                         }
                     </Box>
                     {usageMemo}
+
+                    {/* Ports */}
+                    <div style={{ marginTop: '8px', position: 'relative' }}>
+                        <div>
+                            Ports
+                        </div>
+                        <Grid container spacing={1} direction={"row"} alignItems={'stretch'} sx={{
+                            marginTop: '8px',
+                            marginBottom: '8px'
+                        }}>
+                            {(workspace && workspace["ports"]) ? workspace["ports"].map((port: { name: string; port: string; url: string, disabled: boolean }, index: any) => {
+                                return (
+                                    <Grid item xs={"auto"}>
+                                        <Button
+                                            href={port.url}
+                                            target="_blank"
+                                            variant={"outlined"}
+                                            disabled={port.disabled}
+                                            sx={{
+                                                '&:hover': {
+                                                    backgroundColor: theme.palette.primary.main + "25",
+                                                }
+                                            }}
+                                        >
+                                            {port.name !== "" ? port.name + "  -  " + port.port : port.port}
+                                        </Button>
+                                    </Grid>
+                                )
+                            }) : (
+                                <Typography variant="body2" sx={{ marginLeft: "8px" }}>
+                                    No Ports Available
+                                </Typography>
+                            )}
+                        </Grid>
+                    </div>
                 </Paper>
             )}
         </>

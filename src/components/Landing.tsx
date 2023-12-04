@@ -165,11 +165,12 @@ const GIGOLandingPage: React.FC = () => {
                                 backgroundColor: theme.palette.primary.main + "99",
                             }
                         }}
-                        onClick={() => {
-                            if (endRef.current) {
-                                endRef.current.scrollIntoView({ block: 'start', behavior: 'smooth' });
-                            }
-                        }}
+                        href="/signup"
+                        // onClick={() => {
+                        //     if (endRef.current) {
+                        //         endRef.current.scrollIntoView({ block: 'start', behavior: 'smooth' });
+                        //     }
+                        // }}
                     >
                         Enter The Jungle
                     </Button>

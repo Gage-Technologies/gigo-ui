@@ -80,11 +80,12 @@ const GIGOLandingPageChristmasMobile: React.FC = () => {
                                 borderColor: theme.palette.error.main,
                             }
                         }}
-                        onClick={() => {
-                            if (endRef.current) {
-                                endRef.current.scrollIntoView({ block: 'start', behavior: 'smooth' });
-                            }
-                        }}
+                        href="/signup"
+                        // onClick={() => {
+                        //     if (endRef.current) {
+                        //         endRef.current.scrollIntoView({ block: 'start', behavior: 'smooth' });
+                        //     }
+                        // }}
                     >
                         Explore The North Pole
                     </Button>

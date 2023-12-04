@@ -24,6 +24,7 @@ export interface Workspace {
     init_state_string: string;
     init_failure: WorkspaceInitFailure | null;
     is_vnc: boolean;
+    ports?: { name: string; port: string; url: string, disabled: boolean }[];
 }
 
 export interface WorkspaceConfig {
