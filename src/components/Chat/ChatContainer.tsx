@@ -1567,7 +1567,6 @@ export default function ChatContainer() {
                         sx={{
                             position: 'fixed',
                             bottom: '0px',
-                            width: '100%',
                             zIndex: 6000,
                             // @ts-ignore
                             backgroundColor: theme.palette.background.chat,
