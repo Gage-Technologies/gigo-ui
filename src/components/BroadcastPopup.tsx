@@ -125,15 +125,7 @@ export default function BroadcastPopup(props: IProps) {
             config.rootPath
         )
 
-        if (res === undefined) {
-            swal("Server Error", "We can't get in touch with the GIGO servers right now. Sorry about that! " +
-                "We'll get crackin' on that right away!")
-            return
-        }
-
-        if (res["notifications"] === undefined) {
-            swal("Server Error", "We can't get in touch with the GIGO servers right now. Sorry about that! " +
-                "We'll get crackin' on that right away!")
+        if (res === undefined || res["notifications"] === undefined) {
             return
         }
 

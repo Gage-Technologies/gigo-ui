@@ -236,7 +236,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
 
     switch (holiday) {
         case "Christmas":
-            if (mode === 'light'){
+            if (mode === 'light') {
                 gigoColor = theme.palette.text.primary
                 break
             }
@@ -479,10 +479,6 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         }
         trackEvent(payload);
 
-        if (res["message"] === "You must be logged in to access the GIGO system.") {
-            navigate("/login")
-        }
-
         if (res !== undefined && res["message"] !== undefined) {
             if (res["message"] === "success") {
                 navigate("/login")
@@ -516,15 +512,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
             config.rootPath
         )
 
-        if (res === undefined) {
-            swal("Server Error", "We can't get in touch with the GIGO servers right now. Sorry about that! " +
-                "We'll get crackin' on that right away!")
-            return
-        }
-
-        if (res["notifications"] === undefined) {
-            swal("Server Error", "We can't get in touch with the GIGO servers right now. Sorry about that! " +
-                "We'll get crackin' on that right away!")
+        if (res === undefined || res["notifications"] === undefined) {
             return
         }
 
@@ -2079,7 +2067,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         if (window.location.pathname.includes("/launchpad")) {
             return null
         }
-        
+
         if (holiday === "New Years" && (!onHomePage || loggedIn)) {
             return (<Confetti gravity={0.01} numberOfPieces={100} wind={0.001} colors={['#ad7832', '#dcb468', '#716c6c', '#8e8888']} friction={1} />)
         }

@@ -1,10 +1,20 @@
 import fetch from "isomorphic-fetch";
-import {v4} from "uuid";
+import { v4 } from "uuid";
 import base64ArrayBuffer from "./arrayBufferToBase64";
 import config from "../config";
 import JSZip from "jszip";
 import swal from "sweetalert";
-import {Buffer} from "buffer";
+import { Buffer } from "buffer";
+import { store } from "../app/store";
+import { initialAuthState, updateAuthState } from "../reducers/auth/auth";
+import { resetAppWrapper } from "../reducers/appWrapper/appWrapper";
+import { clearProjectState } from "../reducers/createProject/createProject";
+import { clearSearchParamsState } from "../reducers/searchParams/searchParams";
+import { clearJourneyFormState } from "../reducers/journeyForm/journeyForm";
+import { clearCache } from "../reducers/pageCache/pageCache";
+import { clearChatState } from "../reducers/chat/chat";
+import { clearMessageCache } from "../reducers/chat/cache";
+import { sleep } from './utils'
 
 function constructAuthorizationHeader(rawUsername, rawPassword) {
   let username = rawUsername.toString("base64");
@@ -24,6 +34,21 @@ function constructUrl(url, params) {
     i++;
   }
   return temp_url;
+}
+
+const clearReducers = async () => {
+  let authState = Object.assign({}, initialAuthState)
+  // @ts-ignore
+  store.dispatch(updateAuthState(authState))
+
+  store.dispatch(resetAppWrapper())
+  store.dispatch(clearProjectState())
+  store.dispatch(clearSearchParamsState())
+  store.dispatch(clearJourneyFormState())
+  store.dispatch(clearCache())
+  store.dispatch(clearMessageCache())
+  store.dispatch(clearChatState())
+  console.log("reducers clearead")
 }
 
 async function chunkFile(
@@ -82,7 +107,7 @@ async function chunkFile(
   }
 
   // assign upload parameters to the arguments object
-  Object.assign(args, {total_parts: totalChunks, upload_id: tempFileId});
+  Object.assign(args, { total_parts: totalChunks, upload_id: tempFileId });
 
   // specify reader callback to send upload chunks to the server
   reader.onload = async () => {
@@ -101,7 +126,7 @@ async function chunkFile(
     args["part"] = partIndex;
 
     // create form with base64 encoded file chunk
-    let form = {chunk: base64ArrayBuffer(reader.result)};
+    let form = { chunk: base64ArrayBuffer(reader.result) };
 
     // execute api call with the passed chunk
     res = await apiCall(
@@ -164,7 +189,7 @@ async function chunkFile(
   //   );
 
   // return start message
-  return {message: "File Upload Starting"};
+  return { message: "File Upload Starting" };
 }
 
 async function apiCall(
@@ -179,7 +204,7 @@ async function apiCall(
   completionCall = null
 ) {
   // create variable to hold header data
-  let headers = new Headers({"Content-Type": "application/json"});
+  let headers = new Headers({ "Content-Type": "application/json" });
   // create variable to hold body content
   let body = null;
 
@@ -200,7 +225,7 @@ async function apiCall(
     }
 
     // add token to arguments
-    args = Object.assign(args, {tk: token});
+    args = Object.assign(args, { tk: token });
   }
   // format arguments if they exist
   if (args != null) {
@@ -225,10 +250,6 @@ async function apiCall(
     body = Object.assign(body, form);
   }
 
-  // const sslConfiguredAgent = new https.Agent({
-  //   servername: "Alexis",
-  // })
-
   // execute api call
   try {
     // call api via fetch
@@ -242,10 +263,32 @@ async function apiCall(
       // ensure cookies are included with call
       credentials: "include"
       // agent: sslConfiguredAgent,
-    }).then(response =>
+    }).then(response => {
       // format response into JSON if the status code was successful (within the 200 block)
-      199 < response.status < 300 ? response.json() : response
-    );
+      try {
+        return response.json()
+      } catch (err) {
+        console.log("failed to format api response to json: ", err)
+        return response.text()
+      }
+    });
+
+    if (
+      res["message"] && 
+      (
+        res["message"] === "You must be logged in to access the GIGO system." ||
+        res["message"] === "logout" ||
+        res["message"] === "login"
+      )
+    ) {
+      clearReducers()
+      // we have to wait a bit before the redirect so the reducers really clear
+      await sleep(100)
+      window.location.href = "/login"
+      res = {
+        "message": "Your session has expired. Please login again!"
+      }
+    }
 
     if (completionCall !== undefined && completionCall !== null) {
       completionCall(res);
@@ -283,7 +326,7 @@ export default async function call(
       let result = null;
 
       // execute zip operation and pipe data to file upload
-      await zip.generateAsync({type: "blob"}).then(async function (content) {
+      await zip.generateAsync({ type: "blob" }).then(async function (content) {
         result = await chunkFile(
           content,
           url_extension,
