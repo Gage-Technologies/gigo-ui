@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from './app/hooks';
 import { initialAuthState, initialAuthStateUpdate, selectAuthState, updateAuthState } from "./reducers/auth/auth";
 import TrackedOutlet from './components/OutletTracking';
 import PublicConfigs from "./pages/PublicConfigs";
+import Unsubscribe from "./pages/unsubscribe";
 const CurateAdminPage = React.lazy(() => import("./pages/curateAdmin"));
 const Home = React.lazy(() => import("./pages/home"));
 const Challenge = React.lazy(() => import("./pages/Challenge"));
@@ -86,6 +87,7 @@ export default function Routing() {
                 <Route element={<TokenRouter />}>
                     <Route path={"/login"} element={<Login />}/>
                     <Route path={"/forgotPassword"} element={<ForgotPassword />}/>
+                    <Route path={"/unsubscribe"} element={<Unsubscribe />}/>
                     <Route path={"/resetPassword"} element={<ResetForgotPassword />}/>
                     <Route path={"/resetPassword/:token/:id"} element={<ResetForgotPassword />}/>
                     <Route path={"/home"} element={<Home />} />
