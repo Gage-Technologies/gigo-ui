@@ -30,11 +30,12 @@ import {
     DialogContentText,
     Paper,
     InputBase,
-    Autocomplete
+    Autocomplete,
 } from "@mui/material";
 import { getAllTokens, themeHelpers } from "../theme";
 import SearchBar from "../components/SearchBar";
 import SearchIcon from '@mui/icons-material/Search';
+import CheckIcon from '@mui/icons-material/Check';
 import { useAppSelector, useAppDispatch } from "../app/hooks";
 import {
     initialAuthStateUpdate, selectAuthState,
@@ -4227,7 +4228,7 @@ function Challenge() {
                     </Box>
                 </div>
                 {project !== null && userId === project["author_id"] && window.innerWidth > 1000 ? (
-                    <div style={{ paddingTop: "20px", marginLeft: "10px", paddingRight: "20px" }}>
+                    <div style={{ paddingTop: "20px", marginLeft: "20px", paddingRight: "20px" }}>
                         <Button variant="outlined" sx={styles.mainTabButton} style={{ marginLeft: "20px", }} onClick={() => setEditPopup(true)}>
                             Edit Project Details
                         </Button>
@@ -4526,6 +4527,19 @@ function Challenge() {
     // const removedTags: Tag[] = [];
     // const addedTags: Tag[] = [];
 
+    const projectTitleRef = React.useRef(); // Create a ref for the TextField
+
+    const handleConfirmClick = () => {
+        // Update the projectTitle state with the current value of the TextField
+        const newProjectTitle = projectTitleRef.current.value;
+        setProjectTitle(newProjectTitle);
+        editProject(
+            newProjectTitle !== projectName ? newProjectTitle : null,
+            challengeType !== project["post_type_string"] ? challengeType : null,
+            null, null, null, null
+        );
+    };
+
     const userChallenge = () => {
         return (
             <>
@@ -4604,19 +4618,56 @@ function Challenge() {
                 />
                 <Typography variant="h5" component="div" sx={styles.projectName} style={{ display: "flex", flexDirection: "row" }}>
                     {editTitle ? (
-                        <TextField
-                            value={projectTitle}
-                            onChange={(e) => setProjectTitle(e.target.value)}
-                            variant="outlined"
-                            size="medium"
-                            color={(projectTitle.length > 30) ? "error" : "primary"}
-                            fullWidth
-                            required
-                            sx={{ mt: 2 }}
-                            style={{ width: "auto", background: theme.palette.background.default, zIndex: 2000 }}
-                            inputProps={styles.textField}
-                            multiline
-                        />
+                        <div style={{ display: "flex", flexDirection: "column" }}> {/* Flex container */}
+                            <TextField
+                                value={projectTitle}
+                                onChange={(e) => setProjectTitle(e.target.value)}
+                                variant="outlined"
+                                size="medium"
+                                color={(projectTitle.length > 30) ? "error" : "primary"}
+                                required
+                                sx={{ mt: 2 }}
+                                style={{ width: "200%", background: theme.palette.background.default, zIndex: 2000 }}
+                                inputProps={styles.textField}
+                            />
+                            {project !== null && userId === project["author_id"] && window.innerWidth > 1000 && (
+                                <div> {/* Buttons */}
+                                    <Button
+                                        onClick={() => {
+                                            editProject(
+                                                projectTitle !== projectName ? projectTitle : null,
+                                                challengeType !== project["post_type_string"] ? challengeType : null, null, null, null, null
+                                            )
+                                            setEditTitle(false)
+                                        }}
+                                        variant="outlined"
+                                        color="secondary"
+                                        sx={{
+                                            marginRight: 2, // Adds horizontal spacing
+                                        }}
+                                    >
+                                        <CheckIcon />
+                                    </Button>
+                                    <Button
+                                        onClick={() => setEditTitle(false)}
+                                        color="error"
+                                        variant="outlined"
+                                        sx={{
+                                            height: "4vh",
+                                            maxHeight: "50px",
+                                            minHeight: "35px",
+                                            fontSize: "0.8em",
+                                            '&:hover': {
+                                                backgroundColor: theme.palette.error.main + "25",
+                                            }
+                                        }}
+                                    >
+                                        <CloseIcon />
+                                    </Button>
+                                </div>
+
+                            )}
+                        </div>
                     ) : (
                         <div>
                             {projectName}
@@ -4645,19 +4696,7 @@ function Challenge() {
                                 <Button onClick={() => setEditTitle(true)}>
                                     <EditIcon />
                                 </Button>
-                            ) : (
-                                <div>
-                                    <Button onClick={() => editProject(
-                                        projectTitle !== projectName ? projectTitle : null,
-                                        challengeType !== project["post_type_string"] ? challengeType : null, null, null, null, null
-                                    )}>
-                                        Submit
-                                    </Button>
-                                    <Button onClick={() => setEditTitle(false)}>
-                                        Cancel
-                                    </Button>
-                                </div>
-                            )}
+                            ) : null}
                         </div>
                     ) : null}
                 </Typography>
@@ -5156,5 +5195,19 @@ function Challenge() {
         </div>
     );
 }
+
+const useTextFieldWidth = (text, style) => {
+    const [width, setWidth] = useState(0);
+    const canvasRef = useRef(document.createElement('canvas'));
+
+    useEffect(() => {
+        const context = canvasRef.current.getContext('2d');
+        context.font = `${style.fontSize} ${style.fontFamily}`;
+        const metrics = context.measureText(text);
+        setWidth(metrics.width);
+    }, [text, style]);
+
+    return width;
+};
 
 export default Challenge;
