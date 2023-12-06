@@ -9,9 +9,11 @@ import {
     CssBaseline,
     Dialog, DialogActions, DialogContent, DialogTitle,
     Grid,
+    Link,
     PaletteMode,
     ThemeProvider,
-    Typography
+    Typography,
+    Tooltip
 } from "@mui/material";
 import { getAllTokens, isHoliday, themeHelpers } from "../theme";
 import ProjectCard from "../components/ProjectCard";
@@ -54,6 +56,16 @@ import GIGOLandingPage from "../components/Landing";
 import GIGOLandingPageMobile from "../components/LandingMobile";
 import GIGOLandingPageChristmas from "../components/LandingChristmas";
 import GIGOLandingPageChristmasMobile from "../components/LandingChristmasMobile";
+import { keyframes } from '@mui/system';
+import StarIcon from '@mui/icons-material/Star';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CheckIcon from '@mui/icons-material/CheckCircleOutline';
+
+const gradientAnimation = keyframes`
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+`;
 
 
 function Home() {
@@ -82,6 +94,8 @@ function Home() {
     const stopScroll = React.useRef(false)
     const sidebarOpen = useAppSelector(selectAppWrapperSidebarOpen);
     const chatOpen = useAppSelector(selectAppWrapperChatOpen);
+
+    const [openTooltip, setOpenTooltip] = useState(false);
 
     ReactGA.initialize("G-38KBFJZ6M6");
 
@@ -365,7 +379,7 @@ function Home() {
         // Set up an interval to cycle through projects every 10 seconds
         const intervalId = setInterval(cycleProjects, 10000);
         setCurrentProjectTimeout(intervalId);
-    
+
         // Clear the interval when the component is unmounted
         return () => clearInterval(intervalId);
     }, [cycleProjects]);
@@ -645,21 +659,134 @@ function Home() {
         )
     }
 
+    const handleButtonClick = async () => {
+        try {
+            await navigator.clipboard.writeText(`https://gigo.dev/referral/${encodeURIComponent(authState.userName)}`);
+            setOpenTooltip(true);
+            setTimeout(() => {
+                setOpenTooltip(false);
+            }, 2000); // Tooltip will hide after 2 seconds
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+        }
+    };
+
     const renderWelcomePopup = () => {
-        let steps = [
-            {
-                title: "Welcome to GIGO!",
-                content: "GIGO is a platform to help developers learn to code, practice their skills, and experiment quickly.",
-            },
-            {
-                title: "How to use tutorials",
-                content: "Tutorials will start on important pages to guide you through the platform. This is the only mandatory tutorial. If you skip a tutorial, you can always restart it using the help button at the bottom of the left-hand sidebar.",
-            },
-            {
-                title: "Get Started!",
-                content: "Pick a project from the recommendations or search for one in the search bar.",
-            }
-        ]
+        let steps: {
+            "title": string | React.ReactElement,
+            "content": string | React.ReactElement
+        }[] = [
+                {
+                    title: "Welcome to GIGO!",
+                    content: "GIGO is a platform to help developers learn to code, practice their skills, and experiment quickly.",
+                },
+                {
+                    title: (
+                        <DialogTitle
+                            sx={{
+                                width: 450,
+                                background: "linear-gradient(90deg, #84E8A2, #63a4f8, #84E8A2)",
+                                backgroundSize: "200% 200%",
+                                animation: `${gradientAnimation} 3s ease infinite`,
+                                fontSize: "1.6em",
+                                textAlign: "center",
+                                paddingTop: "20px",
+                                paddingBottom: "20px",
+                                WebkitBackgroundClip: "text",
+                                WebkitTextFillColor: "transparent",
+                                MozBackgroundClip: "text",
+                                MozTextFillColor: "transparent",
+                            }}
+                        >
+                            GIGO Pro Free Trial
+                        </DialogTitle>
+                    ),
+                    content: (
+                        <>
+                            <Typography variant="body2" sx={{ fontSize: ".8em", mb: "5px" }}>
+                                Your trial is activated! Finish your account setup by adding a credit card or paypal to keep your Pro subscription active.
+                            </Typography>
+                            <Typography variant="body2" sx={{ fontSize: ".8em", mb: 2 }}>
+                                Give a month, Get a month! For every friend you refer, both of you get a free month of GIGO Pro!
+                            </Typography>
+                            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+                                <Tooltip
+                                    open={openTooltip}
+                                    disableFocusListener
+                                    disableHoverListener
+                                    disableTouchListener
+                                    title={
+                                        <React.Fragment>
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                Referral Link Copied
+                                                <CheckIcon sx={{ color: theme.palette.success.main, ml: 1 }} />
+                                            </div>
+                                        </React.Fragment>
+                                    }
+                                    placement="top"
+                                    arrow
+                                >
+                                    <Button variant="contained" onClick={handleButtonClick}>
+                                        Referral Link
+                                    </Button>
+                                </Tooltip>
+                            </Box>
+                            <Box sx={{ my: 2 }}>
+                                <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <StarIcon sx={{ color: theme.palette.primary.main, fontSize: ".8em", mr: 1 }} />
+                                    <span style={{ color: theme.palette.primary.main }}>Access to Code Teacher</span>
+                                </Typography>
+                                <Typography variant="body1" component="div" sx={{ fontSize: ".7em", ml: 3 }}>
+                                    Your personal AI tutor.
+                                </Typography>
+                                <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <StarIcon sx={{ color: theme.palette.primary.main, fontSize: ".8em", mr: 1 }} />
+                                    <span style={{ color: theme.palette.primary.main }}>Private DevSpaces</span>
+                                </Typography>
+                                <Typography variant="body1" component="div" sx={{ fontSize: ".7em", ml: 3 }}>
+                                    Learn in stealth mode.
+                                </Typography>
+                                <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <StarIcon sx={{ color: theme.palette.primary.main, fontSize: ".8em", mr: 1 }} />
+                                    <span style={{ color: theme.palette.primary.main }}>More DevSpace Resources</span>
+                                </Typography>
+                                <Typography variant="body1" component="div" sx={{ fontSize: ".7em", ml: 3 }}>
+                                    8 CPU cores, 8GB RAM, 50GB disk space.
+                                </Typography>
+                                <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <StarIcon sx={{ color: theme.palette.primary.main, fontSize: ".8em", mr: 1 }} />
+                                    <span style={{ color: theme.palette.primary.main }}>Three Concurrent DevSpaces</span>
+                                </Typography>
+                                <Typography variant="body1" component="div" sx={{ fontSize: ".7em", ml: 3 }}>
+                                    Run multiple projects.
+                                </Typography>
+                                <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <StarIcon sx={{ color: theme.palette.primary.main, fontSize: ".8em", mr: 1 }} />
+                                    <span style={{ color: theme.palette.primary.main }}>Two Streak Freezes a Week</span>
+                                </Typography>
+                                <Typography variant="body1" component="div" sx={{ fontSize: ".7em", ml: 3 }}>
+                                    Preserve your streak.
+                                </Typography>
+                                <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <StarIcon sx={{ color: theme.palette.primary.main, fontSize: ".8em", mr: 1 }} />
+                                    <span style={{ color: theme.palette.primary.main }}>Premium VsCode Theme</span>
+                                </Typography>
+                                <Typography variant="body1" component="div" sx={{ fontSize: ".7em", ml: 3 }}>
+                                    Enhance your coding experience.
+                                </Typography>
+                            </Box>
+                        </>
+                    ),
+                },
+                {
+                    title: "How to use tutorials",
+                    content: "Tutorials will start on important pages to guide you through the platform. This is the only mandatory tutorial. If you skip a tutorial, you can always restart it using the help button at the bottom of the left-hand sidebar.",
+                },
+                {
+                    title: "Get Started!",
+                    content: "Pick a project from the recommendations or search for one in the search bar.",
+                }
+            ]
 
         return (
             <Dialog
@@ -672,7 +799,7 @@ function Home() {
                 }}
                 BackdropProps={{
                     sx: {
-                        backdropFilter: tutorialStepIndex === 0 ? "blur(3px)" : undefined,
+                        backdropFilter: tutorialStepIndex <= 1 ? "blur(5px)" : undefined,
                         backgroundColor: "transparent",
                     }
                 }}
@@ -683,31 +810,39 @@ function Home() {
                 }}
                 disableEscapeKeyDown={true}
             >
-                <DialogTitle
-                    sx={{
-                        width: 450,
-                        backgroundColor: "transparent",
-                        fontSize: "1.2em",
-                        // center the text
-                        textAlign: "center",
-                        paddingTop: "20px",
-                        paddingBottom: "20px",
-                    }}
-                >
-                    {steps[tutorialStepIndex]["title"]}
-                </DialogTitle>
+                {typeof steps[tutorialStepIndex]["title"] === "string" ? (
+                    <DialogTitle
+                        sx={{
+                            width: 450,
+                            backgroundColor: "transparent",
+                            fontSize: "1.2em",
+                            // center the text
+                            textAlign: "center",
+                            paddingTop: "20px",
+                            paddingBottom: "20px",
+                        }}
+                    >
+                        {steps[tutorialStepIndex]["title"]}
+                    </DialogTitle>
+                ) : (
+                    steps[tutorialStepIndex]["title"]
+                )}
                 <DialogContent
                     sx={{
                         width: 450,
                         backgroundColor: "transparent",
                     }}
                 >
-                    <Typography variant="body1" gutterBottom sx={{
-                        fontSize: ".8em",
-                        paddingTop: "10px",
-                    }}>
-                        {steps[tutorialStepIndex]["content"]}
-                    </Typography>
+                    {typeof steps[tutorialStepIndex]["content"] === "string" ? (
+                        <Typography variant="body1" gutterBottom sx={{
+                            fontSize: ".8em",
+                            paddingTop: "10px",
+                        }}>
+                            {steps[tutorialStepIndex]["content"]}
+                        </Typography>
+                    ) : (
+                        steps[tutorialStepIndex]["content"]
+                    )}
                 </DialogContent>
                 <DialogActions
                     sx={{

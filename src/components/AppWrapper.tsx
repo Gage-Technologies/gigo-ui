@@ -675,7 +675,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     const regex = /https?:\/\/[^\/]+/;
     const referralLink =
         //@ts-ignore
-        urlLink.match(regex)[0] + "/referral/" + username
+        urlLink.match(regex)[0] + "/referral/" + encodeURIComponent(username)
 
     // const referralLink = "https://ui-dev.gigo.dev:33000/referral/" + username;
 
@@ -871,7 +871,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                         <h3>Refer a Friend.</h3>
                                         <h4>Give a Month, Get a Month.</h4>
                                         <div style={{ display: "flex", width: "100%", flexDirection: "row", justifyContent: "center" }}>
-                                            <h5 style={{ outline: "solid gray", borderRadius: "5px", padding: "8px" }} id={"url"}>{referralLink.length > 30 ? referralLink.slice(0, 30) + "..." : referralLink}</h5>
+                                            <h5 style={{ outline: "solid gray", borderRadius: "5px", padding: "8px" }} id={"url"}>{referralLink.length > 50 ? referralLink.slice(0, 50) + "..." : referralLink}</h5>
                                             <Button onClick={() => copyToClipboard()}>
                                                 <ContentCopyIcon />
                                             </Button>
@@ -1298,7 +1298,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                             <h3>Refer a Friend.</h3>
                                             <h4>Give a Month, Get a Month.</h4>
                                             <div style={{ display: "flex", width: "100%", flexDirection: "row", justifyContent: "center" }}>
-                                                <h5 style={{ outline: "solid gray", borderRadius: "5px", padding: "8px" }} id={"url-mobile"}>{referralLink.length > 20 ? referralLink.slice(0, 20) + "..." : referralLink}</h5>
+                                                <h5 style={{ outline: "solid gray", borderRadius: "5px", padding: "8px" }} id={"url-mobile"}>{referralLink.length > 50 ? referralLink.slice(0, 50) + "..." : referralLink}</h5>
                                                 <Button onClick={() => copyToClipboard()}>
                                                     <ContentCopyIcon />
                                                 </Button>
