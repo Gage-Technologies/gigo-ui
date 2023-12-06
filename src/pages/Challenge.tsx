@@ -4084,7 +4084,7 @@ function Challenge() {
                 if (res["message"] !== "success") {
                     swal("There has been an issue loading data. Please try again later.")
                 } else {
-                    swal("Success!", res["message"], "success")
+                    swal("Success!", res["message"], "Updated project title/type")
                 }
             } else {
                 let res = await call(
@@ -4153,6 +4153,9 @@ function Challenge() {
                 swal("There has been an issue loading data. Please try again later.")
             } else {
                 swal("Success!", res["message"], "success")
+                if (title != null) {
+
+                }
             }
         }
 
@@ -4636,10 +4639,10 @@ function Challenge() {
                                 onChange={(e) => setProjectTitle(e.target.value)}
                                 variant="outlined"
                                 size="medium"
-                                color={(projectTitle.length > 30) ? "error" : "primary"}
+                                color={(projectTitle.length > 50) ? "error" : "primary"}
                                 required
                                 sx={{ mt: 2 }}
-                                style={{ width: "200%", background: theme.palette.background.default, zIndex: 2000 }}
+                                style={{ width: "140%", background: theme.palette.background.default, zIndex: 2000 }}
                                 inputProps={styles.textField}
                             />
                             {project !== null && userId === project["author_id"] && window.innerWidth > 1000 && (
@@ -4688,8 +4691,16 @@ function Challenge() {
                     {project !== null && (
                         <div>
                             {editTitle ? (
-                                <div style={{ padding: "10px" }}>
-                                    <ProjectSelector originalLabel={project["post_type_string"] === null ? "Casual" : project["post_type_string"]} onProjectSelect={handleProjectSelection} theme={theme} />
+                                <div style={{ padding: "10px", marginLeft: "140%"}}>
+                                    <ProjectSelector  originalLabel={project["post_type_string"] === null ? "Casual" : project["post_type_string"]} onProjectSelect={handleProjectSelection} theme={theme} style={{
+                                        position: 'absolute', // or 'relative' based on your layout
+                                        transform: 'translateX(-50%)',
+                                        top: "12%",
+                                        marginLeft: "3%",
+                                        zIndex: 2000,
+                                        marginTop: '10px', // adjust as needed to position below the selector
+                                    }} />
+
                                 </div>
                             ) : (
                                 <Chip

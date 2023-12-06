@@ -13,7 +13,7 @@ import {
     createTheme,
 } from "@mui/material";
 
-function ProjectSelector({ originalLabel, onProjectSelect, theme}) {
+function ProjectSelector({ originalLabel, onProjectSelect, theme, style = {}}) {
 
     // let userPref = localStorage.getItem('theme')
     // //@ts-ignore
@@ -101,7 +101,7 @@ function ProjectSelector({ originalLabel, onProjectSelect, theme}) {
                 clickable
             />
             {isOpen && (
-                <List component="nav" style={listStyle}>
+                <List component="nav" style={{...listStyle, ...style}}>
                     {projects.map((project, index) => (
                         <ListItem button key={index} onClick={() => handleSelect(project)}>
                             <Chip
