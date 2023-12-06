@@ -1,7 +1,7 @@
 
 
 import * as React from "react"
-import {Avatar, Button, Card, CardContent, Chip, IconButton, TextField, Tooltip, Typography} from "@mui/material";
+import {Avatar, Button, Card, CardContent, Chip, IconButton, PaletteMode, TextField, Tooltip, Typography, createTheme} from "@mui/material";
 import UserIcon from "./UserIcon";
 import call from "../services/api-call";
 import config from "../config";
@@ -12,6 +12,7 @@ import LocalCafeOutlinedIcon from "@mui/icons-material/LocalCafeOutlined";
 import {useEffect} from "react";
 import Lottie from "react-lottie";
 import ProBannerCircle from "./Icons/ProBannerCircle";
+import { getAllTokens } from "../theme";
 
 interface IProps {
     width: number | string,
@@ -32,11 +33,18 @@ interface IProps {
 }
 
 export default function DiscussionCard(props: IProps) {
+    let userPref = localStorage.getItem('theme')
+    const [mode, _] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
+    const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
+
+
     const styles = {
         card: window.innerWidth > 1000 ? {
             display: 'flex',
             width: props.width,
-            height: "auto"
+            height: "auto",
+            background: "transparent",
+            border: `1px solid ${theme.palette.primary.main}`
         } : {
             display: 'flex',
             width: props.width,

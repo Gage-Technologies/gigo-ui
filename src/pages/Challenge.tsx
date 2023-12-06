@@ -431,7 +431,7 @@ function Challenge() {
                 post_id: id,
                 action: action,
                 session_id: sessionId,
-            })], {type : 'application/json'});
+            })], { type: 'application/json' });
 
             // Use navigator.sendBeacon to send the data to the server
             navigator.sendBeacon(config.rootPath + '/api/implicit/recordAction', blob);
@@ -893,8 +893,9 @@ function Challenge() {
 
     useEffect(() => {
         setLoading(true)
+        console.log("getting data: ", id)
         getProjectInformation()
-        getDiscussions()
+        getDiscussions().then(() => FilterDiscussions())
         setLoading(false)
     }, [id])
 
@@ -1954,7 +1955,7 @@ function Challenge() {
 
         discussionReplies.push(res["comment"])
         setCommentBody("")
-        await getDiscussions()
+        await getDiscussions().then(() => FilterDiscussions())
 
         return
     }
@@ -2009,7 +2010,7 @@ function Challenge() {
 
         threadArray.push(thr["thread_comment"])
         setCommentBody("")
-        await getDiscussions()
+        await getDiscussions().then(() => FilterDiscussions())
 
         return
     }
@@ -2064,7 +2065,7 @@ function Challenge() {
 
         replyArray.push(reply["thread_reply"])
         setCommentBody("")
-        await getDiscussions()
+        await getDiscussions().then(() => FilterDiscussions())
 
         return
     }
@@ -2154,7 +2155,7 @@ function Challenge() {
     }
 
     const goBack = () => {
-        getDiscussions()
+        getDiscussions().then(() => FilterDiscussions())
         if (discussionTab === "comment") {
             setSelectedDiscussion(EmptyDiscussion)
             setDiscussionReplies([])
@@ -2725,6 +2726,7 @@ function Challenge() {
 
 
     const mainTabDiscussions = () => {
+        let targetData = filteredDiscussions.length > 0 ? filteredDiscussions : discussions
         if (discussionTab === "main") {
             return (
                 <div style={{ display: "flex", flexDirection: "column" }}>
@@ -2759,7 +2761,7 @@ function Challenge() {
                             placeholder="Discussions"
                             onChange={(e) => {
                                 const value = e.target.value;
-                                value === "" ? getDiscussions() : handleDiscussionSearch(e);
+                                value === "" ? getDiscussions().then(() => FilterDiscussions()) : handleDiscussionSearch(e);
                             }}
                         />
                     </Paper>
@@ -2772,7 +2774,7 @@ function Challenge() {
                         height: "58vh",
                         paddingTop: "2%"
                     }}>
-                        {filteredDiscussions.map((discussion) => (
+                        {targetData.map((discussion) => (
                             <div
                                 key={discussion["_id"]}
                                 style={{
@@ -2804,7 +2806,17 @@ function Challenge() {
                                 {discussion["author_id"] === callingId ? (
                                     <Button
                                         variant={`text`} color={"primary"} size={`small`}
-                                        sx={window.innerWidth > 1000 ? { height: "2.5vh", minHeight: "4px", right: 3.5 * window.innerWidth / 100, bottom: "35%" } : { height: "2.5vh", minHeight: "4px", right: 20 * window.innerWidth / 100, bottom: "45%" }}
+                                        sx={window.innerWidth > 1000 ? { 
+                                            height: "2.5vh", 
+                                            minHeight: "4px", 
+                                            right: (3.5 * window.innerWidth / 100) + 15,
+                                            bottom: "calc(35% - 10px)" 
+                                        } : { 
+                                            height: "2.5vh", 
+                                            minHeight: "4px", 
+                                            right: 20 * window.innerWidth / 100, 
+                                            bottom: "45%" 
+                                        }}
                                         onClick={() => {
                                             setSelectedDiscussion(discussion);
                                             setNewTitle(discussion["title"]);
@@ -2817,7 +2829,7 @@ function Challenge() {
                                 ) : null}
                                 {discussionUpVotes.includes(discussion["_id"]) ? (
                                     <IconButton onClick={() => handleCoffeeClick(discussion["coffee"], false, "discussion", discussion)}
-                                        sx={{ position: "absolute", bottom: "5%", left: "1%" }}>
+                                        sx={{ position: "absolute", bottom: "5%", left: "1%", marginTop: "10px" }}>
                                         <Badge color="primary" badgeContent={discussion["coffee"]}
                                             sx={{ height: "2.5vh", minHeight: "4px" }}
                                             anchorOrigin={{
@@ -2829,7 +2841,7 @@ function Challenge() {
                                     </IconButton>
                                 ) : (
                                     <IconButton onClick={() => handleCoffeeClick(discussion["coffee"], true, "discussion", discussion)}
-                                        sx={{ position: "absolute", bottom: "5%", left: "1%" }}>
+                                        sx={{ position: "absolute", bottom: "5%", left: "1%", marginTop: "10px" }}>
                                         <Badge color="primary" badgeContent={discussion["coffee"]}
                                             sx={{ height: "2.5vh", minHeight: "4px" }}
                                             anchorOrigin={{
@@ -3378,7 +3390,7 @@ function Challenge() {
         setMainTab(newValue);
         window.location.hash = "#" + newValue
         if (newValue === "discussions") {
-            getDiscussions().then(r => console.log(r))
+            getDiscussions().then(() => FilterDiscussions())
             console.log("run: ", runTutorial)
         }
         setDiscussionTab("main")
