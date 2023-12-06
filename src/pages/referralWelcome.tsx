@@ -167,6 +167,7 @@ function ReferralWelcome(this: any) {
                                                 referralUser["render_in_front"]}
                                                 size={window.innerWidth / 10}
                                                 imageTop={2}
+                                                mouseMove={false}
                                             />
                                         </div>
                                         <Typography variant="h5" component="div" style={window.innerWidth > 1000 ? {fontSize: "2vw", display: "flex", alignItems: "center", paddingLeft: "3vw"} : {fontSize: "4vw", display: "flex", alignItems: "center", paddingLeft: "3vw"}}>
