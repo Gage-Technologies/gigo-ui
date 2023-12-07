@@ -22,6 +22,7 @@ import track, { TrackingContext } from 'react-tracking';
 import { withPageTracking } from './components/PageTracking';
 import call from './services/api-call';
 import { Box, CircularProgress } from '@material-ui/core';
+import Maintence from "./pages/Maintenance";
 
 // create callback to register last activity in session storage
 function setTimestamp() {
@@ -52,21 +53,22 @@ const lazyLoadFallback = (
 )
 
 root.render(
-    <WebSocketProvider>
-        <BrowserRouter>
-            <GoogleOAuthProvider clientId={config.googleClient}>
-                <Provider store={store}>
-                    <PersistGate loading={null} persistor={persistor}>
-                        <AppWrapper>
-                            <Suspense fallback={lazyLoadFallback}>
-                                <Routing />
-                            </Suspense>
-                        </AppWrapper>
-                    </PersistGate>
-                </Provider>
-            </GoogleOAuthProvider>
-        </BrowserRouter>
-    </WebSocketProvider>
+    <Maintence/>
+    // <WebSocketProvider>
+    //     <BrowserRouter>
+    //         <GoogleOAuthProvider clientId={config.googleClient}>
+    //             <Provider store={store}>
+    //                 <PersistGate loading={null} persistor={persistor}>
+    //                     <AppWrapper>
+    //                         <Suspense fallback={lazyLoadFallback}>
+    //                             <Routing />
+    //                         </Suspense>
+    //                     </AppWrapper>
+    //                 </PersistGate>
+    //             </Provider>
+    //         </GoogleOAuthProvider>
+    //     </BrowserRouter>
+    // </WebSocketProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function
