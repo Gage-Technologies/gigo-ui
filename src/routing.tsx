@@ -54,18 +54,18 @@ export default function Routing() {
     const PrivateRoute = ({ role = null }) => {
         // route to login for an unauthenticated user
         if (!authState.authenticated) {
-            return <Navigate to="/login" />
+            return <Navigate to="/login" replace={true} />
         }
 
         // clear expired authentication and route to login
         if (authState.expiration * 1000 < new Date().getTime()) {
             dispatch(updateAuthState(initialAuthState))
-            return <Navigate to="/login" />
+            return <Navigate to="/login" replace={true} />
         }
 
         // route to route for out-of-role url
         if (role !== null && role !== authState.role) {
-            return <Navigate to="/login" />
+            return <Navigate to="/login" replace={true} />
         }
 
         return <Outlet />
