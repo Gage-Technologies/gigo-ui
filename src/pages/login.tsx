@@ -848,7 +848,7 @@ function Login(this: any) {
                 style={{
                     position: 'absolute',
                     top: window.innerWidth > 1000 ? '5%' : '6%', // Adjust the top position as needed (slightly below the logo)
-                    left: window.innerWidth > 1000 ? '360px' : '32%', // Adjust the left position as needed (to the right of the logo)
+                    left: window.innerWidth > 1000 ? '360px' : '37%', // Adjust the left position as needed (to the right of the logo)
                     fontWeight: 'bold', // Customize the text style,
                     fontSize: window.innerWidth > 1000 ? '2em' : '5vw', // Adjust the font size,
                     // fontFamily: 'Kanit',
