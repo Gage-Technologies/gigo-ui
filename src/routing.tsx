@@ -47,11 +47,22 @@ export default function Routing() {
     // load auth state from storage
     const authState = useAppSelector(selectAuthState);
 
+    const userAgent = navigator.userAgent;
+
+    // Check if the user agent belongs to a known crawler
+    const isCrawler = /Googlebot|Bingbot|Slurp|DuckDuckBot|Baiduspider|YandexBot|Sogou/i.test(userAgent);
+
+
     /**
      * Protects private routes from unauthenticated and unauthorized access
      * @param role role required for a user to access the page (optional)
      */
-    const PrivateRoute = ({ role = null }) => {
+    const PrivateRoute = ({ role = null, permitCrawler = false }) => {
+        // If it's a crawler, allow access
+        if (isCrawler && permitCrawler) {
+            return <Outlet />;
+        }
+
         // route to login for an unauthenticated user
         if (!authState.authenticated) {
             return <Navigate to="/login" replace={true} />
@@ -105,8 +116,6 @@ export default function Routing() {
                     <Route path={"/buyingExclusive"} element={<BuyingExclusiveContent />} />
                     <Route path={"/aboutExclusive"} element={<ExclusiveContent />} />
                     <Route element={<PrivateRoute />}>
-                        <Route path={"/signup"} element={<CreateNewAccount />} />
-                        <Route path={"/signup/:name"} element={<CreateNewAccount />} />
                         {/*<Route path={"/journey"} element={<Journey />}/>*/}
                         {/*<Route path={"/journey/form"} element={<JourneyForm />}/>*/}
                         {/*<Route path={"/journey/quiz"} element={<JourneyQuiz />}/>*/}
@@ -126,11 +135,12 @@ export default function Routing() {
                         <Route path={"/configs"} element={<PublicConfigs />} />
                         <Route path={"/launchpad/:id"} element={<WorkspacePage />} />
                         <Route path={"/workspace/:id"} element={<WorkspaceAdvancedPage />} />
-
+                    </Route >
+                    <Route element={<PrivateRoute permitCrawler={true} />}>
                         <Route path="/challenge/:id" element={<Challenge />} />
                         <Route path="/attempt/:id" element={<AttemptPage />} />
                         <Route path="/user/:id" element={<User />} />
-                    </Route >
+                    </Route>
                     <Route path="*" element={<NotFoundPage />} />
                 </Route>
             </Route>
