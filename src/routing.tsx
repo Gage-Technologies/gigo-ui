@@ -85,50 +85,51 @@ export default function Routing() {
         <Routes>
             <Route element={<TrackedOutlet />}>
                 <Route element={<TokenRouter />}>
-                    <Route path={"/login"} element={<Login />}/>
-                    <Route path={"/forgotPassword"} element={<ForgotPassword />}/>
-                    <Route path={"/unsubscribe"} element={<Unsubscribe />}/>
-                    <Route path={"/resetPassword"} element={<ResetForgotPassword />}/>
-                    <Route path={"/resetPassword/:token/:id"} element={<ResetForgotPassword />}/>
+                    <Route path={"/login"} element={<Login />} />
+                    <Route path={"/forgotPassword"} element={<ForgotPassword />} />
+                    <Route path={"/unsubscribe"} element={<Unsubscribe />} />
+                    <Route path={"/resetPassword"} element={<ResetForgotPassword />} />
+                    <Route path={"/resetPassword/:token/:id"} element={<ResetForgotPassword />} />
                     <Route path={"/home"} element={<Home />} />
-                    <Route path="/search" element={<Search />}/>
-                    <Route path={"/"} element={<Home />}/>
-                    <Route path="/challenge/:id" element={<Challenge />}/>
-                    <Route path="/attempt/:id" element={<AttemptPage />}/>
-                    <Route path="/user/:id" element={<User />}/>
-                    <Route path={"/signup"} element={<CreateNewAccount />}/>
-                    <Route path={"/signup/:name"} element={<CreateNewAccount />}/>
-                    <Route path={"/referral/:name"} element={<ReferralWelcome/>}/>
-                    <Route path={"/launchpad/:id"} element={<WorkspacePage />}/>
-                    <Route path={"/workspace/:id"} element={<WorkspaceAdvancedPage />}/>
-                    <Route path={"/about"} element={<About/>}/>
-                    <Route path={"/documentation"} element={<Documentation />}/>
-                    <Route path={"/documentation/:file"} element={<Documentation />}/>
-                    <Route path={"/documentation/:level1/:file"} element={<Documentation />}/>
-                    <Route path={"/documentation/:level1/:level2/:file"} element={<Documentation />}/>
-                    <Route path={"/premium"} element={<PremiumDescription />}/>
-                    <Route path={"/buyingExclusive"} element={<BuyingExclusiveContent/>}/>
-                    <Route path={"/aboutExclusive"} element={<ExclusiveContent/>}/>
+                    <Route path="/search" element={<Search />} />
+                    <Route path={"/"} element={<Home />} />
+                    <Route path={"/signup"} element={<CreateNewAccount />} />
+                    <Route path={"/signup/:name"} element={<CreateNewAccount />} />
+                    <Route path={"/referral/:name"} element={<ReferralWelcome />} />
+                    <Route path={"/about"} element={<About />} />
+                    <Route path={"/documentation"} element={<Documentation />} />
+                    <Route path={"/documentation/:file"} element={<Documentation />} />
+                    <Route path={"/documentation/:level1/:file"} element={<Documentation />} />
+                    <Route path={"/documentation/:level1/:level2/:file"} element={<Documentation />} />
+                    <Route path={"/premium"} element={<PremiumDescription />} />
+                    <Route path={"/buyingExclusive"} element={<BuyingExclusiveContent />} />
+                    <Route path={"/aboutExclusive"} element={<ExclusiveContent />} />
                     <Route element={<PrivateRoute />}>
-                        <Route path={"/signup"} element={<CreateNewAccount />}/>
-                        <Route path={"/signup/:name"} element={<CreateNewAccount />}/>
+                        <Route path={"/signup"} element={<CreateNewAccount />} />
+                        <Route path={"/signup/:name"} element={<CreateNewAccount />} />
                         {/*<Route path={"/journey"} element={<Journey />}/>*/}
-                        {/*<Route path={"/journey/form"} element={<JourneyForm />}/>*/ }
-                        {/*<Route path={"/journey/quiz"} element={<JourneyQuiz />}/>*/ }
-                        <Route path="/following" element={<Following />}/>
-                        <Route path="/settings" element={<AccountSettings />}/>
-                        <Route path="/create-challenge" element={<CreateProject />}/>
-                        <Route path="/active" element={<Active />}/>
-                        <Route path={"/profile"} element={<Profile />}/>
-                        <Route path={"/success"} element={<StripeSuccess />}/>
-                        <Route path={"/successMembership"} element={<StripeSuccessMembership />}/>
-                        <Route path={"/cancel"} element={<StripeCancel />}/>
-                        <Route path={"/canceled"} element={<StripeCancel />}/>
-                        <Route path={"/reauth"} element={<StripeReauth />}/>
-                        <Route path="/streak" element={<Streak />}/>
+                        {/*<Route path={"/journey/form"} element={<JourneyForm />}/>*/}
+                        {/*<Route path={"/journey/quiz"} element={<JourneyQuiz />}/>*/}
+                        <Route path="/following" element={<Following />} />
+                        <Route path="/settings" element={<AccountSettings />} />
+                        <Route path="/create-challenge" element={<CreateProject />} />
+                        <Route path="/active" element={<Active />} />
+                        <Route path={"/profile"} element={<Profile />} />
+                        <Route path={"/success"} element={<StripeSuccess />} />
+                        <Route path={"/successMembership"} element={<StripeSuccessMembership />} />
+                        <Route path={"/cancel"} element={<StripeCancel />} />
+                        <Route path={"/canceled"} element={<StripeCancel />} />
+                        <Route path={"/reauth"} element={<StripeReauth />} />
+                        <Route path="/streak" element={<Streak />} />
                         {/*<Route path="/nemesis" element={<Nemesis />}/>*/}
-                        <Route path={"/curateAdmin"} element={<CurateAdminPage/>}/>
-                        <Route path={"/configs"} element={<PublicConfigs />}/>
+                        <Route path={"/curateAdmin"} element={<CurateAdminPage />} />
+                        <Route path={"/configs"} element={<PublicConfigs />} />
+                        <Route path={"/launchpad/:id"} element={<WorkspacePage />} />
+                        <Route path={"/workspace/:id"} element={<WorkspaceAdvancedPage />} />
+
+                        <Route path="/challenge/:id" element={<Challenge />} />
+                        <Route path="/attempt/:id" element={<AttemptPage />} />
+                        <Route path="/user/:id" element={<User />} />
                     </Route >
                     <Route path="*" element={<NotFoundPage />} />
                 </Route>

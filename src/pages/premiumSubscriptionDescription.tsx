@@ -50,6 +50,9 @@ function PremiumDescription() {
 
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
 
+    // load auth state from storage
+    const authState = useAppSelector(selectAuthState);
+
     const [loading, setLoading] = React.useState(false)
     const [inTrial, setInTrial] = React.useState(false)
     const [membership, setMembership] = React.useState(0)
@@ -147,7 +150,8 @@ function PremiumDescription() {
     // Changed "Become A Pro" to "Stay A Pro"
 
     useEffect(() => {
-        getSubData()
+        if (authState.authenticated)
+            getSubData()
     }, [])
 
     let height = "200px"
