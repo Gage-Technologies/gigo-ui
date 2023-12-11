@@ -38,7 +38,7 @@ const TrackedOutlet: React.FC<TrackedOutletProps> = ({ trackingData, onTrack }) 
             metadata: {
                 mobile: window.innerWidth < 1000,
                 width: window.innerWidth,
-                heigth: window.innerHeight,
+                height: window.innerHeight,
                 user_agent: navigator.userAgent,
                 referrer: document.referrer,
             },
@@ -61,7 +61,7 @@ const TrackedOutlet: React.FC<TrackedOutletProps> = ({ trackingData, onTrack }) 
                 metadata: {
                     mobile: window.innerWidth < 1000,
                     width: window.innerWidth,
-                    heigth: window.innerHeight,
+                    height: window.innerHeight,
                     user_agent: navigator.userAgent,
                     referrer: document.referrer,
                 }
