@@ -304,6 +304,11 @@ export default function ChatContainer() {
 
     // always start at the bottom when the chat is opened
     useEffect(() => {
+        // exit if we are not in a chat view
+        if (selectedTab === "Friends" && !privateChatView) {
+            return
+        }
+
         if (chatOpen) {
             scrollToBottom();
         }
@@ -813,6 +818,12 @@ export default function ChatContainer() {
                         c[chatIndex].last_read_message = msgs[msgs.length - 1]._id;
                         setChats(c);
                     }
+
+                    // exit if we are not in a chat view
+                    if (selectedTab === "Friends" && !privateChatView) {
+                        return
+                    }
+
                     scrollToBottom();
                 }
                 return
@@ -1002,6 +1013,11 @@ export default function ChatContainer() {
             return
         }
 
+        // exit if we are not in a chat view
+        if (selectedTab === "Friends" && !privateChatView) {
+            return
+        }
+
         // mark bootstrapped as true
         if (!bootstrapped)
             setBootstrapped(true);
@@ -1014,13 +1030,18 @@ export default function ChatContainer() {
     // Effect to set up the MutationObserver
     useEffect(() => {
         // exit if we are not in a chat view
-        if (selectedTab !== "Friends" && !privateChatView) {
+        if (selectedTab === "Friends" && !privateChatView) {
             return
         }
 
         const container = listContainerRef.current;
         if (container) {
             const observer = new MutationObserver((mutations) => {
+                // exit if we are not in a chat view
+                if (selectedTab === "Friends" && !privateChatView) {
+                    return
+                }
+
                 // trigger if we are within 10px of the top of the container or loading messages but not auto scrolling
                 // this is basically our way of saying that the data is likely to be changing now or in the near future
                 // but if we are auto scrolling then it doesn't matter because we are going to scroll to the bottom anyway
@@ -1049,6 +1070,11 @@ export default function ChatContainer() {
     useEffect(() => {
         // only handle if the user has not manually scrolled up
         if (userScrolledUp) {
+            return
+        }
+
+        // exit if we are not in a chat view
+        if (selectedTab === "Friends" && !privateChatView) {
             return
         }
 

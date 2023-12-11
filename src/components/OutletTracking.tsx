@@ -35,7 +35,13 @@ const TrackedOutlet: React.FC<TrackedOutletProps> = ({ trackingData, onTrack }) 
             path: location.pathname,
             latitude: null,
             longitude: null,
-            metadata: {},
+            metadata: {
+                mobile: window.innerWidth < 1000,
+                width: window.innerWidth,
+                heigth: window.innerHeight,
+                user_agent: navigator.userAgent,
+                referrer: document.referrer,
+            },
         }
         trackEvent(payload);
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -52,11 +58,17 @@ const TrackedOutlet: React.FC<TrackedOutletProps> = ({ trackingData, onTrack }) 
                 path: location.pathname,
                 latitude: null,
                 longitude: null,
-                metadata: {}
+                metadata: {
+                    mobile: window.innerWidth < 1000,
+                    width: window.innerWidth,
+                    heigth: window.innerHeight,
+                    user_agent: navigator.userAgent,
+                    referrer: document.referrer,
+                }
             }
 
             // Convert payload to a string
-            const blob = new Blob([JSON.stringify(payload)], {type : 'application/json'});
+            const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
 
             // Use navigator.sendBeacon to send the data to the server
             navigator.sendBeacon(config.rootPath + '/api/recordUsage', blob);
