@@ -17,6 +17,9 @@ import loginImg219 from "../img/login/login_background-21-9.jpg";
 import christmasLogin from "../img/christmas-login.png";
 import loginImg from "../img/login/login_background.png";
 import {makeStyles} from "@material-ui/core";
+import call from "../services/api-call";
+import config from "../config";
+import swal from "sweetalert";
 interface SubscriptionState {
     allEmails: boolean;
     streak: boolean;
@@ -53,8 +56,11 @@ function Unsubscribe() {
     // Update the theme only if the mode changes
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
     const [email, setEmail] = useState<string>("");
+    const [userId, setUserId] = useState<string>("");
     const [isEmailValid, setIsEmailValid] = useState<boolean>(false);
-    const [step, setStep] = useState<number>(1);
+    const [userFound, setUserFound] = useState<boolean>(false);
+    const [showPreferences, setShowPreferences] = useState(false);
+    const [componentKey, setComponentKey] = useState(0);
     const [subscriptions, setSubscriptions] = useState<SubscriptionState>({
         allEmails: false,
         streak: false,
@@ -73,6 +79,8 @@ function Unsubscribe() {
     const holiday = isHoliday()
 
     const aspectRatio = useAspectRatio();
+
+    const emailRef = React.useRef(email);
 
     const renderLanding = () => {
 
@@ -96,6 +104,7 @@ function Unsubscribe() {
 
     const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
         setEmail(e.target.value);
+        emailRef.current = e.target.value; // Update emailRef whenever email changes
         setIsEmailValid(isValidEmail(e.target.value));
     };
 
@@ -104,15 +113,135 @@ function Unsubscribe() {
         setSubscriptions({ ...subscriptions, [name]: event.target.checked });
     };
 
-    const handleSubmitEmail = () => {
-        setStep(2); // Transition to subscription options
+    const handleSubmitEmail = async () => {
+        const currentEmail = emailRef.current;
+
+        if (!isEmailValid) {
+            swal("Invalid Credentials", "Please enter a valid email address.");
+            return;
+        }
+
+        let res = await call(
+            "/api/unsubscribe/check",
+            "post",
+            null,
+            null,
+            null,
+            //@ts-ignore
+            { email: currentEmail },
+            null,
+            config.rootPath
+        );
+
+        if (res === undefined || res["userFound"] === undefined) {
+            if (sessionStorage.getItem("alive") === null)
+                //@ts-ignore
+                swal(
+                    "Server Error",
+                    "We are unable to connect with the GIGO servers at this time. We're sorry for the inconvenience!"
+                );
+            return;
+        }
+
+        if (res && res["userFound"]) {
+            const id = res["userID"];
+            setUserId(res["userID"]);
+            await handleGetEmails(id);
+            setShowPreferences(true);
+            setComponentKey(prevKey => prevKey + 1);
+        } else {
+            swal("Invalid Credentials", "No account found with that email address.");
+        }
     };
 
-    const handleSubmitPreferences = async () => {
-        // TODO: API call to update email preferences
-        console.log("Submitted Email:", email);
-        console.log("Subscriptions:", subscriptions);
+    const handleGetEmails = async (userId: string) => {
+        if (userId === "") {
+            swal("Error", "There was an error processing your request. Please try again later or contact support.");
+            return;
+        }
+
+        let res = await call(
+            "/api/unsubscribe/get",
+            "post",
+            null,
+            null,
+            null,
+            //@ts-ignore
+            { userID: userId },
+            null,
+            config.rootPath
+        );
+
+        if (res === undefined) {
+            if (sessionStorage.getItem("alive") === null) {
+                //@ts-ignore
+                swal("Server Error", "We are unable to connect with the GIGO servers at this time. We're sorry for the inconvenience!");
+            }
+            return;
+        }
+
+        if (res && typeof res === "object") {
+            setSubscriptions({
+                allEmails: res["allEmails"],
+                streak: res["streak"],
+                pro: res["pro"],
+                newsletter: res["newsletter"],
+                inactivity: res["inactivity"],
+                messages: res["messages"],
+                referrals: res["referrals"],
+                promotional: res["promotional"],
+            });
+            setShowPreferences(true);
+        } else {
+            swal("Error", "Failed to retrieve email preferences.");
+        }
     };
+
+
+    const handleSubmitPreferences = async () => {
+        // Check if userId is valid
+        if (!userId) {
+            swal("Error", "User ID is not available. Please try again.");
+            return;
+        }
+
+        console.log(userId);
+
+        // Prepare the payload with the updated preferences
+        const preferencesPayload = {
+            userID: userId,
+            allEmails: subscriptions.allEmails,
+            streak: subscriptions.streak,
+            pro: subscriptions.pro,
+            newsletter: subscriptions.newsletter,
+            inactivity: subscriptions.inactivity,
+            messages: subscriptions.messages,
+            referrals: subscriptions.referrals,
+            promotional: subscriptions.promotional,
+        };
+
+        // Make the API call
+        let res = await call(
+            "/api/unsubscribe/modify",
+            "post",
+            null,
+            null,
+            null,
+            //@ts-ignore
+            preferencesPayload,
+            null,
+            config.rootPath
+        );
+
+        // Handle the response
+        if (res && res.success) {
+            swal("Success", "Your email preferences have been updated.");
+        } else {
+            // Handle errors
+            swal("Error", "Failed to update email preferences. Please try again.");
+        }
+    };
+
 
     const handleSelectAllEmails = (event: ChangeEvent<HTMLInputElement>) => {
         const checked = event.target.checked;
@@ -130,7 +259,7 @@ function Unsubscribe() {
 
     // New label mapping
     const labelMapping: { [key in keyof SubscriptionState]: string } = {
-        allEmails: "No Emails",
+        allEmails: "All Emails",
         streak: "Streak Reminders",
         pro: "Membership Notifications",
         newsletter: "Newsletter",
@@ -144,7 +273,7 @@ function Unsubscribe() {
     const classes = useStyles();
 
     return (
-        <div
+        <div key={componentKey}
             style={{
                 backgroundColor: "black",
                 backgroundImage: `url(${renderLanding()})`,
@@ -180,8 +309,7 @@ function Unsubscribe() {
                                       backgroundColor: theme.palette.background.default,
                                   }} direction="column" alignItems="center"
                             >
-                                {/* Step 1: Email Input */}
-                                {step === 1 && (
+                                {!showPreferences && (
                                     <>
                                         <Typography variant="h6" sx={{ mb: 2 }}>
                                             Enter Your Email
@@ -205,9 +333,7 @@ function Unsubscribe() {
                                         </Button>
                                     </>
                                 )}
-
-                                {/* Step 2: Email Preferences */}
-                                {step === 2 && (
+                                {showPreferences && (
                                     <>
                                         <Typography variant="h6" sx={{ mb: 2 }}>
                                             Select Email Preferences
