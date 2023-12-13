@@ -6,7 +6,7 @@ import {Button} from "@mui/material";
 
 export default function PostPayment(postId) {
   const handleClick = async e => {
-    const stripe = await loadStripe("pk_live_51MMbN1KRClXv1ERHBolgHPr1HP16jGDThpzsF3UY9TLkyFyaAeqRkLJb1UomdND8ODZrRwaCze7GlFrwiTVGECdO00y4HGWCtj")
+    const stripe = await loadStripe(config.stripePubKey)
     let res = await call(
       "/api/stripe/getPriceId",
       "post",

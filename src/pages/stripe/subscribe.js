@@ -1,10 +1,11 @@
 import {loadStripe} from '@stripe/stripe-js';
 import {Button} from "@mui/material";
+import config from "../../config";
 
 export default function Subscribe() {
   //look into adding metadata here
   const handleClick = async e => {
-    const stripe = await loadStripe("pk_live_51MMbN1KRClXv1ERHBolgHPr1HP16jGDThpzsF3UY9TLkyFyaAeqRkLJb1UomdND8ODZrRwaCze7GlFrwiTVGECdO00y4HGWCtj")
+    const stripe = await loadStripe(config.stripePubKey)
     const {error} = await stripe.redirectToCheckout({
       lineItems: [
         {

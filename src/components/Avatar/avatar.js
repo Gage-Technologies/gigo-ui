@@ -131,14 +131,8 @@ export default function Avataaar(props) {
           color: 'white',              // Text color
           borderRadius: '8px',         // Rounded edges
           fontFamily: 'Poppins, sans-serif', // Poppins font
-          position: "absolute",
-          top: 420,
-          left: 150
         }}>
-          <h5 style={{
-            margin: 0,
-            fontFamily: 'Poppins, sans-serif', // Ensure h5 also uses Poppins
-          }}>Randomize Avatar</h5>
+          Randomize Avatar
           <ShuffleIcon/>
         </Button>
         <div style={{ display: 'flex', flexDirection: 'row', position: 'relative', width: "90%", justifyContent: "center" }}>

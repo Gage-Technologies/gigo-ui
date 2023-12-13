@@ -957,7 +957,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                                 </Box>
                                                 <Box>
                                                     <Typography variant="subtitle1" style={{ fontWeight: "bold", color: "#9dbab0" }}>
-                                                        Private DevSpaces
+                                                        Private Projects
                                                     </Typography>
                                                     <Typography variant="body2" color="#9dbab0">
                                                         Keep your top-secret work for your eyes only.

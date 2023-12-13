@@ -359,7 +359,13 @@ function CreateNewAccount() {
             path: location.pathname,
             latitude: null,
             longitude: null,
-            metadata: {},
+            metadata: {
+                mobile: window.innerWidth < 1000,
+                width: window.innerWidth,
+                height: window.innerHeight,
+                user_agent: navigator.userAgent,
+                referrer: document.referrer,
+            },
         }
         trackEvent(payload);
 
@@ -457,7 +463,13 @@ function CreateNewAccount() {
                         path: location.pathname,
                         latitude: null,
                         longitude: null,
-                        metadata: {},
+                        metadata: {
+                            mobile: window.innerWidth < 1000,
+                            width: window.innerWidth,
+                            height: window.innerHeight,
+                            user_agent: navigator.userAgent,
+                            referrer: document.referrer,
+                        },
                     }
                     trackEvent(payload);
 
@@ -501,6 +513,8 @@ function CreateNewAccount() {
             authState.exclusiveAgreement = auth["exclusive_agreement"]
             authState.tutorialState = DefaultTutorialState
             dispatch(updateAuthState(authState))
+
+            await sleep(1000)
 
             window.location.href = "/home";
 
@@ -586,7 +600,14 @@ function CreateNewAccount() {
             path: location.pathname,
             latitude: null,
             longitude: null,
-            metadata: { "auth_provider": "google" },
+            metadata: {
+                mobile: window.innerWidth < 1000,
+                width: window.innerWidth,
+                height: window.innerHeight,
+                user_agent: navigator.userAgent,
+                referrer: document.referrer,
+                auth_provider: "google"
+            }
         }
         trackEvent(payload);
 
@@ -663,7 +684,14 @@ function CreateNewAccount() {
                         path: location.pathname,
                         latitude: null,
                         longitude: null,
-                        metadata: { "auth_provider": "google" },
+                        metadata: {
+                            mobile: window.innerWidth < 1000,
+                            width: window.innerWidth,
+                            height: window.innerHeight,
+                            user_agent: navigator.userAgent,
+                            referrer: document.referrer,
+                            auth_provider: "google"
+                        }
                     }
                     trackEvent(payload);
 
@@ -692,7 +720,7 @@ function CreateNewAccount() {
                         dispatch(updateAuthState(authState))
 
                         // this makes sure the dispatch occurs
-                        await sleep(500)
+                        await sleep(1000)
 
                         window.location.href = "/home";
 
@@ -735,7 +763,14 @@ function CreateNewAccount() {
             path: location.pathname,
             latitude: null,
             longitude: null,
-            metadata: { "auth_provider": "github" },
+            metadata: {
+                mobile: window.innerWidth < 1000,
+                width: window.innerWidth,
+                height: window.innerHeight,
+                user_agent: navigator.userAgent,
+                referrer: document.referrer,
+                auth_provider: "github"
+            },
         }
         trackEvent(payload);
 
@@ -818,7 +853,14 @@ function CreateNewAccount() {
                         path: location.pathname,
                         latitude: null,
                         longitude: null,
-                        metadata: { "auth_provider": "github" },
+                        metadata: {
+                            mobile: window.innerWidth < 1000,
+                            width: window.innerWidth,
+                            height: window.innerHeight,
+                            user_agent: navigator.userAgent,
+                            referrer: document.referrer,
+                            auth_provider: "github"
+                        },
                     }
                     trackEvent(payload);
 
@@ -846,7 +888,7 @@ function CreateNewAccount() {
                         authState.tier = auth["tier"]
                         dispatch(updateAuthState(authState))
 
-                        await sleep(500)
+                        await sleep(1000)
 
                         window.location.href = "/home";
 

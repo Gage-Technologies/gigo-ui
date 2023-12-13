@@ -741,7 +741,7 @@ function Home() {
                                 </Typography>
                                 <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
                                     <StarIcon sx={{ color: theme.palette.primary.main, fontSize: ".8em", mr: 1 }} />
-                                    <span style={{ color: theme.palette.primary.main }}>Private DevSpaces</span>
+                                    <span style={{ color: theme.palette.primary.main }}>Private Projects</span>
                                 </Typography>
                                 <Typography variant="body1" component="div" sx={{ fontSize: ".7em", ml: 3 }}>
                                     Learn in stealth mode.

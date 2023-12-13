@@ -54,6 +54,7 @@ import GIGOLandingPageMobile from "../components/LandingMobile";
 import GIGOLandingPageChristmas from "../components/LandingChristmas";
 import GIGOLandingPage from "../components/Landing";
 import GigoCircleIcon from "../components/Icons/GigoCircleLogo";
+import { sleep } from "../services/utils";
 
 
 function Login(this: any) {
@@ -179,6 +180,8 @@ function Login(this: any) {
             authState.hasSubscription = auth["has_subscription"]
             dispatch(updateAuthState(authState))
 
+            await sleep(1000)
+
             window.location.href = "/home";
 
         } else {
@@ -289,6 +292,8 @@ function Login(this: any) {
             authState.hasPaymentInfo = auth["has_payment_info"]
             authState.hasSubscription = auth["has_subscription"]
             dispatch(updateAuthState(authState))
+
+            await sleep(1000)
 
             window.location.href = "/home";
 
@@ -420,6 +425,8 @@ function Login(this: any) {
             dispatch(updateAuthState(authState))
 
             console.log("auth is: ", auth)
+
+            await sleep(1000)
 
             window.location.href = "/home";
             const payload: RecordWebUsage = {
