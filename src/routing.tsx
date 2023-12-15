@@ -50,7 +50,7 @@ export default function Routing() {
     const userAgent = navigator.userAgent;
 
     // Check if the user agent belongs to a known crawler
-    const isCrawler = /Googlebot|Bingbot|Slurp|DuckDuckBot|Baiduspider|YandexBot|Sogou/i.test(userAgent);
+    const isCrawler = /Googlebot|Bingbot|Slurp|DuckDuckBot|Baiduspider|YandexBot|Sogou|Google\sInspection\sTool/i.test(userAgent);
 
 
     /**
