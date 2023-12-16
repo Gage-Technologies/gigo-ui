@@ -60,6 +60,7 @@ import { keyframes } from '@mui/system';
 import StarIcon from '@mui/icons-material/Star';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/CheckCircleOutline';
+import { LoadingButton } from "@mui/lab";
 
 const gradientAnimation = keyframes`
   0% { background-position: 0% 50%; }
@@ -97,6 +98,10 @@ function Home() {
 
     const [openTooltip, setOpenTooltip] = useState(false);
 
+    const [proMonthlyLink, setProMonthlyLink] = useState("");
+    const [proYearlyLink, setProYearlyLink] = useState("");
+    const [loadingProLinks, setLoadingProLinks] = useState(false)
+
     ReactGA.initialize("G-38KBFJZ6M6");
 
 
@@ -117,6 +122,36 @@ function Home() {
         }
         setRunTutorial(!tutorialState.home && loggedIn && window.innerWidth > 1000)
     }, [tutorialState])
+
+    const retrieveProUrls = async (): Promise<{ monthly: string, yearly: string } | null> => {
+        let res = await call(
+            "/api/stripe/premiumMembershipSession",
+            "post",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {},
+            null,
+            config.rootPath
+        )
+
+        if (res !== undefined && res["return url"] !== undefined && res["return year"] !== undefined) {
+            setProMonthlyLink(res["return url"])
+            setProYearlyLink(res["return year"])
+            return {
+                "monthly": res["return url"],
+                "yearly": res["return year"],
+            }
+        }
+
+        return null
+    }
+
+    useEffect(() => {
+        if (runTutorial)
+            retrieveProUrls()
+    }, [runTutorial])
 
     const infiniteScrollHandler = async () => {
         // we make up to 3 attempts to retrieve the next block of data
@@ -659,7 +694,7 @@ function Home() {
         )
     }
 
-    const handleButtonClick = async () => {
+    const handleReferralButtonClick = async () => {
         try {
             await navigator.clipboard.writeText(`https://gigo.dev/referral/${encodeURIComponent(authState.userName)}`);
             setOpenTooltip(true);
@@ -670,6 +705,29 @@ function Home() {
             console.error('Failed to copy text: ', err);
         }
     };
+
+    const handleClaimButtonClick = async () => {
+        setLoadingProLinks(true)
+
+        // first let's check if we have a cached session - we hope so cause it'll be way faster
+        let mlink = proMonthlyLink
+        let ylink = proYearlyLink
+        if (mlink == "" || ylink != "") {
+            // retrieve the urls if they aren't cached
+            let links = await retrieveProUrls()
+            if (links === null) {
+                swal("Server Error", "This is awkward... The server is having a fit. We hope you claim your trial another time!", "error")
+                return
+            }
+            mlink = links.monthly
+            ylink = links.yearly
+        }
+
+        // open the monthly link in a new tab
+        window.open(mlink, "_blank");
+
+        setLoadingProLinks(false)
+    }
 
     const renderWelcomePopup = () => {
         let steps: {
@@ -698,14 +756,23 @@ function Home() {
                                 MozTextFillColor: "transparent",
                             }}
                         >
-                            GIGO Pro Free Trial
+                            GIGO Pro
                         </DialogTitle>
                     ),
                     content: (
                         <>
-                            <Typography variant="body2" sx={{ fontSize: ".8em", mb: "5px" }}>
-                                Your trial is activated! Finish your account setup by adding a credit card or paypal to keep your Pro subscription active.
-                            </Typography>
+                            {authState.role != 1 && (
+                                <>
+                                    <Typography variant="body2" sx={{ fontSize: ".8em", mb: 2 }}>
+                                        You've received a free month of GIGO Pro!
+                                    </Typography>
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', mb: 2 }}>
+                                        <LoadingButton loading={loadingProLinks} variant="contained" onClick={handleClaimButtonClick}>
+                                            Claim Free Month
+                                        </LoadingButton>
+                                    </Box>
+                                </>
+                            )}
                             <Typography variant="body2" sx={{ fontSize: ".8em", mb: 2 }}>
                                 Give a month, Get a month! For every friend you refer, both of you get a free month of GIGO Pro!
                             </Typography>
@@ -726,7 +793,7 @@ function Home() {
                                     placement="top"
                                     arrow
                                 >
-                                    <Button variant="contained" onClick={handleButtonClick}>
+                                    <Button variant="contained" onClick={handleReferralButtonClick}>
                                         Referral Link
                                     </Button>
                                 </Tooltip>

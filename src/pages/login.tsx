@@ -178,6 +178,7 @@ function Login(this: any) {
             authState.alreadyCancelled = auth["already_cancelled"]
             authState.hasPaymentInfo = auth["has_payment_info"]
             authState.hasSubscription = auth["has_subscription"]
+            authState.usedFreeTrial = auth["used_free_trial"]
             dispatch(updateAuthState(authState))
 
             await sleep(1000)
@@ -291,6 +292,7 @@ function Login(this: any) {
             authState.alreadyCancelled = auth["already_cancelled"]
             authState.hasPaymentInfo = auth["has_payment_info"]
             authState.hasSubscription = auth["has_subscription"]
+            authState.usedFreeTrial = auth["used_free_trial"]
             dispatch(updateAuthState(authState))
 
             await sleep(1000)
@@ -422,6 +424,7 @@ function Login(this: any) {
             authState.alreadyCancelled = auth["already_cancelled"]
             authState.hasPaymentInfo = auth["has_payment_info"]
             authState.hasSubscription = auth["has_subscription"]
+            authState.usedFreeTrial = auth["used_free_trial"]
             dispatch(updateAuthState(authState))
 
             console.log("auth is: ", auth)

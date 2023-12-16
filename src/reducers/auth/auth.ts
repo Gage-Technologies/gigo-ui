@@ -50,7 +50,9 @@ export interface AuthState {
     inTrial: boolean,
     hasPaymentInfo: boolean,
     hasSubscription: boolean,
-    alreadyCancelled: boolean
+    alreadyCancelled: boolean,
+    lastRefresh: number | null,
+    usedFreeTrial: boolean,
 }
 
 export interface AuthStateUpdate {
@@ -75,7 +77,9 @@ export interface AuthStateUpdate {
     inTrial: boolean | null,
     hasPaymentInfo: boolean | null,
     hasSubscription: boolean | null,
-    alreadyCancelled: boolean | null
+    alreadyCancelled: boolean | null,
+    lastRefresh: number | null,
+    usedFreeTrial: boolean | null,
 }
 
 export const initialAuthState: AuthState = {
@@ -110,7 +114,9 @@ export const initialAuthState: AuthState = {
     inTrial: false,
     hasPaymentInfo: false,
     hasSubscription: false,
-    alreadyCancelled: false
+    alreadyCancelled: false,
+    lastRefresh: null,
+    usedFreeTrial: false,
 };
 
 export const initialAuthStateUpdate: AuthStateUpdate = {
@@ -135,7 +141,9 @@ export const initialAuthStateUpdate: AuthStateUpdate = {
     inTrial: null,
     hasPaymentInfo: null,
     hasSubscription: null,
-    alreadyCancelled: null
+    alreadyCancelled: null,
+    lastRefresh: null,
+    usedFreeTrial: null,
 };
 
 export const authSlice = createSlice({
@@ -233,6 +241,14 @@ export const authSlice = createSlice({
             if (update.payload.alreadyCancelled!== null) {
                 state.alreadyCancelled = update.payload.alreadyCancelled
             }
+
+            if (update.payload.lastRefresh !== null) {
+                state.lastRefresh = update.payload.lastRefresh
+            }
+
+            if (update.payload.usedFreeTrial !== null) {
+                state.usedFreeTrial = update.payload.usedFreeTrial
+            }
         },
     }
 });
@@ -265,5 +281,7 @@ export const selectAuthStateInTrial = (state: RootState) => state.auth.inTrial? 
 export const selectAuthStateHasSubscription = (state: RootState) => state.auth.hasSubscription? state.auth.hasSubscription : initialAuthState.hasSubscription;
 export const selectAuthStateHasPaymentInfo = (state: RootState) => state.auth.hasPaymentInfo? state.auth.hasPaymentInfo : initialAuthState.hasPaymentInfo;
 export const selectAuthStateAlreadyCancelled = (state: RootState) => state.auth.alreadyCancelled? state.auth.alreadyCancelled : initialAuthState.alreadyCancelled;
+export const selectAuthStateLastRefresh = (state: RootState) => state.auth.lastRefresh? state.auth.lastRefresh : initialAuthState.lastRefresh;
+export const selectAuthStateUsedFreeTrail = (state: RootState) => state.auth.usedFreeTrial? state.auth.usedFreeTrial : initialAuthState.usedFreeTrial;
 
 export default authSlice.reducer;

@@ -69,6 +69,7 @@ import {
     selectAuthStateThumbnail,
     selectAuthStateTutorialState,
     selectAuthStateUserName,
+    TutorialState,
     updateAuthState,
 } from "../reducers/auth/auth";
 import { isChrome } from "react-device-detect";
@@ -111,6 +112,8 @@ import { useLocation } from 'react-router-dom';
 import { useTracking } from 'react-tracking';
 import Pro from './Icons/Pro';
 import DevSpaceControls from './DevSpaceControls';
+import { sleep } from '../services/utils';
+import { decodeToken } from 'react-jwt';
 
 
 interface IProps {
@@ -425,6 +428,54 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         dispatch(clearChatState())
     }
 
+    const updateToken = async () => {
+        let res = await call(
+            "/api/auth/updateToken",
+            "post",
+            null,
+            null,
+            null,
+            null,
+            null,
+            config.rootPath
+        );
+
+        if (res && res["token"]) {
+            let auth: {
+                [key: string]: any
+            } | null = decodeToken(res["token"]);
+            if (!auth) {
+                return;
+            }
+
+            let authState = Object.assign({}, initialAuthStateUpdate)
+            authState.authenticated = true
+            authState.expiration = auth["exp"]
+            authState.id = auth["user"]
+            authState.role = auth["user_status"]
+            authState.email = auth["email"]
+            authState.phone = auth["phone"]
+            authState.userName = auth["user_name"]
+            authState.thumbnail = auth["thumbnail"]
+            authState.backgroundColor = auth["color_palette"]
+            authState.backgroundName = auth["name"]
+            authState.backgroundRenderInFront = auth["render_in_front"]
+            authState.exclusiveContent = auth["exclusive_account"]
+            authState.exclusiveAgreement = auth["exclusive_agreement"]
+            authState.tutorialState = auth["tutorials"] as TutorialState
+            authState.tier = auth["tier"]
+            authState.inTrial = auth["in_trial"]
+            authState.alreadyCancelled = auth["already_cancelled"]
+            authState.hasPaymentInfo = auth["has_payment_info"]
+            authState.hasSubscription = auth["has_subscription"]
+            authState.lastRefresh = Date.now()
+            authState.usedFreeTrial = auth["used_free_trial"]
+            dispatch(updateAuthState(authState))
+
+            await sleep(1000)
+        }
+    }
+
     const reportIssue = async () => {
         let url = window.location.href
         let stringSplit = url.split("/")
@@ -526,9 +577,17 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     };
 
     React.useEffect(() => {
-        if (loggedIn)
+        if (loggedIn) {
             getNotifications();
+            // refresh the user token when the enter the app if they haven't been here within the last hour
+            // this doesn't extend their session just ensures they have the latest session metadata
+            if (authState.lastRefresh === null || Date.now() - authState.lastRefresh < 1000 * 60 * 60)
+                updateToken()
+        }
+
     }, []);
+
+
 
     const handleExclusiveContent = () => {
         setAnchorEl(null);
