@@ -113,14 +113,15 @@ function Home() {
     }
 
     const tutorialState = useAppSelector(selectAuthStateTutorialState);
-    const [runTutorial, setRunTutorial] = React.useState(!tutorialState.home && loggedIn && window.innerWidth > 1000)
+    const [runTutorial, setRunTutorial] = React.useState(!tutorialState.home && loggedIn)
 
     // this enables us to push tutorial restarts from the app wrapper down into this page
     useEffect(() => {
+        console.log("run tutorial: ", runTutorial)
         if (tutorialState.home === !runTutorial) {
             return
         }
-        setRunTutorial(!tutorialState.home && loggedIn && window.innerWidth > 1000)
+        setRunTutorial(!tutorialState.home && loggedIn)
     }, [tutorialState])
 
     const retrieveProUrls = async (): Promise<{ monthly: string, yearly: string } | null> => {
@@ -742,7 +743,8 @@ function Home() {
                     title: (
                         <DialogTitle
                             sx={{
-                                width: 450,
+                                width: window.innerWidth > 1000 ? 450 : undefined,
+                                maxWidth: window.innerWidth > 1000 ? undefined : "90vw",
                                 background: "linear-gradient(90deg, #84E8A2, #63a4f8, #84E8A2)",
                                 backgroundSize: "200% 200%",
                                 animation: `${gradientAnimation} 3s ease infinite`,
@@ -847,7 +849,7 @@ function Home() {
                 },
                 {
                     title: "How to use tutorials",
-                    content: "Tutorials will start on important pages to guide you through the platform. This is the only mandatory tutorial. If you skip a tutorial, you can always restart it using the help button at the bottom of the left-hand sidebar.",
+                    content: "Tutorials will start on important pages to guide you through the platform. This is the only mandatory tutorial. If you skip a tutorial, you can always restart it using the help button at the bottom of the left-hand sidebar (desktop) or the user icon drop down (mobile).",
                 },
                 {
                     title: "Get Started!",
@@ -879,7 +881,15 @@ function Home() {
             >
                 {typeof steps[tutorialStepIndex]["title"] === "string" ? (
                     <DialogTitle
-                        sx={{
+                        sx={window.innerWidth < 1000 ? {
+                            maxWidth: "90vw",
+                            backgroundColor: "transparent",
+                            fontSize: "1.2em",
+                            // center the text
+                            textAlign: "center",
+                            paddingTop: "20px",
+                            paddingBottom: "20px",
+                        } : {
                             width: 450,
                             backgroundColor: "transparent",
                             fontSize: "1.2em",
@@ -895,7 +905,10 @@ function Home() {
                     steps[tutorialStepIndex]["title"]
                 )}
                 <DialogContent
-                    sx={{
+                    sx={window.innerWidth < 1000 ? {
+                        maxWidth: "90vw",
+                        backgroundColor: "transparent",
+                    } : {
                         width: 450,
                         backgroundColor: "transparent",
                     }}

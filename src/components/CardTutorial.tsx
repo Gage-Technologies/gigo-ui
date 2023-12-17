@@ -24,9 +24,6 @@ type TutorialProps = {
     step: number;
     changeCallback: (step: number, back: boolean) => void;
     steps: TutorialStep[];
-    bottom?: number;
-    right?: number;
-    width?: number;
 };
 
 export default function CardTutorial(props: TutorialProps) {
@@ -42,7 +39,18 @@ export default function CardTutorial(props: TutorialProps) {
 
     return (
         <Box
-            sx={{
+            sx={window.innerWidth < 1000 ? {
+                position: "fixed",
+                bottom: 60,
+                right: "2.5vw",
+                borderRadius: "10px",
+                zIndex: 10000,
+                boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2);",
+                ...themeHelpers.frostedGlass,
+                backgroundColor: "rgba(19,19,19,0.31)",
+                // backgroundColor: theme.palette.primary.main + "30",
+                width: "95vw"
+            } :{
                 position: "fixed",
                 bottom: 40,
                 right: 80,
@@ -52,7 +60,7 @@ export default function CardTutorial(props: TutorialProps) {
                 ...themeHelpers.frostedGlass,
                 backgroundColor: "rgba(19,19,19,0.31)",
                 // backgroundColor: theme.palette.primary.main + "30",
-                width: props.width ? props.width : 400,
+                width: 400,
             }}
         >
             <DialogContent

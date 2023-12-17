@@ -476,6 +476,47 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         }
     }
 
+    const restartTutorialClick = () => {
+        let authState = Object.assign({}, initialAuthStateUpdate)
+        // copy the existing state
+        let state = Object.assign({}, tutorialState)
+        // update the state
+        switch (window.location.pathname.split("/")[1]) {
+            case "home":
+                state.home = false
+                break;
+            case "challenge":
+                state.challenge = false
+                break;
+            case "workspace":
+                state.workspace = false
+                break;
+            case "streak":
+                state.stats = false
+                break;
+            case "nemesis":
+                state.nemesis = false
+                break;
+            case "launchpad":
+                // get query params from url
+                let queryParams = new URLSearchParams(window.location.search)
+
+                // reset the vscode tutorial if editor query param is true
+                if (queryParams.has("editor") && queryParams.get("editor") === "true") {
+                    state.vscode = false
+                } else {
+                    state.launchpad = false
+                }
+                break;
+            case "create-challenge":
+                state.create_project = false
+                break;
+        }
+        authState.tutorialState = state
+        // @ts-ignore
+        dispatch(updateAuthState(authState))
+    }
+
     const reportIssue = async () => {
         let url = window.location.href
         let stringSplit = url.split("/")
@@ -682,46 +723,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         return (
             <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
                 <Tooltip title={"Restart Tutorial. Click to close at any point."}>
-                    <Button onClick={() => {
-                        let authState = Object.assign({}, initialAuthStateUpdate)
-                        // copy the existing state
-                        let state = Object.assign({}, tutorialState)
-                        // update the state
-                        switch (window.location.pathname.split("/")[1]) {
-                            case "home":
-                                state.home = false
-                                break;
-                            case "challenge":
-                                state.challenge = false
-                                break;
-                            case "workspace":
-                                state.workspace = false
-                                break;
-                            case "streak":
-                                state.stats = false
-                                break;
-                            case "nemesis":
-                                state.nemesis = false
-                                break;
-                            case "launchpad":
-                                // get query params from url
-                                let queryParams = new URLSearchParams(window.location.search)
-
-                                // reset the vscode tutorial if editor query param is true
-                                if (queryParams.has("editor") && queryParams.get("editor") === "true") {
-                                    state.vscode = false
-                                } else {
-                                    state.launchpad = false
-                                }
-                                break;
-                            case "create-challenge":
-                                state.create_project = false
-                                break;
-                        }
-                        authState.tutorialState = state
-                        // @ts-ignore
-                        dispatch(updateAuthState(authState))
-                    }}>
+                    <Button onClick={() => restartTutorialClick()}>
                         <HelpOutlineIcon height={"25"} width={"25"} />
                     </Button>
                 </Tooltip>
@@ -1328,6 +1330,10 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     onClose={handleClose}
                                 >
                                     <MenuItem onClick={handleProfile}>Profile</MenuItem>
+                                    <MenuItem onClick={() => {
+                                        restartTutorialClick()
+                                        handleClose()
+                                    }}>Restart Tutorial</MenuItem>
                                     {window.innerWidth > 1000 ? (
                                         <MenuItem onClick={handleSettings}>Account Settings</MenuItem>
                                     ) : null}

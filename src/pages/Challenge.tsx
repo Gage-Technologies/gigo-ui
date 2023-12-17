@@ -306,7 +306,7 @@ function Challenge() {
         if (tutorialState.challenge === !runTutorial) {
             return
         }
-        setRunTutorial(!tutorialState.challenge && loggedIn && window.innerWidth > 1000)
+        setRunTutorial(!tutorialState.challenge && loggedIn)
     }, [tutorialState])
 
     useEffect(() => {
@@ -901,7 +901,7 @@ function Challenge() {
 
     useEffect(() => {
         if (projectDesc !== "")
-            setRunTutorial(!tutorialState.challenge && loggedIn && window.innerWidth > 1000)
+            setRunTutorial(!tutorialState.challenge && loggedIn)
     }, [projectDesc])
 
     const projectName = project !== null ? project["title"] : ""
@@ -4626,6 +4626,7 @@ function Challenge() {
                             moreInfo: (
                                 <div>
                                     <p style={styles.tutorialText}>Discussions are a great way to get help or share your thoughts on a project. When you complete an Attempt head over to Discussions to share your opinion or help others!</p>
+                                    <p style={styles.tutorialText}>Discussions are currently only available on desktop GIGO but we're working hard to bring them to mobile!</p>
                                 </div>
                             )
                         },
