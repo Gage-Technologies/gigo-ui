@@ -112,7 +112,8 @@ export default function StripeSuccessMembership() {
     }}>
       <Box
         sx={{
-          maxWidth: '800px',
+          width: window.innerWidth < 1000 ? "90vw" : undefined,
+          maxWidth: window.innerWidth < 1000 ? undefined : '800px',
           textAlign: 'center',
           padding: '2rem',
           overflowY: 'hidden',
