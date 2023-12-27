@@ -487,11 +487,11 @@ function Login(this: any) {
                             Sign In
                         </Typography>
                         <TextField
-                            label={"Username"}
+                            label={"Username/Email"}
                             variant={`outlined`}
                             size={window.innerWidth > 1000 ? `medium` : `small`}
                             color={"primary"}
-                            helperText={"Please enter your username"}
+                            helperText={"Please enter your username or email"}
                             inputProps={
                                 styles.textField
                             }

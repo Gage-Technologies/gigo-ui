@@ -7,6 +7,7 @@ import { initialAuthState, initialAuthStateUpdate, selectAuthState, updateAuthSt
 import TrackedOutlet from './components/OutletTracking';
 import PublicConfigs from "./pages/PublicConfigs";
 import Unsubscribe from "./pages/unsubscribe";
+import config from './config';
 const CurateAdminPage = React.lazy(() => import("./pages/curateAdmin"));
 const Home = React.lazy(() => import("./pages/home"));
 const Challenge = React.lazy(() => import("./pages/Challenge"));
@@ -49,17 +50,24 @@ export default function Routing() {
 
     const userAgent = navigator.userAgent;
 
-    // Check if the user agent belongs to a known crawler
+    // check if the user agent belongs to a known crawler
     const isCrawler = /Googlebot|Bingbot|Slurp|DuckDuckBot|Baiduspider|YandexBot|Sogou|Google\sInspection\sTool/i.test(userAgent);
 
+    // check if the referrer is from our site
+    const isReferrerFromOurSite = new RegExp(config.appDomain.replace(".", "\.")).test(document.referrer);
 
     /**
      * Protects private routes from unauthenticated and unauthorized access
      * @param role role required for a user to access the page (optional)
      */
-    const PrivateRoute = ({ role = null, permitCrawler = false }) => {
-        // If it's a crawler, allow access
-        if (isCrawler && permitCrawler) {
+    const PrivateRoute = ({ role = null, softBlock = false }) => {
+        // if it's a crawler, allow access
+        if (isCrawler && softBlock) {
+            return <Outlet />;
+        }
+
+        // permit direct visitors that are directly accessing the page on softBlock
+        if (softBlock && !isReferrerFromOurSite) {
             return <Outlet />;
         }
 
@@ -136,7 +144,7 @@ export default function Routing() {
                         <Route path={"/launchpad/:id"} element={<WorkspacePage />} />
                         <Route path={"/workspace/:id"} element={<WorkspaceAdvancedPage />} />
                     </Route >
-                    <Route element={<PrivateRoute permitCrawler={true} />}>
+                    <Route element={<PrivateRoute softBlock={true} />}>
                         <Route path="/challenge/:id" element={<Challenge />} />
                         <Route path="/attempt/:id" element={<AttemptPage />} />
                         <Route path="/user/:id" element={<User />} />

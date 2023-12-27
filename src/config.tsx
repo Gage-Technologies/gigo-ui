@@ -1,5 +1,6 @@
 // prod
 const config = {
+    appDomain: "gigo.dev",
     rootPath: "https://api.cdn.gigo.dev",
     cdnPath: "https://api.cdn.gigo.dev",
     imgCdnProxy: "https://imgproxy.cdn.gigo.dev",
@@ -10,6 +11,7 @@ const config = {
 
 // dev
 // const config = {
+//     appDomain: "gigo.dev",
 //     rootPath: "https://dev.api.cdn.gigo.dev",
 //     cdnPath: "https://dev.api.cdn.gigo.dev",
 //     imgCdnProxy: "https://imgproxy.cdn.gigo.dev",

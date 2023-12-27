@@ -1493,7 +1493,7 @@ function CreateNewAccount() {
                             <form style={{ height: "auto", alignContent: "center", justifyContent: "center" }}>
                                 <TextField
                                     id={"Username"}
-                                    error={username === "" ? missingUser : false}
+                                    error={username === "" ? missingUser : invalidUsername}
                                     variant={`outlined`}
                                     color={"primary"}
                                     size={window.innerWidth > 1000 ? `small` : `small`}
@@ -1507,7 +1507,15 @@ function CreateNewAccount() {
                                         mt: window.innerWidth > 1000 ? "2.5vh" : ".5vh"
                                     }}
                                     value={username}
-                                    onChange={e => setUsername(e.target.value)}
+                                    onChange={e => {
+                                        if (e.target.value.includes(" ") || e.target.value.includes("@") || e.target.value.length > 25) {
+                                            setInvalidUsername(true);
+                                        } else {
+                                            setInvalidUsername(false)
+                                        }                              
+                                        setUsername(e.target.value)
+                                    }}
+                                    helperText={invalidUsername ? "Must be <= 25 chars with no spaces or @ symbols" : undefined}
                                 >
                                 </TextField>
                                 <TextField
@@ -1587,6 +1595,17 @@ function CreateNewAccount() {
                                     }}
                                     variant={`contained`}
                                     color={"primary"}
+                                    disabled={(
+                                        missingEmail || 
+                                        missingPassword || 
+                                        missingConfirm || 
+                                        invalidUsername || 
+                                        username === "" || 
+                                        email === "" ||
+                                        password === "" ||
+                                        confirmPass === "" ||
+                                        password !== confirmPass
+                                    )}
                                     // endIcon={<LockPersonIcon/>}
                                     sx={{
                                         width: window.innerWidth > 1000 ? '15vw' : "40%",
