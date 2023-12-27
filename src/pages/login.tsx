@@ -49,10 +49,6 @@ import { RecordWebUsage, WebTrackingEvent } from "../models/web_usage";
 import { useLocation } from 'react-router-dom';
 import christmasLogin from "../img/christmas-login.png";
 import christmasLogin219 from "../img/christmas-login-21-9.png";
-// import GIGOLandingPageChristmasMobile from "../components/LandingChristmasMobile";
-import GIGOLandingPageMobile from "../components/LandingMobile";
-import GIGOLandingPageChristmas from "../components/LandingChristmas";
-import GIGOLandingPage from "../components/Landing";
 import GigoCircleIcon from "../components/Icons/GigoCircleLogo";
 import { sleep } from "../services/utils";
 

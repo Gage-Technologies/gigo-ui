@@ -61,6 +61,8 @@ import StarIcon from '@mui/icons-material/Star';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/CheckCircleOutline';
 import { LoadingButton } from "@mui/lab";
+import GIGOLandingPageNewYearsMobile from "../components/LandingNewYearsMobile";
+import GIGOLandingPageNewYears from "../components/LandingNewYears";
 
 const gradientAnimation = keyframes`
   0% { background-position: 0% 50%; }
@@ -1002,11 +1004,18 @@ function Home() {
             if (holiday === "Christmas") {
                 return (<GIGOLandingPageChristmasMobile />)
             }
+            if (holiday === "New Years") {
+                return (<GIGOLandingPageNewYearsMobile />)
+            }
             return (<GIGOLandingPageMobile />)
         }
 
         if (holiday === "Christmas") {
             return (<GIGOLandingPageChristmas />)
+        }
+
+        if (holiday === "New Years") {
+            return (<GIGOLandingPageNewYears />)
         }
 
         return (<GIGOLandingPage />)

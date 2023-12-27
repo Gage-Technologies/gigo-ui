@@ -747,16 +747,16 @@ export const getAllTokens = (mode: PaletteMode) => {
         return getHalloweenTokens(mode);
     }
 
+    if ((today.getMonth() === 11 && today.getDate() >= 26) || (today.getMonth() === 0 && today.getDate() <= 2)){
+        // New Years
+        holiday = "New Years"
+        return getNewYearsTokens(mode);
+    }
+
     if (today.getMonth() === 11){
         // Christmas
         holiday = "Christmas"
         return getChristmasTokens(mode);
-    }
-
-    if ((today.getMonth() === 11 && today.getDate() >= 26) && (today.getMonth() === 0 && today.getDate() <= 2)){
-        // New Years
-        holiday = "New Years"
-        return getNewYearsTokens(mode);
     }
 
     if (today.getMonth() === 1) {
