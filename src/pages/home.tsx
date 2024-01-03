@@ -1236,20 +1236,6 @@ function Home() {
                                 borderRadius: 1,
                             }}
                         >
-                            {ProjectsBox()}
-                        </Box>
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                flexWrap: "wrap",
-                                width: "100%",
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                bgcolor: 'background.default',
-                                color: 'text.primary',
-                                borderRadius: 1,
-                            }}
-                        >
                             {ActiveProjects()}
                         </Box>
 
