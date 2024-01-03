@@ -645,15 +645,15 @@ function Home() {
                     marginLeft: "1%",
                 }}>
                     {/*TODO mobile => make carousel 1 for mobile*/}
-                    <Carousel show={(document.documentElement.clientWidth < 1000 ? 1 : 4)}>
+                    <Carousel show={(document.documentElement.clientWidth < 1000 ? 1 : 5)}>
                         {
                             //@ts-ignore
                             activeData.map((project, index) => {
                                 return (
-                                    <div style={{ paddingBottom: "10px" }}>
+                                    <div style={{ paddingBottom: "10px", width: "16vw" }}>
                                         <LazyLoad once scroll unmountIfInvisible>
                                             <ShortsCard
-                                                height={"50vh"}
+                                                height={"52vh"}
                                                 imageHeight={"43vh"}
                                                 // TODO mobile => make width 'fit-content'
                                                 width={'13vw'}

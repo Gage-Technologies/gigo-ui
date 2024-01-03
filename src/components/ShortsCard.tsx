@@ -80,18 +80,6 @@ export default function ShortsCard(props: IProps) {
             backgroundImage: "linear-gradient(45deg, rgba(255,255,255,0) 45%, rgba(0,0,0,1) 91%), url(" + props.shortsThumb + ")",
             // objectFit: "fill",
         },
-        date: {
-            textOverflow: "ellipsis",
-            overflow: "hidden",
-            display: '-webkit-box',
-            WebkitLineClamp: 5,
-            WebkitBoxOrient: 'vertical',
-            color: theme.palette.text.secondary,
-            fontWeight: 200,
-            fontSize: "0.6em",
-            textAlign: "left",
-            // paddingLeft: "10px",
-        },
         title: {
             textOverflow: "ellipsis",
             overflow: "hidden",
@@ -103,13 +91,6 @@ export default function ShortsCard(props: IProps) {
             width: props.width,
             margin: 0,
             paddingLeft: 0
-        },
-        username: {
-            textOverflow: "ellipsis",
-            overflow: "hidden",
-            whiteSpace: "nowrap",
-            width: "9ch", // approximately 4 characters wide
-            fontSize: "0.8em",
         },
         content: {
             paddingBottom: "4px",
