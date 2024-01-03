@@ -43,15 +43,15 @@ interface IProps {
     height: number | string,
     imageWidth: number | string,
     imageHeight: number | string,
-    shortsId: string,
-    shortsTitle: string,
-    shortsThumb: string,
-    shortsDesc: string,
+    bytesId: string,
+    bytesTitle: string,
+    bytesThumb: string,
+    bytesDesc: string,
     onClick: () => void,
     animate: boolean,
 }
 
-export default function ShortsCard(props: IProps) {
+export default function BytesCard(props: IProps) {
     let userPref = localStorage.getItem('theme')
     const [mode, _] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
@@ -77,7 +77,7 @@ export default function ShortsCard(props: IProps) {
             height: props.imageHeight,
             width: props.imageWidth,
             minWidth: 200,
-            backgroundImage: "linear-gradient(45deg, rgba(255,255,255,0) 45%, rgba(0,0,0,1) 91%), url(" + props.shortsThumb + ")",
+            backgroundImage: "linear-gradient(45deg, rgba(255,255,255,0) 45%, rgba(0,0,0,1) 91%), url(" + props.bytesThumb + ")",
             // objectFit: "fill",
         },
         title: {
@@ -140,7 +140,7 @@ export default function ShortsCard(props: IProps) {
             `}
             </style>
             <ButtonBase
-                href={`/byte/${props.shortsId}`}
+                href={`/byte/${props.bytesId}`}
                 // onClick={props.onClick}
             >
                 <Card sx={styles.card}>
@@ -153,7 +153,7 @@ export default function ShortsCard(props: IProps) {
                         sx={styles.content}
                     >
                         <Typography gutterBottom variant="h6" component="div" sx={styles.title}>
-                            {props.shortsTitle}
+                            {props.bytesTitle}
                         </Typography>
                     </CardContent>
                 </Card>
@@ -162,14 +162,14 @@ export default function ShortsCard(props: IProps) {
     )
 }
 
-ShortsCard.defaultProps = {
+BytesCard.defaultProps = {
     width: "12vw",
     height: "36vh",
     imageWidth: "12vw",
     imageHeight: "30vh",
-    shortsId: 0,
-    shortsTitle: "",
-    shortsDesc: "",
-    shortsThumb: "",
+    bytesId: 0,
+    bytesTitle: "",
+    bytesDesc: "",
+    bytesThumb: "",
     animate: false,
 }

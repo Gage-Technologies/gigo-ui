@@ -63,7 +63,7 @@ import CheckIcon from '@mui/icons-material/CheckCircleOutline';
 import { LoadingButton } from "@mui/lab";
 import GIGOLandingPageNewYearsMobile from "../components/LandingNewYearsMobile";
 import GIGOLandingPageNewYears from "../components/LandingNewYears";
-import ShortsCard from "../components/ShortsCard";
+import BytesCard from "../components/BytesCard";
 
 const gradientAnimation = keyframes`
   0% { background-position: 0% 50%; }
@@ -652,16 +652,16 @@ function Home() {
                                 return (
                                     <div style={{ paddingBottom: "10px", width: "16vw" }}>
                                         <LazyLoad once scroll unmountIfInvisible>
-                                            <ShortsCard
+                                            <BytesCard
                                                 height={"52vh"}
                                                 imageHeight={"43vh"}
                                                 // TODO mobile => make width 'fit-content'
                                                 width={'13vw'}
                                                 imageWidth={"13vw"}
-                                                shortsId={project["_id"]}
-                                                shortsTitle={project["title"] !== null ? project["title"] : project["post_title"]}
-                                                shortsDesc={project["description"]}
-                                                shortsThumb={config.rootPath + project["thumbnail"]}
+                                                bytesId={project["_id"]}
+                                                bytesTitle={project["title"] !== null ? project["title"] : project["post_title"]}
+                                                bytesDesc={project["description"]}
+                                                bytesThumb={config.rootPath + project["thumbnail"]}
                                                 onClick={() => navigate("/byte/" + project["_id"])}
                                                 role={authState.role}
                                             />
