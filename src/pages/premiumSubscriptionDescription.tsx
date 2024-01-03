@@ -192,7 +192,7 @@ function PremiumDescription() {
         <ThemeProvider theme={theme}>
             <CssBaseline>
                 <div>
-                    <Box style={window.innerWidth > 1000 ? { width: "100%", height: "500px", backgroundColor: renderThemeColor() } : { width: "100%", height: "850px", backgroundColor: renderThemeColor() }}>
+                    <Box style={window.innerWidth > 1000 ? { width: "100%", height: "500px", backgroundColor: theme.palette.primary.light } : { width: "100%", height: "850px", backgroundColor: theme.palette.primary.light }}>
                         <div style={window.innerWidth > 1000 ? { width: "100%", display: "flex", flexDirection: "row", justifyContent: "space-evenly" } : { width: "100%", display: "flex", flexDirection: "column", height: "100%" }}>
                             <div style={window.innerWidth > 1000 ? { position: "relative", top: "150px" } : { position: "relative", height: "100%", top: "50px" }}>
                                 {inTrial ? (
@@ -239,10 +239,10 @@ function PremiumDescription() {
                                         <h4>Don't want to see it go? Only $15.00/month. Cancel anytime.</h4>
                                         <AwesomeButton style={{
                                             width: "auto",
-                                            '--button-primary-color': theme.palette.background.paper,
+                                            '--button-primary-color': theme.palette.primary.main,
                                             '--button-primary-color-dark': theme.palette.primary.dark,
                                             '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.dark,
+                                            '--button-primary-color-hover': theme.palette.primary.main,
                                             fontSize: "14px"
                                         }} type="primary" onPress={() => stripeNavigate()}>
                                             <img src={premiumImage} />
@@ -254,10 +254,10 @@ function PremiumDescription() {
                                         <h4>Only $15.00/month. Cancel anytime.</h4>
                                         <AwesomeButton style={{
                                             width: "auto",
-                                            '--button-primary-color': theme.palette.background.paper,
+                                            '--button-primary-color': theme.palette.primary.main,
                                             '--button-primary-color-dark': theme.palette.primary.dark,
                                             '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.dark,
+                                            '--button-primary-color-hover': theme.palette.primary.main,
                                             fontSize: "14px"
                                         }} type="primary" onPress={() => stripeNavigate()}>
                                             <img src={premiumImage} />
@@ -271,10 +271,10 @@ function PremiumDescription() {
                                         <h4>No Limits. No Restrictions. True Freedom.</h4>
                                         <AwesomeButton style={{
                                             width: "auto",
-                                            '--button-primary-color': theme.palette.background.paper,
+                                            '--button-primary-color': theme.palette.primary.main,
                                             '--button-primary-color-dark': theme.palette.primary.dark,
                                             '--button-primary-color-light': theme.palette.text.primary,
-                                            '--button-primary-color-hover': theme.palette.primary.dark,
+                                            '--button-primary-color-hover': theme.palette.primary.main,
                                             fontSize: "14px"
                                         }} type="primary" href={"/settings"} onPress={() => {
                                             window.sessionStorage.setItem("accountsPage", "membership");
@@ -295,7 +295,7 @@ function PremiumDescription() {
                     <Box>
                         <div style={window.innerWidth > 1000 ? { display: "flex", flexDirection: "row", width: "100%", justifyContent: "space-evenly" } : { display: "flex", flexDirection: "column", width: "100%", alignItems: "center" }}>
                             <div style={window.innerWidth > 1000 ? {} : { marginBottom: "50px" }}>
-                                <Button disabled={true} style={{ backgroundColor: renderThemeColor() }}>
+                                <Button disabled={true} style={{ backgroundColor: theme.palette.primary.light }}>
                                     <img src={codeTeacher} width={width} height={height} />
                                 </Button>
                                 <div style={window.innerWidth > 1000 ? { width: textWidth } : { width: textWidth, wordWrap: "break-word" }}>
@@ -304,7 +304,7 @@ function PremiumDescription() {
                                 </div>
                             </div>
                             <div style={window.innerWidth > 1000 ? {} : { marginBottom: "50px" }}>
-                                <Button disabled={true} style={{ backgroundColor: renderThemeColor() }}>
+                                <Button disabled={true} style={{ backgroundColor: theme.palette.primary.light }}>
                                     <img src={privateWorkspace} width={width} height={height} />
                                 </Button>
                                 <div style={window.innerWidth > 1000 ? { width: textWidth } : { width: textWidth, wordWrap: "break-word" }}>
@@ -313,7 +313,7 @@ function PremiumDescription() {
                                 </div>
                             </div>
                             <div style={window.innerWidth > 1000 ? {} : { marginBottom: "50px" }}>
-                                <Button disabled={true} style={{ backgroundColor: renderThemeColor() }}>
+                                <Button disabled={true} style={{ backgroundColor: theme.palette.primary.light }}>
                                     <img src={resources} width={width} height={height} />
                                 </Button>
                                 <div style={window.innerWidth > 1000 ? { width: textWidth } : { width: textWidth, wordWrap: "break-word" }}>
@@ -325,7 +325,7 @@ function PremiumDescription() {
                         <div style={{ height: "100px" }} />
                         <div style={window.innerWidth > 1000 ? { display: "flex", flexDirection: "row", width: "100%", justifyContent: "space-evenly" } : { display: "flex", flexDirection: "column", width: "100%", alignItems: "center" }}>
                             <div style={window.innerWidth > 1000 ? {} : { marginBottom: "50px" }}>
-                                <Button disabled={true} style={{ backgroundColor: renderThemeColor() }}>
+                                <Button disabled={true} style={{ backgroundColor: theme.palette.primary.light }}>
                                     <img src={workspaces} width={width} height={height} />
                                 </Button>
                                 <div style={window.innerWidth > 1000 ? { width: textWidth } : { width: textWidth, wordWrap: "break-word" }}>
@@ -334,7 +334,7 @@ function PremiumDescription() {
                                 </div>
                             </div>
                             <div style={window.innerWidth > 1000 ? {} : { marginBottom: "50px" }}>
-                                <Button disabled={true} style={{ backgroundColor: renderThemeColor() }}>
+                                <Button disabled={true} style={{ backgroundColor: theme.palette.primary.light }}>
                                     <img src={streakFreeze} width={width} height={height} />
                                 </Button>
                                 <div style={window.innerWidth > 1000 ? { width: textWidth } : { width: textWidth, wordWrap: "break-word" }}>
@@ -343,7 +343,7 @@ function PremiumDescription() {
                                 </div>
                             </div>
                             <div style={window.innerWidth > 1000 ? {} : { marginBottom: "50px" }}>
-                                <Button disabled={true} style={{ backgroundColor: renderThemeColor() }}>
+                                <Button disabled={true} style={{ backgroundColor: theme.palette.primary.light }}>
                                     <img src={vscodeTheme} width={width} height={height} />
                                 </Button>
                                 <div style={window.innerWidth > 1000 ? { width: textWidth } : { width: textWidth, wordWrap: "break-word" }}>
