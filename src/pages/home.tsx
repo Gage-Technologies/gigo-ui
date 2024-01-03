@@ -63,6 +63,7 @@ import CheckIcon from '@mui/icons-material/CheckCircleOutline';
 import { LoadingButton } from "@mui/lab";
 import GIGOLandingPageNewYearsMobile from "../components/LandingNewYearsMobile";
 import GIGOLandingPageNewYears from "../components/LandingNewYears";
+import ShortsCard from "../components/ShortsCard";
 
 const gradientAnimation = keyframes`
   0% { background-position: 0% 50%; }
@@ -536,7 +537,7 @@ function Home() {
                         Active Challenges
                     </Typography>
                     <Button variant="text"
-                        href={"/active"}
+                        href={"/bytes"}
                         sx={{
                             fontSize: "0.8em",
                             fontWeight: "light",
@@ -586,6 +587,82 @@ function Home() {
                                                 exclusive={false}
                                                 hover={false}
                                                 attempt={true}
+                                                role={authState.role}
+                                            />
+                                        </LazyLoad>
+                                    </div>
+                                )
+                            })}
+                    </Carousel>
+                </div>
+            </div>
+        )
+    }
+
+    const Bytes = () => {
+        if (activeData === null || activeData === undefined || activeData.length === 0) {
+            return (<div />)
+        }
+
+
+        // @ts-ignore
+        return (
+            <div style={{
+                display: "flex",
+                flexDirection: "column",
+                paddingLeft: "auto",
+                paddingRight: "auto",
+                justifyContent: "center",
+                width: "100%",
+                paddingBottom: "10px",
+                height: "100%"
+            }}>
+                <div style={{ display: "inline-flex" }}>
+                    <Typography variant="h6" gutterBottom sx={{
+                        paddingLeft: "10px",
+                        paddingTop: "6px",
+                        fontSize: "1.2em"
+                    }}>
+                        GIGO Bytes
+                    </Typography>
+                    <Button variant="text"
+                            href={"/active"}
+                            sx={{
+                                fontSize: "0.8em",
+                                fontWeight: "light",
+                                textTransform: "lowercase",
+                            }}
+                    >
+                        (show all)
+                    </Button>
+                </div>
+                <div style={{
+                    display: "flex",
+                    justifyContent: "start",
+                    flexDirection: `row`,
+                    alignContent: `center`,
+                    overflowX: "auto",
+                    marginLeft: "1%",
+                }}>
+                    {/*TODO mobile => make carousel 1 for mobile*/}
+                    <Carousel show={(document.documentElement.clientWidth < 1000 ? 1 : 4)}>
+                        {
+                            //@ts-ignore
+                            activeData.map((project, index) => {
+                                return (
+                                    <div style={{ paddingBottom: "10px" }}>
+                                        <LazyLoad once scroll unmountIfInvisible>
+                                            <ShortsCard
+                                                height={"50vh"}
+                                                imageHeight={"43vh"}
+                                                // TODO mobile => make width 'fit-content'
+                                                width={'13vw'}
+                                                imageWidth={"13vw"}
+                                                shortsId={project["_id"]}
+                                                shortsTitle={project["title"] !== null ? project["title"] : project["post_title"]}
+                                                shortsDesc={project["description"]}
+                                                shortsThumb={config.rootPath + project["thumbnail"]}
+                                                onClick={() => navigate("/shorts/" + project["_id"])}
                                                 role={authState.role}
                                             />
                                         </LazyLoad>
@@ -1132,6 +1209,20 @@ function Home() {
 
 
                             {TopRecommendations()}
+                        </Box>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexWrap: "wrap",
+                                width: "100%",
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                bgcolor: 'background.default',
+                                color: 'text.primary',
+                                borderRadius: 1,
+                            }}
+                        >
+                            {Bytes()}
                         </Box>
                         <Box
                             sx={{
