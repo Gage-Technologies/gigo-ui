@@ -140,7 +140,7 @@ export default function ShortsCard(props: IProps) {
             `}
             </style>
             <ButtonBase
-                href={`/shorts/${props.shortsId}`}
+                href={`/byte/${props.shortsId}`}
                 // onClick={props.onClick}
             >
                 <Card sx={styles.card}>

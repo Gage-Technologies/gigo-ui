@@ -623,10 +623,10 @@ function Home() {
                         paddingTop: "6px",
                         fontSize: "1.2em"
                     }}>
-                        GIGO Bytes
+                        🍌  Bytes
                     </Typography>
                     <Button variant="text"
-                            href={"/active"}
+                            href={"/bytes"}
                             sx={{
                                 fontSize: "0.8em",
                                 fontWeight: "light",
@@ -662,7 +662,7 @@ function Home() {
                                                 shortsTitle={project["title"] !== null ? project["title"] : project["post_title"]}
                                                 shortsDesc={project["description"]}
                                                 shortsThumb={config.rootPath + project["thumbnail"]}
-                                                onClick={() => navigate("/shorts/" + project["_id"])}
+                                                onClick={() => navigate("/byte/" + project["_id"])}
                                                 role={authState.role}
                                             />
                                         </LazyLoad>
