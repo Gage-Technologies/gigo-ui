@@ -8,6 +8,7 @@ import TrackedOutlet from './components/OutletTracking';
 import PublicConfigs from "./pages/PublicConfigs";
 import Unsubscribe from "./pages/unsubscribe";
 import config from './config';
+import Byte from "./pages/bytes";
 const CurateAdminPage = React.lazy(() => import("./pages/curateAdmin"));
 const Home = React.lazy(() => import("./pages/home"));
 const Challenge = React.lazy(() => import("./pages/Challenge"));
@@ -148,6 +149,7 @@ export default function Routing() {
                     </Route >
                     <Route element={<PrivateRoute softBlock={true} />}>
                         <Route path="/challenge/:id" element={<Challenge />} />
+                        <Route path="/byte/:id" element={<Byte />} />
                         <Route path="/attempt/:id" element={<AttemptPage />} />
                         <Route path="/user/:id" element={<User />} />
                     </Route>

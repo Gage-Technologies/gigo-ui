@@ -4324,6 +4324,11 @@ accepts@~1.3.4, accepts@~1.3.5, accepts@~1.3.8:
     mime-types "~2.1.34"
     negotiator "0.6.3"
 
+ace-builds@^1.32.3, ace-builds@^1.4.14:
+  version "1.32.3"
+  resolved "https://registry.yarnpkg.com/ace-builds/-/ace-builds-1.32.3.tgz#13ea72e27339ffd56077149e8b00a31e6f685d38"
+  integrity sha512-ptSTUmDEU+LuwGiPY3/qQPmmAWE27vuv5sASL8swLRyLGJb7Ye7a8MrJ4NnAkFh1sJgVUqKTEGWRRFDmqYPw2Q==
+
 acorn-globals@^6.0.0:
   version "6.0.0"
   resolved "https://registry.npmjs.org/acorn-globals/-/acorn-globals-6.0.0.tgz"
@@ -5974,6 +5979,11 @@ didyoumean@^1.2.2:
   version "1.2.2"
   resolved "https://registry.npmjs.org/didyoumean/-/didyoumean-1.2.2.tgz"
   integrity sha512-gxtyfqMg7GKyhQmb056K7M3xszy/myH8w+B4RT+QXBQsvAOdc3XymqDDPHx1BgPgsdAA5SIifona89YtRATDzw==
+
+diff-match-patch@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/diff-match-patch/-/diff-match-patch-1.0.5.tgz#abb584d5f10cd1196dfc55aa03701592ae3f7b37"
+  integrity sha512-IayShXAgj/QMXgB0IWmKx+rOPuGMhqm5w6jvFxmVenXKIzRqTAAsbBPT3kWQeGANj3jGgvcvv4yK6SxqYmikgw==
 
 diff-sequences@^27.5.1:
   version "27.5.1"
@@ -9205,6 +9215,16 @@ lodash.escape@^4.0.1:
   resolved "https://registry.npmjs.org/lodash.escape/-/lodash.escape-4.0.1.tgz"
   integrity sha512-nXEOnb/jK9g0DYMr1/Xvq6l5xMD7GDG55+GSYIYmS0G4tBk/hURD4JR9WCavs04t33WmJx9kCyp9vJ+mr4BOUw==
 
+lodash.get@^4.4.2:
+  version "4.4.2"
+  resolved "https://registry.yarnpkg.com/lodash.get/-/lodash.get-4.4.2.tgz#2d177f652fa31e939b4438d5341499dfa3825e99"
+  integrity sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==
+
+lodash.isequal@^4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/lodash.isequal/-/lodash.isequal-4.5.0.tgz#415c4478f2bcc30120c22ce10ed3226f7d3e18e0"
+  integrity sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==
+
 lodash.kebabcase@^4.1.1:
   version "4.1.1"
   resolved "https://registry.npmjs.org/lodash.kebabcase/-/lodash.kebabcase-4.1.1.tgz"
@@ -9345,6 +9365,11 @@ markdown-table@^3.0.0:
   version "3.0.3"
   resolved "https://registry.npmjs.org/markdown-table/-/markdown-table-3.0.3.tgz"
   integrity sha512-Z1NL3Tb1M9wH4XESsCDEksWoKTdlUafKc4pt0GRwjUyXaCFZ+dc3g2erqB6zm3szA2IUSi7VnPI+o/9jnxh9hw==
+
+marked@^11.1.1:
+  version "11.1.1"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-11.1.1.tgz#e1b2407241f744fb1935fac224680874d9aff7a3"
+  integrity sha512-EgxRjgK9axsQuUa/oKMx5DEY8oXpKJfk61rT5iY3aRlgU6QJtUcxU5OAymdhCvWvhYcd9FKmO5eQoX8m9VGJXg==
 
 mdast-util-compact@^2.0.0:
   version "2.0.1"
@@ -11274,6 +11299,17 @@ raw-body@2.5.1:
     http-errors "2.0.0"
     iconv-lite "0.4.24"
     unpipe "1.0.0"
+
+react-ace@^10.1.0:
+  version "10.1.0"
+  resolved "https://registry.yarnpkg.com/react-ace/-/react-ace-10.1.0.tgz#d348eac2b16475231779070b6cd16768deed565f"
+  integrity sha512-VkvUjZNhdYTuKOKQpMIZi7uzZZVgzCjM7cLYu6F64V0mejY8a2XTyPUIMszC6A4trbeMIHbK5fYFcT/wkP/8VA==
+  dependencies:
+    ace-builds "^1.4.14"
+    diff-match-patch "^1.0.5"
+    lodash.get "^4.4.2"
+    lodash.isequal "^4.5.0"
+    prop-types "^15.7.2"
 
 react-animated-text-content@^1.0.1:
   version "1.0.1"

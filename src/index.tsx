@@ -22,6 +22,7 @@ import track, { TrackingContext } from 'react-tracking';
 import { withPageTracking } from './components/PageTracking';
 import call from './services/api-call';
 import { Box, CircularProgress } from '@material-ui/core';
+import ace from 'ace-builds/src-noconflict/ace';
 
 // create callback to register last activity in session storage
 function setTimestamp() {
