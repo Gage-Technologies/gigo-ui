@@ -38,7 +38,7 @@ import DebugIcon from "./Icons/Debug";
 
 
 interface IProps {
-    role: any | null;
+    role?: any | null;
     width: number | string,
     height: number | string,
     imageWidth: number | string,
@@ -49,6 +49,9 @@ interface IProps {
     bytesDesc: string,
     onClick: () => void,
     animate: boolean,
+    style?: React.CSSProperties;
+    onMouseEnter?: (e: React.MouseEvent<HTMLDivElement>) => void;
+    onMouseLeave?: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 export default function BytesCard(props: IProps) {
@@ -99,6 +102,11 @@ export default function BytesCard(props: IProps) {
             width: props.width
         }
     };
+
+    const cardStyle = {
+        ...styles.card,
+        ...props.style, // Include custom styles if provided
+    };
     let [exit, setExit] = React.useState<boolean>(false);
 
     /**
@@ -139,19 +147,15 @@ export default function BytesCard(props: IProps) {
             }
             `}
             </style>
-            <ButtonBase
-                href={`/byte/${props.bytesId}`}
-                // onClick={props.onClick}
-            >
-                <Card sx={styles.card}>
-                    <CardMedia
-                        component="div"
-                        sx={styles.image}
-                    />
-                    <CardContent
-                        // sx={{width: "100%", height: "100%"}}
-                        sx={styles.content}
-                    >
+            <ButtonBase href={`/byte/${props.bytesId}`} onClick={props.onClick}>
+                <Card
+                    sx={styles.card}
+                    style={props.style}
+                    onMouseEnter={props.onMouseEnter}
+                    onMouseLeave={props.onMouseLeave}
+                >
+                    <CardMedia component="div" sx={styles.image} />
+                    <CardContent sx={styles.content}>
                         <Typography gutterBottom variant="h6" component="div" sx={styles.title}>
                             {props.bytesTitle}
                         </Typography>
@@ -159,7 +163,7 @@ export default function BytesCard(props: IProps) {
                 </Card>
             </ButtonBase>
         </>
-    )
+    );
 }
 
 BytesCard.defaultProps = {

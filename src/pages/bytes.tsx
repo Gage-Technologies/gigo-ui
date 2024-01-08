@@ -19,6 +19,7 @@ import AceEditor from "react-ace";
 import 'ace-builds'
 import 'ace-builds/webpack-resolver'
 import {CodeComponent} from "react-markdown/lib/ast-to-react";
+import ByteSelectionMenu from "../components/ByteSelectionMenu";
 
 function Byte() {
     let userPref = localStorage.getItem('theme');
@@ -34,6 +35,8 @@ function Byte() {
     const [loading, setLoading] = useState(true);
     const [code, setCode] = useState("// Write your code here...");
     const [isButtonActive, setIsButtonActive] = useState(false);
+    const [output, setOutput] = useState("");
+    const [currentByteTitle, setCurrentByteTitle] = useState("");
 
     // Define your API call logic here
     const loadData = async () => {
@@ -86,61 +89,107 @@ Please write your code in the editor on the right.
         }
     };
 
-    const AnimatedAwesomeButton = styled(AwesomeButton)`
-      .aws-btn__wrapper:before {
-            border-radius: 25px;
-            transition: box-shadow 0.3s ease;
-            box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px ${theme.palette.primary.main}, 0 0 20px ${theme.palette.primary.main}, 0 0 25px ${theme.palette.primary.main}, 0 0 30px ${theme.palette.primary.main}, 0 0 35px ${theme.palette.primary.main};
-        
-            &:hover {
-              box-shadow: 0 0 3px #fff, 0 0 6px #fff, 0 0 9px ${theme.palette.primary.main}, 0 0 12px ${theme.palette.primary.main}, 0 0 15px ${theme.palette.primary.main}, 0 0 18px ${theme.palette.primary.main}, 0 0 21px ${theme.palette.primary.main};
-            }
-        
-            &:active {
-              box-shadow: 0 0 2px #fff, 0 0 4px #fff, 0 0 6px ${theme.palette.primary.main}, 0 0 8px ${theme.palette.primary.main}, 0 0 10px ${theme.palette.primary.main}, 0 0 12px ${theme.palette.primary.main}, 0 0 14px ${theme.palette.primary.main};
-            }
+    const bytes = [
+        {
+            id: "1688617436791701504",
+            title: "Python Basics: From Hello World to Classes",
+            content: "Dive into the world of Python programming with this beginner-friendly project...",
+            bytesThumb: "/static/posts/t/1688617436791701504"
+        },
+        {
+            id: "1688570643030736896",
+            title: "Introduction to Golang: Master the Basics",
+            content: "Dive into the world of Golang with this introductory project...",
+            bytesThumb: "/static/posts/t/1688570643030736896"
+        },
+        {
+            id: "1688638972722413568",
+            title: "Java Basics: Syntax and Structure",
+            content: "Dive into the world of Java with this beginner-friendly project...",
+            bytesThumb: "/static/posts/t/1688638972722413568"
+        },
+        {
+            id: "1688940677359992832",
+            title: "JavaScript Syntax Basics",
+            content: "Learn the basics of JavaScript syntax and explore examples...",
+            bytesThumb: "/static/posts/t/1688940677359992832"
+        },
+        {
+            id: "1693725878338453504",
+            title: "Mastering Visual Studio Code",
+            content: "Learn how to use Visual Studio Code and its various features to enhance your coding experience.",
+            bytesThumb: "/static/posts/t/1693725878338453504"
         }
-    `;
+        // ... potentially more bytes
+    ];
+
+    const handleSelectByte = (id: string) => {
+        const selectedByte = bytes.find(byte => byte.id === id);
+        if (selectedByte) {
+            setCurrentByteTitle(selectedByte.title);
+        }
+    };
+
 
     interface SubmitButtonProps {
         isButtonActive: boolean;
+        onClick?: () => void;
     }
 
     // Styled AwesomeButton for the Submit button
     const SubmitButton = styled(AwesomeButton)<SubmitButtonProps>`
-        position: absolute;
-        bottom: 20px;
-        right: 20px;
-        &:before {
-            transition: box-shadow 0.3s ease;
-            box-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #ddd, 0 0 20px #ddd, 0 0 25px #ddd, 0 0 30px #ddd, 0 0 35px #ddd;
-            border-radius: 25px;
-        }
-        &:hover:before {
-            box-shadow: 0 0 3px #fff, 0 0 6px #fff, 0 0 9px #bbb, 0 0 12px #bbb, 0 0 15px #bbb, 0 0 18px #bbb, 0 0 21px #bbb;
-        }
-        &:active:before {
-            box-shadow: 0 0 2px #fff, 0 0 4px #fff, 0 0 6px #aaa, 0 0 8px #aaa, 0 0 10px #aaa, 0 0 12px #aaa, 0 0 14px #aaa;
-        }
-        background-color: ${props => props.isButtonActive ? theme.palette.secondary.main : theme.palette.primary.main};
-        cursor: ${props => props.isButtonActive ? 'pointer' : 'not-allowed'};
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      &:before {
+        transition: box-shadow 0.3s ease;
+        box-shadow: ${props => props.isButtonActive ? '0 0 5px #fff, 0 0 10px #fff, 0 0 15px #ddd, 0 0 20px #ddd, 0 0 25px #ddd, 0 0 30px #ddd, 0 0 35px #ddd' : 'none'};
+        border-radius: 25px;
+      }
+      &:hover:before {
+        box-shadow: ${props => props.isButtonActive ? '0 0 3px #fff, 0 0 6px #fff, 0 0 9px #bbb, 0 0 12px #bbb, 0 0 15px #bbb, 0 0 18px #bbb, 0 0 21px #bbb' : 'none'};
+      }
+      &:active:before {
+        box-shadow: ${props => props.isButtonActive ? '0 0 2px #fff, 0 0 4px #fff, 0 0 6px #aaa, 0 0 8px #aaa, 0 0 10px #aaa, 0 0 12px #aaa, 0 0 14px #aaa' : 'none'};
+      }
+      background-color: ${props => props.isButtonActive ? theme.palette.secondary.main : theme.palette.primary.main};
+      cursor: ${props => props.isButtonActive ? 'pointer' : 'not-allowed'};
     `;
-
-    // Adjust the backgroundColor to be a slightly lighter shade
-    const lighterBackground = theme.palette.mode === 'dark' ?
-        'rgba(255, 255, 255, 0.1)' : // Lighter shade for dark mode
-        'rgba(0, 0, 0, 0.1)';       // Lighter shade for light mode
 
     const combinedSectionStyle: React.CSSProperties = {
         display: 'flex',
-        height: '80vh',
+        height: '80vh', // Adjust height as needed
         width: '60vw',
+        marginLeft: '5%',
+        marginRight: 'auto',
         borderRadius: theme.shape.borderRadius,
         overflow: 'hidden',
         gap: "3%",
-        boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.2)', // Soft shadow for depth
+        boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.2)',
         border: `1px solid ${theme.palette.grey[300]}`,
-        padding: "1%", // Optional: Adds some space inside the border
+        padding: "1%",
+    };
+
+    const mainLayoutStyle: React.CSSProperties = {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: '1rem', // Add a gap between the main content and the menu
+        marginTop: '1rem'
+    };
+
+    // Byte selection menu style
+    const byteSelectionMenuStyle: React.CSSProperties = {
+        width: '20%', // Adjust the width as needed
+        maxHeight: '80vh', // Adjust the height as needed
+        overflow: 'auto'
+    };
+
+    const containerStyle: React.CSSProperties = {
+        width: '100%',
+        padding: theme.spacing(0), // Remove vertical padding
+        margin: '0',
+        maxWidth: 'none',
     };
 
     const markdownSectionStyle: React.CSSProperties = {
@@ -163,13 +212,6 @@ Please write your code in the editor on the right.
         whiteSpace: 'pre-wrap', // Wrap whitespace as necessary
     };
 
-    const editorSectionStyle: React.CSSProperties = {
-        flex: 1,
-        // Standout for the editor, making it lighter
-        backgroundColor: theme.palette.mode === 'dark' ? 'rgba(40, 40, 40, 0.3)' : 'rgba(220, 220, 220, 0.3)',
-        borderRadius: theme.shape.borderRadius,
-    };
-
     // Style for markdown comment blocks
     const markdownBlockStyle: React.CSSProperties = {
         backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
@@ -179,17 +221,82 @@ Please write your code in the editor on the right.
         wordBreak: 'break-word', // Ensure long words do not cause overflow
     };
 
-    const submitButtonStyle = {
-        position: 'absolute',
-        bottom: 20,
-        right: 20,
-        width: '120px',
-        backgroundColor: isButtonActive ? theme.palette.secondary.main : theme.palette.primary.main,
-        color: 'white',
-        cursor: isButtonActive ? 'pointer' : 'not-allowed',
-        boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.2)',
-        transition: 'background-color 0.3s ease',
+    const editorAndTerminalStyle: React.CSSProperties = {
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        height: '100%', // Use the full height of the parent container
     };
+
+// Adjust the height of the AceEditor and TerminalOutput
+    const aceEditorStyle: React.CSSProperties = {
+        width: '100%',
+        height: 'calc(100% - 100px)', // Adjust height as needed, minus the height of the terminal
+        borderRadius: theme.shape.borderRadius,
+    };
+
+    const terminalOutputStyle: React.CSSProperties = {
+        backgroundColor: "#333",
+        color: "lime",
+        fontFamily: "monospace",
+        padding: "10px",
+        marginTop: "20px",
+        borderRadius: "5px",
+        whiteSpace: "pre-wrap",
+        height: '100px', // Set the height of the terminal
+    };
+
+    const titleStyle: React.CSSProperties = {
+        marginBottom: theme.spacing(2),
+        textAlign: 'center', // Center align the title
+        width: '60vw', // Match the width of the byte container
+        marginLeft: '5%', // Align with the left margin of the byte container
+    };
+
+    let originalConsoleLog = console.log;
+
+    const executeCode = () => {
+        try {
+            let capturedOutput = "";
+            console.log = (...args) => {
+                capturedOutput += args.join(" ") + "\n";
+            };
+
+            eval(code);
+
+            console.log = originalConsoleLog; // Restore original console.log
+            setOutput(capturedOutput);
+        } catch (e) {
+            console.log = originalConsoleLog; // Restore in case of error
+            if (e instanceof Error) {
+                setOutput("Error: " + e.message);
+            } else {
+                setOutput("Error: Unknown error occurred");
+            }
+        }
+    };
+
+    interface TerminalOutputProps {
+        output: string;
+        style?: React.CSSProperties;
+    }
+
+    const TerminalOutput: React.FC<TerminalOutputProps> = ({ output, style }) => (
+        <div style={{
+            ...{
+                backgroundColor: "#333",
+                color: "lime",
+                fontFamily: "monospace",
+                padding: "10px",
+                marginTop: "20px",
+                borderRadius: "5px",
+                whiteSpace: "pre-wrap"
+            },
+            ...style
+        }}>
+            {output || "No output"}
+        </div>
+    );
 
     const CodeBlock: CodeComponent = ({ inline, className, children, ...props }) => {
         if (inline) {
@@ -214,13 +321,12 @@ Please write your code in the editor on the right.
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
-                <Container maxWidth="xl" style={{ marginTop: theme.spacing(4) }}>
-                    <Typography variant="h4" component="h1" style={{ marginBottom: theme.spacing(2) }}>
-                        Javascript console logs {/* Replace with dynamic title if needed */}
+                <Container maxWidth="xl" style={containerStyle}>
+                    <Typography variant="h4" component="h1" style={titleStyle}>
+                        {currentByteTitle}
                     </Typography>
-                    <div style={{ position: 'relative' }}> {/* Parent div for relative positioning */}
+                    <div style={mainLayoutStyle}>
                         <div style={combinedSectionStyle}>
-                            {/* Markdown Section */}
                             <div style={markdownSectionStyle}>
                                 <div style={markdownContentStyle}>
                                     <ReactMarkdown components={{ code: CodeBlock, p: TextBlock }}>
@@ -239,8 +345,7 @@ Please write your code in the editor on the right.
                                     Get Help
                                 </AwesomeButton>
                             </div>
-                            {/* Editor Section */}
-                            <div style={editorSectionStyle}>
+                            <div style={editorAndTerminalStyle}>
                                 <AceEditor
                                     mode="javascript"
                                     theme="monokai"
@@ -248,21 +353,27 @@ Please write your code in the editor on the right.
                                     onChange={handleEditorChange}
                                     name="ACE_EDITOR_DIV"
                                     editorProps={{ $blockScrolling: true }}
-                                    style={{ width: '100%', height: '100%', borderRadius: theme.shape.borderRadius }}
+                                    style={aceEditorStyle}
                                 />
+                                <TerminalOutput output={output} style={terminalOutputStyle} />
                             </div>
+                            {isButtonActive && (
+                                <SubmitButton
+                                    style={{
+                                        right: '22%',
+                                        marginBottom: `2%`
+                                    }}
+                                    type="primary"
+                                    onClick={executeCode}
+                                    isButtonActive={isButtonActive}
+                                >
+                                    Submit Code
+                                </SubmitButton>
+                            )}
                         </div>
-                        <SubmitButton
-                            type={isButtonActive ? "secondary" : "primary"}
-                            isButtonActive={isButtonActive}
-                            disabled={!isButtonActive}
-                            style={{
-                                position: 'absolute',
-                                right: "12%",
-                            }}
-                        >
-                            Submit
-                        </SubmitButton>
+                        <div style={byteSelectionMenuStyle}>
+                            <ByteSelectionMenu bytes={bytes} onSelectByte={handleSelectByte} />
+                        </div>
                     </div>
                 </Container>
             </CssBaseline>
