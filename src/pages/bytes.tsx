@@ -140,7 +140,7 @@ Please write your code in the editor on the right.
     const startByteAttempt = async (byteId: string) => {
         try {
             const response = await call(
-                "/api/bytes/getByteAttempt",
+                "/api/bytes/startByteAttempt",
                 "POST",
                 null,
                 null,
@@ -158,8 +158,8 @@ Please write your code in the editor on the right.
                 return;
             }
 
-            if (res["byte_attempt"]) {
-
+            if (res["byte_attempt"] !== undefined && res["byte_attempt"]["content"] !== "") {
+                setCode(res["byte_attempt"]["content"]);
             }
         } catch (error) {
             swal("Error", "An error occurred while fetching the byte attempt data.");
