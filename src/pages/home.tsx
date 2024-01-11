@@ -92,6 +92,7 @@ function Home() {
     const [tutorialStepIndex, setTutorialStepIndex] = React.useState(0)
     const userId = useAppSelector(selectAuthStateId) as string
     const [userProjects, setUserProjects] = React.useState<Array<never>>([])
+    const [byteContent, setByteContent] = React.useState<Array<never>>([])
     const [xpPopup, setXpPopup] = React.useState(false)
     const [xpData, setXpData] = React.useState(null)
     const [recDataPage, setRecDataPage] = React.useState(0)
@@ -229,14 +230,14 @@ function Home() {
                 config.rootPath
             )
 
-            let projects = call(
-                "/api/user/userProjects",
+            let bytes = call(
+                "/api/bytes/getRecommendedBytes",
                 "post",
                 null,
                 null,
                 null,
                 //@ts-ignore
-                { skip: 0, limit: 10 },
+                {},
                 null,
                 config.rootPath
             )
@@ -256,14 +257,14 @@ function Home() {
             const [res, res2, res3, res4] = await Promise.all([
                 active,
                 follow,
-                projects,
+                bytes,
                 top
             ])
 
             if (
                 (res === undefined || res["projects"] === undefined ||
                     res2 === undefined || res["projects"] === undefined ||
-                    res3 === undefined || res["projects"] === undefined) ||
+                    res3 === undefined || res["rec_bytes"] === undefined) ||
                 res4 === undefined || res["projects"] === undefined && loggedIn
             ) {
                 swal("There has been an issue loading data. Please try again later.")
@@ -271,7 +272,8 @@ function Home() {
 
             setActiveData(res["projects"])
             setFollowData(res2["projects"])
-            setUserProjects(res3["projects"])
+            // setUserProjects(res3["projects"])
+            setByteContent(res3["rec_bytes"])
             setTopRec(res4["projects"])
         }
     }
@@ -303,87 +305,87 @@ function Home() {
         }
     };
 
-    const ProjectsBox = () => {
-        if (userProjects === null || userProjects === undefined || userProjects.length === 0) {
-            return (<div />)
-        }
-
-        return (
-            <div style={{
-                display: "flex",
-                flexDirection: "column",
-                paddingLeft: "auto",
-                paddingRight: "auto",
-                justifyContent: "center",
-                width: "100%",
-                paddingBottom: "10px"
-            }}>
-                <div style={{ display: "inline-flex", marginTop: "25px" }}>
-                    <Typography variant="h6" gutterBottom sx={{
-                        paddingLeft: "10px",
-                        paddingTop: "6px",
-                        fontSize: "1.2em"
-                    }}>
-                        My Projects
-                    </Typography>
-                    <Button variant="text"
-                        onClick={async () => {
-                            navigate("/profile")
-                        }}
-                        className={"show-all"}
-                    >
-                        (show all)
-                    </Button>
-                </div>
-                <div style={{
-                    display: "flex",
-                    justifyContent: "start",
-                    flexDirection: `row`,
-                    alignContent: `center`,
-                    overflowX: "auto",
-                    marginLeft: "1%",
-                }}>
-                    <Carousel show={(document.documentElement.clientWidth < 1000 ? 1 : 4)}>
-                        {
-                            //@ts-ignore
-                            userProjects.map((project, index) => {
-                                return (
-                                    <div className={'attempt'} style={{ paddingBottom: "10px" }}>
-                                        <LazyLoad once scroll unmountIfInvisible>
-                                            <ProjectCard
-                                                height={"23vh"}
-                                                imageHeight={"23vh"}
-                                                width={(chatOpen || sidebarOpen) ? "16vw" : (document.documentElement.clientWidth < 1000 ? 'fit-content' : '20vw')}
-                                                imageWidth={(chatOpen || sidebarOpen) ? "16vw" : "23vw"}
-                                                projectId={project["_id"]}
-                                                projectTitle={project["title"]}
-                                                projectDesc={project["description"]}
-                                                projectThumb={config.rootPath + project["thumbnail"]}
-                                                projectDate={project["updated_at"]}
-                                                projectType={project["post_type_string"]}
-                                                renown={project["tier"]}
-                                                onClick={() => navigate("/challenge/" + project["_id"])}
-                                                userTier={authState.tier}
-                                                userThumb={config.rootPath + "/static/user/pfp/" + authState.id}
-                                                userId={authState.id}
-                                                username={authState.userName}
-                                                backgroundName={authState.backgroundName}
-                                                backgroundPalette={authState.backgroundColor}
-                                                backgroundRender={authState.backgroundRenderInFront}
-                                                exclusive={project["challenge_cost"] === null ? false : true}
-                                                hover={false}
-                                                role={authState.role}
-                                                estimatedTime={project["estimated_tutorial_time_millis"]}
-                                            />
-                                        </LazyLoad>
-                                    </div>
-                                )
-                            })}
-                    </Carousel>
-                </div>
-            </div>
-        )
-    }
+    // const ProjectsBox = () => {
+    //     if (userProjects === null || userProjects === undefined || userProjects.length === 0) {
+    //         return (<div />)
+    //     }
+    //
+    //     return (
+    //         <div style={{
+    //             display: "flex",
+    //             flexDirection: "column",
+    //             paddingLeft: "auto",
+    //             paddingRight: "auto",
+    //             justifyContent: "center",
+    //             width: "100%",
+    //             paddingBottom: "10px"
+    //         }}>
+    //             <div style={{ display: "inline-flex", marginTop: "25px" }}>
+    //                 <Typography variant="h6" gutterBottom sx={{
+    //                     paddingLeft: "10px",
+    //                     paddingTop: "6px",
+    //                     fontSize: "1.2em"
+    //                 }}>
+    //                     My Projects
+    //                 </Typography>
+    //                 <Button variant="text"
+    //                     onClick={async () => {
+    //                         navigate("/profile")
+    //                     }}
+    //                     className={"show-all"}
+    //                 >
+    //                     (show all)
+    //                 </Button>
+    //             </div>
+    //             <div style={{
+    //                 display: "flex",
+    //                 justifyContent: "start",
+    //                 flexDirection: `row`,
+    //                 alignContent: `center`,
+    //                 overflowX: "auto",
+    //                 marginLeft: "1%",
+    //             }}>
+    //                 <Carousel show={(document.documentElement.clientWidth < 1000 ? 1 : 4)}>
+    //                     {
+    //                         //@ts-ignore
+    //                         userProjects.map((project, index) => {
+    //                             return (
+    //                                 <div className={'attempt'} style={{ paddingBottom: "10px" }}>
+    //                                     <LazyLoad once scroll unmountIfInvisible>
+    //                                         <ProjectCard
+    //                                             height={"23vh"}
+    //                                             imageHeight={"23vh"}
+    //                                             width={(chatOpen || sidebarOpen) ? "16vw" : (document.documentElement.clientWidth < 1000 ? 'fit-content' : '20vw')}
+    //                                             imageWidth={(chatOpen || sidebarOpen) ? "16vw" : "23vw"}
+    //                                             projectId={project["_id"]}
+    //                                             projectTitle={project["title"]}
+    //                                             projectDesc={project["description"]}
+    //                                             projectThumb={config.rootPath + project["thumbnail"]}
+    //                                             projectDate={project["updated_at"]}
+    //                                             projectType={project["post_type_string"]}
+    //                                             renown={project["tier"]}
+    //                                             onClick={() => navigate("/challenge/" + project["_id"])}
+    //                                             userTier={authState.tier}
+    //                                             userThumb={config.rootPath + "/static/user/pfp/" + authState.id}
+    //                                             userId={authState.id}
+    //                                             username={authState.userName}
+    //                                             backgroundName={authState.backgroundName}
+    //                                             backgroundPalette={authState.backgroundColor}
+    //                                             backgroundRender={authState.backgroundRenderInFront}
+    //                                             exclusive={project["challenge_cost"] === null ? false : true}
+    //                                             hover={false}
+    //                                             role={authState.role}
+    //                                             estimatedTime={project["estimated_tutorial_time_millis"]}
+    //                                         />
+    //                                     </LazyLoad>
+    //                                 </div>
+    //                             )
+    //                         })}
+    //                 </Carousel>
+    //             </div>
+    //         </div>
+    //     )
+    // }
 
     const [currentProjectIndex, setCurrentProjectIndex] = useState(0);
     const [currentProjectTimeout, setCurrentProjectTimeout] = useState<NodeJS.Timer | null>(null)
@@ -537,7 +539,7 @@ function Home() {
                         Active Challenges
                     </Typography>
                     <Button variant="text"
-                        href={"/bytes"}
+                        href={"/active"}
                         sx={{
                             fontSize: "0.8em",
                             fontWeight: "light",
@@ -600,7 +602,7 @@ function Home() {
     }
 
     const Bytes = () => {
-        if (activeData === null || activeData === undefined || activeData.length === 0) {
+        if (byteContent === null || byteContent === undefined || byteContent.length === 0) {
             return (<div />)
         }
 
@@ -648,7 +650,7 @@ function Home() {
                     <Carousel show={(document.documentElement.clientWidth < 1000 ? 1 : 5)}>
                         {
                             //@ts-ignore
-                            activeData.map((project, index) => {
+                            byteContent.map((project, index) => {
                                 return (
                                     <div style={{ paddingBottom: "10px", width: "16vw" }}>
                                         <LazyLoad once scroll unmountIfInvisible>
@@ -659,7 +661,7 @@ function Home() {
                                                 width={'13vw'}
                                                 imageWidth={"13vw"}
                                                 bytesId={project["_id"]}
-                                                bytesTitle={project["title"] !== null ? project["title"] : project["post_title"]}
+                                                bytesTitle={project["name"]}
                                                 bytesDesc={project["description"]}
                                                 bytesThumb={config.rootPath + project["thumbnail"]}
                                                 onClick={() => navigate("/byte/" + project["_id"])}

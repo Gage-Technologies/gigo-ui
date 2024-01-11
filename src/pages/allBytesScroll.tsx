@@ -54,8 +54,8 @@ function AllBytesScroll() {
     }
 
     const apiLoad = async () => {
-        let active = call(
-            "/api/home/active",
+        let byteData = call(
+            "/api/bytes/getRecommendedBytes",
             "post",
             null,
             null,
@@ -66,13 +66,13 @@ function AllBytesScroll() {
             config.rootPath
         )
 
-        const [res] = await Promise.all([active])
+        const [res] = await Promise.all([byteData])
 
         if (res === undefined){
             swal("There has been an issue loading data. Please try again later.")
         }
 
-        setBytes(res["projects"])
+        setBytes(res["rec_bytes"])
     }
 
 
@@ -109,7 +109,7 @@ function AllBytesScroll() {
                                                 width={'13vw'}
                                                 imageWidth={"13vw"}
                                                 bytesId={byte["_id"]}
-                                                bytesTitle={byte["title"] !== null ? byte["title"] : byte["post_title"]}
+                                                bytesTitle={byte["name"]}
                                                 bytesDesc={byte["description"]}
                                                 bytesThumb={config.rootPath + byte["thumbnail"]}
                                                 onClick={() => navigate("/byte/" + byte["_id"])}
