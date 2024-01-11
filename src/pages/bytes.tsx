@@ -6,20 +6,17 @@ import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { useNavigate } from "react-router-dom";
 import AppWrapper from "../components/AppWrapper";
 import swal from "sweetalert";
-import {ThreeDots } from "react-loading-icons";
-import Lottie from "react-lottie";
 import * as animationData from "../img/85023-no-data.json";
-import {Box, Button, Paper} from "@material-ui/core";
 import ReactMarkdown from "react-markdown";
 import styled from "@emotion/styled";
 import {AwesomeButton} from "react-awesome-button";
 import AceEditor from "react-ace";
-// import "ace-builds/src-noconflict/mode-javascript"; // Example mode, change as needed
-// import "ace-builds/src-noconflict/theme-monokai";
+import call from "../services/api-call";
 import 'ace-builds'
 import 'ace-builds/webpack-resolver'
 import {CodeComponent} from "react-markdown/lib/ast-to-react";
 import ByteSelectionMenu from "../components/ByteSelectionMenu";
+import config from "../config";
 
 function Byte() {
     let userPref = localStorage.getItem('theme');
@@ -61,13 +58,79 @@ function greet() {
 Please write your code in the editor on the right.
 `;
 
+    const getRecommendedBytes = async () => {
+        let recommendedBytes = await call(
+            "/api/bytes/getRecommendedBytes",
+            "POST",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {},
+            null,
+            config.rootPath
+        );
+
+        const [res] = await Promise.all([recommendedBytes]);
+
+        if (res === undefined) {
+            swal("Server Error", "Cannot fetch recommended bytes. Please try again later.");
+            return;
+        }
+
+        if (res["rec_bytes"] === undefined) {
+            swal("Server Error", "Cannot fetch recommended bytes. Please try again later.");
+            return;
+        }
+
+        if (res["rec_bytes"]) {
+            setByteData(res["rec_bytes"]);
+        } else {
+            swal("No Bytes Found", "No recommended bytes found.");
+        }
+    };
+
+    // Function to fetch the full metadata of a byte
+    const getByte = async (byteId: string) => {
+        try {
+            const response = await call(
+                "/api/bytes/getByte",
+                "POST",
+                null,
+                null,
+                null,
+                // @ts-ignore
+                { byte_id: byteId },
+                null,
+                config.rootPath
+            );
+
+            const [res] = await Promise.all([response]);
+
+            if (res === undefined) {
+                swal("Server Error", "Cannot fetch byte data. Please try again later.");
+                return;
+            }
+
+            if (res["rec_bytes"]) {
+                setCurrentByteTitle(res["rec_bytes"].Name);
+                setMarkdown(`${res["rec_bytes"].OutlineContent}\n\n${res["rec_bytes"].DevSteps}`);
+            } else {
+                swal("Byte Not Found", "The requested byte could not be found.");
+            }
+        } catch (error) {
+            swal("Error", "An error occurred while fetching the byte data.");
+        }
+    };
+
+
     useEffect(() => {
         setLoading(true);
-        loadData().then(() => {
+        getByte("999");
+        getRecommendedBytes().then(() => {
             setLoading(false);
-            // Update this part to fetch and set your actual markdown content
-            setMarkdown(initialMarkdownContent);
         });
+        setMarkdown(initialMarkdownContent);
     }, []);
 
     const defaultOptions = {
@@ -124,10 +187,7 @@ Please write your code in the editor on the right.
     ];
 
     const handleSelectByte = (id: string) => {
-        const selectedByte = bytes.find(byte => byte.id === id);
-        if (selectedByte) {
-            setCurrentByteTitle(selectedByte.title);
-        }
+        getByte("999");
     };
 
 
@@ -372,7 +432,7 @@ Please write your code in the editor on the right.
                             )}
                         </div>
                         <div style={byteSelectionMenuStyle}>
-                            <ByteSelectionMenu bytes={bytes} onSelectByte={handleSelectByte} />
+                            {byteData && <ByteSelectionMenu bytes={byteData} onSelectByte={handleSelectByte} />}
                         </div>
                     </div>
                 </Container>
