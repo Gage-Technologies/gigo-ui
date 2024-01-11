@@ -128,9 +128,49 @@ Please write your code in the editor on the right.
         }
     };
 
+    function getByteIdFromUrl() {
+        const currentUrl = window.location.href;
+        let urlParts = currentUrl.split('/');
+        // Remove any empty strings from the end of the array (caused by trailing slashes)
+        urlParts = urlParts.filter(part => part !== '');
+        const byteId = urlParts[urlParts.length - 1];
+        return byteId;
+    }
+
+    const startByteAttempt = async (byteId: string) => {
+        try {
+            const response = await call(
+                "/api/bytes/getByteAttempt",
+                "POST",
+                null,
+                null,
+                null,
+                // @ts-ignore
+                { byte_id: byteId },
+                null,
+                config.rootPath
+            );
+
+            const [res] = await Promise.all([response]);
+
+            if (res === undefined) {
+                swal("Server Error", "Cannot fetch byte data. Please try again later.");
+                return;
+            }
+
+            if (res["byte_attempt"]) {
+
+            }
+        } catch (error) {
+            swal("Error", "An error occurred while fetching the byte attempt data.");
+        }
+    };
+
     useEffect(() => {
+        const byteId = getByteIdFromUrl();
         setLoading(true);
-        getByte("999");
+        getByte(byteId);
+        startByteAttempt(byteId);
         getRecommendedBytes().then(() => {
             setLoading(false);
         });
