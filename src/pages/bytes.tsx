@@ -113,8 +113,13 @@ Please write your code in the editor on the right.
             }
 
             if (res["rec_bytes"]) {
-                setCurrentByteTitle(res["rec_bytes"].Name);
-                setMarkdown(`${res["rec_bytes"].OutlineContent}\n\n${res["rec_bytes"].DevSteps}`);
+                setCurrentByteTitle(res["rec_bytes"].name);
+
+                // Adjusting the format of outline_content
+                const formattedOutlineContent = res["rec_bytes"].outline_content.split('\n').map((line: string) => line.trim()).join('\n'); // Changed from ' ' to '\n'
+
+                // Setting the markdown content
+                setMarkdown(`### Description\n${res["rec_bytes"].description}\n\n### Outline\n${formattedOutlineContent}\n\n### Development Steps\n${res["rec_bytes"].dev_steps}`);
             } else {
                 swal("Byte Not Found", "The requested byte could not be found.");
             }
@@ -122,7 +127,6 @@ Please write your code in the editor on the right.
             swal("Error", "An error occurred while fetching the byte data.");
         }
     };
-
 
     useEffect(() => {
         setLoading(true);
