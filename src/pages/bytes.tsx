@@ -18,6 +18,10 @@ import {CodeComponent} from "react-markdown/lib/ast-to-react";
 import ByteSelectionMenu from "../components/ByteSelectionMenu";
 import config from "../config";
 import {useParams} from "react-router";
+import {useGlobalWebSocket} from "../services/websocket";
+import {WsMessage, WsMessageType} from "../models/websocket";
+import {AgentWsRequestMessage, ByteUpdateCodeRequest, ExecRequestPayload} from "../models/bytes";
+import {programmingLanguages} from "../services/vars";
 
 function Byte() {
     let userPref = localStorage.getItem('theme');
@@ -45,6 +49,8 @@ function Byte() {
         // Example: Set the byteData state with the response
     };
 
+    let globalWs = useGlobalWebSocket();
+
     const [markdown, setMarkdown] = useState("");
 
     const initialMarkdownContent = `
@@ -61,6 +67,46 @@ function greet() {
 
 Please write your code in the editor on the right.
 `;
+
+    useEffect(() => {
+        globalWs.sendWebsocketMessage(
+            {
+                sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                type: WsMessageType.ByteUpdateCode,
+                payload: {
+                    byte_attempt_id: "0",
+                    content: ""
+                } satisfies ByteUpdateCodeRequest
+            },
+            (msg: WsMessage<any>) => {
+                console.log(msg.payload);
+            }
+        )
+    }, []);
+
+    useEffect(() => {
+        globalWs.sendWebsocketMessage(
+            {
+                sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                type: WsMessageType.AgentExecRequest,
+                payload: {
+                    byte_attempt_id: "0",
+                    payload: {
+                        lang: programmingLanguages.indexOf("Python"),
+                        code: "print(\"Hello, World!\")"
+                    }
+                } satisfies AgentWsRequestMessage,
+            },
+            (msg: WsMessage<any>) => {
+                if (msg.payload.type !== WsMessageType.AgentExecResponse) {
+                    console.log("error: ", msg.payload);
+                    return
+                }
+
+                // update console with payload
+            }
+        )
+    }, []);
 
     const getRecommendedBytes = async () => {
         let recommendedBytes = await call(

@@ -20,6 +20,12 @@ export enum WsMessageType {
     UpdateChatMute,
     ChatUpdatedEvent,
     RecordWebUsage,
+    AgentExecRequest,
+    AgentExecResponse,
+    AgentLintRequest,
+    AgentLintResponse,
+    ByteLivePing,
+    ByteUpdateCode
 }
 
 export enum WsResponseCode {
@@ -63,6 +69,12 @@ export const wsMessageTypeToString = (t: WsMessageType) => {
         "MessageTypeUpdateReadMessage",
         "MessageTypeUpdateChatMute",
         "MessageTypeChatUpdatedEvent",
-        "MessageTypeRecordWebUsage"
+        "MessageTypeRecordWebUsage",
+        "MessageTypeAgentExecRequest",
+        "MessageTypeAgentExecResponse",
+        "MessageTypeAgentLintRequest",
+        "MessageTypeAgentLintResponse",
+        "MessageTypeByteLivePing",
+        "MessageTypeByteUpdateCode"
     ][t];
 }
