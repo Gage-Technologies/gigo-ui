@@ -295,9 +295,9 @@ Please write your code in the editor on the right.
 
             // Call createWorkspace only if it hasn't been called before
             if (!workspaceCreated && id) {
-                createWorkspace(id)
-                    .then(() => setWorkspaceCreated(true)) // Set the flag to true once the workspace is created
-                    .catch(console.error);
+                // createWorkspace(id)
+                //     .then(() => setWorkspaceCreated(true)) // Set the flag to true once the workspace is created
+                //     .catch(console.error);
             }
         } else {
             setIsButtonActive(false);
@@ -512,6 +512,7 @@ Please write your code in the editor on the right.
                     flexDirection: "row",
                     justifyContent: "flex-end",
                     alignItems: "flex-end",
+                    paddingBottom: '10px'
                 }}
             >
                 <Card
@@ -554,6 +555,7 @@ Please write your code in the editor on the right.
                     flexDirection: "row",
                     justifyContent: "flex-end",
                     alignItems: "flex-end",
+                    paddingBottom: '10px'
                 }}
             >
                 <Card
@@ -590,38 +592,44 @@ Please write your code in the editor on the right.
         overflowY: 'auto',
         padding: 2,
         marginBottom: 4, // space for the input field and button
-        height: '50vh', // adjust based on your header/footer size
+        height: '68vh', // adjust based on your header/footer size
     }));
 
+    type Message = {
+        type: 'user' | 'bot';
+        content: string;
+    };
+
+    const [userMessage, setUserMessage] = useState('');
+    const [messages, setMessages] = useState<Message[]>([]);
+
+    const handleSend = () => {
+        // Add user message to messages array
+        setMessages(prevMessages => [...prevMessages, { type: 'user', content: userMessage }]);
+        setUserMessage('');
+
+        // Simulate receiving a bot message after a delay
+        setTimeout(() => {
+            const botResponse = "Bot's response to: " + userMessage;
+            setMessages(prevMessages => [...prevMessages, { type: 'bot', content: botResponse }]);
+        }, 1000); // Simulating delay for bot response
+    };
+
+    const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (event.key === 'Enter') {
+            handleSend();
+        }
+    };
+
     const CodeTeacher = () => {
-        const [userMessage, setUserMessage] = useState('');
-
-        const handleSend = () => {
-            // Here you can handle the user message
-            console.log(userMessage);
-        };
-
-        const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
-            if (event.key === 'Enter') {
-                handleSend();
-            }
-        };
-
         return (
             <Box>
                 <MessageContainer>
-                    {renderBotMessage("Hello! How may I help you?", false, "123", true, false)}
-                    {renderUserMessage("Help me with this code")}
-                    {renderBotMessage("Just be better", false, "123", true, false)}
+
+
+                    {renderBotMessage(initialMarkdownContent,  false, "123", true, false)}
+                    {renderUserMessage("Help me with my code")}
                 </MessageContainer>
-                <TextField
-                    fullWidth
-                    label="Type your message"
-                    variant="outlined"
-                    value={userMessage}
-                    onChange={(e) => setUserMessage(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                />
             </Box>
         );
     };
@@ -638,43 +646,15 @@ Please write your code in the editor on the right.
                     <div style={mainLayoutStyle}>
                         <div style={combinedSectionStyle}>
                             <div style={markdownSectionStyle}>
-                                <Tabs
-                                    orientation="horizontal"
-                                    value={typeTab}
-                                    onChange={handleChange}
-                                    aria-label="Vertical tabs"
-                                    style={{
-                                        width: 'fit-content',
-                                        overflowY: 'auto',
-                                        maxHeight: '42px'
-                                    }}
-                                >
-                                    {minorValues.map((minorValue) => (
-                                        <Tab label={minorValue} value={minorValue} sx={{ color: 'text.primary' }}/>
-                                    ))}
-                                </Tabs>
-                                <div style={markdownContentStyle}>
-                                    {typeTab === 'Outline' ?
-                                        <ReactMarkdown components={{ code: CodeBlock, p: TextBlock }}>
-                                            {markdown}
-                                        </ReactMarkdown>
-                                        :
-                                        <>
-                                            <CodeTeacher/>
-                                        </>
-                                    }
-                                </div>
-                                <AwesomeButton
-                                    type="primary"
-                                    style={{
-                                        width: '40%',
-                                        alignSelf: 'center',
-                                        marginTop: 'auto',
-                                        marginBottom: theme.spacing(2),
-                                    }}
-                                >
-                                    Get Help
-                                </AwesomeButton>
+                                <CodeTeacher/>
+                                <TextField
+                                    fullWidth
+                                    label="Ask Code Teacher!"
+                                    variant="outlined"
+                                    value={userMessage}
+                                    onChange={(e) => setUserMessage(e.target.value)}
+                                    onKeyPress={handleKeyPress}
+                                />
                             </div>
                             <div style={editorAndTerminalStyle}>
                                 <AceEditor
