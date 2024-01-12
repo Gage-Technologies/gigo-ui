@@ -1,6 +1,16 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
-import {Container, createTheme, Grid, CssBaseline, PaletteMode, ThemeProvider, Typography} from "@mui/material";
+import {
+    Container,
+    createTheme,
+    Grid,
+    CssBaseline,
+    PaletteMode,
+    ThemeProvider,
+    Typography,
+    Box,
+    Paper, Card, Tooltip, Button, Divider, Tab, Tabs, TextField
+} from "@mui/material";
 import { getAllTokens } from "../theme";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { useNavigate } from "react-router-dom";
@@ -22,6 +32,8 @@ import {useGlobalWebSocket} from "../services/websocket";
 import {WsMessage, WsMessageType} from "../models/websocket";
 import {AgentWsRequestMessage, ByteUpdateCodeRequest, ExecRequestPayload} from "../models/bytes";
 import {programmingLanguages} from "../services/vars";
+import {useGlobalCtWebSocket} from "../services/ct_websocket";
+import MenuItem from "@mui/material/MenuItem";
 
 function Byte() {
     let userPref = localStorage.getItem('theme');
@@ -42,6 +54,12 @@ function Byte() {
     const [workspaceCreated, setWorkspaceCreated] = useState(false);
 
     let { id } = useParams();
+
+    let ctWs = useGlobalCtWebSocket();
+
+    const ctChat = () => {
+
+    }
 
     // Define your API call logic here
     const loadData = async () => {
@@ -486,6 +504,130 @@ Please write your code in the editor on the right.
         return <p {...props}>{children}</p>;
     };
 
+    const renderUserMessage = (content: string) => {
+        return (
+            <div
+                style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "flex-end",
+                    alignItems: "flex-end",
+                }}
+            >
+                <Card
+                    style={{
+                        fontSize: ".75rem",
+                        marginLeft: "auto",
+                        marginRight: "10px",
+                        marginBottom: "0px",
+                        padding: "10px",
+                        backgroundColor: "#0842a040",
+                        border: "1px solid #0842a0",
+                        color: "#fcfcfc",
+                        borderRadius: "10px",
+                        width: "auto",
+                        height: "auto",
+                        display: "block",
+                        maxWidth: "90%"
+                    }}
+                >
+                    <ReactMarkdown components={{ code: CodeBlock, p: TextBlock }}>
+                        {content}
+                    </ReactMarkdown>
+                </Card>
+            </div>
+        );
+    }
+
+    const renderBotMessage = (
+        content: string,
+        loading: boolean,
+        _id: string | null = null,
+        premiumLlm: boolean = false,
+        freeCreditUse: boolean = false
+    ) => {
+
+        return (
+            <div
+                style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "flex-end",
+                    alignItems: "flex-end",
+                }}
+            >
+                <Card
+                    style={{
+                        fontSize: ".75rem",
+                        marginLeft: "10px",
+                        marginRight: "auto",
+                        marginBottom: "0px",
+                        padding: "10px",
+                        backgroundColor: "#31343a40",
+                        border: `1px solid ${premiumLlm ? "#84E8A2" : "#31343a"}`,
+                        color: "white",
+                        borderRadius: "10px",
+                        width: "auto",
+                        height: "auto",
+                        display: "block",
+                        maxWidth: "90%"
+                    }}
+                >
+                    <ReactMarkdown components={{ code: CodeBlock, p: TextBlock }}>
+                        {content}
+                    </ReactMarkdown>
+                </Card>
+            </div>
+        );
+    }
+
+    const [typeTab, setTypeTab] = React.useState("Outline")
+    const handleChange = async(event: React.SyntheticEvent, newValue: string) => {
+        setTypeTab(newValue);
+    };
+
+    const MessageContainer = styled('div')(({ theme }) => ({
+        overflowY: 'auto',
+        padding: 2,
+        marginBottom: 4, // space for the input field and button
+        height: '50vh', // adjust based on your header/footer size
+    }));
+
+    const CodeTeacher = () => {
+        const [userMessage, setUserMessage] = useState('');
+
+        const handleSend = () => {
+            // Here you can handle the user message
+            console.log(userMessage);
+        };
+
+        const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
+            if (event.key === 'Enter') {
+                handleSend();
+            }
+        };
+
+        return (
+            <Box>
+                <MessageContainer>
+                    {renderBotMessage("Hello! How may I help you?", false, "123", true, false)}
+                    {renderUserMessage("Help me with this code")}
+                    {renderBotMessage("Just be better", false, "123", true, false)}
+                </MessageContainer>
+                <TextField
+                    fullWidth
+                    label="Type your message"
+                    variant="outlined"
+                    value={userMessage}
+                    onChange={(e) => setUserMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                />
+            </Box>
+        );
+    };
+
+
+    let minorValues = ["Outline", "Code Teacher"]
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
@@ -496,10 +638,31 @@ Please write your code in the editor on the right.
                     <div style={mainLayoutStyle}>
                         <div style={combinedSectionStyle}>
                             <div style={markdownSectionStyle}>
+                                <Tabs
+                                    orientation="horizontal"
+                                    value={typeTab}
+                                    onChange={handleChange}
+                                    aria-label="Vertical tabs"
+                                    style={{
+                                        width: 'fit-content',
+                                        overflowY: 'auto',
+                                        maxHeight: '42px'
+                                    }}
+                                >
+                                    {minorValues.map((minorValue) => (
+                                        <Tab label={minorValue} value={minorValue} sx={{ color: 'text.primary' }}/>
+                                    ))}
+                                </Tabs>
                                 <div style={markdownContentStyle}>
-                                    <ReactMarkdown components={{ code: CodeBlock, p: TextBlock }}>
-                                        {markdown}
-                                    </ReactMarkdown>
+                                    {typeTab === 'Outline' ?
+                                        <ReactMarkdown components={{ code: CodeBlock, p: TextBlock }}>
+                                            {markdown}
+                                        </ReactMarkdown>
+                                        :
+                                        <>
+                                            <CodeTeacher/>
+                                        </>
+                                    }
                                 </div>
                                 <AwesomeButton
                                     type="primary"

@@ -500,7 +500,7 @@ export default function ChatContainer() {
 
             // handle error case
             setLoadingChats(false);
-            swal("Server Error", "The server said you have no chats but we know your popular. We'll have a talk with that server!");
+            swal("Server Error", "The server said you have no chats but we know you're popular. We'll have a talk with that server!");
         })
     }, []);
 
