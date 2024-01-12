@@ -17,6 +17,7 @@ import 'ace-builds/webpack-resolver'
 import {CodeComponent} from "react-markdown/lib/ast-to-react";
 import ByteSelectionMenu from "../components/ByteSelectionMenu";
 import config from "../config";
+import {useParams} from "react-router";
 
 function Byte() {
     let userPref = localStorage.getItem('theme');
@@ -34,6 +35,9 @@ function Byte() {
     const [isButtonActive, setIsButtonActive] = useState(false);
     const [output, setOutput] = useState("");
     const [currentByteTitle, setCurrentByteTitle] = useState("");
+    const [workspaceCreated, setWorkspaceCreated] = useState(false);
+
+    let { id } = useParams();
 
     // Define your API call logic here
     const loadData = async () => {
@@ -84,7 +88,12 @@ Please write your code in the editor on the right.
         }
 
         if (res["rec_bytes"]) {
-            setByteData(res["rec_bytes"]);
+            // Map through each byte and add a random image from byteImages
+            const enhancedBytes = res["rec_bytes"].map((byte: any) => ({
+                ...byte,
+                bytesThumb: byteImages[Math.floor(Math.random() * byteImages.length)]
+            }));
+            setByteData(enhancedBytes);
         } else {
             swal("No Bytes Found", "No recommended bytes found.");
         }
@@ -93,8 +102,7 @@ Please write your code in the editor on the right.
     // Function to fetch the full metadata of a byte
     const getByte = async (byteId: string) => {
         try {
-            const response = await call(
-                "/api/bytes/getByte",
+            const response = await call("/api/bytes/getByte",
                 "POST",
                 null,
                 null,
@@ -102,24 +110,30 @@ Please write your code in the editor on the right.
                 // @ts-ignore
                 { byte_id: byteId },
                 null,
-                config.rootPath
-            );
-
+                config.rootPath);
             const [res] = await Promise.all([response]);
 
-            if (res === undefined) {
-                swal("Server Error", "Cannot fetch byte data. Please try again later.");
-                return;
-            }
-
-            if (res["rec_bytes"]) {
+            if (res && res["rec_bytes"]) {
                 setCurrentByteTitle(res["rec_bytes"].name);
 
-                // Adjusting the format of outline_content
-                const formattedOutlineContent = res["rec_bytes"].outline_content.split('\n').map((line: string) => line.trim()).join('\n'); // Changed from ' ' to '\n'
+                // Process the outline content
+                const outlineContent = res["rec_bytes"].outline_content
+                    .replace(/\\n/g, "\n") // Replace escaped newlines with actual newline characters
+                    .split('\n') // Split the string into lines
+                    .map((line: string) => {
+                        // Remove step number (formatted as "1.", "2.", etc.), trim, and format as a comment
+                        const stepContent = line.replace(/^\d+\.\s*/, '').trim();
+                        return stepContent ? `// ${stepContent}` : '';
+                    })
+                    .filter((line: string) => line) // Remove empty lines
+                    .join('\n\n'); // Join lines with double newline for spacing
 
-                // Setting the markdown content
-                setMarkdown(`### Description\n${res["rec_bytes"].description}\n\n### Outline\n${formattedOutlineContent}\n\n### Development Steps\n${res["rec_bytes"].dev_steps}`);
+                setCode(outlineContent); // Set the processed content as code
+
+                // Set the markdown content for other sections
+                setMarkdown(`### Description\n${res["rec_bytes"].description}\n\n### Development Steps\n${res["rec_bytes"].dev_steps}`);
+
+                setWorkspaceCreated(false);
             } else {
                 swal("Byte Not Found", "The requested byte could not be found.");
             }
@@ -127,6 +141,7 @@ Please write your code in the editor on the right.
             swal("Error", "An error occurred while fetching the byte data.");
         }
     };
+
 
     function getByteIdFromUrl() {
         const currentUrl = window.location.href;
@@ -166,6 +181,37 @@ Please write your code in the editor on the right.
         }
     };
 
+    const createWorkspace = async (byteId: string) => {
+        try {
+            const response = await call(
+                "/api/bytes/createWorkspace",
+                "POST",
+                null,
+                null,
+                null,
+                // @ts-ignore
+                { byte_id: byteId },
+                null,
+                config.rootPath
+            );
+
+            const [res] = await Promise.all([response]);
+
+            if (res === undefined) {
+                swal("Server Error", "Cannot fetch byte data. Please try again later.");
+                return;
+            }
+
+            if (res["message"] === "Workspace Created Successfully") {
+                // TODO implement what needs to be done if successful
+                console.log("agent_url: ", res['agent_url'])
+                console.log("workspace: ", res['workspace'])
+            }
+        } catch (error) {
+            swal("Error", "An error occurred while creating the byte workspace.");
+        }
+    };
+
     useEffect(() => {
         const byteId = getByteIdFromUrl();
         setLoading(true);
@@ -177,57 +223,29 @@ Please write your code in the editor on the right.
         setMarkdown(initialMarkdownContent);
     }, []);
 
-    const defaultOptions = {
-        loop: true,
-        autoplay: true,
-        animationData: animationData,
-        rendererSettings: {
-            preserveAspectRatio: 'xMidYMid slice'
-        }
-    };
-
     // Handle changes in the editor and activate the button
     const handleEditorChange = (newCode: string) => {
         setCode(newCode);
         if (newCode && newCode !== "// Write your code here...") {
             setIsButtonActive(true);
+
+            // Call createWorkspace only if it hasn't been called before
+            if (!workspaceCreated && id) {
+                createWorkspace(id)
+                    .then(() => setWorkspaceCreated(true)) // Set the flag to true once the workspace is created
+                    .catch(console.error);
+            }
         } else {
             setIsButtonActive(false);
         }
     };
 
-    const bytes = [
-        {
-            id: "1688617436791701504",
-            title: "Python Basics: From Hello World to Classes",
-            content: "Dive into the world of Python programming with this beginner-friendly project...",
-            bytesThumb: "/static/posts/t/1688617436791701504"
-        },
-        {
-            id: "1688570643030736896",
-            title: "Introduction to Golang: Master the Basics",
-            content: "Dive into the world of Golang with this introductory project...",
-            bytesThumb: "/static/posts/t/1688570643030736896"
-        },
-        {
-            id: "1688638972722413568",
-            title: "Java Basics: Syntax and Structure",
-            content: "Dive into the world of Java with this beginner-friendly project...",
-            bytesThumb: "/static/posts/t/1688638972722413568"
-        },
-        {
-            id: "1688940677359992832",
-            title: "JavaScript Syntax Basics",
-            content: "Learn the basics of JavaScript syntax and explore examples...",
-            bytesThumb: "/static/posts/t/1688940677359992832"
-        },
-        {
-            id: "1693725878338453504",
-            title: "Mastering Visual Studio Code",
-            content: "Learn how to use Visual Studio Code and its various features to enhance your coding experience.",
-            bytesThumb: "/static/posts/t/1693725878338453504"
-        }
-        // ... potentially more bytes
+    const byteImages = [
+        "/static/posts/t/1688617436791701504",
+        "/static/posts/t/1688570643030736896",
+        "/static/posts/t/1688638972722413568",
+        "/static/posts/t/1688940677359992832",
+        "/static/posts/t/1693725878338453504"
     ];
 
     const handleSelectByte = (id: string) => {

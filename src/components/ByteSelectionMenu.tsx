@@ -5,7 +5,7 @@ import config from "../config";
 
 interface Byte {
     id: string;
-    title: string;
+    name: string;
     content: string;
     bytesThumb: string;
 }
@@ -17,6 +17,7 @@ interface ByteSelectionMenuProps {
 }
 
 const ByteSelectionMenu: React.FC<ByteSelectionMenuProps> = ({ bytes, onSelectByte }) => {
+    console.log(bytes);
     return (
         <div style={{
             height: '80vh',
@@ -36,7 +37,7 @@ const ByteSelectionMenu: React.FC<ByteSelectionMenuProps> = ({ bytes, onSelectBy
                     }}>
                         <BytesCard
                             bytesId={byte.id}
-                            bytesTitle={byte.title}
+                            bytesTitle={byte.name}
                             bytesThumb={config.rootPath + byte.bytesThumb}
                             onClick={() => onSelectByte(byte.id)}
                             style={{ cursor: 'pointer', transition: 'transform 0.3s ease' }}
