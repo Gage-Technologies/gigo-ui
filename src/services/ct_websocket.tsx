@@ -2,6 +2,8 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 import config from "../config";
 import * as models from "../models/ct_websocket";
 import useWebSocket from "react-use-websocket";
+import { useAppSelector } from '../app/hooks';
+import { selectAuthState } from '../reducers/auth/auth';
 
 interface WebSocketContextProps {
     sendWebsocketMessage: (msg: models.CtMessage<any>, callback: WebSocketResponseCallback | null) => Promise<void>;
@@ -13,7 +15,7 @@ const WebSocketContext = createContext<WebSocketContextProps | undefined>(undefi
 export const useGlobalCtWebSocket = (): WebSocketContextProps => {
     const context = useContext(WebSocketContext);
     if (!context) {
-        throw new Error('useGlobalWebSocket must be used within a WebSocketProvider');
+        throw new Error('useGlobalCtWebSocket must be used within a WebSocketProvider');
     }
     return context;
 };
@@ -23,7 +25,7 @@ interface WebSocketProviderProps {
 }
 
 interface WebSocketResponseCallback {
-    (message: models.CtMessage<any>): void;
+    (message: models.CtMessage<any>): boolean;
 }
 
 interface CallbackEntry {
@@ -66,6 +68,9 @@ class Mutex {
 }
 
 export const CtWebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }) => {
+    // load auth state from storage
+    const authState = useAppSelector(selectAuthState);
+
     // create map to hold callbacks
     let messageCallbacks = React.useRef<CallbackMap>({});
     let globalCallbacks = React.useRef<GlobalCallbackMap>({} as GlobalCallbackMap);
@@ -93,12 +98,12 @@ export const CtWebSocketProvider: React.FC<WebSocketProviderProps> = ({ children
     // establish websocket connection
     let websocketRoot = config.ctPath.replace("https://", "wss://").replace("http://", "ws://");
     const { sendMessage } = useWebSocket(
-        `${websocketRoot}/api/ws`, {
+        `${websocketRoot}/api/v1/ws`, {
             // Will attempt to reconnect on all close events, such as server shutting down
-            shouldReconnect: (closeEvent) => true,
-            onClose: () => console.log("global socket closed"),
-            onError: (error) => console.log("global socket error: ", error),
-            onOpen: (event: WebSocketEventMap['open']) => console.log("global socket open"),
+            shouldReconnect: (closeEvent) => authState.authenticated,
+            onClose: () => console.log("ct socket closed"),
+            onError: (error) => console.log("ct socket error: ", error),
+            onOpen: (event: WebSocketEventMap['open']) => console.log("ct socket open"),
             onMessage: (event: WebSocketEventMap['message']) => {
                 // skip if this is a ping
                 if (event.data === "ping") {
@@ -112,8 +117,10 @@ export const CtWebSocketProvider: React.FC<WebSocketProviderProps> = ({ children
                     let c = messageCallbacks.current;
                     if (c[msg.sequence_id]) {
                         // call the callback and delete it from the map
-                        c[msg.sequence_id].callback(msg);
-                        delete c[msg.sequence_id];
+                        const remove = c[msg.sequence_id].callback(msg);
+                        if (remove) {
+                            delete c[msg.sequence_id];
+                        }
                         messageCallbacks.current = c;
                     }
                 });

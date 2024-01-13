@@ -23,7 +23,7 @@ import { withPageTracking } from './components/PageTracking';
 import call from './services/api-call';
 import { Box, CircularProgress } from '@material-ui/core';
 import ace from 'ace-builds/src-noconflict/ace';
-import {CtWebSocketProvider} from "./services/ct_websocket";
+import { CtWebSocketProvider } from "./services/ct_websocket";
 
 // create callback to register last activity in session storage
 function setTimestamp() {
@@ -55,21 +55,21 @@ const lazyLoadFallback = (
 
 root.render(
     <WebSocketProvider>
-        <CtWebSocketProvider>
-            <BrowserRouter>
-                <GoogleOAuthProvider clientId={config.googleClient}>
-                    <Provider store={store}>
-                        <PersistGate loading={null} persistor={persistor}>
+        <BrowserRouter>
+            <GoogleOAuthProvider clientId={config.googleClient}>
+                <Provider store={store}>
+                    <PersistGate loading={null} persistor={persistor}>
+                        <CtWebSocketProvider>
                             <AppWrapper>
                                 <Suspense fallback={lazyLoadFallback}>
                                     <Routing />
                                 </Suspense>
                             </AppWrapper>
-                        </PersistGate>
-                    </Provider>
-                </GoogleOAuthProvider>
-            </BrowserRouter>
-        </CtWebSocketProvider>
+                        </CtWebSocketProvider>
+                    </PersistGate>
+                </Provider>
+            </GoogleOAuthProvider>
+        </BrowserRouter>
     </WebSocketProvider>
 );
 

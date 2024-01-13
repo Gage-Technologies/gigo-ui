@@ -19,21 +19,24 @@ import swal from "sweetalert";
 import * as animationData from "../img/85023-no-data.json";
 import ReactMarkdown from "react-markdown";
 import styled from "@emotion/styled";
-import {AwesomeButton} from "react-awesome-button";
+import { AwesomeButton } from "react-awesome-button";
 import AceEditor from "react-ace";
 import call from "../services/api-call";
 import 'ace-builds'
 import 'ace-builds/webpack-resolver'
-import {CodeComponent} from "react-markdown/lib/ast-to-react";
+import { CodeComponent } from "react-markdown/lib/ast-to-react";
 import ByteSelectionMenu from "../components/ByteSelectionMenu";
 import config from "../config";
-import {useParams} from "react-router";
-import {useGlobalWebSocket} from "../services/websocket";
-import {WsMessage, WsMessageType} from "../models/websocket";
-import {AgentWsRequestMessage, ByteUpdateCodeRequest, ExecRequestPayload} from "../models/bytes";
-import {programmingLanguages} from "../services/vars";
-import {useGlobalCtWebSocket} from "../services/ct_websocket";
+import { useParams } from "react-router";
+import { useGlobalWebSocket } from "../services/websocket";
+import { WsMessage, WsMessageType } from "../models/websocket";
+import { AgentWsRequestMessage, ByteUpdateCodeRequest, ExecRequestPayload } from "../models/bytes";
+import { programmingLanguages } from "../services/vars";
+import { useGlobalCtWebSocket } from "../services/ct_websocket";
 import MenuItem from "@mui/material/MenuItem";
+import ByteNextStep from "../components/CodeTeacher/ByteNextStep";
+import { IAceEditor } from "react-ace/lib/types";
+import ReactAce from "react-ace/lib/ace";
 
 function Byte() {
     let userPref = localStorage.getItem('theme');
@@ -52,6 +55,15 @@ function Byte() {
     const [output, setOutput] = useState("");
     const [currentByteTitle, setCurrentByteTitle] = useState("");
     const [workspaceCreated, setWorkspaceCreated] = useState(false);
+    const [bytesDescription, setBytesDescription] = useState("");
+    const [bytesDevSteps, setBytesDevSteps] = useState("");
+    const [bytesLang, setBytesLang] = useState("python");
+
+    const editorRef = React.useRef(null);
+    const aceEditorRef = React.useRef<ReactAce | null>(null);
+    const [cursorPosition, setCursorPosition] = useState<{row: number, column: number} | null>(null)
+    const [codeBeforeCursor, setCodeBeforeCursor] = useState("");
+    const [codeAfterCursor, setCodeAfterCursor] = useState("");
 
     let { id } = useParams();
 
@@ -196,6 +208,9 @@ Please write your code in the editor on the right.
 
                 // Set the markdown content for other sections
                 setMarkdown(`### Description\n${res["rec_bytes"].description}\n\n### Development Steps\n${res["rec_bytes"].dev_steps}`);
+                setBytesDescription(res["rec_bytes"].description)
+                setBytesDevSteps(res["rec_bytes"].dev_steps)
+                setBytesLang(programmingLanguages[res["rec_bytes"].lang])
 
                 setWorkspaceCreated(false);
             } else {
@@ -284,11 +299,12 @@ Please write your code in the editor on the right.
         getRecommendedBytes().then(() => {
             setLoading(false);
         });
-        setMarkdown(initialMarkdownContent);
+        setMarkdown("");
     }, []);
 
     // Handle changes in the editor and activate the button
     const handleEditorChange = (newCode: string) => {
+        console.log("new code: ", newCode)
         setCode(newCode);
         if (newCode && newCode !== "// Write your code here...") {
             setIsButtonActive(true);
@@ -323,7 +339,7 @@ Please write your code in the editor on the right.
     }
 
     // Styled AwesomeButton for the Submit button
-    const SubmitButton = styled(AwesomeButton)<SubmitButtonProps>`
+    const SubmitButton = styled(AwesomeButton) <SubmitButtonProps>`
       position: absolute;
       bottom: 20px;
       right: 20px;
@@ -414,7 +430,7 @@ Please write your code in the editor on the right.
         height: '100%', // Use the full height of the parent container
     };
 
-// Adjust the height of the AceEditor and TerminalOutput
+    // Adjust the height of the AceEditor and TerminalOutput
     const aceEditorStyle: React.CSSProperties = {
         width: '100%',
         height: 'calc(100% - 100px)', // Adjust height as needed, minus the height of the terminal
@@ -462,6 +478,59 @@ Please write your code in the editor on the right.
         }
     };
 
+    useEffect(() => {
+        if (cursorPosition === null) {
+            return
+        }
+
+        const lines = code.split("\n");
+        console.log("line: ", lines[cursorPosition.row])
+        if (lines[cursorPosition.row] === undefined) {
+            return
+        }
+        let preffix = lines.filter((x, i) => i < cursorPosition.row).join("\n") + lines[cursorPosition.row].slice(0, cursorPosition.column)
+        let suffix = lines[cursorPosition.row].slice(cursorPosition.column, lines[cursorPosition.row].length) + lines.filter((x, i) => i > cursorPosition.row).join("\n")
+        setCodeBeforeCursor(preffix)
+        setCodeAfterCursor(suffix)
+
+        console.log("preffix\n", preffix)
+        console.log("suffix\n", suffix)
+    }, [code, cursorPosition])
+
+    const logCursorPosition = React.useCallback(() => {
+        console.log("registering cursor position")
+        if (!aceEditorRef || !aceEditorRef.current) {
+            return
+        }
+
+        const editor = aceEditorRef.current.editor;
+        const cursorPosition = editor.getCursorPosition();
+
+        console.log("new cursor position", cursorPosition)
+        console.log("code content: ", code)
+        
+        setCursorPosition({
+            row: cursorPosition.row,
+            column: cursorPosition.column,
+        })
+    }, [aceEditorRef.current]);
+
+    useEffect(() => {
+        // Function to log the cursor position
+        if (!aceEditorRef || !aceEditorRef.current) {
+            return
+        }
+
+        // Get the Ace Editor instance from the ref and attach the changeCursor event listener
+        const editor = aceEditorRef.current.editor;
+        editor.session.selection.on('changeCursor', logCursorPosition);
+
+        // Cleanup the event listener when the component unmounts
+        return () => {
+            editor.session.selection.off('changeCursor', logCursorPosition);
+        };
+    }, []);
+
     interface TerminalOutputProps {
         output: string;
         style?: React.CSSProperties;
@@ -490,8 +559,8 @@ Please write your code in the editor on the right.
         }
         return (
             <pre style={markdownBlockStyle}>
-        <code className={className} {...props}>{children}</code>
-      </pre>
+                <code className={className} {...props}>{children}</code>
+            </pre>
         );
     };
 
@@ -584,7 +653,7 @@ Please write your code in the editor on the right.
     }
 
     const [typeTab, setTypeTab] = React.useState("Outline")
-    const handleChange = async(event: React.SyntheticEvent, newValue: string) => {
+    const handleChange = async (event: React.SyntheticEvent, newValue: string) => {
         setTypeTab(newValue);
     };
 
@@ -627,7 +696,7 @@ Please write your code in the editor on the right.
                 <MessageContainer>
 
 
-                    {renderBotMessage(initialMarkdownContent,  false, "123", true, false)}
+                    {renderBotMessage(markdown, false, "123", true, false)}
                     {renderUserMessage("Help me with my code")}
                 </MessageContainer>
             </Box>
@@ -646,7 +715,7 @@ Please write your code in the editor on the right.
                     <div style={mainLayoutStyle}>
                         <div style={combinedSectionStyle}>
                             <div style={markdownSectionStyle}>
-                                <CodeTeacher/>
+                                <CodeTeacher />
                                 <TextField
                                     fullWidth
                                     label="Ask Code Teacher!"
@@ -656,9 +725,28 @@ Please write your code in the editor on the right.
                                     onKeyPress={handleKeyPress}
                                 />
                             </div>
-                            <div style={editorAndTerminalStyle}>
+                            <ByteNextStep
+                                open={true}
+                                closeCallback={() => { }}
+                                currentCode={code}
+                                anchorEl={editorRef.current}
+                                placement="right-start"
+                                posMods={[0, 40]}
+                                maxWidth="30vw"
+                                bytesID={id || ""}
+                                bytesDescription={bytesDescription}
+                                bytesDevSteps={bytesDevSteps}
+                                bytesLang={bytesLang}
+                                codePrefix={codeBeforeCursor}
+                                codeSuffix={codeAfterCursor}
+                            />
+                            <div
+                                style={editorAndTerminalStyle}
+                                ref={editorRef}
+                            >
                                 <AceEditor
-                                    mode="javascript"
+                                    ref={aceEditorRef}
+                                    mode={bytesLang === "Go" ? "golang" : "python"}
                                     theme="monokai"
                                     value={code}
                                     onChange={handleEditorChange}
