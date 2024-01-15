@@ -311,8 +311,9 @@ export default function ByteNextStep(props: ByteNextStepProps) {
                 <DialogContent
                     sx={{
                         backgroundColor: 'transparent',
-                        maxHeight: '50vh',
+                        maxHeight: '70vh',
                         overflow: 'auto',
+                        mt: response.length > 0 ? 2: undefined,
                     }}
                 >
                     {renderContent()}
