@@ -9,7 +9,7 @@ import {
     ThemeProvider,
     Typography,
     Box,
-    Paper, Card, Tooltip, Button, Divider, Tab, Tabs, TextField
+    Paper, Card, Tooltip, Button, Divider, Tab, Tabs, TextField, Popper
 } from "@mui/material";
 import { getAllTokens } from "../theme";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
@@ -37,6 +37,7 @@ import MenuItem from "@mui/material/MenuItem";
 import ByteNextStep from "../components/CodeTeacher/ByteNextStep";
 import { IAceEditor } from "react-ace/lib/types";
 import ReactAce from "react-ace/lib/ace";
+import { CtByteNextOutputRequest, CtByteNextOutputResponse, CtGenericErrorPayload, CtMessage, CtMessageOrigin, CtMessageType, CtValidationErrorPayload } from "../models/ct_websocket";
 
 function Byte() {
     let userPref = localStorage.getItem('theme');
@@ -64,6 +65,8 @@ function Byte() {
     const [cursorPosition, setCursorPosition] = useState<{row: number, column: number} | null>(null)
     const [codeBeforeCursor, setCodeBeforeCursor] = useState("");
     const [codeAfterCursor, setCodeAfterCursor] = useState("");
+    const [outputPopup, setOutputPopup] = useState(false);
+    const [outputMessage, setOutputMessage] = useState("");
 
     let { id } = useParams();
 
@@ -457,25 +460,87 @@ Please write your code in the editor on the right.
 
     let originalConsoleLog = console.log;
 
-    const executeCode = () => {
-        try {
-            let capturedOutput = "";
-            console.log = (...args) => {
-                capturedOutput += args.join(" ") + "\n";
-            };
+    const sendWebsocketMessageNextOutput = (byteId: string, userCode: string, codeOutput: string) => {
+      ctWs.sendWebsocketMessage({
+          sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+          type: CtMessageType.WebSocketMessageTypeByteNextOutputMessageRequest,
+          origin: CtMessageOrigin.WebSocketMessageOriginClient,
+          created_at: Date.now(),
+          payload: {
+              byte_id: byteId,
+              byte_description: bytesDescription,
+              code_language: bytesLang,
+              byte_output: codeOutput,
+              code: userCode
+          }
+      } satisfies CtMessage<CtByteNextOutputRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtByteNextOutputResponse>) => {
+          console.log("response message: ", msg)
+          if (msg.type !== CtMessageType.WebSocketMessageTypeByteNextOutputMessageResponse) {
+              console.log("failed next steps", msg)
+              return true
+          }
+          const p: CtByteNextOutputResponse = msg.payload as CtByteNextOutputResponse;
+          setOutputMessage(p.complete_message)
+          setOutputPopup(true)
+        //   if (p.done) {
+        //       setState(State.COMPLETED)
+        //       return true
+        //   }
+          return false
+      })
+    };
 
-            eval(code);
+    const sendExecRequest = () => {
+        // Log when sendExecRequest is triggered
+        console.log("sendExecRequest triggered");
 
-            console.log = originalConsoleLog; // Restore original console.log
-            setOutput(capturedOutput);
-        } catch (e) {
-            console.log = originalConsoleLog; // Restore in case of error
-            if (e instanceof Error) {
-                setOutput("Error: " + e.message);
-            } else {
-                setOutput("Error: Unknown error occurred");
+        // Prepare the message to be sent
+        const message = {
+            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            type: WsMessageType.AgentExecRequest,
+            payload: {
+                byte_attempt_id: byteAttemptId,
+                payload: {
+                    lang: programmingLanguages.indexOf("Python"),
+                    code: code
+                }
+            } // satisfies AgentWsRequestMessage
+        };
+
+        // Log the message being sent
+        console.log("Sending message:", message);
+
+        globalWs.sendWebsocketMessage(
+            message,
+            (msg: WsMessage<any>) => {
+                // Log the received message
+                console.log("Received message:", msg);
+
+                if (msg.payload.type !== WsMessageType.AgentExecResponse) {
+                    console.error("error: ", msg.payload);
+                    return;
+                }
+
+                const { StdOut, StdErr } = msg.payload;
+
+                // Update state to render output
+                setOutput({
+                    stdout: StdOut.map((row: { Content: string; }) => row.Content),
+                    stderr: StdErr.map((row: { Content: string; }) => row.Content),
+                });
             }
+        );
+    };
+
+    useEffect(() => {
+        if (output !== "" && id !== undefined) {
+            sendWebsocketMessageNextOutput(id, code, output)
         }
+    }, [output])
+
+    const executeCode = () => {
+        console.log("executeCode called")
+        sendExecRequest();
     };
 
     useEffect(() => {
@@ -755,6 +820,28 @@ Please write your code in the editor on the right.
                                     style={aceEditorStyle}
                                 />
                                 <TerminalOutput output={output} style={terminalOutputStyle} />
+                            </div>
+                            <div>
+                                <Popper
+                                    open={outputPopup}
+                                    anchorEl={editorRef.current}
+                                    placement={"right-start"}
+                                    sx={{
+                                        backgroundColor: "transparent"
+                                    }}
+                                    modifiers={[
+                                        {
+                                            name: 'offset',
+                                            options: {
+                                                offset: [0, 40], // x, y offset
+                                            },
+                                        },
+                                    ]}
+                                >
+                                    <Box>
+                                        Hello
+                                    </Box>
+                                </Popper>
                             </div>
                             {isButtonActive && (
                                 <SubmitButton

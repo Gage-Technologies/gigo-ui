@@ -64,3 +64,20 @@ export interface CtByteNextStepsResponse {
     premium_llm: boolean;
     free_credit_use: boolean;
 }
+
+export interface CtByteNextOutputRequest {
+    byte_id: string;
+    byte_description: string;
+    code: string;
+    byte_output: string;
+    code_language: string;
+}
+
+export interface CtByteNextOutputResponse {
+    assistant_id: string;
+    token: string;
+    complete_message: string;
+    done: boolean;
+    premium_llm: boolean;
+    free_credit_use: boolean;
+}
