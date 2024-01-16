@@ -11,7 +11,8 @@ import {
     Box,
     Paper, Card, Tooltip, Button, Divider, Tab, Tabs, TextField, Popper, DialogContent
 } from "@mui/material";
-import { getAllTokens } from "../theme";
+import { getAllTokens, themeHelpers } from "../theme";
+import { Close } from "@material-ui/icons";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { useNavigate } from "react-router-dom";
 import AppWrapper from "../components/AppWrapper";
@@ -831,16 +832,19 @@ function Byte() {
                                     anchorEl={editorRef.current}
                                     placement={"right-start"}
                                     sx={{
-                                        backgroundColor: "transparent"
+                                        backgroundColor: "transparent",
+                                        width: "20vw",
+                                        height: "60vh",
+                                        overflow: "scroll"
                                     }}
-                                    modifiers={[
-                                        {
-                                            name: 'offset',
-                                            options: {
-                                                offset: [0, 40], // x, y offset
-                                            },
-                                        },
-                                    ]}
+                                    // modifiers={[
+                                    //     {
+                                    //         name: 'offset',
+                                    //         options: {
+                                    //             offset: [0, 40], // x, y offset
+                                    //         },
+                                    //     },
+                                    // ]}
                                 >
                                     <Box
                                         sx={{
@@ -848,9 +852,13 @@ function Byte() {
                                             flexDirection: 'row',
                                             alignItems: 'start',
                                             p: 1,
+                                            borderRadius: '10px',
+                                            boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2);',
+                                            ...themeHelpers.frostedGlass,
+                                            backgroundColor: 'rgba(19,19,19,0.31)',
                                         }}
                                     >
-                                        {/* <Button
+                                        <Button
                                             variant="text"
                                             color="error"
                                             sx={{
@@ -861,16 +869,16 @@ function Byte() {
                                                 padding: 1,
                                                 minWidth: "0px"
                                             }}
-                                            onClick={setOutputPopup(false)}
+                                            onClick={() => setOutputPopup(false)}
                                         >
                                             <Close />
-                                        </Button> */}
+                                        </Button>
                                         <DialogContent
                                             sx={{
                                                 backgroundColor: 'transparent',
-                                                maxHeight: '70vh',
+                                                maxHeight: '100%',
                                                 overflow: 'auto',
-                                                mt: outputMessage.length > 0 ? 2: undefined,
+                                                // mt: outputMessage.length > 0 ? 2: undefined,
                                             }}
                                         >
                                             {outputMessage}
