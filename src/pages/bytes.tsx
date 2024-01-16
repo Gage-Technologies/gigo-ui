@@ -53,7 +53,13 @@ function Byte() {
     const [loading, setLoading] = useState(true);
     const [code, setCode] = useState("// Write your code here...");
     const [isButtonActive, setIsButtonActive] = useState(false);
-    const [output, setOutput] = useState("");
+
+    type OutputState = {
+        stdout: string[];
+        stderr: string[];
+    };
+    const [output, setOutput] = useState({ stdout: [], stderr: [] });
+
     const [currentByteTitle, setCurrentByteTitle] = useState("");
     const [workspaceCreated, setWorkspaceCreated] = useState(false);
     const [bytesDescription, setBytesDescription] = useState("");
@@ -67,6 +73,8 @@ function Byte() {
     const [codeAfterCursor, setCodeAfterCursor] = useState("");
     const [outputPopup, setOutputPopup] = useState(false);
     const [outputMessage, setOutputMessage] = useState("");
+    const [byteAttemptId, setByteAttemptId] = useState("");
+
 
     let { id } = useParams();
 
@@ -86,60 +94,87 @@ function Byte() {
 
     const [markdown, setMarkdown] = useState("");
 
-    const initialMarkdownContent = `
-# Byte Instructions
-**Objective:** Write a JavaScript function that logs "Hello, World!" to the console.
+    // useEffect(() => {
+    //     globalWs.sendWebsocketMessage(
+    //         {
+    //             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+    //             type: WsMessageType.ByteUpdateCode,
+    //             payload: {
+    //                 byte_attempt_id: "0",
+    //                 content: ""
+    //             } satisfies ByteUpdateCodeRequest
+    //         },
+    //         (msg: WsMessage<any>) => {
+    //             console.log(msg.payload);
+    //         }
+    //     )
+    // }, []);
 
-\`\`\`javascript
-// Example:
-function greet() {
-    console.log("Hello, World!");
-}
-// Remember to call greet();
-\`\`\`
+    // useEffect(() => {
+    //     globalWs.sendWebsocketMessage(
+    //         {
+    //             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+    //             type: WsMessageType.AgentExecRequest,
+    //             payload: {
+    //                 byte_attempt_id: "0",
+    //                 payload: {
+    //                     lang: programmingLanguages.indexOf("Python"),
+    //                     code: "print(\"Hello, World!\")"
+    //                 }
+    //             } satisfies AgentWsRequestMessage,
+    //         },
+    //         (msg: WsMessage<any>) => {
+    //             if (msg.payload.type !== WsMessageType.AgentExecResponse) {
+    //                 console.log("error: ", msg.payload);
+    //                 return
+    //             }
+    //
+    //             // update console with payload
+    //         }
+    //     )
+    // }, []);
 
-Please write your code in the editor on the right.
-`;
+    const sendExecRequest = () => {
+        // Log when sendExecRequest is triggered
+        console.log("sendExecRequest triggered");
 
-    useEffect(() => {
-        globalWs.sendWebsocketMessage(
-            {
-                sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-                type: WsMessageType.ByteUpdateCode,
+        // Prepare the message to be sent
+        const message = {
+            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            type: WsMessageType.AgentExecRequest,
+            payload: {
+                byte_attempt_id: byteAttemptId,
                 payload: {
-                    byte_attempt_id: "0",
-                    content: ""
-                } satisfies ByteUpdateCodeRequest
-            },
-            (msg: WsMessage<any>) => {
-                console.log(msg.payload);
-            }
-        )
-    }, []);
+                    lang: programmingLanguages.indexOf("Python"),
+                    code: code
+                }
+            } // satisfies AgentWsRequestMessage
+        };
 
-    useEffect(() => {
+        // Log the message being sent
+        console.log("Sending message:", message);
+
         globalWs.sendWebsocketMessage(
-            {
-                sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-                type: WsMessageType.AgentExecRequest,
-                payload: {
-                    byte_attempt_id: "0",
-                    payload: {
-                        lang: programmingLanguages.indexOf("Python"),
-                        code: "print(\"Hello, World!\")"
-                    }
-                } satisfies AgentWsRequestMessage,
-            },
+            message,
             (msg: WsMessage<any>) => {
+                // Log the received message
+                console.log("Received message:", msg);
+
                 if (msg.payload.type !== WsMessageType.AgentExecResponse) {
-                    console.log("error: ", msg.payload);
-                    return
+                    console.error("error: ", msg.payload);
+                    return;
                 }
 
-                // update console with payload
+                const { StdOut, StdErr } = msg.payload;
+
+                // Update state to render output
+                setOutput({
+                    stdout: StdOut.map((row: { Content: string; }) => row.Content),
+                    stderr: StdErr.map((row: { Content: string; }) => row.Content),
+                });
             }
-        )
-    }, []);
+        );
+    };
 
     const getRecommendedBytes = async () => {
         let recommendedBytes = await call(
@@ -255,8 +290,9 @@ Please write your code in the editor on the right.
                 return;
             }
 
-            if (res["byte_attempt"] !== undefined && res["byte_attempt"]["content"] !== "") {
+            if (res["byte_attempt"] !== undefined && res["byte_attempt"]["content"] !== undefined) {
                 setCode(res["byte_attempt"]["content"]);
+                setByteAttemptId(res["byte_attempt"]["_id"]);
             }
         } catch (error) {
             swal("Error", "An error occurred while fetching the byte attempt data.");
@@ -297,26 +333,32 @@ Please write your code in the editor on the right.
     useEffect(() => {
         const byteId = getByteIdFromUrl();
         setLoading(true);
-        getByte(byteId);
-        startByteAttempt(byteId);
-        getRecommendedBytes().then(() => {
+        getRecommendedBytes()
+        getByte(byteId).then(() => {
+            startByteAttempt(byteId).then(() => {
+                if (!workspaceCreated && byteId) {
+                    createWorkspace(byteId)
+                        .then(() => setWorkspaceCreated(true))
+                        .catch((error) => console.error("Error creating workspace:", error));
+                }
+            });
+        }).finally(() => {
             setLoading(false);
         });
-        setMarkdown("");
-    }, []);
+    }, [id]);
 
     // Handle changes in the editor and activate the button
     const handleEditorChange = (newCode: string) => {
-        console.log("new code: ", newCode)
+        //console.log("new code: ", newCode)
         setCode(newCode);
         if (newCode && newCode !== "// Write your code here...") {
             setIsButtonActive(true);
 
             // Call createWorkspace only if it hasn't been called before
             if (!workspaceCreated && id) {
-                // createWorkspace(id)
-                //     .then(() => setWorkspaceCreated(true)) // Set the flag to true once the workspace is created
-                //     .catch(console.error);
+                createWorkspace(id)
+                    .then(() => setWorkspaceCreated(true)) // Set the flag to true once the workspace is created
+                    .catch(console.error);
             }
         } else {
             setIsButtonActive(false);
@@ -342,23 +384,31 @@ Please write your code in the editor on the right.
     }
 
     // Styled AwesomeButton for the Submit button
-    const SubmitButton = styled(AwesomeButton) <SubmitButtonProps>`
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      &:before {
-        transition: box-shadow 0.3s ease;
-        box-shadow: ${props => props.isButtonActive ? '0 0 5px #fff, 0 0 10px #fff, 0 0 15px #ddd, 0 0 20px #ddd, 0 0 25px #ddd, 0 0 30px #ddd, 0 0 35px #ddd' : 'none'};
-        border-radius: 25px;
-      }
-      &:hover:before {
-        box-shadow: ${props => props.isButtonActive ? '0 0 3px #fff, 0 0 6px #fff, 0 0 9px #bbb, 0 0 12px #bbb, 0 0 15px #bbb, 0 0 18px #bbb, 0 0 21px #bbb' : 'none'};
-      }
-      &:active:before {
-        box-shadow: ${props => props.isButtonActive ? '0 0 2px #fff, 0 0 4px #fff, 0 0 6px #aaa, 0 0 8px #aaa, 0 0 10px #aaa, 0 0 12px #aaa, 0 0 14px #aaa' : 'none'};
-      }
-      background-color: ${props => props.isButtonActive ? theme.palette.secondary.main : theme.palette.primary.main};
+    // const SubmitButton = styled(AwesomeButton) <SubmitButtonProps>`
+    //   position: absolute;
+    //   bottom: 20px;
+    //   right: 20px;
+    //   &:before {
+    //     transition: box-shadow 0.3s ease;
+    //     box-shadow: ${props => props.isButtonActive ? '0 0 5px #fff, 0 0 10px #fff, 0 0 15px #ddd, 0 0 20px #ddd, 0 0 25px #ddd, 0 0 30px #ddd, 0 0 35px #ddd' : 'none'};
+    //     border-radius: 25px;
+    //   }
+    //   &:hover:before {
+    //     box-shadow: ${props => props.isButtonActive ? '0 0 3px #fff, 0 0 6px #fff, 0 0 9px #bbb, 0 0 12px #bbb, 0 0 15px #bbb, 0 0 18px #bbb, 0 0 21px #bbb' : 'none'};
+    //   }
+    //   &:active:before {
+    //     box-shadow: ${props => props.isButtonActive ? '0 0 2px #fff, 0 0 4px #fff, 0 0 6px #aaa, 0 0 8px #aaa, 0 0 10px #aaa, 0 0 12px #aaa, 0 0 14px #aaa' : 'none'};
+    //   }
+    //   background-color: ${props => props.isButtonActive ? theme.palette.secondary.main : theme.palette.primary.main};
+    //   cursor: ${props => props.isButtonActive ? 'pointer' : 'not-allowed'};
+    // `;
+
+    const SubmitButton = styled(AwesomeButton)<SubmitButtonProps>`
       cursor: ${props => props.isButtonActive ? 'pointer' : 'not-allowed'};
+      &:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
     `;
 
     const combinedSectionStyle: React.CSSProperties = {
@@ -460,8 +510,11 @@ Please write your code in the editor on the right.
 
     let originalConsoleLog = console.log;
 
-    const sendWebsocketMessageNextOutput = (byteId: string, userCode: string, codeOutput: string) => {
-      ctWs.sendWebsocketMessage({
+    const sendWebsocketMessageNextOutput = (byteId: string, userCode: string, codeOutput: {
+        stdout: any[];
+        stderr: any[]
+    }) => {
+        ctWs.sendWebsocketMessage({
           sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
           type: CtMessageType.WebSocketMessageTypeByteNextOutputMessageRequest,
           origin: CtMessageOrigin.WebSocketMessageOriginClient,
@@ -470,6 +523,7 @@ Please write your code in the editor on the right.
               byte_id: byteId,
               byte_description: bytesDescription,
               code_language: bytesLang,
+              // @ts-ignore
               byte_output: codeOutput,
               code: userCode
           }
@@ -490,49 +544,8 @@ Please write your code in the editor on the right.
       })
     };
 
-    const sendExecRequest = () => {
-        // Log when sendExecRequest is triggered
-        console.log("sendExecRequest triggered");
-
-        // Prepare the message to be sent
-        const message = {
-            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-            type: WsMessageType.AgentExecRequest,
-            payload: {
-                byte_attempt_id: byteAttemptId,
-                payload: {
-                    lang: programmingLanguages.indexOf("Python"),
-                    code: code
-                }
-            } // satisfies AgentWsRequestMessage
-        };
-
-        // Log the message being sent
-        console.log("Sending message:", message);
-
-        globalWs.sendWebsocketMessage(
-            message,
-            (msg: WsMessage<any>) => {
-                // Log the received message
-                console.log("Received message:", msg);
-
-                if (msg.payload.type !== WsMessageType.AgentExecResponse) {
-                    console.error("error: ", msg.payload);
-                    return;
-                }
-
-                const { StdOut, StdErr } = msg.payload;
-
-                // Update state to render output
-                setOutput({
-                    stdout: StdOut.map((row: { Content: string; }) => row.Content),
-                    stderr: StdErr.map((row: { Content: string; }) => row.Content),
-                });
-            }
-        );
-    };
-
     useEffect(() => {
+        // @ts-ignore
         if (output !== "" && id !== undefined) {
             sendWebsocketMessageNextOutput(id, code, output)
         }
@@ -549,7 +562,7 @@ Please write your code in the editor on the right.
         }
 
         const lines = code.split("\n");
-        console.log("line: ", lines[cursorPosition.row])
+        //console.log("line: ", lines[cursorPosition.row])
         if (lines[cursorPosition.row] === undefined) {
             return
         }
@@ -558,12 +571,12 @@ Please write your code in the editor on the right.
         setCodeBeforeCursor(preffix)
         setCodeAfterCursor(suffix)
 
-        console.log("preffix\n", preffix)
-        console.log("suffix\n", suffix)
+        //console.log("preffix\n", preffix)
+        //console.log("suffix\n", suffix)
     }, [code, cursorPosition])
 
     const logCursorPosition = React.useCallback(() => {
-        console.log("registering cursor position")
+        //console.log("registering cursor position")
         if (!aceEditorRef || !aceEditorRef.current) {
             return
         }
@@ -571,8 +584,8 @@ Please write your code in the editor on the right.
         const editor = aceEditorRef.current.editor;
         const cursorPosition = editor.getCursorPosition();
 
-        console.log("new cursor position", cursorPosition)
-        console.log("code content: ", code)
+        //console.log("new cursor position", cursorPosition)
+        //console.log("code content: ", code)
         
         setCursorPosition({
             row: cursorPosition.row,
@@ -597,7 +610,7 @@ Please write your code in the editor on the right.
     }, []);
 
     interface TerminalOutputProps {
-        output: string;
+        output: OutputState;
         style?: React.CSSProperties;
     }
 
@@ -605,7 +618,6 @@ Please write your code in the editor on the right.
         <div style={{
             ...{
                 backgroundColor: "#333",
-                color: "lime",
                 fontFamily: "monospace",
                 padding: "10px",
                 marginTop: "20px",
@@ -614,7 +626,18 @@ Please write your code in the editor on the right.
             },
             ...style
         }}>
-            {output || "No output"}
+            {/* StdOut */}
+            {output.stdout && output.stdout.map((line, index) => (
+                <div key={index} style={{ color: "lime" }}>
+                    {line}
+                </div>
+            ))}
+            {/* StdErr */}
+            {output.stderr && output.stderr.map((line, index) => (
+                <div key={index} style={{ color: "red" }}>
+                    {line}
+                </div>
+            ))}
         </div>
     );
 
@@ -844,17 +867,23 @@ Please write your code in the editor on the right.
                                 </Popper>
                             </div>
                             {isButtonActive && (
-                                <SubmitButton
+                                <button
                                     style={{
+                                        position: 'absolute',
                                         right: '22%',
-                                        marginBottom: `2%`
+                                        marginBottom: '2%',
+                                        backgroundColor: theme.palette.primary.main,
+                                        color: theme.palette.primary.contrastText,
+                                        border: 'none',
+                                        padding: '10px 20px',
+                                        borderRadius: theme.shape.borderRadius,
+                                        cursor: 'pointer',
+                                        boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.2)'
                                     }}
-                                    type="primary"
                                     onClick={executeCode}
-                                    isButtonActive={isButtonActive}
                                 >
                                     Submit Code
-                                </SubmitButton>
+                                </button>
                             )}
                         </div>
                         <div style={byteSelectionMenuStyle}>

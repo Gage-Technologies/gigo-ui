@@ -17,7 +17,6 @@ interface ByteSelectionMenuProps {
 }
 
 const ByteSelectionMenu: React.FC<ByteSelectionMenuProps> = ({ bytes, onSelectByte }) => {
-    console.log(bytes);
     return (
         <div style={{
             height: '80vh',

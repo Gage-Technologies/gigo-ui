@@ -148,6 +148,31 @@ const CurateAdminPage: React.FC = () => {
         setCuratedData(res["curated_posts"])
     }
 
+    const handleMailingListBulkInit = async () => {
+        const res = await call(
+            "/api/email/mailingListBulk",
+            "POST",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {
+                mailingList: "allsubscribedgigousers@gigo.dev",
+                password: password,
+            },
+            null,
+            config.rootPath
+        );
+
+        if (res === undefined) {
+            swal("Server Error", "There was an issue contacting the server.");
+            return;
+        }
+
+        // Handle the response accordingly
+        swal("Mailing List Initialized", "The mailing list has been initialized successfully.");
+    };
+
     const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setPassword(e.target.value);
     }
@@ -283,6 +308,13 @@ const CurateAdminPage: React.FC = () => {
                             Add Curated Project
                         </Button>
                     </div>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleMailingListBulkInit}
+                    >
+                        Initialize Mailing List
+                    </Button>
                     {curatedData !== null && curatedData.length > 0 ? (
                         <Typography component={"div"} sx={{
                             display: "flex",
