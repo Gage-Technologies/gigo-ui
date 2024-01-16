@@ -9,7 +9,7 @@ import {
     ThemeProvider,
     Typography,
     Box,
-    Paper, Card, Tooltip, Button, Divider, Tab, Tabs, TextField, Popper
+    Paper, Card, Tooltip, Button, Divider, Tab, Tabs, TextField, Popper, DialogContent
 } from "@mui/material";
 import { getAllTokens } from "../theme";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
@@ -38,6 +38,7 @@ import ByteNextStep from "../components/CodeTeacher/ByteNextStep";
 import { IAceEditor } from "react-ace/lib/types";
 import ReactAce from "react-ace/lib/ace";
 import { CtByteNextOutputRequest, CtByteNextOutputResponse, CtGenericErrorPayload, CtMessage, CtMessageOrigin, CtMessageType, CtValidationErrorPayload } from "../models/ct_websocket";
+import { Nightlife } from "@mui/icons-material";
 
 function Byte() {
     let userPref = localStorage.getItem('theme');
@@ -93,46 +94,6 @@ function Byte() {
     let globalWs = useGlobalWebSocket();
 
     const [markdown, setMarkdown] = useState("");
-
-    // useEffect(() => {
-    //     globalWs.sendWebsocketMessage(
-    //         {
-    //             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-    //             type: WsMessageType.ByteUpdateCode,
-    //             payload: {
-    //                 byte_attempt_id: "0",
-    //                 content: ""
-    //             } satisfies ByteUpdateCodeRequest
-    //         },
-    //         (msg: WsMessage<any>) => {
-    //             console.log(msg.payload);
-    //         }
-    //     )
-    // }, []);
-
-    // useEffect(() => {
-    //     globalWs.sendWebsocketMessage(
-    //         {
-    //             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-    //             type: WsMessageType.AgentExecRequest,
-    //             payload: {
-    //                 byte_attempt_id: "0",
-    //                 payload: {
-    //                     lang: programmingLanguages.indexOf("Python"),
-    //                     code: "print(\"Hello, World!\")"
-    //                 }
-    //             } satisfies AgentWsRequestMessage,
-    //         },
-    //         (msg: WsMessage<any>) => {
-    //             if (msg.payload.type !== WsMessageType.AgentExecResponse) {
-    //                 console.log("error: ", msg.payload);
-    //                 return
-    //             }
-    //
-    //             // update console with payload
-    //         }
-    //     )
-    // }, []);
 
     const sendExecRequest = () => {
         // Log when sendExecRequest is triggered
@@ -514,6 +475,18 @@ function Byte() {
         stdout: any[];
         stderr: any[]
     }) => {
+        console.log("next output starting")
+
+        console.log(" payload next output is: ", {
+            byte_id: byteId,
+            byte_description: bytesDescription,
+            code_language: bytesLang,
+            // @ts-ignore
+            byte_output: codeOutput["stdout"][0],
+            code: userCode
+        })
+
+
         ctWs.sendWebsocketMessage({
           sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
           type: CtMessageType.WebSocketMessageTypeByteNextOutputMessageRequest,
@@ -524,13 +497,13 @@ function Byte() {
               byte_description: bytesDescription,
               code_language: bytesLang,
               // @ts-ignore
-              byte_output: codeOutput,
+              byte_output: codeOutput["stdout"][0],
               code: userCode
           }
       } satisfies CtMessage<CtByteNextOutputRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtByteNextOutputResponse>) => {
-          console.log("response message: ", msg)
+          console.log("response message of next output: ", msg)
           if (msg.type !== CtMessageType.WebSocketMessageTypeByteNextOutputMessageResponse) {
-              console.log("failed next steps", msg)
+              console.log("failed next output message", msg)
               return true
           }
           const p: CtByteNextOutputResponse = msg.payload as CtByteNextOutputResponse;
@@ -544,16 +517,24 @@ function Byte() {
       })
     };
 
-    useEffect(() => {
-        // @ts-ignore
-        if (output !== "" && id !== undefined) {
-            sendWebsocketMessageNextOutput(id, code, output)
-        }
-    }, [output])
+    // useEffect(() => {
+    //     console.log("output is: ", output)
+    //     console.log("id is: ", id)
+    //     // @ts-ignore
+    //     if (id !== undefined && output !== { stdout: [], stderr: [] }) {
+    //         sendWebsocketMessageNextOutput(id, code, output)
+    //     }
+    // }, [output])
 
     const executeCode = () => {
         console.log("executeCode called")
-        sendExecRequest();
+        // sendExecRequest();
+        //todo: remove later
+        console.log("id is: ", id)
+        // @ts-ignore
+        if (id !== undefined) {
+            sendWebsocketMessageNextOutput(id, code, {stdout: ["testing true"], stderr: ["nil"]})
+        }
     };
 
     useEffect(() => {
@@ -861,8 +842,39 @@ function Byte() {
                                         },
                                     ]}
                                 >
-                                    <Box>
-                                        Hello
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            alignItems: 'start',
+                                            p: 1,
+                                        }}
+                                    >
+                                        {/* <Button
+                                            variant="text"
+                                            color="error"
+                                            sx={{
+                                                position: "absolute",
+                                                right: 10,
+                                                top: 10,
+                                                borderRadius: "50%",
+                                                padding: 1,
+                                                minWidth: "0px"
+                                            }}
+                                            onClick={setOutputPopup(false)}
+                                        >
+                                            <Close />
+                                        </Button> */}
+                                        <DialogContent
+                                            sx={{
+                                                backgroundColor: 'transparent',
+                                                maxHeight: '70vh',
+                                                overflow: 'auto',
+                                                mt: outputMessage.length > 0 ? 2: undefined,
+                                            }}
+                                        >
+                                            {outputMessage}
+                                        </DialogContent>
                                     </Box>
                                 </Popper>
                             </div>
