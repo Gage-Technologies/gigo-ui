@@ -552,24 +552,25 @@ function Byte() {
       })
     };
 
-    // useEffect(() => {
-    //     console.log("output is: ", output)
-    //     console.log("id is: ", id)
-    //     // @ts-ignore
-    //     if (id !== undefined && output !== { stdout: [], stderr: [] }) {
-    //         sendWebsocketMessageNextOutput(id, code, output)
-    //     }
-    // }, [output])
+    useEffect(() => {
+        console.log("output is: ", output)
+        console.log("id is: ", id)
+        // @ts-ignore
+        if (id !== undefined && (output["stdout"].length > 0 || output["stderr"].length > 0)) {
+            console.log("next output called")
+            sendWebsocketMessageNextOutput(id, code, output)
+        }
+    }, [output])
 
     const executeCode = () => {
         console.log("executeCode called")
-        // sendExecRequest();
-        //todo: remove later
-        console.log("id is: ", id)
-        // @ts-ignore
-        if (id !== undefined) {
-            sendWebsocketMessageNextOutput(id, code, {stdout: ["testing true"], stderr: ["nil"]})
-        }
+        sendExecRequest();
+        // //todo: remove later
+        // console.log("id is: ", id)
+        // // @ts-ignore
+        // if (id !== undefined) {
+        //     sendWebsocketMessageNextOutput(id, code, {stdout: ["testing true"], stderr: ["nil"]})
+        // }
     };
 
     useEffect(() => {
