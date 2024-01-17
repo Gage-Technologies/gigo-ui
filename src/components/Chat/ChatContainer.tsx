@@ -490,17 +490,18 @@ export default function ChatContainer() {
                 offset: 0,
                 limit: 250,
             } as GetChatsParams,
-        }, (msg: wsModels.WsMessage<any>) => {
+        }, (msg: wsModels.WsMessage<any>): boolean => {
             if (msg.type === wsModels.WsMessageType.GetChats) {
                 let c = msg.payload as models.GetChatsResponse;
                 setChats(c.chats);
                 setLoadingChats(false);
-                return;
+                return true;
             }
 
             // handle error case
             setLoadingChats(false);
             swal("Server Error", "The server said you have no chats but we know you're popular. We'll have a talk with that server!");
+            return true;
         })
     }, []);
 
@@ -792,13 +793,13 @@ export default function ChatContainer() {
                 limit: 50,
             }
         };
-        globalWs.sendWebsocketMessage(wsMsg, (msg: wsModels.WsMessage<any>) => {
+        globalWs.sendWebsocketMessage(wsMsg, (msg: wsModels.WsMessage<any>): boolean => {
             if (msg.type === wsModels.WsMessageType.GetChatMessages) {
                 let m = msg.payload as models.GetChatMessagesResponse;
                 if (m.messages.length === 0) {
                     setNoMoreData(true);
                     setLoadingMessages(false);
-                    return;
+                    return true;
                 }
                 let oldMessageLength = messages.length;
                 if (!override && oldMessageLength > 0) {
@@ -821,18 +822,18 @@ export default function ChatContainer() {
 
                     // exit if we are not in a chat view
                     if (selectedTab === "Friends" && !privateChatView) {
-                        return
+                        return true;
                     }
 
                     scrollToBottom();
                 }
-                return
+                return true;
             }
 
             // handle error case
             // swal("Server Error", "The server said you have no messages but we know your inbox is full! We'll get right on that!");
             setLoadingMessages(false);
-            return
+            return true;
         });
     }
 
@@ -871,7 +872,7 @@ export default function ChatContainer() {
                 message_type: models.ChatMessageType.ChatMessageTypeInsecure,
             }
         };
-        globalWs.sendWebsocketMessage(wsMsg, (msg: wsModels.WsMessage<any>) => {
+        globalWs.sendWebsocketMessage(wsMsg, (msg: wsModels.WsMessage<any>): boolean => {
             if (msg.type === wsModels.WsMessageType.NewOutgoingChatMessage) {
                 // update the message with the server message
                 let newMessage = msg.payload as models.ChatMessage
@@ -896,7 +897,7 @@ export default function ChatContainer() {
                 // clear the message cache
                 dispatch(setMessageCache(chat._id, ""));
 
-                return;
+                return true;
             }
 
             // check if any existing messages have this sequence id
@@ -910,6 +911,7 @@ export default function ChatContainer() {
             }
             // alert the user
             swal("Failed To Send Message", "We lost the message in transit. It's like the USPS but more high tech! Sorry about that!");
+            return true;
         });
     }, 100);
 
@@ -967,15 +969,16 @@ export default function ChatContainer() {
                 payload: {
                     chat_id: challengeSub,
                 }
-            }, (msg: wsModels.WsMessage<any>) => {
+            }, (msg: wsModels.WsMessage<any>): boolean => {
                 if (msg.type === wsModels.WsMessageType.ChatUnsubscribe) {
                     // set challenge sub
                     setChallengeSub(null);
-                    return;
+                    return true;
                 }
 
                 // handle error case
                 swal("Server Error", "The chat server for this challenge is on vacation. We'll call it back from the beach!");
+                return true;
             });
         }
 
@@ -988,18 +991,19 @@ export default function ChatContainer() {
                     chat_id: chat._id,
                     chat_type: chat.type,
                 }
-            }, (msg: wsModels.WsMessage<any>) => {
+            }, (msg: wsModels.WsMessage<any>): boolean => {
                 if (msg.type === wsModels.WsMessageType.ChatSubscribe) {
                     // extract chat from payload
                     let c = msg.payload as models.ChatSubscribeResponse;
 
                     // set challenge sub
                     setChallengeSub(c.chat._id);
-                    return;
+                    return true;
                 }
 
                 // handle error case
                 swal("Server Error", "The chat server for this challenge is on vacation. We'll call it back from the beach!");
+                return true;
             });
         }
 
@@ -1684,9 +1688,9 @@ export default function ChatContainer() {
                 remove_users: [],
             }
         }
-        globalWs.sendWebsocketMessage(wsMsg, (msg: wsModels.WsMessage<any>) => {
+        globalWs.sendWebsocketMessage(wsMsg, (msg: wsModels.WsMessage<any>): boolean => {
             if (msg.type === wsModels.WsMessageType.UpdateChat) {
-                return;
+                return true;
             }
 
             // handle error case
@@ -1699,6 +1703,8 @@ export default function ChatContainer() {
                 c[index].name = oldChatName;
                 setChats(c);
             }
+
+            return true;
         })
     }
 
@@ -1757,12 +1763,12 @@ export default function ChatContainer() {
                 users: newChatSelectedFriends.map((friend) => friend._id),
             }
         }
-        globalWs.sendWebsocketMessage(wsMsg, (msg: wsModels.WsMessage<any>) => {
+        globalWs.sendWebsocketMessage(wsMsg, (msg: wsModels.WsMessage<any>): boolean => {
             if (msg.type === wsModels.WsMessageType.NewChat) {
                 let c = msg.payload as models.Chat;
                 // skip if we already have the chat
                 if (chats.findIndex((e: models.Chat) => e._id === c._id) !== -1) {
-                    return;
+                    return true;
                 }
                 let z = JSON.parse(JSON.stringify(chats));
                 z.push(c);
@@ -1770,7 +1776,7 @@ export default function ChatContainer() {
                 handleChatSelection(c);
                 setLoadingNewChat(false);
                 handleNewChatClose();
-                return;
+                return true;
             }
 
             setLoadingNewChat(false);
@@ -1778,6 +1784,7 @@ export default function ChatContainer() {
 
             // handle error case
             swal("Server Error", "The server didn't make your chat. It's having a mood. We'll talk to it...");
+            return true;
         })
     };
 
@@ -1823,7 +1830,7 @@ export default function ChatContainer() {
                 chat_id: chatEdit._id,
             }
         }
-        globalWs.sendWebsocketMessage(wsMsg, (msg: wsModels.WsMessage<any>) => {
+        globalWs.sendWebsocketMessage(wsMsg, (msg: wsModels.WsMessage<any>): boolean => {
             if (msg.type === wsModels.WsMessageType.DeleteChat) {
                 // remove the chat from the list
                 let c = JSON.parse(JSON.stringify(chats));
@@ -1834,7 +1841,7 @@ export default function ChatContainer() {
                 }
                 setChatDeleteLoading(false);
                 handleChatSelectionRightClickClose();
-                return;
+                return true;
             }
 
             setChatDeleteLoading(false);
@@ -1842,6 +1849,7 @@ export default function ChatContainer() {
 
             // handle error case
             swal("Server Error", "The server didn't delete your chat. It's having a mood. We'll talk to it...");
+            return true;
         });
     }
 
@@ -1859,7 +1867,7 @@ export default function ChatContainer() {
                 mute: !chatEdit.muted,
             }
         }
-        globalWs.sendWebsocketMessage(wsMsg, (msg: wsModels.WsMessage<any>) => {
+        globalWs.sendWebsocketMessage(wsMsg, (msg: wsModels.WsMessage<any>): boolean => {
             if (msg.type === wsModels.WsMessageType.UpdateChatMute) {
                 // mark chat as muted or unmuted
                 let c = JSON.parse(JSON.stringify(chats));
@@ -1870,7 +1878,7 @@ export default function ChatContainer() {
                 }
                 setChatMuteLoading(false);
                 handleChatSelectionRightClickClose();
-                return;
+                return true;
             }
 
             setChatMuteLoading(false);
@@ -1878,6 +1886,7 @@ export default function ChatContainer() {
 
             // handle error case
             swal("Server Error", "The server didn't mute your chat. It's having a mood. We'll talk to it...");
+            return true;
         });
     }
 

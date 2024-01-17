@@ -5,7 +5,7 @@ import useWebSocket from "react-use-websocket";
 
 interface WebSocketContextProps {
     sendWebsocketMessage: (msg: models.WsMessage<any>, callback: WebSocketResponseCallback | null) => Promise<void>;
-    registerCallback: (type: models.WsMessageType, key: string, callback: WebSocketResponseCallback) => Promise<void>;
+    registerCallback: (type: models.WsMessageType, key: string, callback: WebSocketGlobalCallback) => Promise<void>;
 }
 
 const WebSocketContext = createContext<WebSocketContextProps | undefined>(undefined);
@@ -23,6 +23,10 @@ interface WebSocketProviderProps {
 }
 
 interface WebSocketResponseCallback {
+    (message: models.WsMessage<any>): boolean;
+}
+
+interface WebSocketGlobalCallback {
     (message: models.WsMessage<any>): void;
 }
 
@@ -32,12 +36,18 @@ interface CallbackEntry {
     expiration: number;
 }
 
+interface GlobalCallbackEntry {
+    callback: WebSocketGlobalCallback;
+    key: string;
+    expiration: number;
+}
+
 interface CallbackMap {
     [key: string]: CallbackEntry;
 }
 
 type GlobalCallbackMap = {
-    [key in models.WsMessageType]: CallbackEntry[];
+    [key in models.WsMessageType]: GlobalCallbackEntry[];
 };
 
 class Mutex {
@@ -113,8 +123,10 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
                 let c = messageCallbacks.current;
                 if (c[msg.sequence_id]) {
                     // call the callback and delete it from the map
-                    c[msg.sequence_id].callback(msg);
-                    delete c[msg.sequence_id];
+                    const remove = c[msg.sequence_id].callback(msg);
+                    if (remove === undefined || remove === true) {
+                        delete c[msg.sequence_id];
+                    }
                     messageCallbacks.current = c;
                 }
             });
@@ -150,7 +162,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
         sendMessage(JSON.stringify(msg));
     }, []);
 
-    const registerCallback = React.useCallback(async (type: models.WsMessageType, key: string, callback: WebSocketResponseCallback) => {
+    const registerCallback = React.useCallback(async (type: models.WsMessageType, key: string, callback: WebSocketGlobalCallback) => {
         // add callback to global callback map
         await mutex.dispatch(() => {
             let gc = globalCallbacks.current;

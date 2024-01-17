@@ -144,12 +144,12 @@ function Byte() {
 
         globalWs.sendWebsocketMessage(
             message,
-            (msg: WsMessage<any>) => {
+            (msg: WsMessage<any>): boolean => {
                 console.log("Received message:", msg);
 
                 if (msg.payload.type !== WsMessageType.AgentExecResponse) {
                     console.log("error: ", msg.payload);
-                    //return;
+                    return true;
                 }
 
                 const payload = msg.payload as ExecResponsePayload;
@@ -169,6 +169,8 @@ function Byte() {
                     stderr: accumulatedStdErr.map(row => row.content),
                 });
 
+                // we only return true here if we are done since true removes this callback
+                return payload.done
             }
         );
     };
