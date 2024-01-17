@@ -47,6 +47,19 @@ import ReactAce from "react-ace/lib/ace";
 import { CtByteNextOutputRequest, CtByteNextOutputResponse, CtGenericErrorPayload, CtMessage, CtMessageOrigin, CtMessageType, CtValidationErrorPayload } from "../models/ct_websocket";
 import { Nightlife } from "@mui/icons-material";
 
+interface MergedOutputRow {
+    error: boolean;
+    content: string;
+    timestamp: number;
+}
+
+interface OutputState {
+    stdout: OutputRow[];
+    stderr: OutputRow[];
+    merged: string;
+    mergedLines: MergedOutputRow[];
+}
+
 function Byte() {
     let userPref = localStorage.getItem('theme');
     const [mode, _] = useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
@@ -62,14 +75,8 @@ function Byte() {
     const [code, setCode] = useState("// Write your code here...");
     const [isButtonActive, setIsButtonActive] = useState(false);
 
-    type OutputState = {
-        stdout: string[];
-        stderr: string[];
-    };
-    const [output, setOutput] = useState<OutputState>({ stdout: [], stderr: [] });
+    const [output, setOutput] = useState<OutputState | null>(null);
     const [isReceivingData, setIsReceivingData] = useState(false);
-    const [accumulatedStdOut, setAccumulatedStdOut] = useState<OutputRow[]>([]);
-    const [accumulatedStdErr, setAccumulatedStdErr] = useState<OutputRow[]>([]);
 
     const [currentByteTitle, setCurrentByteTitle] = useState("");
     const [workspaceCreated, setWorkspaceCreated] = useState(false);
@@ -139,8 +146,7 @@ function Byte() {
         console.log("Sending message:", message);
 
         setIsReceivingData(true);
-        setAccumulatedStdOut([]);
-        setAccumulatedStdErr([]);
+        setOutput(null);
 
         globalWs.sendWebsocketMessage(
             message,
@@ -155,22 +161,32 @@ function Byte() {
                 const payload = msg.payload as ExecResponsePayload;
                 const { stdout, stderr, done } = payload;
 
-                // Append new output to the accumulated output
-                setAccumulatedStdOut(accumulatedStdOut => [...accumulatedStdOut, ...stdout]);
-                setAccumulatedStdErr(accumulatedStdErr => [...accumulatedStdErr, ...stderr]);
+                // merge all the lines together
+                let mergedRows: MergedOutputRow[] = [];
+                mergedRows = mergedRows.concat(stdout.map(row => ({
+                    content: row.content,
+                    error: false,
+                    timestamp: row.timestamp
+                })));
+                mergedRows = mergedRows.concat(stderr.map(row => ({
+                    content: row.content,
+                    error: true,
+                    timestamp: row.timestamp
+                })));
 
+                // sort the lines by timestamp
+                mergedRows = mergedRows.sort((a, b) => a.timestamp - b.timestamp);
 
-                console.log("Payload received:", payload);
-                setIsReceivingData(false);
-                console.log("accumulatedStdOut:", accumulatedStdOut);
-                console.log("accumulatedStdErr:", accumulatedStdErr);
+                // assemble the final output state and set it
                 setOutput({
-                    stdout: accumulatedStdOut.map(row => row.content),
-                    stderr: accumulatedStdErr.map(row => row.content),
-                });
+                    stdout: stdout,
+                    stderr: stderr,
+                    merged: mergedRows.map(row => row.content).join("\n"),
+                    mergedLines: mergedRows,
+                })
 
                 // we only return true here if we are done since true removes this callback
-                return payload.done
+                return done
             }
         );
     };
@@ -514,10 +530,7 @@ function Byte() {
 
     let originalConsoleLog = console.log;
 
-    const sendWebsocketMessageNextOutput = (byteId: string, userCode: string, codeOutput: {
-        stdout: any[];
-        stderr: any[]
-    }) => {
+    const sendWebsocketMessageNextOutput = (byteId: string, userCode: string, codeOutput: string) => {
         console.log("next output starting")
 
         console.log(" payload next output is: ", {
@@ -564,9 +577,9 @@ function Byte() {
         console.log("output is: ", output)
         console.log("id is: ", id)
         // @ts-ignore
-        if (id !== undefined && (output["stdout"].length > 0 || output["stderr"].length > 0)) {
+        if (id !== undefined && output) {
             console.log("next output called")
-            sendWebsocketMessageNextOutput(id, code, output)
+            sendWebsocketMessageNextOutput(id, code, output.merged)
         }
     }, [output])
 
@@ -635,7 +648,7 @@ function Byte() {
     }, []);
 
     interface TerminalOutputProps {
-        output: OutputState;
+        output: OutputState | null;
         style?: React.CSSProperties;
     }
 
@@ -651,16 +664,9 @@ function Byte() {
             },
             ...style
         }}>
-            {/* StdOut */}
-            {output.stdout && output.stdout.map((line, index) => (
-                <div key={index} style={{ color: "lime" }}>
-                    {line}
-                </div>
-            ))}
-            {/* StdErr */}
-            {output.stderr && output.stderr.map((line, index) => (
-                <div key={index} style={{ color: "red" }}>
-                    {line}
+            {output && output.mergedLines.map((line, index) => (
+                <div key={index} style={{ color: line.error ? "red" : "white" }}>
+                    {line.content}
                 </div>
             ))}
         </div>
