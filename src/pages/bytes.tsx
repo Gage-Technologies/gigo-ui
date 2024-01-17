@@ -68,8 +68,8 @@ function Byte() {
     };
     const [output, setOutput] = useState<OutputState>({ stdout: [], stderr: [] });
     const [isReceivingData, setIsReceivingData] = useState(false);
-    const [accumulatedStdOut, setAccumulatedStdOut] = useState<string[]>([]);
-    const [accumulatedStdErr, setAccumulatedStdErr] = useState<string[]>([]);
+    const [accumulatedStdOut, setAccumulatedStdOut] = useState<OutputRow[]>([]);
+    const [accumulatedStdErr, setAccumulatedStdErr] = useState<OutputRow[]>([]);
 
     const [currentByteTitle, setCurrentByteTitle] = useState("");
     const [workspaceCreated, setWorkspaceCreated] = useState(false);
@@ -149,20 +149,26 @@ function Byte() {
 
                 if (msg.payload.type !== WsMessageType.AgentExecResponse) {
                     console.log("error: ", msg.payload);
-                    // return;
+                    //return;
                 }
 
                 const payload = msg.payload as ExecResponsePayload;
                 const { stdout, stderr, done } = payload;
 
-                if (done) {
-                    console.log("Payload received:", payload);
-                    setIsReceivingData(false);
-                    setOutput({
-                        stdout: stdout.map((row: OutputRow) => row.content),
-                        stderr: stderr.map((row: OutputRow) => row.content),
-                    });
-                }
+                // Append new output to the accumulated output
+                setAccumulatedStdOut(accumulatedStdOut => [...accumulatedStdOut, ...stdout]);
+                setAccumulatedStdErr(accumulatedStdErr => [...accumulatedStdErr, ...stderr]);
+
+
+                console.log("Payload received:", payload);
+                setIsReceivingData(false);
+                console.log("accumulatedStdOut:", accumulatedStdOut);
+                console.log("accumulatedStdErr:", accumulatedStdErr);
+                setOutput({
+                    stdout: accumulatedStdOut.map(row => row.content),
+                    stderr: accumulatedStdErr.map(row => row.content),
+                });
+
             }
         );
     };
@@ -536,7 +542,7 @@ function Byte() {
               code: userCode
           }
       } satisfies CtMessage<CtByteNextOutputRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtByteNextOutputResponse>) => {
-          console.log("response message of next output: ", msg)
+          //console.log("response message of next output: ", msg)
           if (msg.type !== CtMessageType.WebSocketMessageTypeByteNextOutputMessageResponse) {
               console.log("failed next output message", msg)
               return true
@@ -565,7 +571,7 @@ function Byte() {
     const executeCode = () => {
         console.log("executeCode called")
         sendExecRequest();
-        // //todo: remove later
+        // todo: remove later
         // console.log("id is: ", id)
         // // @ts-ignore
         // if (id !== undefined) {
