@@ -149,7 +149,7 @@ function Byte() {
 
                 if (msg.payload.type !== WsMessageType.AgentExecResponse) {
                     console.log("error: ", msg.payload);
-                    return true;
+                    //return true;
                 }
 
                 const payload = msg.payload as ExecResponsePayload;
