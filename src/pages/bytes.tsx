@@ -31,7 +31,13 @@ import config from "../config";
 import { useParams } from "react-router";
 import { useGlobalWebSocket } from "../services/websocket";
 import { WsMessage, WsMessageType } from "../models/websocket";
-import { AgentWsRequestMessage, ByteUpdateCodeRequest, ExecRequestPayload } from "../models/bytes";
+import {
+    AgentWsRequestMessage,
+    ByteUpdateCodeRequest,
+    ExecRequestPayload,
+    ExecResponsePayload,
+    OutputRow
+} from "../models/bytes";
 import { programmingLanguages } from "../services/vars";
 import { useGlobalCtWebSocket } from "../services/ct_websocket";
 import MenuItem from "@mui/material/MenuItem";
@@ -60,7 +66,10 @@ function Byte() {
         stdout: string[];
         stderr: string[];
     };
-    const [output, setOutput] = useState({ stdout: [], stderr: [] });
+    const [output, setOutput] = useState<OutputState>({ stdout: [], stderr: [] });
+    const [isReceivingData, setIsReceivingData] = useState(false);
+    const [accumulatedStdOut, setAccumulatedStdOut] = useState<string[]>([]);
+    const [accumulatedStdErr, setAccumulatedStdErr] = useState<string[]>([]);
 
     const [currentByteTitle, setCurrentByteTitle] = useState("");
     const [workspaceCreated, setWorkspaceCreated] = useState(false);
@@ -96,11 +105,25 @@ function Byte() {
 
     const [markdown, setMarkdown] = useState("");
 
+    // useEffect(() => {
+    //     globalWs.sendWebsocketMessage(
+    //         {
+    //             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+    //             type: WsMessageType.ByteUpdateCode,
+    //             payload: {
+    //                 byte_attempt_id: "0",
+    //                 content: ""
+    //             } satisfies ByteUpdateCodeRequest
+    //         },
+    //         (msg: WsMessage<any>) => {
+    //             console.log(msg.payload);
+    //         }
+    //     )
+    // }, []);
+
     const sendExecRequest = () => {
-        // Log when sendExecRequest is triggered
         console.log("sendExecRequest triggered");
 
-        // Prepare the message to be sent
         const message = {
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
             type: WsMessageType.AgentExecRequest,
@@ -110,33 +133,44 @@ function Byte() {
                     lang: programmingLanguages.indexOf("Python"),
                     code: code
                 }
-            } // satisfies AgentWsRequestMessage
+            }
         };
 
-        // Log the message being sent
         console.log("Sending message:", message);
+
+        setIsReceivingData(true);
+        setAccumulatedStdOut([]);
+        setAccumulatedStdErr([]);
 
         globalWs.sendWebsocketMessage(
             message,
             (msg: WsMessage<any>) => {
-                // Log the received message
                 console.log("Received message:", msg);
 
                 if (msg.payload.type !== WsMessageType.AgentExecResponse) {
-                    console.error("error: ", msg.payload);
-                    return;
+                    console.log("error: ", msg.payload);
+                    // return;
                 }
 
-                const { StdOut, StdErr } = msg.payload;
+                const payload = msg.payload as ExecResponsePayload;
+                const { stdout, stderr, done } = payload;
 
-                // Update state to render output
-                setOutput({
-                    stdout: StdOut.map((row: { Content: string; }) => row.Content),
-                    stderr: StdErr.map((row: { Content: string; }) => row.Content),
-                });
+                if (done) {
+                    console.log("Payload received:", payload);
+                    setIsReceivingData(false);
+                    setOutput({
+                        stdout: stdout.map((row: OutputRow) => row.content),
+                        stderr: stderr.map((row: OutputRow) => row.content),
+                    });
+                }
             }
         );
     };
+
+
+    useEffect(() => {
+        console.log("Output state updated:", output);
+    }, [output]);
 
     const getRecommendedBytes = async () => {
         let recommendedBytes = await call(
@@ -890,7 +924,8 @@ function Byte() {
                                 <button
                                     style={{
                                         position: 'absolute',
-                                        right: '22%',
+                                        right: '16%',
+                                        top:"90%",
                                         marginBottom: '2%',
                                         backgroundColor: theme.palette.primary.main,
                                         color: theme.palette.primary.contrastText,
