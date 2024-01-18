@@ -32,7 +32,7 @@ import { useParams } from "react-router";
 import { useGlobalWebSocket } from "../services/websocket";
 import { WsMessage, WsMessageType } from "../models/websocket";
 import {
-    AgentWsRequestMessage,
+    AgentWsRequestMessage, BytesLivePingRequest,
     ByteUpdateCodeRequest,
     ExecRequestPayload,
     ExecResponsePayload,
@@ -144,27 +144,35 @@ function Byte() {
     //     )
     // }, []);
 
-    // const startWebSocketPing = () => {
-    //     const pingMessage = {
-    //         sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-    //         type: WsMessageType.WebSocketPing, // Replace with the appropriate message type for ping
-    //         payload: {}
-    //     };
-    //
-    //     const pingInterval = setInterval(() => {
-    //         globalWs.sendWebsocketMessage(pingMessage);
-    //     }, 1000); // Send a ping every second (1000 milliseconds)
-    //
-    //     return pingInterval;
-    // };
-    //
-    // useEffect(() => {
-    //     const pingInterval = startWebSocketPing();
-    //
-    //     return () => {
-    //         clearInterval(pingInterval); // Clear the interval when the component unmounts
-    //     };
-    // }, []);
+    const byteWebSocketPing = () => {
+        const pingMessage: WsMessage<BytesLivePingRequest> = {
+            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            type: WsMessageType.ByteLivePing,
+            payload: {
+                byte_attempt_id: byteAttemptId
+            }
+        };
+
+        const pingInterval = setInterval(() => {
+            globalWs.sendWebsocketMessage(pingMessage, null);
+            console.log("BytesLivePingRequest sent")
+        }, 60000); // Send a ping every minute (60000 milliseconds)
+
+        return pingInterval;
+    };
+
+    useEffect(() => {
+        let pingInterval: NodeJS.Timeout | null = null;
+        if (byteAttemptId) {
+            pingInterval = byteWebSocketPing();
+        }
+
+        return () => {
+            if (pingInterval) {
+                clearInterval(pingInterval); // Clear the interval when the component unmounts or byteAttemptId changes
+            }
+        };
+    }, [byteAttemptId]);
 
     const sendExecRequest = () => {
         console.log("sendExecRequest triggered");
@@ -638,7 +646,6 @@ function Byte() {
     };
 
     const executeCode = () => {
-        console.log("executeCode called")
         if (suggestionPopup){
             setSuggestionPopup(false)
         }
