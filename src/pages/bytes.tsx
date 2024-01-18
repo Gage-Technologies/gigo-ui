@@ -74,9 +74,9 @@ function Byte() {
     const [loading, setLoading] = useState(true);
     const [code, setCode] = useState("// Write your code here...");
     const [isButtonActive, setIsButtonActive] = useState(false);
-
-    const [output, setOutput] = useState<OutputState | null>(null);
     const [isReceivingData, setIsReceivingData] = useState(false);
+    
+    const [output, setOutput] = useState<OutputState | null>(null);
 
     const [currentByteTitle, setCurrentByteTitle] = useState("");
     const [workspaceCreated, setWorkspaceCreated] = useState(false);
@@ -97,16 +97,6 @@ function Byte() {
     let { id } = useParams();
 
     let ctWs = useGlobalCtWebSocket();
-
-    const ctChat = () => {
-
-    }
-
-    // Define your API call logic here
-    const loadData = async () => {
-        // Implement your API call logic
-        // Example: Set the byteData state with the response
-    };
 
     let globalWs = useGlobalWebSocket();
 
@@ -167,12 +157,12 @@ function Byte() {
                     content: row.content,
                     error: false,
                     timestamp: row.timestamp
-                })));
+                }))).sort((a, b) => a.timestamp - b.timestamp);
                 mergedRows = mergedRows.concat(stderr.map(row => ({
                     content: row.content,
                     error: true,
                     timestamp: row.timestamp
-                })));
+                }))).sort((a, b) => a.timestamp - b.timestamp);
 
                 // sort the lines by timestamp
                 mergedRows = mergedRows.sort((a, b) => a.timestamp - b.timestamp);
@@ -403,26 +393,6 @@ function Byte() {
         onClick?: () => void;
     }
 
-    // Styled AwesomeButton for the Submit button
-    // const SubmitButton = styled(AwesomeButton) <SubmitButtonProps>`
-    //   position: absolute;
-    //   bottom: 20px;
-    //   right: 20px;
-    //   &:before {
-    //     transition: box-shadow 0.3s ease;
-    //     box-shadow: ${props => props.isButtonActive ? '0 0 5px #fff, 0 0 10px #fff, 0 0 15px #ddd, 0 0 20px #ddd, 0 0 25px #ddd, 0 0 30px #ddd, 0 0 35px #ddd' : 'none'};
-    //     border-radius: 25px;
-    //   }
-    //   &:hover:before {
-    //     box-shadow: ${props => props.isButtonActive ? '0 0 3px #fff, 0 0 6px #fff, 0 0 9px #bbb, 0 0 12px #bbb, 0 0 15px #bbb, 0 0 18px #bbb, 0 0 21px #bbb' : 'none'};
-    //   }
-    //   &:active:before {
-    //     box-shadow: ${props => props.isButtonActive ? '0 0 2px #fff, 0 0 4px #fff, 0 0 6px #aaa, 0 0 8px #aaa, 0 0 10px #aaa, 0 0 12px #aaa, 0 0 14px #aaa' : 'none'};
-    //   }
-    //   background-color: ${props => props.isButtonActive ? theme.palette.secondary.main : theme.palette.primary.main};
-    //   cursor: ${props => props.isButtonActive ? 'pointer' : 'not-allowed'};
-    // `;
-
     const SubmitButton = styled(AwesomeButton)<SubmitButtonProps>`
       cursor: ${props => props.isButtonActive ? 'pointer' : 'not-allowed'};
       &:disabled {
@@ -433,7 +403,7 @@ function Byte() {
 
     const combinedSectionStyle: React.CSSProperties = {
         display: 'flex',
-        height: '80vh', // Adjust height as needed
+        height: '80vh',
         width: '60vw',
         marginLeft: '5%',
         marginRight: 'auto',
@@ -449,20 +419,20 @@ function Byte() {
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'flex-start',
-        gap: '1rem', // Add a gap between the main content and the menu
+        gap: '1rem',
         marginTop: '1rem'
     };
 
     // Byte selection menu style
     const byteSelectionMenuStyle: React.CSSProperties = {
-        width: '20%', // Adjust the width as needed
-        maxHeight: '80vh', // Adjust the height as needed
+        width: '20%',
+        maxHeight: '80vh',
         overflow: 'auto'
     };
 
     const containerStyle: React.CSSProperties = {
         width: '100%',
-        padding: theme.spacing(0), // Remove vertical padding
+        padding: theme.spacing(0),
         margin: '0',
         maxWidth: 'none',
     };
@@ -472,7 +442,7 @@ function Byte() {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        backgroundColor: 'transparent', // No background color here
+        backgroundColor: 'transparent',
         borderRadius: theme.shape.borderRadius,
         overflow: 'hidden',
     };
@@ -481,10 +451,10 @@ function Byte() {
         padding: theme.spacing(2),
         backgroundColor: theme.palette.background.paper,
         borderRadius: theme.shape.borderRadius,
-        overflowY: 'auto', // Allow vertical scrolling within the markdown section
-        overflowX: 'hidden', // Prevent horizontal scrolling
-        wordBreak: 'break-word', // Break long words to prevent horizontal scrolling
-        whiteSpace: 'pre-wrap', // Wrap whitespace as necessary
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        wordBreak: 'break-word',
+        whiteSpace: 'pre-wrap',
     };
 
     // Style for markdown comment blocks
@@ -493,20 +463,20 @@ function Byte() {
         borderRadius: theme.shape.borderRadius,
         padding: theme.spacing(1),
         marginBottom: theme.spacing(1),
-        wordBreak: 'break-word', // Ensure long words do not cause overflow
+        wordBreak: 'break-word',
     };
 
     const editorAndTerminalStyle: React.CSSProperties = {
         display: 'flex',
         flexDirection: 'column',
         flex: 1,
-        height: '100%', // Use the full height of the parent container
+        height: '100%',
     };
 
     // Adjust the height of the AceEditor and TerminalOutput
     const aceEditorStyle: React.CSSProperties = {
         width: '100%',
-        height: 'calc(100% - 100px)', // Adjust height as needed, minus the height of the terminal
+        height: 'calc(100% - 100px)',
         borderRadius: theme.shape.borderRadius,
     };
 
@@ -514,18 +484,21 @@ function Byte() {
         backgroundColor: "#333",
         color: "lime",
         fontFamily: "monospace",
+        fontSize: "0.9rem",
         padding: "10px",
         marginTop: "20px",
         borderRadius: "5px",
         whiteSpace: "pre-wrap",
-        height: '100px', // Set the height of the terminal
+        height: '300px',
+        overflowY: 'auto',
+        wordWrap: 'break-word',
     };
 
     const titleStyle: React.CSSProperties = {
         marginBottom: theme.spacing(2),
-        textAlign: 'center', // Center align the title
-        width: '60vw', // Match the width of the byte container
-        marginLeft: '5%', // Align with the left margin of the byte container
+        textAlign: 'center',
+        width: '60vw',
+        marginLeft: '5%',
     };
 
     let originalConsoleLog = console.log;
@@ -538,7 +511,7 @@ function Byte() {
             byte_description: bytesDescription,
             code_language: bytesLang,
             // @ts-ignore
-            byte_output: codeOutput["stdout"][0],
+            byte_output: codeOutput,// changed from this because of an error codeOutput["stdout"][0]
             code: userCode
         })
 
@@ -553,7 +526,7 @@ function Byte() {
               byte_description: bytesDescription,
               code_language: bytesLang,
               // @ts-ignore
-              byte_output: codeOutput["stdout"][0],
+              byte_output: codeOutput, // changed from codeOutput["stdout"][0] because of an error
               code: userCode
           }
       } satisfies CtMessage<CtByteNextOutputRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtByteNextOutputResponse>) => {
@@ -653,17 +626,7 @@ function Byte() {
     }
 
     const TerminalOutput: React.FC<TerminalOutputProps> = ({ output, style }) => (
-        <div style={{
-            ...{
-                backgroundColor: "#333",
-                fontFamily: "monospace",
-                padding: "10px",
-                marginTop: "20px",
-                borderRadius: "5px",
-                whiteSpace: "pre-wrap"
-            },
-            ...style
-        }}>
+        <div style={{ ...terminalOutputStyle, ...style }}>
             {output && output.mergedLines.map((line, index) => (
                 <div key={index} style={{ color: line.error ? "red" : "white" }}>
                     {line.content}
@@ -813,8 +776,6 @@ function Byte() {
         return (
             <Box>
                 <MessageContainer>
-
-
                     {renderBotMessage(markdown, false, "123", true, false)}
                     {renderUserMessage("Help me with my code")}
                 </MessageContainer>
