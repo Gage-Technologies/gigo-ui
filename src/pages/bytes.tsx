@@ -88,6 +88,7 @@ function Byte() {
     // Define the state for your data and loading state
     const [byteData, setByteData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [initialCode, setInitialCode] = useState("// Write your code here...");
     const [code, setCode] = useState("// Write your code here...");
     const [longLine, setLongLine] = useState(false);
     const [isButtonActive, setIsButtonActive] = useState(false);
@@ -125,6 +126,44 @@ function Byte() {
     let globalWs = useGlobalWebSocket();
 
     const [markdown, setMarkdown] = useState("");
+
+    // useEffect(() => {
+    //     globalWs.sendWebsocketMessage(
+    //         {
+    //             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+    //             type: WsMessageType.ByteUpdateCode,
+    //             payload: {
+    //                 byte_attempt_id: "0",
+    //                 content: ""
+    //             } satisfies ByteUpdateCodeRequest
+    //         },
+    //         (msg: WsMessage<any>) => {
+    //             console.log(msg.payload);
+    //         }
+    //     )
+    // }, []);
+
+    // const startWebSocketPing = () => {
+    //     const pingMessage = {
+    //         sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+    //         type: WsMessageType.WebSocketPing, // Replace with the appropriate message type for ping
+    //         payload: {}
+    //     };
+    //
+    //     const pingInterval = setInterval(() => {
+    //         globalWs.sendWebsocketMessage(pingMessage);
+    //     }, 1000); // Send a ping every second (1000 milliseconds)
+    //
+    //     return pingInterval;
+    // };
+    //
+    // useEffect(() => {
+    //     const pingInterval = startWebSocketPing();
+    //
+    //     return () => {
+    //         clearInterval(pingInterval); // Clear the interval when the component unmounts
+    //     };
+    // }, []);
 
     const sendExecRequest = () => {
         console.log("sendExecRequest triggered");
@@ -232,6 +271,7 @@ function Byte() {
             // Map through each byte and add a random image from byteImages
             const enhancedBytes = res["rec_bytes"].map((byte: any) => ({
                 ...byte,
+                id: byte._id,
                 bytesThumb: byteImages[Math.floor(Math.random() * byteImages.length)]
             }));
             setByteData(enhancedBytes);
@@ -257,9 +297,12 @@ function Byte() {
             if (res && res["rec_bytes"]) {
                 setCurrentByteTitle(res["rec_bytes"].name);
 
+                let outlineContent = res["rec_bytes"].outline_content
+                    .replace(/^"|"$/g, '') // Remove leading and trailing quotes
+                    .replace(/\\n/g, "\n"); // Replace escaped newlines with actual newlines
+
                 // Process the outline content
-                const outlineContent = res["rec_bytes"].outline_content
-                    .replace(/\\n/g, "\n") // Replace escaped newlines with actual newline characters
+                outlineContent = outlineContent
                     .split('\n') // Split the string into lines
                     .map((line: string) => {
                         // Remove step number (formatted as "1.", "2.", etc.), trim, and format as a comment
@@ -267,15 +310,16 @@ function Byte() {
                         return stepContent ? `// ${stepContent}` : '';
                     })
                     .filter((line: string) => line) // Remove empty lines
-                    .join('\n\n'); // Join lines with double newline for spacing
+                    .join('\n'); // Join lines with single newline for spacing
 
-                setCode(outlineContent); // Set the processed content as code
+                setInitialCode(outlineContent); // Set the initial formatted content
+                setCode(outlineContent); // Also set the user-editable code
 
                 // Set the markdown content for other sections
                 setMarkdown(`### Description\n${res["rec_bytes"].description}\n\n### Development Steps\n${res["rec_bytes"].dev_steps}`);
-                setBytesDescription(res["rec_bytes"].description)
-                setBytesDevSteps(res["rec_bytes"].dev_steps)
-                setBytesLang(programmingLanguages[res["rec_bytes"].lang])
+                setBytesDescription(res["rec_bytes"].description);
+                setBytesDevSteps(res["rec_bytes"].dev_steps);
+                setBytesLang(programmingLanguages[res["rec_bytes"].lang]);
 
                 setWorkspaceCreated(false);
             } else {
@@ -285,7 +329,6 @@ function Byte() {
             swal("Error", "An error occurred while fetching the byte data.");
         }
     };
-
 
     function getByteIdFromUrl() {
         const currentUrl = window.location.href;
@@ -318,7 +361,20 @@ function Byte() {
             }
 
             if (res["byte_attempt"] !== undefined && res["byte_attempt"]["content"] !== undefined) {
-                setCode(res["byte_attempt"]["content"]);
+                // Apply new line formatting
+                let content = res["byte_attempt"]["content"]
+                    .replace(/^"|"$/g, '') // Remove leading and trailing quotes
+                    .replace(/\\n/g, "\n") // Replace escaped newlines with actual newlines
+                    .split('\n') // Split the string into lines
+                    .map((line: string) => {
+                        // Remove step number (formatted as "1.", "2.", etc.), trim, and format as a comment
+                        const stepContent = line.replace(/^\s*\d+\.\s*/, '').trim(); // Adjusted regex to handle spaces before step number
+                        return stepContent ? `// ${stepContent}` : '';
+                    })
+                    .filter((line: string) => line) // Remove empty lines
+                    .join('\n'); // Join lines with single newline for spacing
+
+                setCode(content);
                 setByteAttemptId(res["byte_attempt"]["_id"]);
             }
         } catch (error) {
@@ -384,7 +440,7 @@ function Byte() {
 
     // Handle changes in the editor and activate the button
     const handleEditorChange = (newCode: string) => {
-        //console.log("new code: ", newCode)
+        // Update the code state with the new content
         setCode(newCode);
         if (typingTimerRef.current) {
             clearTimeout(typingTimerRef.current);
@@ -416,8 +472,8 @@ function Byte() {
         "/static/posts/t/1693725878338453504"
     ];
 
-    const handleSelectByte = (id: string) => {
-        getByte("999");
+    const handleSelectByte = (byteId: string) => {
+        navigate(`/byte/${byteId}`);
     };
 
     const combinedSectionStyle: React.CSSProperties = {
@@ -606,6 +662,10 @@ function Byte() {
             sendWebsocketMessageNextOutput(id, code, output.merged)
         }
     }, [output])
+
+    useEffect(() => {
+        console.log("code changed: ", code)
+    }, [code])
 
     const executeCode = () => {
         console.log("executeCode called")
