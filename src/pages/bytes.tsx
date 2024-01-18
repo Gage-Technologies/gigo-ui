@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useEffect, useState } from "react";
+import {useEffect, useRef, useState} from "react";
 import {
     Container,
     createTheme,
@@ -46,7 +46,7 @@ import { IAceEditor } from "react-ace/lib/types";
 import ReactAce from "react-ace/lib/ace";
 import {
     CtByteNextOutputRequest,
-    CtByteNextOutputResponse,
+    CtByteNextOutputResponse, CtByteSuggestionRequest, CtByteSuggestionResponse,
     CtGenericErrorPayload,
     CtMessage,
     CtMessageOrigin,
@@ -109,6 +109,9 @@ function Byte() {
     const [outputPopup, setOutputPopup] = useState(false);
     const [outputMessage, setOutputMessage] = useState("");
     const [byteAttemptId, setByteAttemptId] = useState("");
+    const typingTimerRef = useRef(null);
+    const [byteSuggestion, setByteSuggestion] = useState("")
+    const [suggestionPopup, setSuggestionPopup] = useState(false)
 
     const [executingOutputMessage, setExecutingOutputMessage] = useState<boolean>(false)
 
@@ -120,22 +123,6 @@ function Byte() {
     let globalWs = useGlobalWebSocket();
 
     const [markdown, setMarkdown] = useState("");
-
-    // useEffect(() => {
-    //     globalWs.sendWebsocketMessage(
-    //         {
-    //             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-    //             type: WsMessageType.ByteUpdateCode,
-    //             payload: {
-    //                 byte_attempt_id: "0",
-    //                 content: ""
-    //             } satisfies ByteUpdateCodeRequest
-    //         },
-    //         (msg: WsMessage<any>) => {
-    //             console.log(msg.payload);
-    //         }
-    //     )
-    // }, []);
 
     const sendExecRequest = () => {
         console.log("sendExecRequest triggered");
@@ -382,10 +369,26 @@ function Byte() {
         });
     }, [id]);
 
+    useEffect(() => {
+        return () => {
+            if (typingTimerRef.current !== null) {
+                clearTimeout(typingTimerRef.current);
+            }
+        };
+    }, []);
+
     // Handle changes in the editor and activate the button
     const handleEditorChange = (newCode: string) => {
         //console.log("new code: ", newCode)
         setCode(newCode);
+        if (typingTimerRef.current) {
+            clearTimeout(typingTimerRef.current);
+        }
+        //@ts-ignore
+        typingTimerRef.current = setTimeout(() => {
+            //@ts-ignore
+            getByteSuggestion(id, code);
+        }, 15000); // 15000 milliseconds = 15 seconds
         if (newCode && newCode !== "// Write your code here...") {
             setIsButtonActive(true);
 
@@ -500,6 +503,48 @@ function Byte() {
 
     let originalConsoleLog = console.log;
 
+    const getByteSuggestion = (byteId: string, userCode: string) => {
+        console.log("byte suggestion starting")
+
+        console.log(" suggestion payload is: ", {
+            code_language: bytesLang,
+            code: userCode,
+            byte_description: bytesDescription,
+            byte_id: byteId,
+            assistant_id: ""
+        })
+
+
+        ctWs.sendWebsocketMessage({
+            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            type: CtMessageType.WebSocketMessageTypeByteSuggestionRequest,
+            origin: CtMessageOrigin.WebSocketMessageOriginClient,
+            created_at: Date.now(),
+            payload: {
+                code_language: bytesLang,
+                code: userCode,
+                byte_description: bytesDescription,
+                byte_id: byteId,
+                assistant_id: ""
+            }
+        } satisfies CtMessage<CtByteSuggestionRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtByteNextOutputResponse>) => {
+            //console.log("response message of next output: ", msg)
+            if (msg.type !== CtMessageType.WebSocketMessageTypeByteSuggestionResponse) {
+                console.log("failed suggestion message", msg)
+                return true
+            }
+            const p: CtByteSuggestionResponse = msg.payload as unknown as CtByteSuggestionResponse;
+            console.log("complete suggestion message: ", p.complete_message)
+            setByteSuggestion(p.complete_message)
+            setSuggestionPopup(true)
+            //   if (p.done) {
+            //       setState(State.COMPLETED)
+            //       return true
+            //   }
+            return false
+        })
+    };
+
     const sendWebsocketMessageNextOutput = (byteId: string, userCode: string, codeOutput: string) => {
         if (executingOutputMessage) {
             return
@@ -558,13 +603,10 @@ function Byte() {
 
     const executeCode = () => {
         console.log("executeCode called")
+        if (suggestionPopup){
+            setSuggestionPopup(false)
+        }
         sendExecRequest();
-        // todo: remove later
-        // console.log("id is: ", id)
-        // // @ts-ignore
-        // if (id !== undefined) {
-        //     sendWebsocketMessageNextOutput(id, code, {stdout: ["testing true"], stderr: ["nil"]})
-        // }
     };
 
     useEffect(() => {
@@ -821,7 +863,8 @@ function Byte() {
                             </div>
                             <ByteNextStep
                                 open={true}
-                                closeCallback={() => { }}
+                                closeCallback={() => {
+                                }}
                                 currentCode={code}
                                 anchorEl={editorRef.current}
                                 placement="right-start"
@@ -846,14 +889,14 @@ function Byte() {
                                     // debounceChangePeriod={300}
                                     onChange={handleEditorChange}
                                     name="ACE_EDITOR_DIV"
-                                    editorProps={{ $blockScrolling: true }}
+                                    editorProps={{$blockScrolling: true}}
                                     style={aceEditorStyle}
                                     showPrintMargin={true}
                                     setOptions={{
                                         printMarginColumn: longLine ? 80 : 10000
                                     }}
                                 />
-                                <TerminalOutput output={output} style={terminalOutputStyle} />
+                                <TerminalOutput output={output} style={terminalOutputStyle}/>
                             </div>
                             <div>
                                 <Popper
@@ -900,7 +943,7 @@ function Byte() {
                                             }}
                                             onClick={() => setOutputPopup(false)}
                                         >
-                                            <Close />
+                                            <Close/>
                                         </Button>
                                         <DialogContent
                                             sx={{
@@ -912,6 +955,73 @@ function Byte() {
                                         >
                                             <MarkdownRenderer
                                                 markdown={outputMessage}
+                                                style={{
+                                                    overflowWrap: 'break-word',
+                                                    borderRadius: '10px',
+                                                    padding: '0px',
+                                                }}
+                                            />
+                                        </DialogContent>
+                                    </Box>
+                                </Popper>
+                            </div>
+                            <div>
+                                <Popper
+                                    open={suggestionPopup}
+                                    anchorEl={editorRef.current}
+                                    placement={"right-start"}
+                                    sx={{
+                                        backgroundColor: "transparent",
+                                        // height: "50vh"
+                                        // width: "20vw",
+                                    }}
+                                    modifiers={[
+                                        {
+                                            name: 'offset',
+                                            options: {
+                                                offset: [0, 40], // x, y offset
+                                            },
+                                        },
+                                    ]}
+                                >
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            alignItems: 'start',
+                                            p: 1,
+                                            borderRadius: '10px',
+                                            boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2);',
+                                            ...themeHelpers.frostedGlass,
+                                            backgroundColor: 'rgba(19,19,19,0.31)',
+                                            maxWidth: "30vw"
+                                        }}
+                                    >
+                                        <Button
+                                            variant="text"
+                                            color="error"
+                                            sx={{
+                                                position: "absolute",
+                                                right: 10,
+                                                top: 10,
+                                                borderRadius: "50%",
+                                                padding: 1,
+                                                minWidth: "0px"
+                                            }}
+                                            onClick={() => setSuggestionPopup(false)}
+                                        >
+                                            <Close/>
+                                        </Button>
+                                        <DialogContent
+                                            sx={{
+                                                backgroundColor: 'transparent',
+                                                maxHeight: '70vh',
+                                                overflow: 'auto',
+                                                mt: outputMessage.length > 0 ? 2 : undefined,
+                                            }}
+                                        >
+                                            <MarkdownRenderer
+                                                markdown={byteSuggestion}
                                                 style={{
                                                     overflowWrap: 'break-word',
                                                     borderRadius: '10px',
@@ -944,7 +1054,7 @@ function Byte() {
                             )}
                         </div>
                         <div style={byteSelectionMenuStyle}>
-                            {byteData && <ByteSelectionMenu bytes={byteData} onSelectByte={handleSelectByte} />}
+                            {byteData && <ByteSelectionMenu bytes={byteData} onSelectByte={handleSelectByte}/>}
                         </div>
                     </div>
                 </Container>

@@ -84,6 +84,23 @@ export interface CtByteNextOutputResponse {
     free_credit_use: boolean;
 }
 
+export interface CtByteSuggestionRequest {
+    byte_id: string;
+    byte_description: string;
+    code: string;
+    assistant_id: string;
+    code_language: string;
+}
+
+export interface CtByteSuggestionResponse {
+    suggestion_id: string;
+    token: string;
+    complete_message: string;
+    done: boolean;
+    premium_llm: boolean;
+    free_credit_use: boolean;
+}
+
 export interface ContentLocation {
     start_line: number;
     end_line: number;
