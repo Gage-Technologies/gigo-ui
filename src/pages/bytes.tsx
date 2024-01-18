@@ -12,7 +12,7 @@ import {
     Paper, Card, Tooltip, Button, Divider, Tab, Tabs, TextField, Popper, DialogContent
 } from "@mui/material";
 import { getAllTokens, themeHelpers } from "../theme";
-import { Close } from "@material-ui/icons";
+import { Close, PlayArrow } from "@material-ui/icons";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { useNavigate } from "react-router-dom";
 import AppWrapper from "../components/AppWrapper";
@@ -59,6 +59,7 @@ import ace from "ace-builds/src-noconflict/ace";
 import "./bytes.css"
 import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
 import ByteChat from "../components/CodeTeacher/ByteChat";
+import { LoadingButton } from "@mui/lab";
 
 const Range = ace.require('ace/range').Range;
 
@@ -114,6 +115,7 @@ function Byte() {
     const [suggestionPopup, setSuggestionPopup] = useState(false)
 
     const [executingOutputMessage, setExecutingOutputMessage] = useState<boolean>(false)
+    const [executingCode, setExecutingCode] = useState<boolean>(false)
 
 
     let { id } = useParams();
@@ -144,11 +146,12 @@ function Byte() {
         setIsReceivingData(true);
         setTerminalVisible(true)
         setOutput({
-            stdout: [{timestamp: Date.now() * 1000, content: "Running..."}],
+            stdout: [{ timestamp: Date.now() * 1000, content: "Running..." }],
             stderr: [],
             merged: "Running...",
-            mergedLines: [{timestamp: Date.now() * 1000, content: "Running...", error: false}],
+            mergedLines: [{ timestamp: Date.now() * 1000, content: "Running...", error: false }],
         });
+        setExecutingCode(true)
 
         globalWs.sendWebsocketMessage(
             message,
@@ -186,6 +189,8 @@ function Byte() {
                     merged: mergedRows.map(row => row.content).join("\n"),
                     mergedLines: mergedRows,
                 })
+
+                setExecutingCode(!done)
 
                 // we only return true here if we are done since true removes this callback
                 return done
@@ -468,7 +473,8 @@ function Byte() {
         flex: 1,
         height: '100%',
         paddingLeft: "20px",
-        width: "60vw"
+        width: "60vw",
+        position: "relative"
     };
 
     // Adjust the height of the AceEditor and TerminalOutput
@@ -680,21 +686,21 @@ function Byte() {
 
         return (
             <Box style={{ ...terminalOutputStyle, ...style }}>
-                    <Button
-                        variant="text"
-                        color="error"
-                        sx={{
-                            position: "absolute",
-                            right: 10,
-                            top: 10,
-                            borderRadius: "50%",
-                            padding: 1,
-                            minWidth: "0px"
-                        }}
-                        onClick={() => setTerminalVisible(false)}
-                    >
-                        <Close />
-                    </Button>
+                <Button
+                    variant="text"
+                    color="error"
+                    sx={{
+                        position: "absolute",
+                        right: 10,
+                        top: 10,
+                        borderRadius: "50%",
+                        padding: 1,
+                        minWidth: "0px"
+                    }}
+                    onClick={() => setTerminalVisible(false)}
+                >
+                    <Close />
+                </Button>
                 <code>
                     {output && output.mergedLines.map((line, index) => (
                         <span style={{ color: line.error ? "red" : "white" }}>
@@ -881,6 +887,26 @@ function Byte() {
                                 style={editorAndTerminalStyle}
                                 ref={editorRef}
                             >
+                                {code.length > 0 && (
+                                    <Tooltip title="Run Code">
+                                        <LoadingButton
+                                            loading={executingCode}
+                                            variant="text"
+                                            color={"success"}
+                                            style={{
+                                                position: 'absolute',
+                                                right: '8px',
+                                                top: '8px',
+                                                zIndex: 3,
+                                                borderRadius: "50%",
+                                                minWidth: 0,
+                                            }}
+                                            onClick={executeCode}
+                                        >
+                                            <PlayArrow />
+                                        </LoadingButton>
+                                    </Tooltip>
+                                )}
                                 <AceEditor
                                     ref={aceEditorRef}
                                     mode={bytesLang === "Go" ? "golang" : "python"}
@@ -1032,26 +1058,6 @@ function Byte() {
                                     </Box>
                                 </Popper>
                             </div>
-                            {isButtonActive && (
-                                <button
-                                    style={{
-                                        position: 'absolute',
-                                        right: '16%',
-                                        top: "90%",
-                                        marginBottom: '2%',
-                                        backgroundColor: theme.palette.primary.main,
-                                        color: theme.palette.primary.contrastText,
-                                        border: 'none',
-                                        padding: '10px 20px',
-                                        borderRadius: theme.shape.borderRadius,
-                                        cursor: 'pointer',
-                                        boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.2)'
-                                    }}
-                                    onClick={executeCode}
-                                >
-                                    Submit Code
-                                </button>
-                            )}
                         </div>
                         <div style={byteSelectionMenuStyle}>
                             {byteData && <ByteSelectionMenu bytes={byteData} onSelectByte={handleSelectByte}/>}
