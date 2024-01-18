@@ -58,6 +58,7 @@ import { Nightlife } from "@mui/icons-material";
 import ace from "ace-builds/src-noconflict/ace";
 import "./bytes.css"
 import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
+import ByteChat from "../components/CodeTeacher/ByteChat";
 
 const Range = ace.require('ace/range').Range;
 
@@ -950,15 +951,7 @@ function Byte() {
                     <div style={mainLayoutStyle}>
                         <div style={combinedSectionStyle}>
                             <div style={markdownSectionStyle}>
-                                <CodeTeacher />
-                                <TextField
-                                    fullWidth
-                                    label="Ask Code Teacher!"
-                                    variant="outlined"
-                                    value={userMessage}
-                                    onChange={(e) => setUserMessage(e.target.value)}
-                                    onKeyPress={handleKeyPress}
-                                />
+                                <ByteChat/>
                             </div>
                             <ByteNextStep
                                 open={true}

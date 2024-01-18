@@ -16,7 +16,9 @@ export enum CtMessageType {
     WebSocketMessageTypeByteDebugRequest = 46,
     WebSocketMessageTypeByteDebugResponse = 47,
     WebSocketMessageTypeByteSuggestionRequest = 48,
-    WebSocketMessageTypeByteSuggestionResponse = 49
+    WebSocketMessageTypeByteSuggestionResponse = 49,
+    WebSocketMessageTypeByteUserMessage = 50,
+    WebSocketMessageTypeByteAssistantMessage = 51
 }
 
 export enum CtResponseCode {
