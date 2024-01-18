@@ -44,8 +44,21 @@ import MenuItem from "@mui/material/MenuItem";
 import ByteNextStep from "../components/CodeTeacher/ByteNextStep";
 import { IAceEditor } from "react-ace/lib/types";
 import ReactAce from "react-ace/lib/ace";
-import { CtByteNextOutputRequest, CtByteNextOutputResponse, CtGenericErrorPayload, CtMessage, CtMessageOrigin, CtMessageType, CtValidationErrorPayload } from "../models/ct_websocket";
+import {
+    CtByteNextOutputRequest,
+    CtByteNextOutputResponse,
+    CtGenericErrorPayload,
+    CtMessage,
+    CtMessageOrigin,
+    CtMessageType,
+    CtParseFileRequest, CtParseFileResponse,
+    CtValidationErrorPayload
+} from "../models/ct_websocket";
 import { Nightlife } from "@mui/icons-material";
+import ace from "ace-builds/src-noconflict/ace";
+import "./bytes.css"
+
+const Range = ace.require('ace/range').Range;
 
 interface MergedOutputRow {
     error: boolean;
@@ -782,6 +795,147 @@ function Byte() {
             </Box>
         );
     };
+
+    const [currentLineMarker, setCurrentLineMarker] = useState<number | null>(null);
+
+    // const editorMarkCallback = React.useCallback(() => {
+    //     console.log("marker callback")
+    //
+    //     if (!aceEditorRef.current) {
+    //         return;
+    //     }
+    //
+    //     console.log("marking editor")
+    //
+    //     const editor = aceEditorRef.current.editor;
+    //     const session = editor.getSession();
+    //     const Range = ace.require('ace/range').Range;
+    //
+    //     console.log("marked")
+    //
+    //     // Get the current cursor position
+    //     const cursor = editor.getCursorPosition();
+    //
+    //     // Add a new marker for the current line
+    //     const newMarker = session.addMarker(new Range(cursor.row, 0, cursor.row, 1), "editorLineHighlighted", "fullLine");
+    //     //@ts-ignore
+    //     setCurrentLineMarker(newMarker);
+    // }, [aceEditorRef.current, currentLineMarker])
+
+    function findFunctionStartLine(code: string, cursorLine: number) {
+        const lines = code.split('\n');
+        let depth = 0;
+
+        for (let i = cursorLine - 1; i >= 0; i--) {
+            const line = lines[i].trim();
+
+            // Check for function start patterns
+            if (line.match(/function\s+(\w+)?\s*\(/) || // function declaration/expression
+                line.match(/(\w+)\s*=\s*function\s*\(/) || // function expression
+                line.match(/(\w+)\s*=\s*\(/) || // arrow function
+                line.match(/(\w+):\s*function\s*\(/)) { // method shorthand
+                if (depth === 0) {
+                    return i;
+                }
+                depth--;
+            }
+
+            // Check for function end (simple approach)
+            if (line.endsWith('}')) {
+                depth++;
+            }
+        }
+
+        return -1; // Function start not found
+    }
+
+
+    useEffect(() => {
+        console.log("marker callback")
+
+        if (!aceEditorRef.current || cursorPosition === null) {
+            return;
+        }
+
+        console.log("marking editor")
+
+        const editor = aceEditorRef.current.editor;
+        const session = editor.getSession();
+        const code = session.getValue();
+
+        if (currentLineMarker != null) {
+            console.log("removing current marker")
+            session.removeMarker(currentLineMarker);
+        }
+
+        ctWs.sendWebsocketMessage({
+            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            type: CtMessageType.WebSocketMessageTypeParseFileRequest,
+            origin: CtMessageOrigin.WebSocketMessageOriginClient,
+            created_at: Date.now(),
+            payload: {
+                relative_path: "main." + (bytesLang === "Go" ? "go" : "py"),
+                content: code
+            }
+        } satisfies CtMessage<CtParseFileRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtParseFileResponse>): boolean => {
+            //console.log("response message of next output: ", msg)
+            if (msg.type !== CtMessageType.WebSocketMessageTypeParseFileResponse) {
+                console.log("failed parse file", msg)
+                return true
+            }
+            const p: CtParseFileResponse = msg.payload as CtParseFileResponse;
+
+            // locate the symbol that the cursor is pointing to
+            for (let i = 0; i < p.nodes.length; ++i) {
+                let node = p.nodes[i]
+
+                // check if the cursor row is within the nodes content location
+                if (
+                    node.position.start_line <= cursorPosition.row &&
+                    node.position.end_line >= cursorPosition.row
+                ) {
+                    const newMarker = session.addMarker(new Range(node.position.start_line, 0, node.position.end_line, Infinity), "editorLineHighlighted", "fullLine");
+                    setCurrentLineMarker(newMarker);
+                    break;
+                }
+            }
+
+            return true
+        })
+
+        // const functionStartLine = findFunctionStartLine(code, cursorPosition.row);
+        //
+        // console.log("marked")
+        //
+        // console.log("cursorPosition is: ", cursorPosition)
+        // console.log("functionStart: ", functionStartLine)
+        //
+        // // // Add a new marker for the current line
+        // // const newMarker = session.addMarker(new Range(cursorPosition.row, 0, cursorPosition.row, 1), "editorLineHighlighted", "fullLine");
+        // // Add a new marker for the current line
+        // const newMarker = session.addMarker(new Range(functionStartLine, 0, cursorPosition.row, Infinity), "editorLineHighlighted", "fullLine");
+        // //@ts-ignore
+        // setCurrentLineMarker(newMarker);
+    }, [code, cursorPosition])
+
+    // useEffect(() => {
+    //     if (!aceEditorRef.current) {
+    //         return;
+    //     }
+    //
+    //     const editor = aceEditorRef.current.editor;
+    //
+    //     // Attach event listener for cursor changes
+    //     editor.session.selection.on('changeCursor', editorMarkCallback);
+    //
+    //     // Cleanup
+    //     return () => {
+    //         editor.session.selection.off('changeCursor', editorMarkCallback);
+    //         if (currentLineMarker) {
+    //             editor.session.removeMarker(currentLineMarker);
+    //         }
+    //     };
+    // }, [aceEditorRef.current]);
 
 
     let minorValues = ["Outline", "Code Teacher"]

@@ -81,3 +81,58 @@ export interface CtByteNextOutputResponse {
     premium_llm: boolean;
     free_credit_use: boolean;
 }
+
+export interface ContentLocation {
+    start_line: number;
+    end_line: number;
+    start_column: number;
+    end_column: number;
+}
+
+export interface Node {
+    id: string;
+    name: string;
+    type: number;
+    language: number;
+    position: ContentLocation;
+    content: string;
+}
+
+export interface CtParseFileRequest {
+    relative_path: string;
+    content: string;
+}
+
+export interface CtParseFileResponse {
+    relative_path: string;
+    nodes: Node[];
+}
+
+export enum SymbolType {
+    SymbolTypeUnknown,
+    SymbolTypeFunction,
+    SymbolTypeStruct,
+    SymbolTypeInterface,
+    SymbolTypeVariable,
+    SymbolTypeConstant,
+    SymbolTypeType,
+    SymbolTypePackage,
+    SymbolTypeImport,
+    SymbolTypeField,
+    SymbolTypeMethod,
+    SymbolTypeConstructor,
+    SymbolTypeEnum,
+    SymbolTypeEnumValue,
+    SymbolTypeProperty,
+    SymbolTypeParameter,
+    SymbolTypeLabel,
+    SymbolTypeClass,
+    SymbolTypeAnnotation,
+    SymbolTypeImplementation,
+    SymbolTypeChunk,
+    SymbolTypeNamespace,
+    SymbolTypeTemplate,
+    SymbolTypeComponent,
+    SymbolTypeHook,
+    SymbolTypeAttribute,
+}
