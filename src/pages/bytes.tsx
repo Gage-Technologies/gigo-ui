@@ -60,6 +60,7 @@ import "./bytes.css"
 import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
 import ByteChat from "../components/CodeTeacher/ByteChat";
 import { LoadingButton } from "@mui/lab";
+import ByteSuggestions from "../components/CodeTeacher/ByteSuggestions";
 
 const Range = ace.require('ace/range').Range;
 
@@ -112,7 +113,6 @@ function Byte() {
     const [outputMessage, setOutputMessage] = useState("");
     const [byteAttemptId, setByteAttemptId] = useState("");
     const typingTimerRef = useRef(null);
-    const [byteSuggestion, setByteSuggestion] = useState("")
     const [suggestionPopup, setSuggestionPopup] = useState(false)
 
     const [executingOutputMessage, setExecutingOutputMessage] = useState<boolean>(false)
@@ -448,7 +448,7 @@ function Byte() {
         //@ts-ignore
         typingTimerRef.current = setTimeout(() => {
             //@ts-ignore
-            getByteSuggestion(id, code);
+            setSuggestionPopup(true)
         }, 15000); // 15000 milliseconds = 15 seconds
         if (newCode && newCode !== "// Write your code here...") {
             setIsButtonActive(true);
@@ -561,50 +561,6 @@ function Byte() {
         textAlign: 'center',
         width: '80vw',
         marginLeft: '5%',
-    };
-
-    let originalConsoleLog = console.log;
-
-    const getByteSuggestion = (byteId: string, userCode: string) => {
-        console.log("byte suggestion starting")
-
-        console.log(" suggestion payload is: ", {
-            code_language: bytesLang,
-            code: userCode,
-            byte_description: bytesDescription,
-            byte_id: byteId,
-            assistant_id: ""
-        })
-
-
-        ctWs.sendWebsocketMessage({
-            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-            type: CtMessageType.WebSocketMessageTypeByteSuggestionRequest,
-            origin: CtMessageOrigin.WebSocketMessageOriginClient,
-            created_at: Date.now(),
-            payload: {
-                code_language: bytesLang,
-                code: userCode,
-                byte_description: bytesDescription,
-                byte_id: byteId,
-                assistant_id: ""
-            }
-        } satisfies CtMessage<CtByteSuggestionRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtByteNextOutputResponse>) => {
-            //console.log("response message of next output: ", msg)
-            if (msg.type !== CtMessageType.WebSocketMessageTypeByteSuggestionResponse) {
-                console.log("failed suggestion message", msg)
-                return true
-            }
-            const p: CtByteSuggestionResponse = msg.payload as unknown as CtByteSuggestionResponse;
-            console.log("complete suggestion message: ", p.complete_message)
-            setByteSuggestion(p.complete_message)
-            setSuggestionPopup(true)
-            //   if (p.done) {
-            //       setState(State.COMPLETED)
-            //       return true
-            //   }
-            return false
-        })
     };
 
     const sendWebsocketMessageNextOutput = (byteId: string, userCode: string, codeOutput: string) => {
@@ -1051,73 +1007,20 @@ function Byte() {
                                     </Box>
                                 </Popper>
                             </div>
-                            <div>
-                                <Popper
-                                    open={suggestionPopup}
-                                    anchorEl={editorRef.current}
-                                    placement={"right-start"}
-                                    sx={{
-                                        backgroundColor: "transparent",
-                                        // height: "50vh"
-                                        // width: "20vw",
-                                    }}
-                                    modifiers={[
-                                        {
-                                            name: 'offset',
-                                            options: {
-                                                offset: [0, 40], // x, y offset
-                                            },
-                                        },
-                                    ]}
-                                >
-                                    <Box
-                                        sx={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            alignItems: 'start',
-                                            p: 1,
-                                            borderRadius: '10px',
-                                            boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2);',
-                                            ...themeHelpers.frostedGlass,
-                                            backgroundColor: 'rgba(19,19,19,0.31)',
-                                            maxWidth: "30vw"
-                                        }}
-                                    >
-                                        <Button
-                                            variant="text"
-                                            color="error"
-                                            sx={{
-                                                position: "absolute",
-                                                right: 10,
-                                                top: 10,
-                                                borderRadius: "50%",
-                                                padding: 1,
-                                                minWidth: "0px"
-                                            }}
-                                            onClick={() => setSuggestionPopup(false)}
-                                        >
-                                            <Close/>
-                                        </Button>
-                                        <DialogContent
-                                            sx={{
-                                                backgroundColor: 'transparent',
-                                                maxHeight: '70vh',
-                                                overflow: 'auto',
-                                                mt: outputMessage.length > 0 ? 2 : undefined,
-                                            }}
-                                        >
-                                            <MarkdownRenderer
-                                                markdown={byteSuggestion}
-                                                style={{
-                                                    overflowWrap: 'break-word',
-                                                    borderRadius: '10px',
-                                                    padding: '0px',
-                                                }}
-                                            />
-                                        </DialogContent>
-                                    </Box>
-                                </Popper>
-                            </div>
+                            <ByteSuggestions 
+                                open={suggestionPopup}
+                                closeCallback={() => {
+                                    setSuggestionPopup(false)
+                                }}
+                                code={code}
+                                anchorEl={editorRef.current}
+                                placement="right-start"
+                                posMods={[0, 40]}
+                                maxWidth="20vw"
+                                byteId={id || ""}
+                                description={bytesDescription}
+                                lang={bytesLang}
+                            />
                         </div>
                         <div style={byteSelectionMenuStyle}>
                             {byteData && <ByteSelectionMenu bytes={byteData} onSelectByte={handleSelectByte}/>}
