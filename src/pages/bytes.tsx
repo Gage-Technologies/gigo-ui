@@ -57,6 +57,7 @@ import {
 import { Nightlife } from "@mui/icons-material";
 import ace from "ace-builds/src-noconflict/ace";
 import "./bytes.css"
+import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
 
 const Range = ace.require('ace/range').Range;
 
@@ -997,18 +998,17 @@ function Byte() {
                                     placement={"right-start"}
                                     sx={{
                                         backgroundColor: "transparent",
-                                        width: "20vw",
-                                        height: "60vh",
-                                        overflow: "scroll"
+                                        // height: "50vh"
+                                        // width: "20vw",
                                     }}
-                                    // modifiers={[
-                                    //     {
-                                    //         name: 'offset',
-                                    //         options: {
-                                    //             offset: [0, 40], // x, y offset
-                                    //         },
-                                    //     },
-                                    // ]}
+                                    modifiers={[
+                                        {
+                                            name: 'offset',
+                                            options: {
+                                                offset: [0, 40], // x, y offset
+                                            },
+                                        },
+                                    ]}
                                 >
                                     <Box
                                         sx={{
@@ -1020,6 +1020,7 @@ function Byte() {
                                             boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2);',
                                             ...themeHelpers.frostedGlass,
                                             backgroundColor: 'rgba(19,19,19,0.31)',
+                                            maxWidth: "30vw"
                                         }}
                                     >
                                         <Button
@@ -1040,12 +1041,19 @@ function Byte() {
                                         <DialogContent
                                             sx={{
                                                 backgroundColor: 'transparent',
-                                                maxHeight: '100%',
+                                                maxHeight: '70vh',
                                                 overflow: 'auto',
-                                                // mt: outputMessage.length > 0 ? 2: undefined,
+                                                mt: outputMessage.length > 0 ? 2: undefined,
                                             }}
                                         >
-                                            {outputMessage}
+                                            <MarkdownRenderer
+                                                markdown={outputMessage}
+                                                style={{
+                                                    overflowWrap: 'break-word',
+                                                    borderRadius: '10px',
+                                                    padding: '0px',
+                                                }}
+                                            />
                                         </DialogContent>
                                     </Box>
                                 </Popper>
