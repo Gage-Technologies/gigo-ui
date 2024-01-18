@@ -54,7 +54,7 @@ import {
     CtParseFileRequest, CtParseFileResponse,
     CtValidationErrorPayload
 } from "../models/ct_websocket";
-import { Nightlife } from "@mui/icons-material";
+import { KeyboardReturn, Nightlife } from "@mui/icons-material";
 import ace from "ace-builds/src-noconflict/ace";
 import "./bytes.css"
 import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
@@ -88,9 +88,10 @@ function Byte() {
     const [byteData, setByteData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [code, setCode] = useState("// Write your code here...");
+    const [longLine, setLongLine] = useState(false);
     const [isButtonActive, setIsButtonActive] = useState(false);
     const [isReceivingData, setIsReceivingData] = useState(false);
-    
+
     const [output, setOutput] = useState<OutputState | null>(null);
 
     const [currentByteTitle, setCurrentByteTitle] = useState("");
@@ -101,12 +102,15 @@ function Byte() {
 
     const editorRef = React.useRef(null);
     const aceEditorRef = React.useRef<ReactAce | null>(null);
-    const [cursorPosition, setCursorPosition] = useState<{row: number, column: number} | null>(null)
+    const [cursorPosition, setCursorPosition] = useState<{ row: number, column: number } | null>(null)
     const [codeBeforeCursor, setCodeBeforeCursor] = useState("");
     const [codeAfterCursor, setCodeAfterCursor] = useState("");
+    const [terminalVisible, setTerminalVisible] = useState(false);
     const [outputPopup, setOutputPopup] = useState(false);
     const [outputMessage, setOutputMessage] = useState("");
     const [byteAttemptId, setByteAttemptId] = useState("");
+
+    const [executingOutputMessage, setExecutingOutputMessage] = useState<boolean>(false)
 
 
     let { id } = useParams();
@@ -142,7 +146,7 @@ function Byte() {
             payload: {
                 byte_attempt_id: byteAttemptId,
                 payload: {
-                    lang: programmingLanguages.indexOf("Python"),
+                    lang: programmingLanguages.indexOf(bytesLang),
                     code: code
                 }
             }
@@ -151,7 +155,13 @@ function Byte() {
         console.log("Sending message:", message);
 
         setIsReceivingData(true);
-        setOutput(null);
+        setTerminalVisible(true)
+        setOutput({
+            stdout: [{timestamp: Date.now() * 1000, content: "Running..."}],
+            stderr: [],
+            merged: "Running...",
+            mergedLines: [{timestamp: Date.now() * 1000, content: "Running...", error: false}],
+        });
 
         globalWs.sendWebsocketMessage(
             message,
@@ -402,32 +412,17 @@ function Byte() {
         getByte("999");
     };
 
-
-    interface SubmitButtonProps {
-        isButtonActive: boolean;
-        onClick?: () => void;
-    }
-
-    const SubmitButton = styled(AwesomeButton)<SubmitButtonProps>`
-      cursor: ${props => props.isButtonActive ? 'pointer' : 'not-allowed'};
-      &:disabled {
-        cursor: not-allowed;
-        opacity: 0.5;
-      }
-    `;
-
     const combinedSectionStyle: React.CSSProperties = {
         display: 'flex',
         height: '80vh',
-        width: '60vw',
+        width: '80vw',
         marginLeft: '5%',
         marginRight: 'auto',
         borderRadius: theme.shape.borderRadius,
         overflow: 'hidden',
-        gap: "3%",
         boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.2)',
         border: `1px solid ${theme.palette.grey[300]}`,
-        padding: "1%",
+        padding: "10px",
     };
 
     const mainLayoutStyle: React.CSSProperties = {
@@ -454,6 +449,8 @@ function Byte() {
 
     const markdownSectionStyle: React.CSSProperties = {
         flex: 1,
+        minWidth: "450px",
+        maxWidth: "20vw",
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
@@ -462,36 +459,19 @@ function Byte() {
         overflow: 'hidden',
     };
 
-    const markdownContentStyle: React.CSSProperties = {
-        padding: theme.spacing(2),
-        backgroundColor: theme.palette.background.paper,
-        borderRadius: theme.shape.borderRadius,
-        overflowY: 'auto',
-        overflowX: 'hidden',
-        wordBreak: 'break-word',
-        whiteSpace: 'pre-wrap',
-    };
-
-    // Style for markdown comment blocks
-    const markdownBlockStyle: React.CSSProperties = {
-        backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
-        borderRadius: theme.shape.borderRadius,
-        padding: theme.spacing(1),
-        marginBottom: theme.spacing(1),
-        wordBreak: 'break-word',
-    };
-
     const editorAndTerminalStyle: React.CSSProperties = {
         display: 'flex',
         flexDirection: 'column',
         flex: 1,
         height: '100%',
+        paddingLeft: "20px",
+        width: "60vw"
     };
 
     // Adjust the height of the AceEditor and TerminalOutput
     const aceEditorStyle: React.CSSProperties = {
         width: '100%',
-        height: 'calc(100% - 100px)',
+        height: '100%',
         borderRadius: theme.shape.borderRadius,
     };
 
@@ -504,21 +484,27 @@ function Byte() {
         marginTop: "20px",
         borderRadius: "5px",
         whiteSpace: "pre-wrap",
-        height: '300px',
+        maxHeight: '300px',
+        minHeight: "100px",
         overflowY: 'auto',
         wordWrap: 'break-word',
+        position: "relative"
     };
 
     const titleStyle: React.CSSProperties = {
         marginBottom: theme.spacing(2),
         textAlign: 'center',
-        width: '60vw',
+        width: '80vw',
         marginLeft: '5%',
     };
 
     let originalConsoleLog = console.log;
 
     const sendWebsocketMessageNextOutput = (byteId: string, userCode: string, codeOutput: string) => {
+        if (executingOutputMessage) {
+            return
+        }
+
         console.log("next output starting")
 
         console.log(" payload next output is: ", {
@@ -531,41 +517,40 @@ function Byte() {
         })
 
 
+        setExecutingOutputMessage(true)
         ctWs.sendWebsocketMessage({
-          sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-          type: CtMessageType.WebSocketMessageTypeByteNextOutputMessageRequest,
-          origin: CtMessageOrigin.WebSocketMessageOriginClient,
-          created_at: Date.now(),
-          payload: {
-              byte_id: byteId,
-              byte_description: bytesDescription,
-              code_language: bytesLang,
-              // @ts-ignore
-              byte_output: codeOutput, // changed from codeOutput["stdout"][0] because of an error
-              code: userCode
-          }
-      } satisfies CtMessage<CtByteNextOutputRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtByteNextOutputResponse>) => {
-          //console.log("response message of next output: ", msg)
-          if (msg.type !== CtMessageType.WebSocketMessageTypeByteNextOutputMessageResponse) {
-              console.log("failed next output message", msg)
-              return true
-          }
-          const p: CtByteNextOutputResponse = msg.payload as CtByteNextOutputResponse;
-          setOutputMessage(p.complete_message)
-          setOutputPopup(true)
-        //   if (p.done) {
-        //       setState(State.COMPLETED)
-        //       return true
-        //   }
-          return false
-      })
+            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            type: CtMessageType.WebSocketMessageTypeByteNextOutputMessageRequest,
+            origin: CtMessageOrigin.WebSocketMessageOriginClient,
+            created_at: Date.now(),
+            payload: {
+                byte_id: byteId,
+                byte_description: bytesDescription,
+                code_language: bytesLang,
+                // @ts-ignore
+                byte_output: codeOutput, // changed from codeOutput["stdout"][0] because of an error
+                code: userCode
+            }
+        } satisfies CtMessage<CtByteNextOutputRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtByteNextOutputResponse>) => {
+            //console.log("response message of next output: ", msg)
+            if (msg.type !== CtMessageType.WebSocketMessageTypeByteNextOutputMessageResponse) {
+                console.log("failed next output message", msg)
+                setExecutingOutputMessage(false)
+                return true
+            }
+            const p: CtByteNextOutputResponse = msg.payload as CtByteNextOutputResponse;
+            setOutputMessage(p.complete_message)
+            setOutputPopup(true)
+            setExecutingOutputMessage(!p.done)
+            return p.done
+        })
     };
 
     useEffect(() => {
         console.log("output is: ", output)
         console.log("id is: ", id)
         // @ts-ignore
-        if (id !== undefined && output) {
+        if (id !== undefined && output && output.merged !== "Running...") {
             console.log("next output called")
             sendWebsocketMessageNextOutput(id, code, output.merged)
         }
@@ -583,11 +568,16 @@ function Byte() {
     };
 
     useEffect(() => {
+        const lines = code.split("\n");
+
+        // detect if any lines extend beyond 80 chars
+        let ll = lines.filter(x => x.length >= 80);
+        setLongLine(ll.length > 0)
+
         if (cursorPosition === null) {
             return
         }
 
-        const lines = code.split("\n");
         //console.log("line: ", lines[cursorPosition.row])
         if (lines[cursorPosition.row] === undefined) {
             return
@@ -596,6 +586,7 @@ function Byte() {
         let suffix = lines[cursorPosition.row].slice(cursorPosition.column, lines[cursorPosition.row].length) + lines.filter((x, i) => i > cursorPosition.row).join("\n")
         setCodeBeforeCursor(preffix)
         setCodeAfterCursor(suffix)
+
 
         //console.log("preffix\n", preffix)
         //console.log("suffix\n", suffix)
@@ -612,7 +603,7 @@ function Byte() {
 
         //console.log("new cursor position", cursorPosition)
         //console.log("code content: ", code)
-        
+
         setCursorPosition({
             row: cursorPosition.row,
             column: cursorPosition.column,
@@ -640,162 +631,37 @@ function Byte() {
         style?: React.CSSProperties;
     }
 
-    const TerminalOutput: React.FC<TerminalOutputProps> = ({ output, style }) => (
-        <div style={{ ...terminalOutputStyle, ...style }}>
-            {output && output.mergedLines.map((line, index) => (
-                <div key={index} style={{ color: line.error ? "red" : "white" }}>
-                    {line.content}
-                </div>
-            ))}
-        </div>
-    );
-
-    const CodeBlock: CodeComponent = ({ inline, className, children, ...props }) => {
-        if (inline) {
-            return <code className={className} {...props}>{children}</code>;
+    const TerminalOutput: React.FC<TerminalOutputProps> = ({ output, style }) => {
+        if (!terminalVisible) {
+            return null
         }
-        return (
-            <pre style={markdownBlockStyle}>
-                <code className={className} {...props}>{children}</code>
-            </pre>
-        );
-    };
-
-    interface TextBlockProps {
-        children?: React.ReactNode;
-        node?: any;
-    }
-
-    const TextBlock = ({ children, node, ...props }: TextBlockProps) => {
-        return <p {...props}>{children}</p>;
-    };
-
-    const renderUserMessage = (content: string) => {
-        return (
-            <div
-                style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "flex-end",
-                    alignItems: "flex-end",
-                    paddingBottom: '10px'
-                }}
-            >
-                <Card
-                    style={{
-                        fontSize: ".75rem",
-                        marginLeft: "auto",
-                        marginRight: "10px",
-                        marginBottom: "0px",
-                        padding: "10px",
-                        backgroundColor: "#0842a040",
-                        border: "1px solid #0842a0",
-                        color: "#fcfcfc",
-                        borderRadius: "10px",
-                        width: "auto",
-                        height: "auto",
-                        display: "block",
-                        maxWidth: "90%"
-                    }}
-                >
-                    <ReactMarkdown components={{ code: CodeBlock, p: TextBlock }}>
-                        {content}
-                    </ReactMarkdown>
-                </Card>
-            </div>
-        );
-    }
-
-    const renderBotMessage = (
-        content: string,
-        loading: boolean,
-        _id: string | null = null,
-        premiumLlm: boolean = false,
-        freeCreditUse: boolean = false
-    ) => {
 
         return (
-            <div
-                style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "flex-end",
-                    alignItems: "flex-end",
-                    paddingBottom: '10px'
-                }}
-            >
-                <Card
-                    style={{
-                        fontSize: ".75rem",
-                        marginLeft: "10px",
-                        marginRight: "auto",
-                        marginBottom: "0px",
-                        padding: "10px",
-                        backgroundColor: "#31343a40",
-                        border: `1px solid ${premiumLlm ? "#84E8A2" : "#31343a"}`,
-                        color: "white",
-                        borderRadius: "10px",
-                        width: "auto",
-                        height: "auto",
-                        display: "block",
-                        maxWidth: "90%"
-                    }}
-                >
-                    <ReactMarkdown components={{ code: CodeBlock, p: TextBlock }}>
-                        {content}
-                    </ReactMarkdown>
-                </Card>
-            </div>
-        );
-    }
-
-    const [typeTab, setTypeTab] = React.useState("Outline")
-    const handleChange = async (event: React.SyntheticEvent, newValue: string) => {
-        setTypeTab(newValue);
-    };
-
-    const MessageContainer = styled('div')(({ theme }) => ({
-        overflowY: 'auto',
-        padding: 2,
-        marginBottom: 4, // space for the input field and button
-        height: '68vh', // adjust based on your header/footer size
-    }));
-
-    type Message = {
-        type: 'user' | 'bot';
-        content: string;
-    };
-
-    const [userMessage, setUserMessage] = useState('');
-    const [messages, setMessages] = useState<Message[]>([]);
-
-    const handleSend = () => {
-        // Add user message to messages array
-        setMessages(prevMessages => [...prevMessages, { type: 'user', content: userMessage }]);
-        setUserMessage('');
-
-        // Simulate receiving a bot message after a delay
-        setTimeout(() => {
-            const botResponse = "Bot's response to: " + userMessage;
-            setMessages(prevMessages => [...prevMessages, { type: 'bot', content: botResponse }]);
-        }, 1000); // Simulating delay for bot response
-    };
-
-    const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
-        if (event.key === 'Enter') {
-            handleSend();
-        }
-    };
-
-    const CodeTeacher = () => {
-        return (
-            <Box>
-                <MessageContainer>
-                    {renderBotMessage(markdown, false, "123", true, false)}
-                    {renderUserMessage("Help me with my code")}
-                </MessageContainer>
+            <Box style={{ ...terminalOutputStyle, ...style }}>
+                    <Button
+                        variant="text"
+                        color="error"
+                        sx={{
+                            position: "absolute",
+                            right: 10,
+                            top: 10,
+                            borderRadius: "50%",
+                            padding: 1,
+                            minWidth: "0px"
+                        }}
+                        onClick={() => setTerminalVisible(false)}
+                    >
+                        <Close />
+                    </Button>
+                <code>
+                    {output && output.mergedLines.map((line, index) => (
+                        <span style={{ color: line.error ? "red" : "white" }}>
+                            {line.content + "\n"}
+                        </span>
+                    ))}
+                </code>
             </Box>
-        );
+        )
     };
 
     const [currentLineMarker, setCurrentLineMarker] = useState<number | null>(null);
@@ -951,7 +817,7 @@ function Byte() {
                     <div style={mainLayoutStyle}>
                         <div style={combinedSectionStyle}>
                             <div style={markdownSectionStyle}>
-                                <ByteChat/>
+                                <ByteChat />
                             </div>
                             <ByteNextStep
                                 open={true}
@@ -960,7 +826,7 @@ function Byte() {
                                 anchorEl={editorRef.current}
                                 placement="right-start"
                                 posMods={[0, 40]}
-                                maxWidth="30vw"
+                                maxWidth="20vw"
                                 bytesID={id || ""}
                                 bytesDescription={bytesDescription}
                                 bytesDevSteps={bytesDevSteps}
@@ -977,10 +843,15 @@ function Byte() {
                                     mode={bytesLang === "Go" ? "golang" : "python"}
                                     theme="monokai"
                                     value={code}
+                                    // debounceChangePeriod={300}
                                     onChange={handleEditorChange}
                                     name="ACE_EDITOR_DIV"
                                     editorProps={{ $blockScrolling: true }}
                                     style={aceEditorStyle}
+                                    showPrintMargin={true}
+                                    setOptions={{
+                                        printMarginColumn: longLine ? 80 : 10000
+                                    }}
                                 />
                                 <TerminalOutput output={output} style={terminalOutputStyle} />
                             </div>
@@ -1013,7 +884,7 @@ function Byte() {
                                             boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2);',
                                             ...themeHelpers.frostedGlass,
                                             backgroundColor: 'rgba(19,19,19,0.31)',
-                                            maxWidth: "30vw"
+                                            maxWidth: "20vw"
                                         }}
                                     >
                                         <Button
@@ -1036,7 +907,7 @@ function Byte() {
                                                 backgroundColor: 'transparent',
                                                 maxHeight: '70vh',
                                                 overflow: 'auto',
-                                                mt: outputMessage.length > 0 ? 2: undefined,
+                                                mt: outputMessage.length > 0 ? 2 : undefined,
                                             }}
                                         >
                                             <MarkdownRenderer
@@ -1056,7 +927,7 @@ function Byte() {
                                     style={{
                                         position: 'absolute',
                                         right: '16%',
-                                        top:"90%",
+                                        top: "90%",
                                         marginBottom: '2%',
                                         backgroundColor: theme.palette.primary.main,
                                         color: theme.palette.primary.contrastText,
