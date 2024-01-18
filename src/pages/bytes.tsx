@@ -128,22 +128,6 @@ function Byte() {
 
     const [markdown, setMarkdown] = useState("");
 
-    // useEffect(() => {
-    //     globalWs.sendWebsocketMessage(
-    //         {
-    //             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-    //             type: WsMessageType.ByteUpdateCode,
-    //             payload: {
-    //                 byte_attempt_id: "0",
-    //                 content: ""
-    //             } satisfies ByteUpdateCodeRequest
-    //         },
-    //         (msg: WsMessage<any>) => {
-    //             console.log(msg.payload);
-    //         }
-    //     )
-    // }, []);
-
     const byteWebSocketPing = () => {
         const pingMessage: WsMessage<BytesLivePingRequest> = {
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
@@ -159,6 +143,19 @@ function Byte() {
         }, 60000); // Send a ping every minute (60000 milliseconds)
 
         return pingInterval;
+    };
+
+    const updateCode = (newCode: string) => {
+        const message = {
+            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            type: WsMessageType.ByteUpdateCode,
+            payload: {
+                byte_attempt_id: byteAttemptId,
+                content: newCode
+            }
+        };
+
+        globalWs.sendWebsocketMessage(message, null);
     };
 
     useEffect(() => {
@@ -464,8 +461,10 @@ function Byte() {
         // Update the code state with the new content
         setCode(newCode);
         startTypingTimer();
-        if (newCode && newCode !== "// Write your code here...") {
+        if (newCode && newCode !== "// Write your code here..." && newCode !== initialCode) {
             setIsButtonActive(true);
+
+            updateCode(newCode);
 
             // Call createWorkspace only if it hasn't been called before
             if (!workspaceCreated && id) {
@@ -950,7 +949,7 @@ function Byte() {
                                     mode={bytesLang === "Go" ? "golang" : "python"}
                                     theme="monokai"
                                     value={code}
-                                    // debounceChangePeriod={300}
+                                    debounceChangePeriod={1000} // 1000 ms delay
                                     onChange={handleEditorChange}
                                     name="ACE_EDITOR_DIV"
                                     editorProps={{$blockScrolling: true}}
