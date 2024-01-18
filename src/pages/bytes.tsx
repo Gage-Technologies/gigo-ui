@@ -61,6 +61,7 @@ import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
 import ByteChat from "../components/CodeTeacher/ByteChat";
 import { LoadingButton } from "@mui/lab";
 import ByteSuggestions from "../components/CodeTeacher/ByteSuggestions";
+import ByteNextOutputMessage from "../components/CodeTeacher/ByteNextOutputMessage";
 
 const Range = ace.require('ace/range').Range;
 
@@ -230,6 +231,7 @@ function Byte() {
                 })
 
                 setExecutingCode(!done)
+                setOutputPopup(true)
 
                 // we only return true here if we are done since true removes this callback
                 return done
@@ -438,18 +440,22 @@ function Byte() {
         };
     }, []);
 
-    // Handle changes in the editor and activate the button
-    const handleEditorChange = (newCode: string) => {
-        // Update the code state with the new content
-        setCode(newCode);
+    const startTypingTimer = () => {
         if (typingTimerRef.current) {
             clearTimeout(typingTimerRef.current);
         }
         //@ts-ignore
         typingTimerRef.current = setTimeout(() => {
-            //@ts-ignore
-            setSuggestionPopup(true)
-        }, 15000); // 15000 milliseconds = 15 seconds
+            setSuggestionPopup(true);
+        }, 15000);
+    };
+
+
+    // Handle changes in the editor and activate the button
+    const handleEditorChange = (newCode: string) => {
+        // Update the code state with the new content
+        setCode(newCode);
+        startTypingTimer();
         if (newCode && newCode !== "// Write your code here...") {
             setIsButtonActive(true);
 
@@ -563,71 +569,80 @@ function Byte() {
         marginLeft: '5%',
     };
 
-    const sendWebsocketMessageNextOutput = (byteId: string, userCode: string, codeOutput: string) => {
-        if (executingOutputMessage) {
-            return
-        }
+    // const sendWebsocketMessageNextOutput = (byteId: string, userCode: string, codeOutput: string) => {
+    //     if (executingOutputMessage) {
+    //         return
+    //     }
+    //
+    //     console.log("next output starting")
+    //
+    //     console.log(" payload next output is: ", {
+    //         byte_id: byteId,
+    //         byte_description: bytesDescription,
+    //         code_language: bytesLang,
+    //         // @ts-ignore
+    //         byte_output: codeOutput,// changed from this because of an error codeOutput["stdout"][0]
+    //         code: userCode
+    //     })
+    //
+    //
+    //     setExecutingOutputMessage(true)
+    //     ctWs.sendWebsocketMessage({
+    //         sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+    //         type: CtMessageType.WebSocketMessageTypeByteNextOutputMessageRequest,
+    //         origin: CtMessageOrigin.WebSocketMessageOriginClient,
+    //         created_at: Date.now(),
+    //         payload: {
+    //             byte_id: byteId,
+    //             byte_description: bytesDescription,
+    //             code_language: bytesLang,
+    //             // @ts-ignore
+    //             byte_output: codeOutput, // changed from codeOutput["stdout"][0] because of an error
+    //             code: userCode
+    //         }
+    //     } satisfies CtMessage<CtByteNextOutputRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtByteNextOutputResponse>) => {
+    //         //console.log("response message of next output: ", msg)
+    //         if (msg.type !== CtMessageType.WebSocketMessageTypeByteNextOutputMessageResponse) {
+    //             console.log("failed next output message", msg)
+    //             setExecutingOutputMessage(false)
+    //             return true
+    //         }
+    //         const p: CtByteNextOutputResponse = msg.payload as CtByteNextOutputResponse;
+    //         setOutputMessage(p.complete_message)
+    //         setOutputPopup(true)
+    //         setExecutingOutputMessage(!p.done)
+    //         return p.done
+    //     })
+    // };
 
-        console.log("next output starting")
-
-        console.log(" payload next output is: ", {
-            byte_id: byteId,
-            byte_description: bytesDescription,
-            code_language: bytesLang,
-            // @ts-ignore
-            byte_output: codeOutput,// changed from this because of an error codeOutput["stdout"][0]
-            code: userCode
-        })
-
-
-        setExecutingOutputMessage(true)
-        ctWs.sendWebsocketMessage({
-            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-            type: CtMessageType.WebSocketMessageTypeByteNextOutputMessageRequest,
-            origin: CtMessageOrigin.WebSocketMessageOriginClient,
-            created_at: Date.now(),
-            payload: {
-                byte_id: byteId,
-                byte_description: bytesDescription,
-                code_language: bytesLang,
-                // @ts-ignore
-                byte_output: codeOutput, // changed from codeOutput["stdout"][0] because of an error
-                code: userCode
-            }
-        } satisfies CtMessage<CtByteNextOutputRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtByteNextOutputResponse>) => {
-            //console.log("response message of next output: ", msg)
-            if (msg.type !== CtMessageType.WebSocketMessageTypeByteNextOutputMessageResponse) {
-                console.log("failed next output message", msg)
-                setExecutingOutputMessage(false)
-                return true
-            }
-            const p: CtByteNextOutputResponse = msg.payload as CtByteNextOutputResponse;
-            setOutputMessage(p.complete_message)
-            setOutputPopup(true)
-            setExecutingOutputMessage(!p.done)
-            return p.done
-        })
-    };
-
-    useEffect(() => {
-        console.log("output is: ", output)
-        console.log("id is: ", id)
-        // @ts-ignore
-        if (id !== undefined && output && output.merged !== "Running...") {
-            console.log("next output called")
-            sendWebsocketMessageNextOutput(id, code, output.merged)
-        }
-    }, [output])
+    // useEffect(() => {
+    //     console.log("output is: ", output)
+    //     console.log("id is: ", id)
+    //     // @ts-ignore
+    //     if (id !== undefined && output && output.merged !== "Running...") {
+    //         console.log("next output called")
+    //         sendWebsocketMessageNextOutput(id, code, output.merged)
+    //     }
+    // }, [output])
 
     useEffect(() => {
         console.log("code changed: ", code)
     }, [code])
+
+
+    const deleteTypingTimer = () => {
+        if (typingTimerRef.current) {
+            clearTimeout(typingTimerRef.current);
+            typingTimerRef.current = null;
+        }
+    };
 
     const executeCode = () => {
         console.log("executeCode called")
         if (suggestionPopup){
             setSuggestionPopup(false)
         }
+        deleteTypingTimer();
         sendExecRequest();
     };
 
@@ -940,73 +955,19 @@ function Byte() {
                                 />
                                 <TerminalOutput output={output} style={terminalOutputStyle}/>
                             </div>
-                            <div>
-                                <Popper
-                                    open={outputPopup}
-                                    anchorEl={editorRef.current}
-                                    placement={"right-start"}
-                                    sx={{
-                                        backgroundColor: "transparent",
-                                        // height: "50vh"
-                                        // width: "20vw",
-                                    }}
-                                    modifiers={[
-                                        {
-                                            name: 'offset',
-                                            options: {
-                                                offset: [0, 40], // x, y offset
-                                            },
-                                        },
-                                    ]}
-                                >
-                                    <Box
-                                        sx={{
-                                            display: 'flex',
-                                            flexDirection: 'row',
-                                            alignItems: 'start',
-                                            p: 1,
-                                            borderRadius: '10px',
-                                            boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2);',
-                                            ...themeHelpers.frostedGlass,
-                                            backgroundColor: 'rgba(19,19,19,0.31)',
-                                            maxWidth: "20vw"
-                                        }}
-                                    >
-                                        <Button
-                                            variant="text"
-                                            color="error"
-                                            sx={{
-                                                position: "absolute",
-                                                right: 10,
-                                                top: 10,
-                                                borderRadius: "50%",
-                                                padding: 1,
-                                                minWidth: "0px"
-                                            }}
-                                            onClick={() => setOutputPopup(false)}
-                                        >
-                                            <Close/>
-                                        </Button>
-                                        <DialogContent
-                                            sx={{
-                                                backgroundColor: 'transparent',
-                                                maxHeight: '70vh',
-                                                overflow: 'auto',
-                                                mt: outputMessage.length > 0 ? 2 : undefined,
-                                            }}
-                                        >
-                                            <MarkdownRenderer
-                                                markdown={outputMessage}
-                                                style={{
-                                                    overflowWrap: 'break-word',
-                                                    borderRadius: '10px',
-                                                    padding: '0px',
-                                                }}
-                                            />
-                                        </DialogContent>
-                                    </Box>
-                                </Popper>
-                            </div>
+                            <ByteNextOutputMessage
+                                open={outputPopup}
+                                closeCallback={() => {setOutputPopup(false)}}
+                                anchorEl={editorRef.current}
+                                placement={"right-start"}
+                                posMods={[0, 40]}
+                                lang={bytesLang}
+                                code={code}
+                                byteId={id || ""}
+                                description={bytesDescription}
+                                maxWidth={"20vw"}
+                                codeOutput={output?.merged || ""}
+                            />
                             <ByteSuggestions 
                                 open={suggestionPopup}
                                 closeCallback={() => {
