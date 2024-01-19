@@ -37,7 +37,7 @@ const ByteSelectionMenu: React.FC<ByteSelectionMenuProps> = ({ bytes, onSelectBy
                         <BytesCard
                             bytesId={byte.id}
                             bytesTitle={byte.name}
-                            bytesThumb={config.rootPath + byte.bytesThumb}
+                            bytesThumb={config.rootPath + "/static/bytes/t/" + byte.id}
                             onClick={() => onSelectByte(byte.id)}
                             style={{ cursor: 'pointer', transition: 'transform 0.3s ease' }}
                             onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}

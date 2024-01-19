@@ -111,7 +111,7 @@ function AllBytesScroll() {
                                                 bytesId={byte["_id"]}
                                                 bytesTitle={byte["name"]}
                                                 bytesDesc={byte["description"]}
-                                                bytesThumb={config.rootPath + byte["thumbnail"]}
+                                                bytesThumb={config.rootPath + "/static/bytes/t/" + byte["_id"]}
                                                 onClick={() => navigate("/byte/" + byte["_id"])}
                                                 role={authState.role}
                                             />

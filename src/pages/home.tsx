@@ -663,7 +663,7 @@ function Home() {
                                                 bytesId={project["_id"]}
                                                 bytesTitle={project["name"]}
                                                 bytesDesc={project["description"]}
-                                                bytesThumb={config.rootPath + project["thumbnail"]}
+                                                bytesThumb={config.rootPath + "/static/bytes/t/" + project["_id"]}
                                                 onClick={() => navigate("/byte/" + project["_id"])}
                                                 role={authState.role}
                                             />
