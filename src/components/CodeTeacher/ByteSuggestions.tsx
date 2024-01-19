@@ -122,6 +122,8 @@ export default function ByteSuggestion(props: ByteSuggestionProps) {
     useEffect(() => {
         if (!props.open)
             return
+        close()
+        return
         getByteSuggestion()
     }, [props.open])
 

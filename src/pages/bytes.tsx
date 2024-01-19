@@ -62,6 +62,7 @@ import ByteChat from "../components/CodeTeacher/ByteChat";
 import { LoadingButton } from "@mui/lab";
 import ByteSuggestions from "../components/CodeTeacher/ByteSuggestions";
 import ByteNextOutputMessage from "../components/CodeTeacher/ByteNextOutputMessage";
+import Editor from "../components/IDE/Editor";
 
 const Range = ace.require('ace/range').Range;
 
@@ -546,13 +547,6 @@ function Byte() {
         position: "relative"
     };
 
-    // Adjust the height of the AceEditor and TerminalOutput
-    const aceEditorStyle: React.CSSProperties = {
-        width: '100%',
-        height: '100%',
-        borderRadius: theme.shape.borderRadius,
-    };
-
     const terminalOutputStyle: React.CSSProperties = {
         backgroundColor: "#333",
         color: "lime",
@@ -653,6 +647,8 @@ function Byte() {
     };
 
     useEffect(() => {
+        console.log("cursor position: ", cursorPosition)
+
         const lines = code.split("\n");
 
         // detect if any lines extend beyond 80 chars
@@ -673,43 +669,9 @@ function Byte() {
         setCodeAfterCursor(suffix)
 
 
-        //console.log("preffix\n", preffix)
-        //console.log("suffix\n", suffix)
+        console.log("preffix\n", preffix)
+        console.log("suffix\n", suffix)
     }, [code, cursorPosition])
-
-    const logCursorPosition = React.useCallback(() => {
-        //console.log("registering cursor position")
-        if (!aceEditorRef || !aceEditorRef.current) {
-            return
-        }
-
-        const editor = aceEditorRef.current.editor;
-        const cursorPosition = editor.getCursorPosition();
-
-        //console.log("new cursor position", cursorPosition)
-        //console.log("code content: ", code)
-
-        setCursorPosition({
-            row: cursorPosition.row,
-            column: cursorPosition.column,
-        })
-    }, [aceEditorRef.current]);
-
-    useEffect(() => {
-        // Function to log the cursor position
-        if (!aceEditorRef || !aceEditorRef.current) {
-            return
-        }
-
-        // Get the Ace Editor instance from the ref and attach the changeCursor event listener
-        const editor = aceEditorRef.current.editor;
-        editor.session.selection.on('changeCursor', logCursorPosition);
-
-        // Cleanup the event listener when the component unmounts
-        return () => {
-            editor.session.selection.off('changeCursor', logCursorPosition);
-        };
-    }, []);
 
     interface TerminalOutputProps {
         output: OutputState | null;
@@ -944,12 +906,12 @@ function Byte() {
                                         </LoadingButton>
                                     </Tooltip>
                                 )}
-                                <AceEditor
+                                {/* <AceEditor
                                     ref={aceEditorRef}
                                     mode={bytesLang === "Go" ? "golang" : "python"}
                                     theme="monokai"
                                     value={code}
-                                    debounceChangePeriod={1000} // 1000 ms delay
+                                    debounceChangePeriod={0.3} // 1000 ms delay
                                     onChange={handleEditorChange}
                                     name="ACE_EDITOR_DIV"
                                     editorProps={{$blockScrolling: true}}
@@ -958,6 +920,13 @@ function Byte() {
                                     setOptions={{
                                         printMarginColumn: longLine ? 80 : 10000
                                     }}
+                                /> */}
+                                <Editor 
+                                    language={bytesLang}
+                                    code={code}
+                                    theme={mode}
+                                    onChange={(val, view) => handleEditorChange(val)}
+                                    onCursorChange={(bytePosition, line, column) => setCursorPosition({row: line, column: column})}
                                 />
                                 <TerminalOutput output={output} style={terminalOutputStyle}/>
                             </div>

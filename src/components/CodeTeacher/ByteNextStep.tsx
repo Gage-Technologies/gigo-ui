@@ -127,14 +127,6 @@ export default function ByteNextStep(props: ByteNextStepProps) {
     }
 
     const launchNextSteps = () => {
-        console.log("executing next steps", {
-            byte_id: props.bytesID,
-            byte_description: props.bytesDescription,
-            byte_development_steps: props.bytesDevSteps,
-            code_language: props.bytesLang,
-            code_prefix: props.codePrefix,
-            code_suffix: props.codeSuffix,
-        })
         ctWs.sendWebsocketMessage({
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
             type: CtMessageType.WebSocketMessageTypeByteNextStepsMessageRequest,
@@ -149,7 +141,6 @@ export default function ByteNextStep(props: ByteNextStepProps) {
                 code_suffix: props.codeSuffix,
             }
         } satisfies CtMessage<CtByteNextStepsRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtByteNextStepsResponse>) => {
-            console.log("response message: ", msg)
             if (msg.type !== CtMessageType.WebSocketMessageTypeByteNextStepsMessageResponse) {
                 console.log("failed next steps", msg)
                 return true
