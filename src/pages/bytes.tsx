@@ -306,22 +306,9 @@ function Byte() {
                 setCurrentByteTitle(res["rec_bytes"].name);
 
                 let outlineContent = res["rec_bytes"].outline_content
-                    .replace(/^"|"$/g, '') // Remove leading and trailing quotes
-                    .replace(/\\n/g, "\n"); // Replace escaped newlines with actual newlines
 
-                // Process the outline content
-                outlineContent = outlineContent
-                    .split('\n') // Split the string into lines
-                    .map((line: string) => {
-                        // Remove step number (formatted as "1.", "2.", etc.), trim, and format as a comment
-                        const stepContent = line.replace(/^\d+\.\s*/, '').trim();
-                        return stepContent ? `// ${stepContent}` : '';
-                    })
-                    .filter((line: string) => line) // Remove empty lines
-                    .join('\n'); // Join lines with single newline for spacing
-
-                setInitialCode(outlineContent); // Set the initial formatted content
-                setCode(outlineContent); // Also set the user-editable code
+                setInitialCode(outlineContent);
+                setCode(outlineContent);
 
                 // Set the markdown content for other sections
                 setMarkdown(`### Description\n${res["rec_bytes"].description}\n\n### Development Steps\n${res["rec_bytes"].dev_steps}`);
