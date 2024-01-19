@@ -845,7 +845,14 @@ function Byte() {
                     <div style={mainLayoutStyle}>
                         <div style={combinedSectionStyle}>
                             <div style={markdownSectionStyle}>
-                                <ByteChat />
+                                {bytesDescription !== "" && bytesDevSteps !== "" && id !== undefined && (
+                                    <ByteChat
+                                        byteID={id}
+                                        description={bytesDescription}
+                                        devSteps={bytesDevSteps}
+                                        code={code}
+                                    />
+                                )}
                             </div>
                             <ByteNextStep
                                 open={true}

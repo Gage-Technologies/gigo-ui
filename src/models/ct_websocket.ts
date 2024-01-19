@@ -40,6 +40,11 @@ export enum CtMessageOrigin {
     WebSocketMessageOriginClient
 }
 
+export enum CtByteMessageMessageType {
+    User,
+    Assistant,
+}
+
 export interface CtMessage<T> {
     sequence_id: string;
     type: CtMessageType;
@@ -96,6 +101,70 @@ export interface CtByteSuggestionResponse {
     token: string;
     complete_message: string;
     done: boolean;
+    premium_llm: boolean;
+    free_credit_use: boolean;
+}
+
+export interface CtByteNewOrGetChatRequest {
+    assistant_id: string;
+    byte_id: string;
+    owner_id: string;
+}
+
+export interface CtByteNewOrGetChatResponse {
+    _id: string;
+    assistant_id: string;
+    byte_id: string;
+    owner_id: string;
+    last_message_at: string;
+    message_count: number;
+    thread_count: number;
+    user_message_count: number;
+    assistant_message_count: number;
+    created_at: string;
+}
+
+export interface CtByteUserMessage {
+    byte_id: string;
+    user_message: string;
+    code_content: string;
+}
+
+export interface CtByteAssistantMessage {
+    user_message_id: string;
+    assistant_message_id: string;
+    token: string;
+    complete_message: string;
+    done: boolean;
+    premium_llm: boolean;
+    free_credit_use: boolean;
+}
+
+export interface CtByteChatMessagesRequest {
+    byte_id: string;
+    offset: number;
+    limit: number;
+}
+
+export interface CtByteChatMessagesResponse {
+    messages: CtByteChatMessage[];
+    total_messages: number;
+    total_threads: number;
+    remaining: number;
+    returned: number;
+}
+
+export interface CtByteChatMessage {
+    _id: string;
+    byte_id: string;
+    byte_chat_id: string;
+    assistant_id: string;
+    user_id: string;
+    thread_number: number;
+    message_type: CtByteMessageMessageType;
+    content: string;
+    created_at: Date;
+    message_number: number;
     premium_llm: boolean;
     free_credit_use: boolean;
 }
