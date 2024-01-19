@@ -358,17 +358,7 @@ function Byte() {
             if (res["byte_attempt"] !== undefined && res["byte_attempt"]["content"] !== undefined) {
                 // Apply new line formatting
                 let content = res["byte_attempt"]["content"]
-                    .replace(/^"|"$/g, '') // Remove leading and trailing quotes
-                    .replace(/\\n/g, "\n") // Replace escaped newlines with actual newlines
-                    .split('\n') // Split the string into lines
-                    .map((line: string) => {
-                        // Remove step number (formatted as "1.", "2.", etc.), trim, and format as a comment
-                        const stepContent = line.replace(/^\s*\d+\.\s*/, '').trim(); // Adjusted regex to handle spaces before step number
-                        return stepContent ? `// ${stepContent}` : '';
-                    })
-                    .filter((line: string) => line) // Remove empty lines
-                    .join('\n'); // Join lines with single newline for spacing
-
+                
                 setCode(content);
                 setByteAttemptId(res["byte_attempt"]["_id"]);
             }
