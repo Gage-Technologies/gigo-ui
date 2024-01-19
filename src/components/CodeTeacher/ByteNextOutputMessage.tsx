@@ -21,6 +21,8 @@ import {
 import MarkdownRenderer from "../Markdown/MarkdownRenderer";
 import {Typography} from "@material-ui/core";
 import {Close} from "@material-ui/icons";
+import Lottie from "react-lottie";
+import * as byteSuccess from "../../img/byteSuccess.json"
 
 export type ByteNextOutputMessageProps = {
     open: boolean;
@@ -46,6 +48,7 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
     const [mode, _] = useState<PaletteMode>(userPref === "light" ? "light" : "dark");
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
     const [response, setResponse] = useState<string>("");
+    const [success, setSuccess] = useState<string>("");
     const [state, setState] = useState<State>(State.LOADING);
     const [executingOutputMessage, setExecutingOutputMessage] = useState<boolean>(false)
 
@@ -84,6 +87,7 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
 
     const close = () => {
         setResponse("")
+        setSuccess("")
         setState(State.LOADING)
         props.closeCallback()
     }
@@ -118,14 +122,15 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                 return true
             }
             const p: CtByteNextOutputResponse = msg.payload as CtByteNextOutputResponse;
-            console.log("complete output message: ", p.complete_message)
-            setResponse(p.complete_message)
-            setExecutingOutputMessage(!p.done)
-            if (p.done) {
-                setState(State.COMPLETED)
-                return true
-            }
-            return false
+            console.log("p is: ", p)
+            console.log("complete output message: ", p.success)
+            console.log("Explanation: ", p.explanation)
+            setResponse(p.explanation)
+            setSuccess(p.success)
+            // setSuccess("True")
+            setExecutingOutputMessage(false)
+            setState(State.COMPLETED)
+            return true
         })
     };
 
@@ -212,6 +217,15 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
         return null;
     }
 
+    const byteSuccessOptions = {
+        loop: true,
+        autoplay: true,
+        animationData: byteSuccess,
+        rendererSettings: {
+            preserveAspectRatio: 'xMidYMid slice'
+        }
+    };
+
     return (
         <Popper
             open={props.open}
@@ -229,49 +243,63 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                 },
             ]}
         >
-            <Box
-                sx={{
+            {success === "True" ? (
+                <div style={{
                     display: 'flex',
                     flexDirection: 'row',
-                    alignItems: 'start',
-                    p: 1,
-                    ...({
-                        borderRadius: '10px',
-                        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2);',
-                        ...themeHelpers.frostedGlass,
-                        backgroundColor: 'rgba(19,19,19,0.31)',
-                        maxWidth: props.maxWidth
-                    })
-                }}
-            >
-                {response.length > 0 && (
-                    <Button
-                        variant="text"
-                        color="error"
-                        sx={{
-                            position: "absolute",
-                            right: 10,
-                            top: 10,
-                            borderRadius: "50%",
-                            padding: 1,
-                            minWidth: "0px"
-                        }}
-                        onClick={close}
-                    >
-                        <Close />
-                    </Button>
-                )}
-                <DialogContent
+                    alignItems: 'center',
+                    maxWidth: props.maxWidth
+                }}>
+                    <Lottie options={byteSuccessOptions} speed={.5} direction={-1}
+                            isClickToPauseDisabled={true}/>
+                </div>
+            ) : (
+                <Box
                     sx={{
-                        backgroundColor: 'transparent',
-                        maxHeight: '70vh',
-                        overflow: 'auto',
-                        mt: response.length > 0 ? 2: undefined,
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'start',
+                        p: 1,
+                        ...({
+                            borderRadius: '10px',
+                            boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2);',
+                            ...themeHelpers.frostedGlass,
+                            backgroundColor: 'rgba(19,19,19,0.31)',
+                            maxWidth: props.maxWidth
+                        })
                     }}
                 >
-                    {renderContent()}
-                </DialogContent>
-            </Box>
-        </Popper >
+                    <div>
+                        {response.length > 0 && (
+                            <Button
+                                variant="text"
+                                color="error"
+                                sx={{
+                                    position: "absolute",
+                                    right: 10,
+                                    top: 10,
+                                    borderRadius: "50%",
+                                    padding: 1,
+                                    minWidth: "0px"
+                                }}
+                                onClick={close}
+                            >
+                                <Close/>
+                            </Button>
+                        )}
+                        <DialogContent
+                            sx={{
+                                backgroundColor: 'transparent',
+                                maxHeight: '70vh',
+                                overflow: 'auto',
+                                mt: response.length > 0 ? 2 : undefined,
+                            }}
+                        >
+                            {renderContent()}
+                        </DialogContent>
+                    </div>
+                </Box>
+            )}
+        </Popper>
     );
 }

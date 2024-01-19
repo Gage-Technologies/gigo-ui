@@ -77,9 +77,8 @@ export interface CtByteNextOutputRequest {
 
 export interface CtByteNextOutputResponse {
     assistant_id: string;
-    token: string;
-    complete_message: string;
-    done: boolean;
+    success: string;
+    explanation: string;
     premium_llm: boolean;
     free_credit_use: boolean;
 }

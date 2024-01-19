@@ -237,7 +237,9 @@ function Byte() {
                 })
 
                 setExecutingCode(!done)
-                setOutputPopup(true)
+                if (done && !outputPopup) {
+                    setOutputPopup(true)
+                }
 
                 // we only return true here if we are done since true removes this callback
                 return done
@@ -245,10 +247,6 @@ function Byte() {
         );
     };
 
-
-    useEffect(() => {
-        console.log("Output state updated:", output);
-    }, [output]);
 
     const getRecommendedBytes = async () => {
         let recommendedBytes = await call(
