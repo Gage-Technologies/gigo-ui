@@ -543,8 +543,13 @@ function Byte() {
         flex: 1,
         height: '100%',
         paddingLeft: "20px",
-        width: "60vw",
+        // width: "60vw",
+        width: 0,
         position: "relative"
+    };
+
+    const editorStyle: React.CSSProperties = {
+        height: terminalVisible ? "calc(100% - 200px)" : "100%",
     };
 
     const terminalOutputStyle: React.CSSProperties = {
@@ -556,11 +561,12 @@ function Byte() {
         marginTop: "20px",
         borderRadius: "5px",
         whiteSpace: "pre-wrap",
-        maxHeight: '300px',
-        minHeight: "100px",
+        // maxHeight: '300px',
+        // minHeight: "100px",
+        height: "200px",
         overflowY: 'auto',
         wordWrap: 'break-word',
-        position: "relative"
+        position: "relative",
     };
 
     const titleStyle: React.CSSProperties = {
@@ -882,7 +888,7 @@ function Byte() {
                                 codePrefix={codeBeforeCursor}
                                 codeSuffix={codeAfterCursor}
                             />
-                            <div
+                            <Box
                                 style={editorAndTerminalStyle}
                                 ref={editorRef}
                             >
@@ -906,22 +912,8 @@ function Byte() {
                                         </LoadingButton>
                                     </Tooltip>
                                 )}
-                                {/* <AceEditor
-                                    ref={aceEditorRef}
-                                    mode={bytesLang === "Go" ? "golang" : "python"}
-                                    theme="monokai"
-                                    value={code}
-                                    debounceChangePeriod={0.3} // 1000 ms delay
-                                    onChange={handleEditorChange}
-                                    name="ACE_EDITOR_DIV"
-                                    editorProps={{$blockScrolling: true}}
-                                    style={aceEditorStyle}
-                                    showPrintMargin={true}
-                                    setOptions={{
-                                        printMarginColumn: longLine ? 80 : 10000
-                                    }}
-                                /> */}
                                 <Editor 
+                                    parentStyles={editorStyle}
                                     language={bytesLang}
                                     code={code}
                                     theme={mode}
@@ -929,7 +921,7 @@ function Byte() {
                                     onCursorChange={(bytePosition, line, column) => setCursorPosition({row: line, column: column})}
                                 />
                                 <TerminalOutput output={output} style={terminalOutputStyle}/>
-                            </div>
+                            </Box>
                             <ByteNextOutputMessage
                                 open={outputPopup}
                                 closeCallback={() => {setOutputPopup(false)}}

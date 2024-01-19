@@ -6,9 +6,11 @@ import { go } from '@codemirror/legacy-modes/mode/go';
 import { copilot } from '@uiw/codemirror-theme-copilot';
 import { quietlight } from '@uiw/codemirror-theme-quietlight';
 import useDynamicStyles from "../../hooks/dynamicStyles";
+import { Box } from "@mui/material";
 
 export type EditorProps = {
     language: string;
+    parentStyles: React.CSSProperties;
     wrapperStyles: React.CSSProperties;
     editorStyles: React.CSSProperties;
     gutterStyles: React.CSSProperties;
@@ -67,7 +69,9 @@ function Editor(props: EditorProps) {
     }, [props.onUpdate, props.onCursorChange]);
 
     return (
-        <>
+        <Box
+            style={props.parentStyles}
+        >
             <CodeMirror
                 value={props.code}
                 height="100%"
@@ -77,11 +81,12 @@ function Editor(props: EditorProps) {
                 onChange={onChange}
                 onUpdate={onUpdate}
             />
-        </>
+        </Box>
     )
 }
 
 Editor.defaultProps = {
+    parentStyles: {},
     wrapperStyles: {
         width: '100%',
         height: '100%',
