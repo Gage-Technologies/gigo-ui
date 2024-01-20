@@ -80,7 +80,8 @@ export default function BytesCard(props: IProps) {
             height: props.imageHeight,
             width: props.imageWidth,
             minWidth: 200,
-            backgroundImage: "linear-gradient(45deg, rgba(255,255,255,0) 45%, rgba(0,0,0,1) 91%), url(" + props.bytesThumb + ")",
+            backgroundImage: "url(" + props.bytesThumb + ")",
+            // backgroundImage: "linear-gradient(45deg, rgba(255,255,255,0) 45%, rgba(0,0,0,1) 91%), url(" + props.bytesThumb + ")",
             // objectFit: "fill",
         },
         title: {

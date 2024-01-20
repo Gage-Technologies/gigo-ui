@@ -25,6 +25,7 @@ import { CtByteNextStepsRequest, CtByteNextStepsResponse, CtGenericErrorPayload,
 export type ByteNextStepProps = {
     open: boolean;
     closeCallback: () => void;
+    acceptedCallback: () => void;
     currentCode: string;
     anchorEl: null | HTMLElement; // Add this 
     placement: PopperPlacementType;
@@ -66,21 +67,27 @@ export default function ByteNextStep(props: ByteNextStepProps) {
         @keyframes nextStepsButtonAuraEffect {
         0% {
             box-shadow: 0 0 3px #84E8A2, 0 0 6px #84E8A2;
+            background-color: #84E8A2;
         }
         20% {
             box-shadow: 0 0 3px #29C18C, 0 0 6px #29C18C;
+            background-color: #29C18C;
         }
         40% {
             box-shadow: 0 0 3px #1C8762, 0 0 6px #1C8762;
+            background-color: #1C8762;
         }
         60% {
             box-shadow: 0 0 3px #2A63AC, 0 0 6px #2A63AC;
+            background-color: #2A63AC;
         }
         80% {
             box-shadow: 0 0 3px #3D8EF7, 0 0 6px #3D8EF7;
+            background-color: #3D8EF7;
         }
         100% {
             box-shadow: 0 0 3px #63A4F8, 0 0 6px #63A4F8;
+            background-color: #63A4F8;
         }
         }
     `;
@@ -116,17 +123,21 @@ export default function ByteNextStep(props: ByteNextStepProps) {
         }
     `;
 
-    if (!props.open) {
-        return null;
-    }
-
     const close = () => {
         setResponse("")
         setState(State.WAITING)
         props.closeCallback()
     }
 
-    const launchNextSteps = () => {
+    const launchNextSteps = React.useCallback(() => {
+        console.log('next steps payload: ', {
+            byte_id: props.bytesID,
+            byte_description: props.bytesDescription,
+            byte_development_steps: props.bytesDevSteps,
+            code_language: props.bytesLang,
+            code_prefix: props.codePrefix,
+            code_suffix: props.codeSuffix,
+        })
         ctWs.sendWebsocketMessage({
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
             type: CtMessageType.WebSocketMessageTypeByteNextStepsMessageRequest,
@@ -153,9 +164,9 @@ export default function ByteNextStep(props: ByteNextStepProps) {
             }
             return false
         })
-    }
+    }, [props.bytesID, props.bytesDescription, props.bytesDevSteps, props.bytesLang, props.codePrefix, props.codeSuffix])
 
-    const renderWaiting = () => {
+    const renderWaiting = React.useMemo(() => {
         return (
             <>
                 <Tooltip arrow title="Code Teacher wants to help you with the next step. Click the button to accept the help.">
@@ -163,15 +174,21 @@ export default function ByteNextStep(props: ByteNextStepProps) {
                         variant="outlined"
                         onClick={() => {
                             setState(State.LOADING)
+                            props.acceptedCallback()
                             launchNextSteps()
                         }}
+                        size="small"
+                        sx={{
+                            fontSize: 10,
+                            height: 14,
+                            width: 14,
+                        }}
                     >
-                        <Checklist />
                     </WaitingButton>
                 </Tooltip>
             </>
         )
-    }
+    }, [props.bytesID, props.bytesDescription, props.bytesDevSteps, props.bytesLang, props.codePrefix, props.codeSuffix])
 
     const renderLoading = () => {
         if (response !== "") {
@@ -238,14 +255,19 @@ export default function ByteNextStep(props: ByteNextStepProps) {
     }
 
     const renderContent = () => {
+        console.log("next steps state: ", state)
         switch (state) {
-            case State.WAITING:
-                return renderWaiting();
             case State.LOADING:
                 return renderLoading();
             case State.COMPLETED:
                 return renderCompleted();
+            default:
+                return renderWaiting;
         }
+    }
+
+    if (!props.open) {
+        return null;
     }
 
     return (
@@ -271,6 +293,7 @@ export default function ByteNextStep(props: ByteNextStepProps) {
                     flexDirection: 'row',
                     alignItems: 'start',
                     p: 1,
+                    zIndex: 5,
                     ...(state === State.WAITING ? {
 
                     } : {
@@ -304,7 +327,7 @@ export default function ByteNextStep(props: ByteNextStepProps) {
                         backgroundColor: 'transparent',
                         maxHeight: '70vh',
                         overflow: 'auto',
-                        mt: response.length > 0 ? 2: undefined,
+                        mt: response.length > 0 ? 2 : undefined,
                     }}
                 >
                     {renderContent()}

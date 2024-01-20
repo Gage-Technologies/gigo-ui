@@ -1,5 +1,5 @@
 import * as React from "react";
-import {useEffect, useRef, useState} from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     Container,
     createTheme,
@@ -63,6 +63,8 @@ import { LoadingButton } from "@mui/lab";
 import ByteSuggestions from "../components/CodeTeacher/ByteSuggestions";
 import ByteNextOutputMessage from "../components/CodeTeacher/ByteNextOutputMessage";
 import Editor from "../components/IDE/Editor";
+import chroma from 'chroma-js';
+import SheenPlaceholder from "../components/Loading/SheenPlaceholder";
 
 const Range = ace.require('ace/range').Range;
 
@@ -84,6 +86,109 @@ function Byte() {
     const [mode, _] = useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
 
+    const [terminalVisible, setTerminalVisible] = useState(false);
+
+    const combinedSectionStyle: React.CSSProperties = {
+        display: 'flex',
+        height: '80vh',
+        width: '80vw',
+        marginLeft: '5%',
+        marginRight: 'auto',
+        borderRadius: theme.shape.borderRadius,
+        overflow: 'hidden',
+        boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.2)',
+        border: `1px solid ${theme.palette.grey[300]}`,
+        padding: "10px",
+        backgroundColor: theme.palette.background.default
+    };
+
+    const mainLayoutStyle: React.CSSProperties = {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: '1rem',
+        marginTop: '1rem',
+    };
+
+    // Byte selection menu style
+    const byteSelectionMenuStyle: React.CSSProperties = {
+        width: '20%',
+        maxHeight: '80vh',
+        overflow: 'auto'
+    };
+
+    const containerStyleDefault: React.CSSProperties = {
+        width: '100%',
+        padding: theme.spacing(0),
+        margin: '0',
+        maxWidth: 'none',
+        overflowY: "hidden"
+    };
+
+    const markdownSectionStyle: React.CSSProperties = {
+        flex: 1,
+        minWidth: "450px",
+        maxWidth: "20vw",
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        backgroundColor: 'transparent',
+        borderRadius: theme.shape.borderRadius,
+        overflow: 'hidden',
+    };
+
+    const editorAndTerminalStyle: React.CSSProperties = {
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        height: '100%',
+        paddingLeft: "20px",
+        // width: "60vw",
+        width: 0,
+        position: "relative"
+    };
+
+    const editorStyle: React.CSSProperties = {
+        height: terminalVisible ? "calc(100% - 200px)" : "100%",
+    };
+
+    const terminalOutputStyle: React.CSSProperties = {
+        backgroundColor: "#333",
+        color: "lime",
+        fontFamily: "monospace",
+        fontSize: "0.9rem",
+        padding: "10px",
+        marginTop: "20px",
+        borderRadius: "5px",
+        whiteSpace: "pre-wrap",
+        // maxHeight: '300px',
+        // minHeight: "100px",
+        height: "200px",
+        overflowY: 'auto',
+        wordWrap: 'break-word',
+        position: "relative",
+    };
+
+    const titleStyle: React.CSSProperties = {
+        marginBottom: theme.spacing(2),
+        textAlign: 'center',
+        width: '80vw',
+        marginLeft: '5%',
+    };
+
+    const titlePlaceholderContainerStyle: React.CSSProperties = {
+        display: "flex",
+        padding: theme.spacing(1),
+        marginBottom: theme.spacing(2),
+        alignItems: 'center',
+        width: '80vw',
+        marginLeft: '5%',
+    };
+
+    const titlePlaceholderStyle: React.CSSProperties = {
+        margin: "auto"
+    }
+
     // Define the state and dispatch hook
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -104,18 +209,21 @@ function Byte() {
     const [bytesDescription, setBytesDescription] = useState("");
     const [bytesDevSteps, setBytesDevSteps] = useState("");
     const [bytesLang, setBytesLang] = useState("python");
+    const [bytesColor, setBytesColor] = useState<string | null>(null)
+    const [containerStyle, setContainerSyle] = useState<React.CSSProperties>(containerStyleDefault)
 
     const editorRef = React.useRef(null);
     const aceEditorRef = React.useRef<ReactAce | null>(null);
     const [cursorPosition, setCursorPosition] = useState<{ row: number, column: number } | null>(null)
     const [codeBeforeCursor, setCodeBeforeCursor] = useState("");
     const [codeAfterCursor, setCodeAfterCursor] = useState("");
-    const [terminalVisible, setTerminalVisible] = useState(false);
     const [outputPopup, setOutputPopup] = useState(false);
     const [outputMessage, setOutputMessage] = useState("");
     const [byteAttemptId, setByteAttemptId] = useState("");
     const typingTimerRef = useRef(null);
-    const [suggestionPopup, setSuggestionPopup] = useState(false)
+    const [suggestionPopup, setSuggestionPopup] = useState(false);
+    const [nextStepsPopup, setNextStepsPopup] = useState(false);
+    const [nextStepsActive, setNextStepsActive] = useState(false);
 
     const [executingOutputMessage, setExecutingOutputMessage] = useState<boolean>(false)
     const [executingCode, setExecutingCode] = useState<boolean>(false)
@@ -313,6 +421,7 @@ function Byte() {
                 setBytesDescription(res["rec_bytes"].description);
                 setBytesDevSteps(res["rec_bytes"].dev_steps);
                 setBytesLang(programmingLanguages[res["rec_bytes"].lang]);
+                setBytesColor(res["rec_bytes"].color)
 
                 setWorkspaceCreated(false);
             } else {
@@ -356,7 +465,7 @@ function Byte() {
             if (res["byte_attempt"] !== undefined && res["byte_attempt"]["content"] !== undefined) {
                 // Apply new line formatting
                 let content = res["byte_attempt"]["content"]
-                
+
                 setCode(content);
                 setByteAttemptId(res["byte_attempt"]["_id"]);
             }
@@ -428,6 +537,7 @@ function Byte() {
         //@ts-ignore
         typingTimerRef.current = setTimeout(() => {
             setSuggestionPopup(true);
+            setNextStepsPopup(true);
         }, 15000);
     };
 
@@ -463,92 +573,6 @@ function Byte() {
 
     const handleSelectByte = (byteId: string) => {
         navigate(`/byte/${byteId}`);
-    };
-
-    const combinedSectionStyle: React.CSSProperties = {
-        display: 'flex',
-        height: '80vh',
-        width: '80vw',
-        marginLeft: '5%',
-        marginRight: 'auto',
-        borderRadius: theme.shape.borderRadius,
-        overflow: 'hidden',
-        boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.2)',
-        border: `1px solid ${theme.palette.grey[300]}`,
-        padding: "10px",
-    };
-
-    const mainLayoutStyle: React.CSSProperties = {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        gap: '1rem',
-        marginTop: '1rem'
-    };
-
-    // Byte selection menu style
-    const byteSelectionMenuStyle: React.CSSProperties = {
-        width: '20%',
-        maxHeight: '80vh',
-        overflow: 'auto'
-    };
-
-    const containerStyle: React.CSSProperties = {
-        width: '100%',
-        padding: theme.spacing(0),
-        margin: '0',
-        maxWidth: 'none',
-    };
-
-    const markdownSectionStyle: React.CSSProperties = {
-        flex: 1,
-        minWidth: "450px",
-        maxWidth: "20vw",
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        backgroundColor: 'transparent',
-        borderRadius: theme.shape.borderRadius,
-        overflow: 'hidden',
-    };
-
-    const editorAndTerminalStyle: React.CSSProperties = {
-        display: 'flex',
-        flexDirection: 'column',
-        flex: 1,
-        height: '100%',
-        paddingLeft: "20px",
-        // width: "60vw",
-        width: 0,
-        position: "relative"
-    };
-
-    const editorStyle: React.CSSProperties = {
-        height: terminalVisible ? "calc(100% - 200px)" : "100%",
-    };
-
-    const terminalOutputStyle: React.CSSProperties = {
-        backgroundColor: "#333",
-        color: "lime",
-        fontFamily: "monospace",
-        fontSize: "0.9rem",
-        padding: "10px",
-        marginTop: "20px",
-        borderRadius: "5px",
-        whiteSpace: "pre-wrap",
-        // maxHeight: '300px',
-        // minHeight: "100px",
-        height: "200px",
-        overflowY: 'auto',
-        wordWrap: 'break-word',
-        position: "relative",
-    };
-
-    const titleStyle: React.CSSProperties = {
-        marginBottom: theme.spacing(2),
-        textAlign: 'center',
-        width: '80vw',
-        marginLeft: '5%',
     };
 
     // const sendWebsocketMessageNextOutput = (byteId: string, userCode: string, codeOutput: string) => {
@@ -620,8 +644,9 @@ function Byte() {
     };
 
     const executeCode = () => {
-        if (suggestionPopup){
+        if (suggestionPopup) {
             setSuggestionPopup(false)
+            setNextStepsPopup(true)
         }
         deleteTypingTimer();
         sendExecRequest();
@@ -798,50 +823,41 @@ function Byte() {
 
             return true
         })
-
-        // const functionStartLine = findFunctionStartLine(code, cursorPosition.row);
-        //
-        // console.log("marked")
-        //
-        // console.log("cursorPosition is: ", cursorPosition)
-        // console.log("functionStart: ", functionStartLine)
-        //
-        // // // Add a new marker for the current line
-        // // const newMarker = session.addMarker(new Range(cursorPosition.row, 0, cursorPosition.row, 1), "editorLineHighlighted", "fullLine");
-        // // Add a new marker for the current line
-        // const newMarker = session.addMarker(new Range(functionStartLine, 0, cursorPosition.row, Infinity), "editorLineHighlighted", "fullLine");
-        // //@ts-ignore
-        // setCurrentLineMarker(newMarker);
     }, [code, cursorPosition])
 
-    // useEffect(() => {
-    //     if (!aceEditorRef.current) {
-    //         return;
-    //     }
-    //
-    //     const editor = aceEditorRef.current.editor;
-    //
-    //     // Attach event listener for cursor changes
-    //     editor.session.selection.on('changeCursor', editorMarkCallback);
-    //
-    //     // Cleanup
-    //     return () => {
-    //         editor.session.selection.off('changeCursor', editorMarkCallback);
-    //         if (currentLineMarker) {
-    //             editor.session.removeMarker(currentLineMarker);
-    //         }
-    //     };
-    // }, [aceEditorRef.current]);
+    useEffect(() => {
+        if (bytesColor === null) {
+            setContainerSyle(containerStyleDefault);
+            return;
+        }
 
+        if (containerStyle.background !== undefined)
+            return;
 
-    let minorValues = ["Outline", "Code Teacher"]
+        let s: React.CSSProperties = JSON.parse(JSON.stringify(containerStyleDefault));
+        let color1 = chroma(bytesColor).alpha(0.5).css(); // 60% opacity
+        let color2 = chroma(bytesColor).alpha(0.3).css(); // 30% opacity
+        let color3 = chroma(bytesColor).alpha(0.1).css(); // 10% opacity
+
+        s.background = `linear-gradient(to bottom, ${color1} 0%, ${color2} 20%, ${color3} 40%, transparent 70%)`;
+        setContainerSyle(s);
+    }, [bytesColor]);
+
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
                 <Container maxWidth="xl" style={containerStyle}>
-                    <Typography variant="h4" component="h1" style={titleStyle}>
-                        {currentByteTitle}
-                    </Typography>
+                    {currentByteTitle && currentByteTitle.length > 0 ? (
+                        <Typography variant="h4" component="h1" style={titleStyle}>
+                            {currentByteTitle}
+                        </Typography>
+                    ) : (
+                        <Box sx={titlePlaceholderContainerStyle}>
+                            <Box sx={titlePlaceholderStyle}>
+                                <SheenPlaceholder width="400px" height={"45px"} />
+                            </Box>
+                        </Box>
+                    )}
                     <div style={mainLayoutStyle}>
                         <div style={combinedSectionStyle}>
                             <div style={markdownSectionStyle}>
@@ -855,13 +871,18 @@ function Byte() {
                                 )}
                             </div>
                             <ByteNextStep
-                                open={true}
+                                open={nextStepsPopup}
                                 closeCallback={() => {
+                                    setNextStepsActive(false)
+                                    setNextStepsPopup(false)
+                                }}
+                                acceptedCallback={() => {
+                                    setNextStepsActive(true)
                                 }}
                                 currentCode={code}
                                 anchorEl={editorRef.current}
-                                placement="right-start"
-                                posMods={[0, 40]}
+                                placement={nextStepsActive ? "right-end" : "right-start"}
+                                posMods={nextStepsActive ? [-20, -50] : [0, 10]}
                                 maxWidth="20vw"
                                 bytesID={id || ""}
                                 bytesDescription={bytesDescription}
@@ -894,19 +915,19 @@ function Byte() {
                                         </LoadingButton>
                                     </Tooltip>
                                 )}
-                                <Editor 
+                                <Editor
                                     parentStyles={editorStyle}
                                     language={bytesLang}
                                     code={code}
                                     theme={mode}
                                     onChange={(val, view) => handleEditorChange(val)}
-                                    onCursorChange={(bytePosition, line, column) => setCursorPosition({row: line, column: column})}
+                                    onCursorChange={(bytePosition, line, column) => setCursorPosition({ row: line, column: column })}
                                 />
-                                <TerminalOutput output={output} style={terminalOutputStyle}/>
+                                <TerminalOutput output={output} style={terminalOutputStyle} />
                             </Box>
                             <ByteNextOutputMessage
                                 open={outputPopup}
-                                closeCallback={() => {setOutputPopup(false)}}
+                                closeCallback={() => { setOutputPopup(false) }}
                                 anchorEl={editorRef.current}
                                 placement={"right-start"}
                                 posMods={[0, 40]}
@@ -917,7 +938,7 @@ function Byte() {
                                 maxWidth={"20vw"}
                                 codeOutput={output?.merged || ""}
                             />
-                            <ByteSuggestions 
+                            {/* <ByteSuggestions
                                 open={suggestionPopup}
                                 closeCallback={() => {
                                     setSuggestionPopup(false)
@@ -930,15 +951,15 @@ function Byte() {
                                 byteId={id || ""}
                                 description={bytesDescription}
                                 lang={bytesLang}
-                            />
+                            /> */}
                         </div>
                         <div style={byteSelectionMenuStyle}>
-                            {byteData && <ByteSelectionMenu bytes={byteData} onSelectByte={handleSelectByte}/>}
+                            {byteData && <ByteSelectionMenu bytes={byteData} onSelectByte={handleSelectByte} />}
                         </div>
                     </div>
                 </Container>
             </CssBaseline>
-        </ThemeProvider>
+        </ThemeProvider >
     );
 }
 
