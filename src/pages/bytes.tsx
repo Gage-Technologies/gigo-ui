@@ -380,6 +380,7 @@ function Byte() {
 
                 setExecutingCode(!done)
                 if (done && !outputPopup) {
+                    console.log("trying to set the output popup: ", outputPopup)
                     setOutputPopup(true)
                 }
 

@@ -48,7 +48,7 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
     const [mode, _] = useState<PaletteMode>(userPref === "light" ? "light" : "dark");
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
     const [response, setResponse] = useState<string>("");
-    const [success, setSuccess] = useState<string>("");
+    const [success, setSuccess] = useState<boolean | null>(null);
     const [state, setState] = useState<State>(State.LOADING);
     const [executingOutputMessage, setExecutingOutputMessage] = useState<boolean>(false)
 
@@ -87,12 +87,13 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
 
     const close = () => {
         setResponse("")
-        setSuccess("")
+        setSuccess(null)
         setState(State.LOADING)
         props.closeCallback()
     }
 
     const getOutputMessage = () => {
+        console.log("executingOutputmessage: ", executingOutputMessage)
         if (executingOutputMessage) {
             return
         }
@@ -127,7 +128,7 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
             console.log("Explanation: ", p.explanation)
             setResponse(p.explanation)
             setSuccess(p.success)
-            // setSuccess("True")
+            // setSuccess(true)
             setExecutingOutputMessage(false)
             setState(State.COMPLETED)
             return true
@@ -137,6 +138,7 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
     useEffect(() => {
         if (!props.open)
             return
+        console.log("use effect for output message")
         getOutputMessage()
     }, [props.open])
 
@@ -217,13 +219,21 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
         return null;
     }
 
+    const onAnimationComplete = () => {
+        console.log("here i am on animation complete")
+        setResponse("")
+        setSuccess(null)
+        setState(State.LOADING)
+        props.closeCallback()
+    }
+
     const byteSuccessOptions = {
-        loop: true,
+        loop: false,
         autoplay: true,
         animationData: byteSuccess,
         rendererSettings: {
             preserveAspectRatio: 'xMidYMid slice'
-        }
+        },
     };
 
     return (
@@ -243,14 +253,14 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                 },
             ]}
         >
-            {success === "True" ? (
+            {success ? (
                 <div style={{
                     display: 'flex',
                     flexDirection: 'row',
                     alignItems: 'center',
                     maxWidth: props.maxWidth
                 }}>
-                    <Lottie options={byteSuccessOptions} speed={.5} direction={-1}
+                    <Lottie options={byteSuccessOptions} speed={2} direction={-1}
                             isClickToPauseDisabled={true}/>
                 </div>
             ) : (

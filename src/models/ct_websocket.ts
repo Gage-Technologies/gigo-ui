@@ -82,7 +82,7 @@ export interface CtByteNextOutputRequest {
 
 export interface CtByteNextOutputResponse {
     assistant_id: string;
-    success: string;
+    success: boolean;
     explanation: string;
     premium_llm: boolean;
     free_credit_use: boolean;
