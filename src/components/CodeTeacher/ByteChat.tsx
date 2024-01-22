@@ -472,20 +472,17 @@ export default function ByteChat(props: ByteChatProps) {
     ), [messages])
 
     const textInputMemo = React.useMemo(() => (
-        <>
-            <TextField
-                disabled={disableChat}
-                fullWidth
-                label="Ask Code Teacher!"
-                variant="outlined"
-                value={userMessage}
-                multiline={true}
-                maxRows={5}
-                onChange={(e) => setUserMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-            />
-        </>
-
+        <TextField
+            disabled={disableChat}
+            fullWidth
+            label="Ask Code Teacher!"
+            variant="outlined"
+            value={userMessage}
+            multiline={true}
+            maxRows={5}
+            onChange={(e) => setUserMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+        />
     ), [userMessage, disableChat])
 
     return (
@@ -503,7 +500,9 @@ export default function ByteChat(props: ByteChatProps) {
                 }}
             >
                 {messagesMemo}
-
+                {state === State.LOADING &&
+                    renderBotMessage(response, true, "", false, false)
+                }
             </Box>
             {!isAtBottom && (
                 <Box
