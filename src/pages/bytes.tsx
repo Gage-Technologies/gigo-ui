@@ -66,6 +66,7 @@ import Editor from "../components/IDE/Editor";
 import chroma from 'chroma-js';
 import SheenPlaceholder from "../components/Loading/SheenPlaceholder";
 import { sleep } from "../services/utils";
+import { ViewUpdate } from "@uiw/react-codemirror";
 
 const Range = ace.require('ace/range').Range;
 
@@ -444,15 +445,15 @@ function Byte() {
             if (res && res["rec_bytes"]) {
                 setCurrentByteTitle(res["rec_bytes"].name);
 
-                let outlineContent = res["rec_bytes"].outline_content
+                let outlineContent = res["rec_bytes"].outline_content_medium
 
                 setInitialCode(outlineContent);
                 setCode(outlineContent);
 
                 // Set the markdown content for other sections
-                setMarkdown(`### Description\n${res["rec_bytes"].description}\n\n### Development Steps\n${res["rec_bytes"].dev_steps}`);
-                setBytesDescription(res["rec_bytes"].description);
-                setBytesDevSteps(res["rec_bytes"].dev_steps);
+                setMarkdown(`### Description\n${res["rec_bytes"].description_medium}\n\n### Development Steps\n${res["rec_bytes"].dev_steps_medium}`);
+                setBytesDescription(res["rec_bytes"].description_medium);
+                setBytesDevSteps(res["rec_bytes"].dev_steps_medium);
                 setBytesLang(programmingLanguages[res["rec_bytes"].lang]);
                 setBytesColor(res["rec_bytes"].color)
 
@@ -495,9 +496,9 @@ function Byte() {
                 return;
             }
 
-            if (res["byte_attempt"] !== undefined && res["byte_attempt"]["content"] !== undefined) {
+            if (res["byte_attempt"] !== undefined && res["byte_attempt"]["content_medium"] !== undefined) {
                 // Apply new line formatting
-                let content = res["byte_attempt"]["content"]
+                let content = res["byte_attempt"]["content_medium"]
 
                 setCode(content);
                 setByteAttemptId(res["byte_attempt"]["_id"]);
@@ -595,6 +596,17 @@ function Byte() {
             setIsButtonActive(false);
         }
     };
+
+    // const handleEditorUpdate = (viewUpdate: ViewUpdate) => {
+    //     // Check if the update is due to cursor movement
+    //     if ((viewUpdate.docChanged || viewUpdate.selectionSet)) {
+    //         // retrieve the cursor position
+    //         const cursorPosition = viewUpdate.state.selection.main.head;
+    //         // get the line and column position
+    //         const lineInfo = viewUpdate.state.doc.lineAt(cursorPosition);
+    //         props.onCursorChange(cursorPosition, lineInfo.number-1, cursorPosition - lineInfo.from)
+    //     }
+    // };
 
     const byteImages = [
         "/static/posts/t/1688617436791701504",
@@ -951,6 +963,7 @@ function Byte() {
                                     code={code}
                                     theme={mode}
                                     onChange={(val, view) => handleEditorChange(val)}
+                                    // onUpdate={(update) => handleEditorUpdate(update)}
                                     onCursorChange={(bytePosition, line, column) => setCursorPosition({ row: line, column: column })}
                                 />
                                 <TerminalOutput output={output} style={terminalOutputStyle} />

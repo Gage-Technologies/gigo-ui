@@ -662,7 +662,7 @@ function Home() {
                                                 imageWidth={"13vw"}
                                                 bytesId={project["_id"]}
                                                 bytesTitle={project["name"]}
-                                                bytesDesc={project["description"]}
+                                                bytesDesc={project["description_medium"]}
                                                 bytesThumb={config.rootPath + "/static/bytes/t/" + project["_id"]}
                                                 onClick={() => navigate("/byte/" + project["_id"])}
                                                 role={authState.role}
