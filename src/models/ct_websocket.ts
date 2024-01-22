@@ -127,7 +127,9 @@ export interface CtByteNewOrGetChatResponse {
 export interface CtByteUserMessage {
     byte_id: string;
     user_message: string;
-    code_content: string;
+    code_prefix: string;
+    code_suffix: string;
+    code_language: string;
 }
 
 export interface CtByteAssistantMessage {

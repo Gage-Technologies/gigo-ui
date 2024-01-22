@@ -2,14 +2,14 @@ import {
     Box,
     Button,
     Card,
-    CircularProgress,
+    CircularProgress, createTheme, IconButton, PaletteMode,
     PopperPlacementType,
     styled,
     TextField,
     Tooltip,
     Typography
 } from "@mui/material";
-import React, {useEffect, useLayoutEffect, useState} from "react";
+import React, {useEffect, useLayoutEffect, useRef, useState} from "react";
 import MarkdownRenderer from "../Markdown/MarkdownRenderer";
 import {useGlobalCtWebSocket} from "../../services/ct_websocket";
 import {
@@ -33,15 +33,22 @@ import UserIcon from "../UserIcon";
 import {useAppSelector} from "../../app/hooks";
 import ctIcon from "../../img/codeTeacher/CT-icon.svg"
 import CodeTeacherChatIcon from "./CodeTeacherChatIcon";
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import {getAllTokens} from "../../theme";
 
 export type ByteChatProps = {
     byteID: string;
     description: string;
     devSteps: string;
-    code: string;
+    codePrefix: string;
+    codeSuffix: string;
+    codeLanguage: string;
 };
 
 export default function ByteChat(props: ByteChatProps) {
+    let userPref = localStorage.getItem('theme');
+    const [mode, _] = useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
+    const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
 
     let ctWs = useGlobalCtWebSocket();
     let authState = Object.assign({}, initialAuthState)
@@ -171,7 +178,9 @@ export default function ByteChat(props: ByteChatProps) {
             payload: {
                 byte_id: props.byteID,
                 user_message: userMessage,
-                code_content: props.code
+                code_prefix: props.codePrefix,
+                code_suffix: props.codeSuffix,
+                code_language: props.codeLanguage
             }
         } satisfies CtMessage<CtByteUserMessage>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtByteAssistantMessage>) => {
             if (msg.type !== CtMessageType.WebSocketMessageTypeByteAssistantMessage) {
@@ -425,6 +434,30 @@ export default function ByteChat(props: ByteChatProps) {
         }
     }
 
+    const [isAtBottom, setIsAtBottom] = useState(true);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    const checkScrollPosition = () => {
+        if (!messagesContainerRef.current) return;
+        const isAtBottom = messagesContainerRef.current.scrollHeight - messagesContainerRef.current.scrollTop === messagesContainerRef.current.clientHeight;
+        setIsAtBottom(isAtBottom);
+    };
+
+    useEffect(() => {
+        const messagesContainer = messagesContainerRef.current;
+        if (messagesContainer) {
+            messagesContainer.addEventListener('scroll', checkScrollPosition);
+
+            // Cleanup
+            return () => messagesContainer.removeEventListener('scroll', checkScrollPosition);
+        }
+    }, []);
+
     const messagesMemo = React.useMemo(() => (
         <>
             {messages.map((message: CtByteChatMessage) => (
@@ -434,26 +467,31 @@ export default function ByteChat(props: ByteChatProps) {
                     :
                     renderUserMessage(message.content)
             ))}
+            <div ref={messagesEndRef}/>
         </>
     ), [messages])
 
     const textInputMemo = React.useMemo(() => (
-        <TextField
-            disabled={disableChat}
-            fullWidth
-            label="Ask Code Teacher!"
-            variant="outlined"
-            value={userMessage}
-            multiline={true}
-            maxRows={5}
-            onChange={(e) => setUserMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-        />
+        <>
+            <TextField
+                disabled={disableChat}
+                fullWidth
+                label="Ask Code Teacher!"
+                variant="outlined"
+                value={userMessage}
+                multiline={true}
+                maxRows={5}
+                onChange={(e) => setUserMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+            />
+        </>
+
     ), [userMessage, disableChat])
 
     return (
         <>
             <Box
+                ref={messagesContainerRef}
                 display={"flex"}
                 flexDirection={"column"}
                 sx={{
@@ -461,13 +499,33 @@ export default function ByteChat(props: ByteChatProps) {
                     overflowY: "auto",
                     pt: 2,
                     pb: 2,
-                    marginBottom: 1, // space for the input field and button
+                    marginBottom: 1,
                 }}
             >
                 {messagesMemo}
-                {state === State.LOADING &&
-                    renderBotMessage(response, true, "", false, false)}
+
             </Box>
+            {!isAtBottom && (
+                <Box
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    sx={{mb: 1}}
+                >
+                    <IconButton
+                        onClick={scrollToBottom}
+                        size="small"
+                        sx={{
+                            border: `1px solid ${theme.palette.primary.dark}`,
+                            '&:hover': {
+                                backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                            }
+                        }}
+                    >
+                        <ArrowDownwardIcon/>
+                    </IconButton>
+                </Box>
+            )}
             {textInputMemo}
         </>
     );

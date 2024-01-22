@@ -912,7 +912,9 @@ function Byte() {
                                         byteID={id}
                                         description={bytesDescription}
                                         devSteps={bytesDevSteps}
-                                        code={code}
+                                        codePrefix={codeBeforeCursor}
+                                        codeSuffix={codeAfterCursor}
+                                        codeLanguage={bytesLang}
                                     />
                                 )}
                             </div>
