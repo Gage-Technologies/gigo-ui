@@ -17,7 +17,12 @@ import {
     CtMessageType,
     CtValidationErrorPayload
 } from "../../models/ct_websocket";
-import {initialAuthState} from "../../reducers/auth/auth";
+import {initialAuthState, selectAuthStateThumbnail} from "../../reducers/auth/auth";
+import config from "../../config";
+import UserIcon from "../UserIcon";
+import {useAppSelector} from "../../app/hooks";
+import ctIcon from "../../img/codeTeacher/CT-icon.svg"
+import CodeTeacherChatIcon from "./CodeTeacherChatIcon";
 
 export type ByteChatProps = {
     byteID: string;
@@ -30,6 +35,7 @@ export default function ByteChat(props: ByteChatProps) {
 
     let ctWs = useGlobalCtWebSocket();
     let authState = Object.assign({}, initialAuthState)
+    const thumbnail = useAppSelector(selectAuthStateThumbnail);
 
     enum State {
         WAITING = 'waiting',
@@ -51,7 +57,7 @@ export default function ByteChat(props: ByteChatProps) {
             user_id: authState.id,
             thread_number: 0,
             message_type: CtByteMessageMessageType.Assistant,
-            content: props.description, // place the description and dev steps here
+            content: `Hey! I'm Code Teacher!\n \n${props.description}`, // place the description and dev steps here
             created_at: new Date(0),
             message_number: -1,
             premium_llm: false,
@@ -172,15 +178,18 @@ export default function ByteChat(props: ByteChatProps) {
             // check the messages for a "new-um" message and replace if we find it
             let index = messages.findIndex((x, i) => x._id === "new-um")
             if (index !== -1) {
+                m = JSON.parse(JSON.stringify(m));
                 m[index]._id = p.user_message_id;
                 setMessages(m);
             }
 
             if (p.done) {
+                console.log("completing the state")
                 setDisableChat(false)
                 setState(State.COMPLETED)
 
                 // add the new message
+                m = JSON.parse(JSON.stringify(m));
                 m.push({
                     _id: p.assistant_message_id,
                     byte_id: "",
@@ -292,13 +301,14 @@ export default function ByteChat(props: ByteChatProps) {
     }
 
     const renderUserMessage = (content: string) => {
+        console.log("thumbnail: ", thumbnail)
         return (
             <div
                 style={{
                     display: "flex",
                     flexDirection: "row",
                     justifyContent: "flex-end",
-                    alignItems: "flex-end",
+                    alignItems: "flex-start",
                     paddingBottom: '10px'
                 }}
             >
@@ -306,7 +316,7 @@ export default function ByteChat(props: ByteChatProps) {
                     style={{
                         fontSize: ".75rem",
                         marginLeft: "auto",
-                        marginRight: "10px",
+                        marginRight: "2.5px",
                         marginBottom: "0px",
                         padding: "10px",
                         backgroundColor: "#0842a040",
@@ -316,7 +326,7 @@ export default function ByteChat(props: ByteChatProps) {
                         width: "auto",
                         height: "auto",
                         display: "block",
-                        maxWidth: "90%"
+                        maxWidth: "82%"
                     }}
                 >
                     <MarkdownRenderer
@@ -328,9 +338,22 @@ export default function ByteChat(props: ByteChatProps) {
                         }}
                     />
                 </Card>
+                <UserIcon
+                    userId={authState.id}
+                    userTier={authState.tier}
+                    userThumb={config.rootPath + thumbnail}
+                    size={35}
+                    backgroundName={authState.backgroundName}
+                    backgroundPalette={authState.backgroundColor}
+                    backgroundRender={authState.backgroundRenderInFront}
+                    profileButton={false}
+                    pro={authState.role.toString() === "1"}
+                    mouseMove={false}
+                />
             </div>
         );
-    }
+    };
+
 
     const renderBotMessage = (
         content: string,
@@ -346,14 +369,23 @@ export default function ByteChat(props: ByteChatProps) {
                     display: "flex",
                     flexDirection: "row",
                     justifyContent: "flex-end",
-                    alignItems: "flex-end",
+                    alignItems: "flex-start",
                     paddingBottom: '10px'
                 }}
             >
+
+                <CodeTeacherChatIcon
+                    style={{
+                        marginRight: '10px',
+                        width: '35px',
+                        height: '35px',
+                    }}
+                />
+
                 <Card
                     style={{
                         fontSize: ".75rem",
-                        marginLeft: "10px",
+                        marginLeft: "2.5px",
                         marginRight: "auto",
                         marginBottom: "0px",
                         padding: "10px",
@@ -364,14 +396,15 @@ export default function ByteChat(props: ByteChatProps) {
                         width: "auto",
                         height: "auto",
                         display: "block",
-                        maxWidth: "90%"
+                        maxWidth: "82%"
                     }}
                 >
                     {renderContent(content, loading)}
                 </Card>
             </div>
         );
-    }
+    };
+
 
     const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>) => {
         if (event.key === 'Enter') {
