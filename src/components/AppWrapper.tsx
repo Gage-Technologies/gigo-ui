@@ -114,6 +114,7 @@ import Pro from './Icons/Pro';
 import DevSpaceControls from './DevSpaceControls';
 import { sleep } from '../services/utils';
 import { decodeToken } from 'react-jwt';
+import {clearBytesState} from "../reducers/bytes/bytes";
 
 
 interface IProps {
@@ -426,6 +427,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         dispatch(clearCache())
         dispatch(clearMessageCache())
         dispatch(clearChatState())
+        dispatch(clearBytesState())
     }
 
     const updateToken = async () => {

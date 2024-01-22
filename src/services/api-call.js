@@ -15,6 +15,7 @@ import { clearCache } from "../reducers/pageCache/pageCache";
 import { clearChatState } from "../reducers/chat/chat";
 import { clearMessageCache } from "../reducers/chat/cache";
 import { sleep } from './utils'
+import {clearBytesState} from "../reducers/bytes/bytes";
 
 function constructAuthorizationHeader(rawUsername, rawPassword) {
   let username = rawUsername.toString("base64");
@@ -48,6 +49,7 @@ const clearReducers = async () => {
   store.dispatch(clearCache())
   store.dispatch(clearMessageCache())
   store.dispatch(clearChatState())
+  store.dispatch(clearBytesState())
   console.log("reducers clearead")
 }
 

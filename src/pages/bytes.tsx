@@ -67,6 +67,9 @@ import chroma from 'chroma-js';
 import SheenPlaceholder from "../components/Loading/SheenPlaceholder";
 import { sleep } from "../services/utils";
 import { ViewUpdate } from "@uiw/react-codemirror";
+import DifficultyAdjuster from "../components/ByteDifficulty";
+import {selectAuthState, updateAuthState} from "../reducers/auth/auth";
+import {initialBytesStateUpdate, selectBytesState, updateBytesState} from "../reducers/bytes/bytes";
 
 const Range = ace.require('ace/range').Range;
 
@@ -83,10 +86,44 @@ interface OutputState {
     mergedLines: MergedOutputRow[];
 }
 
+interface BytesData {
+    _id: string;
+    name: string;
+    lang: number;
+    color: string;
+    published: boolean;
+
+    description_easy: string;
+    outline_content_easy: string;
+    dev_steps_easy: string;
+
+    description_medium: string;
+    outline_content_medium: string;
+    dev_steps_medium: string;
+
+    description_hard: string;
+    outline_content_hard: string;
+    dev_steps_hard: string;
+}
+
+interface ByteAttempt {
+    _id: string;
+    byte_id: string;
+    author_id: string;
+    content_easy: string;
+    content_medium: string;
+    content_hard: string;
+    modified: boolean;
+}
+
+
 function Byte() {
     let userPref = localStorage.getItem('theme');
     const [mode, _] = useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
+
+    const authState = useAppSelector(selectAuthState);
+    const bytesState = useAppSelector(selectBytesState)
 
     const [terminalVisible, setTerminalVisible] = useState(false);
 
@@ -171,20 +208,32 @@ function Byte() {
         position: "relative",
     };
 
+    const difficultyAdjusterStyle: React.CSSProperties = {
+        width: "fit-content",
+        marginLeft: "5%"
+    };
+
     const titleStyle: React.CSSProperties = {
-        marginBottom: theme.spacing(2),
         textAlign: 'center',
-        width: '80vw',
-        marginLeft: '5%',
+        marginTop: "14px",
+        marginBottom: "2px",
+        width: "calc(80vw - 164px)",
+    };
+
+    const topContainerStyle: React.CSSProperties = {
+        display: 'flex',
+        alignItems: 'center', // Align items vertically in the center
+        justifyContent: 'flex-start', // Align the DifficultyAdjuster to the left
+        gap: '0rem', // Add some space between the adjuster and the title
     };
 
     const titlePlaceholderContainerStyle: React.CSSProperties = {
         display: "flex",
         padding: theme.spacing(1),
-        marginBottom: theme.spacing(2),
+        marginTop: "14px",
+        marginBottom: "2px",
         alignItems: 'center',
-        width: '80vw',
-        marginLeft: '5%',
+        width: "calc(80vw - 164px)",
     };
 
     const titlePlaceholderStyle: React.CSSProperties = {
@@ -196,7 +245,8 @@ function Byte() {
     const navigate = useNavigate();
 
     // Define the state for your data and loading state
-    const [byteData, setByteData] = useState(null);
+    const [byteData, setByteData] = useState<BytesData | null>(null);
+    const [recommendedBytes, setRecommendedBytes] = useState(null);
     const [loading, setLoading] = useState(true);
     const [initialCode, setInitialCode] = useState("// Write your code here...");
     const [code, setCode] = useState("// Write your code here...");
@@ -206,12 +256,7 @@ function Byte() {
 
     const [output, setOutput] = useState<OutputState | null>(null);
 
-    const [currentByteTitle, setCurrentByteTitle] = useState("");
     const [workspaceCreated, setWorkspaceCreated] = useState(false);
-    const [bytesDescription, setBytesDescription] = useState("");
-    const [bytesDevSteps, setBytesDevSteps] = useState("");
-    const [bytesLang, setBytesLang] = useState("python");
-    const [bytesColor, setBytesColor] = useState<string | null>(null)
     const [containerStyle, setContainerSyle] = useState<React.CSSProperties>(containerStyleDefault)
 
     const editorRef = React.useRef(null);
@@ -222,6 +267,9 @@ function Byte() {
     const [outputPopup, setOutputPopup] = useState(false);
     const [outputMessage, setOutputMessage] = useState("");
     const [byteAttemptId, setByteAttemptId] = useState("");
+    const [easyCode, setEasyCode] = useState("");
+    const [mediumCode, setMediumCode] = useState("");
+    const [hardCode, setHardCode] = useState("");
     const typingTimerRef = useRef(null);
     const [suggestionPopup, setSuggestionPopup] = useState(false);
     const [nextStepsPopup, setNextStepsPopup] = useState(false);
@@ -237,7 +285,28 @@ function Byte() {
 
     let globalWs = useGlobalWebSocket();
 
-    const [markdown, setMarkdown] = useState("");
+    const determineDifficulty = React.useCallback(() => {
+        if (bytesState.initialized) {
+            return bytesState.byteDifficulty
+        }
+        if (authState.tier < 3) {
+            return 0
+        }
+        if (authState.tier < 6) {
+            return 1
+        }
+        return 2
+    }, [bytesState.byteDifficulty])
+
+    const difficultyToString = (difficulty: number): string => {
+        if (difficulty === 0) {
+            return "easy"
+        }
+        if (difficulty === 1) {
+            return "medium"
+        }
+        return "hard"
+    }
 
     const byteWebSocketPing = () => {
         const pingMessage: WsMessage<BytesLivePingRequest> = {
@@ -262,7 +331,8 @@ function Byte() {
             type: WsMessageType.ByteUpdateCode,
             payload: {
                 byte_attempt_id: byteAttemptId,
-                content: newCode
+                content: newCode,
+                content_difficulty: bytesState ? bytesState.byteDifficulty : 0
             }
         };
 
@@ -291,7 +361,7 @@ function Byte() {
             payload: {
                 byte_attempt_id: byteAttemptId,
                 payload: {
-                    lang: programmingLanguages.indexOf(bytesLang),
+                    lang: byteData ? byteData.lang : 5,
                     code: code
                 }
             }
@@ -423,7 +493,7 @@ function Byte() {
                 id: byte._id,
                 bytesThumb: byteImages[Math.floor(Math.random() * byteImages.length)]
             }));
-            setByteData(enhancedBytes);
+            setRecommendedBytes(enhancedBytes);
         } else {
             swal("No Bytes Found", "No recommended bytes found.");
         }
@@ -444,20 +514,11 @@ function Byte() {
             const [res] = await Promise.all([response]);
 
             if (res && res["rec_bytes"]) {
-                setCurrentByteTitle(res["rec_bytes"].name);
-
-                let outlineContent = res["rec_bytes"].outline_content_medium
-
+                let outlineContent = res["rec_bytes"][`outline_content_${difficultyToString(determineDifficulty())}`]
                 setInitialCode(outlineContent);
                 setCode(outlineContent);
 
-                // Set the markdown content for other sections
-                setMarkdown(`### Description\n${res["rec_bytes"].description_medium}\n\n### Development Steps\n${res["rec_bytes"].dev_steps_medium}`);
-                setBytesDescription(res["rec_bytes"].description_medium);
-                setBytesDevSteps(res["rec_bytes"].dev_steps_medium);
-                setBytesLang(programmingLanguages[res["rec_bytes"].lang]);
-                setBytesColor(res["rec_bytes"].color)
-
+                setByteData(res["rec_bytes"])
                 setWorkspaceCreated(false);
             } else {
                 swal("Byte Not Found", "The requested byte could not be found.");
@@ -497,11 +558,14 @@ function Byte() {
                 return;
             }
 
-            if (res["byte_attempt"] !== undefined && res["byte_attempt"]["content_medium"] !== undefined) {
+            if (res["byte_attempt"] !== undefined) {
                 // Apply new line formatting
                 let content = res["byte_attempt"]["content_medium"]
 
-                setCode(content);
+                setEasyCode(res["byte_attempt"]["content_easy"])
+                setMediumCode(res["byte_attempt"]["content_medium"])
+                setHardCode(res["byte_attempt"]["content_hard"])
+                setCode(res["byte_attempt"][`content_${difficultyToString(determineDifficulty())}`]);
                 setByteAttemptId(res["byte_attempt"]["_id"]);
             }
         } catch (error) {
@@ -577,10 +641,36 @@ function Byte() {
     };
 
 
+    useEffect(() => {
+        switch (bytesState.byteDifficulty) {
+            case 0:
+                setCode(easyCode);
+                break
+            case 1:
+                setCode(mediumCode);
+                break
+            case 2:
+                setCode(hardCode)
+                break
+        }
+    }, [bytesState.byteDifficulty])
+
+
     // Handle changes in the editor and activate the button
     const handleEditorChange = (newCode: string) => {
         // Update the code state with the new content
         setCode(newCode);
+        switch (bytesState.byteDifficulty) {
+            case 0:
+                setEasyCode(newCode);
+                break
+            case 1:
+                setMediumCode(newCode);
+                break
+            case 2:
+                setHardCode(newCode)
+                break
+        }
         startTypingTimer();
         if (newCode && newCode !== "// Write your code here..." && newCode !== initialCode) {
             setIsButtonActive(true);
@@ -841,7 +931,7 @@ function Byte() {
             origin: CtMessageOrigin.WebSocketMessageOriginClient,
             created_at: Date.now(),
             payload: {
-                relative_path: "main." + (bytesLang === "Go" ? "go" : "py"),
+                relative_path: "main." + (programmingLanguages[byteData ? byteData.lang : 5] === "Go" ? "go" : "py"),
                 content: code
             }
         } satisfies CtMessage<CtParseFileRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtParseFileResponse>): boolean => {
@@ -872,7 +962,7 @@ function Byte() {
     }, [code, cursorPosition])
 
     useEffect(() => {
-        if (bytesColor === null) {
+        if (byteData === null) {
             setContainerSyle(containerStyleDefault);
             return;
         }
@@ -881,40 +971,62 @@ function Byte() {
             return;
 
         let s: React.CSSProperties = JSON.parse(JSON.stringify(containerStyleDefault));
-        let color1 = chroma(bytesColor).alpha(0.5).css(); // 60% opacity
-        let color2 = chroma(bytesColor).alpha(0.3).css(); // 30% opacity
-        let color3 = chroma(bytesColor).alpha(0.1).css(); // 10% opacity
+        let color1 = chroma(byteData.color).alpha(0.5).css(); // 60% opacity
+        let color2 = chroma(byteData.color).alpha(0.3).css(); // 30% opacity
+        let color3 = chroma(byteData.color).alpha(0.1).css(); // 10% opacity
 
         s.background = `linear-gradient(to bottom, ${color1} 0%, ${color2} 20%, ${color3} 40%, transparent 70%)`;
         setContainerSyle(s);
-    }, [bytesColor]);
+    }, [byteData]);
 
+
+    const updateDifficulty = (difficulty: number) => {
+        // copy the existing state
+        let state = Object.assign({}, initialBytesStateUpdate)
+        // update the state
+        state.initialized = true
+        state.byteDifficulty = difficulty
+        dispatch(updateBytesState(state))
+    }
+
+    console.log("byte difficulty update: ", determineDifficulty())
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
                 <Container maxWidth="xl" style={containerStyle}>
-                    {currentByteTitle && currentByteTitle.length > 0 ? (
-                        <Typography variant="h4" component="h1" style={titleStyle}>
-                            {currentByteTitle}
-                        </Typography>
-                    ) : (
-                        <Box sx={titlePlaceholderContainerStyle}>
-                            <Box sx={titlePlaceholderStyle}>
-                                <SheenPlaceholder width="400px" height={"45px"} />
-                            </Box>
+                    <Box sx={topContainerStyle}>
+                        <Box sx={difficultyAdjusterStyle}>
+                            <DifficultyAdjuster
+                                difficulty={determineDifficulty()}
+                                onChange={updateDifficulty}
+                            />
                         </Box>
-                    )}
+
+                        {byteData ? (
+                            <Typography variant="h4" component="h1" style={titleStyle}>
+                                {byteData.name}
+                            </Typography>
+                        ) : (
+                            <Box sx={titlePlaceholderContainerStyle}>
+                                <Box sx={titlePlaceholderStyle}>
+                                    <SheenPlaceholder width="400px" height={"45px"} />
+                                </Box>
+                            </Box>
+                        )}
+                    </Box>
                     <div style={mainLayoutStyle}>
                         <div style={combinedSectionStyle}>
                             <div style={markdownSectionStyle}>
-                                {bytesDescription !== "" && bytesDevSteps !== "" && id !== undefined && (
+                                {byteData && id !== undefined && (
                                     <ByteChat
                                         byteID={id}
-                                        description={bytesDescription}
-                                        devSteps={bytesDevSteps}
+                                        // @ts-ignore
+                                        description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
+                                        // @ts-ignore
+                                        devSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
                                         codePrefix={codeBeforeCursor}
                                         codeSuffix={codeAfterCursor}
-                                        codeLanguage={bytesLang}
+                                        codeLanguage={programmingLanguages[byteData ? byteData.lang : 5]}
                                     />
                                 )}
                             </div>
@@ -930,9 +1042,11 @@ function Byte() {
                                 currentCode={code}
                                 maxWidth="20vw"
                                 bytesID={id || ""}
-                                bytesDescription={bytesDescription}
-                                bytesDevSteps={bytesDevSteps}
-                                bytesLang={bytesLang}
+                                // @ts-ignore
+                                bytesDescription={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
+                                // @ts-ignore
+                                bytesDevSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
+                                bytesLang={programmingLanguages[byteData ? byteData.lang : 5]}
                                 codePrefix={codeBeforeCursor}
                                 codeSuffix={codeAfterCursor}
                             />
@@ -962,7 +1076,7 @@ function Byte() {
                                 )}
                                 <Editor
                                     parentStyles={editorStyle}
-                                    language={bytesLang}
+                                    language={programmingLanguages[byteData ? byteData.lang : 5]}
                                     code={code}
                                     theme={mode}
                                     onChange={(val, view) => handleEditorChange(val)}
@@ -977,10 +1091,11 @@ function Byte() {
                                 anchorEl={editorRef.current}
                                 placement={"right-start"}
                                 posMods={[0, 40]}
-                                lang={bytesLang}
+                                lang={programmingLanguages[byteData ? byteData.lang : 5]}
                                 code={code}
                                 byteId={id || ""}
-                                description={bytesDescription}
+                                // @ts-ignore
+                                description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
                                 maxWidth={"20vw"}
                                 codeOutput={output?.merged || ""}
                             />
@@ -1000,7 +1115,7 @@ function Byte() {
                             /> */}
                         </div>
                         <div style={byteSelectionMenuStyle}>
-                            {byteData && <ByteSelectionMenu bytes={byteData} onSelectByte={handleSelectByte} />}
+                            {recommendedBytes && <ByteSelectionMenu bytes={recommendedBytes} onSelectByte={handleSelectByte} />}
                         </div>
                     </div>
                 </Container>

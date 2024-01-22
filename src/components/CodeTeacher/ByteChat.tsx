@@ -109,6 +109,15 @@ export default function ByteChat(props: ByteChatProps) {
     }, []);
 
     useEffect(() => {
+        let m: CtByteChatMessage[] = JSON.parse(JSON.stringify(messages))
+        let idx = m.findIndex(x => x._id === "init")
+        if (idx !== undefined) {
+            m[idx].content = `Hey! I'm Code Teacher!\n \n${props.description}`
+            setMessages(m)
+        }
+    }, [props.description]);
+
+    useEffect(() => {
         if (chatId === "")
             return
         ctWs.sendWebsocketMessage({

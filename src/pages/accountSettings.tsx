@@ -56,6 +56,7 @@ import { clearChatState } from "../reducers/chat/chat";
 import StarIcon from '@mui/icons-material/Star';
 import stripeWhite from '../img/powered-stripe-white.svg'
 import stripeBlack from '../img/powered-stripe-black.svg'
+import {clearBytesState} from "../reducers/bytes/bytes";
 
 function AccountSettings() {
 
@@ -627,6 +628,7 @@ function AccountSettings() {
         dispatch(clearCache())
         dispatch(clearMessageCache())
         dispatch(clearChatState())
+        dispatch(clearBytesState())
     }
 
     const deleteUserAccount = async () => {
