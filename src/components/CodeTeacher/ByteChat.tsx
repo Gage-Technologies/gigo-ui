@@ -1,4 +1,14 @@
-import {Box, Button, Card, CircularProgress, PopperPlacementType, styled, TextField, Tooltip} from "@mui/material";
+import {
+    Box,
+    Button,
+    Card,
+    CircularProgress,
+    PopperPlacementType,
+    styled,
+    TextField,
+    Tooltip,
+    Typography
+} from "@mui/material";
 import React, {useEffect, useLayoutEffect, useState} from "react";
 import MarkdownRenderer from "../Markdown/MarkdownRenderer";
 import {useGlobalCtWebSocket} from "../../services/ct_websocket";
@@ -77,14 +87,12 @@ export default function ByteChat(props: ByteChatProps) {
                 owner_id: authState.id // get from page like usual
             }
         } satisfies CtMessage<CtByteNewOrGetChatRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtByteNewOrGetChatResponse>) => {
-            console.log("response message: ", msg)
             if (msg.type !== CtMessageType.WebSocketMessageTypeNewByteChatOrGetResponse) {
-                console.log("failed next steps", msg)
+                console.log("failed launching chat", msg)
                 return true
             }
             const p: CtByteNewOrGetChatResponse = msg.payload as CtByteNewOrGetChatResponse;
             setChatId(p._id)
-            console.log("chat_id: ", chatId)
             return true
         })
     }
@@ -107,9 +115,8 @@ export default function ByteChat(props: ByteChatProps) {
                 limit: 100
             }
         } satisfies CtMessage<CtByteChatMessagesRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtByteChatMessagesResponse>) => {
-            console.log("response message: ", msg)
             if (msg.type !== CtMessageType.WebSocketMessageTypeGetByteChatMessageResponse) {
-                console.log("failed next steps", msg)
+                console.log("failed getting chat messages", msg)
                 return true
             }
             const p: CtByteChatMessagesResponse = msg.payload as CtByteChatMessagesResponse;
@@ -167,9 +174,8 @@ export default function ByteChat(props: ByteChatProps) {
                 code_content: props.code
             }
         } satisfies CtMessage<CtByteUserMessage>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtByteAssistantMessage>) => {
-            console.log("chat response message: ", msg)
             if (msg.type !== CtMessageType.WebSocketMessageTypeByteAssistantMessage) {
-                console.log("failed next steps", msg)
+                console.log("failed sending user chat", msg)
                 return true
             }
             const p: CtByteAssistantMessage = msg.payload as CtByteAssistantMessage;
@@ -184,7 +190,6 @@ export default function ByteChat(props: ByteChatProps) {
             }
 
             if (p.done) {
-                console.log("completing the state")
                 setDisableChat(false)
                 setState(State.COMPLETED)
 
@@ -252,6 +257,9 @@ export default function ByteChat(props: ByteChatProps) {
                     m: 1,
                 }}
             />
+            {/*<Button size={'small'} color={"error"}>*/}
+            {/*    Stop Generating*/}
+            {/*</Button>*/}
         </Box>
     ), [])
 
@@ -301,7 +309,6 @@ export default function ByteChat(props: ByteChatProps) {
     }
 
     const renderUserMessage = (content: string) => {
-        console.log("thumbnail: ", thumbnail)
         return (
             <div
                 style={{

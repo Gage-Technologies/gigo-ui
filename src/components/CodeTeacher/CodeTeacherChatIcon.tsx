@@ -3,6 +3,7 @@ import Popover from '@mui/material/Popover';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button'; // Assuming you want to use a button for closing the Popover
 import CTIcon from '../../img/codeTeacher/CT-icon.svg';
+import {Box} from "@mui/material";
 
 function CodeTeacherChatIcon(props: any) {
     const [anchorEl, setAnchorEl] = useState(null);
@@ -39,11 +40,27 @@ function CodeTeacherChatIcon(props: any) {
                     vertical: 'top',
                     horizontal: 'left',
                 }}
+                sx={{
+                    transform: 'translateY(-40px) translateX(10px)',
+                }}
             >
-                <Typography sx={{ p: 2 }}>
-                    I am Code Teacher, a programming expert and educator dedicated to helping developers improve their coding skills and understand their code better.
-                </Typography>
-                <Button onClick={handleClose}>Close</Button>
+                <Box sx={{ p: 2, maxWidth: 240, background: 'linear-gradient(0deg, rgba(34,117,85,1) 30%, rgba(30,81,135,1) 90%)' }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', pb: 2 }}>
+                        <img alt="Code Teacher" src={CTIcon} style={{ width: 80, height: 80}} />
+                        <Typography variant="h5">Code Teacher</Typography>
+                    </Box>
+                    <Typography variant="body2" paragraph>
+                        I am Code Teacher, a programming expert and educator dedicated to helping developers improve their coding skills and understand their code better.
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', pb: 2 }}>
+                        <Typography variant="h6">
+                            Want the best features?
+                        </Typography>
+                        <Button variant="contained" color="primary" fullWidth href={"/premium"}>
+                            Get Pro
+                        </Button>
+                    </Box>
+                </Box>
             </Popover>
         </div>
     );
