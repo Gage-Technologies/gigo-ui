@@ -263,9 +263,9 @@ function Home() {
 
             if (
                 (res === undefined || res["projects"] === undefined ||
-                    res2 === undefined || res["projects"] === undefined ||
-                    res3 === undefined || res["rec_bytes"] === undefined) ||
-                res4 === undefined || res["projects"] === undefined && loggedIn
+                    res2 === undefined || res2["projects"] === undefined ||
+                    res3 === undefined || res3["rec_bytes"] === undefined) ||
+                res4 === undefined || res4["projects"] === undefined && loggedIn
             ) {
                 swal("There has been an issue loading data. Please try again later.")
             }

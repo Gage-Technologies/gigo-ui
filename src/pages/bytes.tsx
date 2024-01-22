@@ -30,7 +30,7 @@ import ByteSelectionMenu from "../components/ByteSelectionMenu";
 import config from "../config";
 import { useParams } from "react-router";
 import { useGlobalWebSocket } from "../services/websocket";
-import { WsMessage, WsMessageType } from "../models/websocket";
+import { WsGenericErrorPayload, WsMessage, WsMessageType } from "../models/websocket";
 import {
     AgentWsRequestMessage, BytesLivePingRequest,
     ByteUpdateCodeRequest,
@@ -65,6 +65,7 @@ import ByteNextOutputMessage from "../components/CodeTeacher/ByteNextOutputMessa
 import Editor from "../components/IDE/Editor";
 import chroma from 'chroma-js';
 import SheenPlaceholder from "../components/Loading/SheenPlaceholder";
+import { sleep } from "../services/utils";
 
 const Range = ace.require('ace/range').Range;
 
@@ -280,7 +281,7 @@ function Byte() {
         };
     }, [byteAttemptId]);
 
-    const sendExecRequest = () => {
+    const sendExecRequest = (retryCount: number = 0) => {
         console.log("sendExecRequest triggered");
 
         const message = {
@@ -312,9 +313,41 @@ function Byte() {
             (msg: WsMessage<any>): boolean => {
                 console.log("Received message:", msg);
 
-                if (msg.payload.type !== WsMessageType.AgentExecResponse) {
-                    console.log("error: ", msg.payload);
-                    //return true;
+                if (msg.type !== WsMessageType.AgentExecResponse) {
+                    if (msg.type === WsMessageType.GenericError) {
+                        const payload = msg.payload as WsGenericErrorPayload;
+                        console.log("generic error: ", msg.payload.error)
+                        if (payload.error === "workspace is not active") {
+                            if (retryCount >= 20) {
+                                setOutput({
+                                    stdout: [],
+                                    stderr: [{
+                                        timestamp: Date.now() * 1000,
+                                        content: "Failed to connect to DevSpace"
+                                    }],
+                                    merged: "Failed to connect to DevSpace",
+                                    mergedLines: [{
+                                        error: true,
+                                        timestamp: Date.now() * 1000,
+                                        content: "Failed to connect to DevSpace",
+                                    }],
+                                })
+                
+                                setExecutingCode(false)
+                                return true
+                            }
+                            
+                            console.log("triggering retry")
+                            // wait 1s and try again
+                            sleep(1000).then(() => {
+                                console.log("executing retry")
+                                sendExecRequest(retryCount + 1)
+                            })
+                            return true
+                        }
+                    }
+                    console.log("error: ", msg);
+                    return true;
                 }
 
                 const payload = msg.payload as ExecResponsePayload;

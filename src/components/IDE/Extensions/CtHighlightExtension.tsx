@@ -10,7 +10,10 @@ const ctTextHighlightMark = Decoration.mark({ class: "cm-selection-highlight" })
 export const ctTextHighlightTheme = EditorView.baseTheme({
     ".cm-selection-highlight": {
         background: "#29C18C",
-        padding: "4px",
+        paddingRight: "4px",
+        paddingLeft: "4px",
+        paddingTop: "2px",
+        paddingBottom: "2px",
         borderRadius: "10px",
         animation: `selection-highlight-anim 5s infinite`,
     }
