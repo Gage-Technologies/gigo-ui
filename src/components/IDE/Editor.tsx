@@ -1,5 +1,5 @@
 import React from "react";
-import CodeMirror, { ViewUpdate, Text } from '@uiw/react-codemirror';
+import CodeMirror, { ViewUpdate, Text, ReactCodeMirrorRef } from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';
 import { python } from '@codemirror/lang-python';
 import { go } from '@codemirror/legacy-modes/mode/go';
@@ -7,6 +7,9 @@ import { copilot } from '@uiw/codemirror-theme-copilot';
 import { quietlight } from '@uiw/codemirror-theme-quietlight';
 import useDynamicStyles from "../../hooks/dynamicStyles";
 import { Box } from "@mui/material";
+import { indentUnit } from '@codemirror/language';
+import { autocompleteExtension } from "./Extensions/ACTesting";
+import { ctTextHighlightExtension, ctTextHighlightTheme, highlightTesterKeymap } from "./Extensions/CtHighlightExtension";
 
 export type EditorProps = {
     language: string;
@@ -25,6 +28,8 @@ function Editor(props: EditorProps) {
     useDynamicStyles('custom-cm-editor-style', ".cm-editor", props.editorStyles);
     useDynamicStyles('custom-cm-gutters-style', ".cm-gutters", props.gutterStyles);
 
+    const editorRef = React.useRef<ReactCodeMirrorRef>(null);
+
     const selectLang = () => {
         switch (props.language.toLowerCase()) {
             case "go":
@@ -39,7 +44,14 @@ function Editor(props: EditorProps) {
     }
 
     const getExtensions = () => {
-        let exts = [];
+        let exts = [
+            // this indents with 4 spaces
+            indentUnit.of("    "),
+            // autocompleteExtension,
+            ctTextHighlightExtension,
+            ctTextHighlightTheme,
+            highlightTesterKeymap
+        ];
         let lang = selectLang();
         if (lang) {
             exts.push(lang)
@@ -73,6 +85,7 @@ function Editor(props: EditorProps) {
             style={props.parentStyles}
         >
             <CodeMirror
+                ref={editorRef}
                 value={props.code}
                 height="100%"
                 theme={props.theme.toLowerCase() === 'light' ? quietlight : copilot}

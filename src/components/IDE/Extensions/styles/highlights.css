@@ -1,0 +1,20 @@
+@keyframes selection-highlight-anim {
+    0% {
+        background: #84E8A240;
+    }
+    20% {
+        background: #29C18C40;
+    }
+    40% {
+        background: #1C876240;
+    }
+    60% {
+        background: #2A63AC40;
+    }
+    80% {
+        background: #3D8EF740;
+    }
+    100% {
+        background: #63A4F840;
+    }
+}

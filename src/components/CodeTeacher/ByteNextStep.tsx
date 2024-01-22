@@ -27,9 +27,6 @@ export type ByteNextStepProps = {
     closeCallback: () => void;
     acceptedCallback: () => void;
     currentCode: string;
-    anchorEl: null | HTMLElement; // Add this 
-    placement: PopperPlacementType;
-    posMods: number[];
     maxWidth: string;
     bytesID: string;
     bytesDescription: string;
@@ -190,12 +187,24 @@ export default function ByteNextStep(props: ByteNextStepProps) {
         )
     }, [props.bytesID, props.bytesDescription, props.bytesDevSteps, props.bytesLang, props.codePrefix, props.codeSuffix])
 
+    const loadingAnim = React.useMemo(() => (
+        <Box sx={{ width: "100%", height: "fit-content" }}>
+            <AnimCircularProgress
+                size={16}
+                sx={{
+                    float: 'right',
+                    m: 1,
+                }}
+            />
+        </Box>
+    ), [])
+
     const renderLoading = () => {
         if (response !== "") {
             console.log("response\n", response)
             return (
                 <Box
-                    display={"block"}
+                    display={"box"}
                 >
                     <MarkdownRenderer
                         markdown={response}
@@ -205,16 +214,7 @@ export default function ByteNextStep(props: ByteNextStepProps) {
                             padding: '0px',
                         }}
                     />
-                    <Box sx={{ width: "100%", height: "fit-content" }}>
-
-                        <AnimCircularProgress
-                            size={16}
-                            sx={{
-                                float: 'right',
-                                m: 1,
-                            }}
-                        />
-                    </Box>
+                    {loadingAnim}
                 </Box>
             )
         }
@@ -271,68 +271,53 @@ export default function ByteNextStep(props: ByteNextStepProps) {
     }
 
     return (
-        <Popper
-            open={props.open}
-            anchorEl={props.anchorEl}
-            placement={props.placement}
+        <Box
             sx={{
-                backgroundColor: "transparent"
-            }}
-            modifiers={[
-                {
-                    name: 'offset',
-                    options: {
-                        offset: props.posMods, // x, y offset
-                    },
-                },
-            ]}
-        >
-            <Box
-                sx={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'start',
-                    p: 1,
-                    zIndex: 5,
-                    ...(state === State.WAITING ? {
+                position: "absolute",
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'start',
+                p: 1,
+                zIndex: 5,
+                right: "15vw",
+                ...(state === State.WAITING ? {
 
-                    } : {
-                        borderRadius: '10px',
-                        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2);',
-                        ...themeHelpers.frostedGlass,
-                        backgroundColor: 'rgba(19,19,19,0.31)',
-                        maxWidth: props.maxWidth
-                    })
+                } : {
+                    borderRadius: '10px',
+                    boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2);',
+                    ...themeHelpers.frostedGlass,
+                    backgroundColor: 'rgba(19,19,19,0.31)',
+                    maxWidth: props.maxWidth
+                })
+            }}
+        >
+            {state !== State.WAITING && response.length > 0 && (
+                <Button
+                    variant="text"
+                    color="error"
+                    sx={{
+                        position: "absolute",
+                        right: 10,
+                        top: 10,
+                        borderRadius: "50%",
+                        padding: 1,
+                        minWidth: "0px"
+                    }}
+                    onClick={close}
+                >
+                    <Close />
+                </Button>
+            )}
+            <DialogContent
+                sx={{
+                    backgroundColor: 'transparent',
+                    maxHeight: '70vh',
+                    overflow: 'auto',
+                    mt: response.length > 0 ? 2 : undefined,
                 }}
             >
-                {state !== State.WAITING && response.length > 0 && (
-                    <Button
-                        variant="text"
-                        color="error"
-                        sx={{
-                            position: "absolute",
-                            right: 10,
-                            top: 10,
-                            borderRadius: "50%",
-                            padding: 1,
-                            minWidth: "0px"
-                        }}
-                        onClick={close}
-                    >
-                        <Close />
-                    </Button>
-                )}
-                <DialogContent
-                    sx={{
-                        backgroundColor: 'transparent',
-                        maxHeight: '70vh',
-                        overflow: 'auto',
-                        mt: response.length > 0 ? 2 : undefined,
-                    }}
-                >
-                    {renderContent()}
-                </DialogContent>
-            </Box>
-        </Popper >
+                {renderContent()}
+            </DialogContent>
+        </Box>
     );
 }

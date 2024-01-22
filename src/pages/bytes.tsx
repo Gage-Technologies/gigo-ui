@@ -880,9 +880,6 @@ function Byte() {
                                     setNextStepsActive(true)
                                 }}
                                 currentCode={code}
-                                anchorEl={editorRef.current}
-                                placement={nextStepsActive ? "right-end" : "right-start"}
-                                posMods={nextStepsActive ? [-20, -50] : [0, 10]}
                                 maxWidth="20vw"
                                 bytesID={id || ""}
                                 bytesDescription={bytesDescription}
