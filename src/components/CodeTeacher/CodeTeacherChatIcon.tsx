@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import Popover from '@mui/material/Popover';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button'; // Assuming you want to use a button for closing the Popover
 import CTIcon from '../../img/codeTeacher/CT-icon.svg';
 import {Box} from "@mui/material";
+import {initialAuthStateUpdate, selectAuthState} from "../../reducers/auth/auth";
+import {useAppSelector} from "../../app/hooks";
 
 function CodeTeacherChatIcon(props: any) {
     const [anchorEl, setAnchorEl] = useState(null);
+    const authState = useAppSelector(selectAuthState)
 
     const handleClick = (event: any) => {
         setAnchorEl(event.currentTarget);
@@ -53,12 +56,19 @@ function CodeTeacherChatIcon(props: any) {
                         I am Code Teacher, a programming expert and educator dedicated to helping developers improve their coding skills and understand their code better.
                     </Typography>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', pb: 2 }}>
-                        <Typography variant="h6">
-                            Want the best features?
-                        </Typography>
-                        <Button variant="contained" color="primary" fullWidth href={"/premium"}>
-                            Get Pro
-                        </Button>
+                        {(authState.role === 0 || authState.hasSubscription === null)
+                        ?
+                            <>
+                                <Typography variant="h6">
+                                    Want the best features?
+                                </Typography>
+                                <Button variant="contained" color="primary" fullWidth href={"/premium"}>
+                                    Get Pro
+                                </Button>
+                            </>
+                        :
+                        <></>
+                        }
                     </Box>
                 </Box>
             </Popover>

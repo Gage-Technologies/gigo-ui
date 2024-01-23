@@ -67,6 +67,20 @@ export default function ByteChat(props: ByteChatProps) {
     const [userMessage, setUserMessage] = useState('');
     const [messages, setMessages] = useState<CtByteChatMessage[]>([
         {
+            _id: "init2",
+            byte_id: props.byteID,
+            byte_chat_id: props.byteID,
+            assistant_id: "init",
+            user_id: authState.id,
+            thread_number: 0,
+            message_type: CtByteMessageMessageType.Assistant,
+            content: `Hey! I'm Code Teacher!`, // place the description and dev steps here
+            created_at: new Date(0),
+            message_number: -1,
+            premium_llm: false,
+            free_credit_use: false,
+        },
+        {
             _id: "init",
             byte_id: props.byteID,
             byte_chat_id: props.byteID,
@@ -74,7 +88,21 @@ export default function ByteChat(props: ByteChatProps) {
             user_id: authState.id,
             thread_number: 0,
             message_type: CtByteMessageMessageType.Assistant,
-            content: `Hey! I'm Code Teacher!\n \n${props.description}`, // place the description and dev steps here
+            content: `${props.description}`, // place the description and dev steps here
+            created_at: new Date(0),
+            message_number: -1,
+            premium_llm: false,
+            free_credit_use: false,
+        },
+        {
+            _id: "init3",
+            byte_id: props.byteID,
+            byte_chat_id: props.byteID,
+            assistant_id: "init",
+            user_id: authState.id,
+            thread_number: 0,
+            message_type: CtByteMessageMessageType.Assistant,
+            content: `Have Questions? Ask Me!`, // place the description and dev steps here
             created_at: new Date(0),
             message_number: -1,
             premium_llm: false,
@@ -112,7 +140,7 @@ export default function ByteChat(props: ByteChatProps) {
         let m: CtByteChatMessage[] = JSON.parse(JSON.stringify(messages))
         let idx = m.findIndex(x => x._id === "init")
         if (idx !== undefined) {
-            m[idx].content = `Hey! I'm Code Teacher!\n \n${props.description}`
+            m[idx].content = `${props.description}`
             setMessages(m)
         }
     }, [props.description]);
@@ -385,9 +413,11 @@ export default function ByteChat(props: ByteChatProps) {
         loading: boolean,
         _id: string | null = null,
         premiumLlm: boolean = false,
-        freeCreditUse: boolean = false
+        freeCreditUse: boolean = false,
+        msgId: string
     ) => {
 
+        console.log("this is the ID of bot message: ", _id)
         return (
             <div
                 style={{
@@ -399,13 +429,24 @@ export default function ByteChat(props: ByteChatProps) {
                 }}
             >
 
-                <CodeTeacherChatIcon
-                    style={{
-                        marginRight: '10px',
-                        width: '35px',
-                        height: '35px',
-                    }}
-                />
+                {(msgId !== 'init' && msgId !== 'init3')
+                ?
+                    <CodeTeacherChatIcon
+                        style={{
+                            marginRight: '10px',
+                            width: '35px',
+                            height: '35px',
+                        }}
+                    />
+                :
+                    <Box
+                        sx={{
+                            marginRight: '10px',
+                            width: '35px',
+                            height: '35px',
+                        }}
+                    />
+                }
 
                 <Card
                     style={{
@@ -472,7 +513,7 @@ export default function ByteChat(props: ByteChatProps) {
             {messages.map((message: CtByteChatMessage) => (
                 message.message_type === CtByteMessageMessageType.Assistant
                     ?
-                    renderBotMessage(message.content, false, message.assistant_id, message.premium_llm, message.free_credit_use)
+                    renderBotMessage(message.content, false, message.assistant_id, message.premium_llm, message.free_credit_use, message._id)
                     :
                     renderUserMessage(message.content)
             ))}
@@ -510,7 +551,7 @@ export default function ByteChat(props: ByteChatProps) {
             >
                 {messagesMemo}
                 {state === State.LOADING &&
-                    renderBotMessage(response, true, "", false, false)
+                    renderBotMessage(response, true, "", false, false, "")
                 }
             </Box>
             {!isAtBottom && (
