@@ -13,22 +13,43 @@ import { ctTextHighlightExtension, ctTextHighlightTheme, highlightTesterKeymap }
 
 export type EditorProps = {
     language: string;
-    parentStyles: React.CSSProperties;
-    wrapperStyles: React.CSSProperties;
-    editorStyles: React.CSSProperties;
-    gutterStyles: React.CSSProperties;
+    parentStyles?: React.CSSProperties;
+    wrapperStyles?: React.CSSProperties;
+    editorStyles?: React.CSSProperties;
+    gutterStyles?: React.CSSProperties;
     code: string;
-    theme: string;
+    theme?: string;
     onChange?: (val: string, viewUpdate: ViewUpdate) => void;
     onUpdate?: (viewUpdate: ViewUpdate) => void;
     onCursorChange?: (bytePosition: number, lineNumber: number, columnNumber: number) => void;
 };
 
-function Editor(props: EditorProps) {
-    useDynamicStyles('custom-cm-editor-style', ".cm-editor", props.editorStyles);
-    useDynamicStyles('custom-cm-gutters-style', ".cm-gutters", props.gutterStyles);
+const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorProps, ref) => {
+    const defaultProps: {
+        parentStyles: React.CSSProperties;
+        wrapperStyles: React.CSSProperties;
+        editorStyles: React.CSSProperties;
+        gutterStyles: React.CSSProperties;
+        theme: string;
+    } = {
+        parentStyles: {},
+        wrapperStyles: {
+            width: '100%',
+            height: '100%',
+            borderRadius: "10px",
+            // border: "1px solid #fff"
+        },
+        editorStyles: {
+            borderRadius: '10px',
+        },
+        gutterStyles: {
+            borderRadius: '10px',
+        },
+        theme: "dark"
+    };
 
-    const editorRef = React.useRef<ReactCodeMirrorRef>(null);
+    useDynamicStyles('custom-cm-editor-style', ".cm-editor", props.editorStyles ? props.editorStyles : defaultProps.editorStyles);
+    useDynamicStyles('custom-cm-gutters-style', ".cm-gutters", props.gutterStyles ? props.gutterStyles : defaultProps.gutterStyles);
 
     const selectLang = () => {
         switch (props.language.toLowerCase()) {
@@ -76,27 +97,27 @@ function Editor(props: EditorProps) {
             const cursorPosition = viewUpdate.state.selection.main.head;
             // get the line and column position
             const lineInfo = viewUpdate.state.doc.lineAt(cursorPosition);
-            props.onCursorChange(cursorPosition, lineInfo.number-1, cursorPosition - lineInfo.from)
+            props.onCursorChange(cursorPosition, lineInfo.number - 1, cursorPosition - lineInfo.from)
         }
     }, [props.onUpdate, props.onCursorChange]);
 
     return (
         <Box
-            style={props.parentStyles}
+            style={props.parentStyles ? props.parentStyles : defaultProps.parentStyles}
         >
             <CodeMirror
-                ref={editorRef}
+                ref={ref}
                 value={props.code}
                 height="100%"
-                theme={props.theme.toLowerCase() === 'light' ? quietlight : copilot}
-                style={props.wrapperStyles}
+                theme={(props.theme ? props.theme : defaultProps.theme).toLowerCase() === 'light' ? quietlight : copilot}
+                style={props.wrapperStyles ? props.wrapperStyles : defaultProps.wrapperStyles}
                 extensions={getExtensions()}
                 onChange={onChange}
                 onUpdate={onUpdate}
             />
         </Box>
     )
-}
+});
 
 Editor.defaultProps = {
     parentStyles: {},

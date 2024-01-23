@@ -66,7 +66,7 @@ import Editor from "../components/IDE/Editor";
 import chroma from 'chroma-js';
 import SheenPlaceholder from "../components/Loading/SheenPlaceholder";
 import { sleep } from "../services/utils";
-import { ViewUpdate } from "@uiw/react-codemirror";
+import { ReactCodeMirrorRef, ViewUpdate } from "@uiw/react-codemirror";
 import DifficultyAdjuster from "../components/ByteDifficulty";
 import {selectAuthState, updateAuthState} from "../reducers/auth/auth";
 import {initialBytesStateUpdate, selectBytesState, updateBytesState} from "../reducers/bytes/bytes";
@@ -258,8 +258,6 @@ function Byte() {
 
     const [workspaceCreated, setWorkspaceCreated] = useState(false);
     const [containerStyle, setContainerSyle] = useState<React.CSSProperties>(containerStyleDefault)
-
-    const editorRef = React.useRef(null);
     const aceEditorRef = React.useRef<ReactAce | null>(null);
     const [cursorPosition, setCursorPosition] = useState<{ row: number, column: number } | null>(null)
     const [codeBeforeCursor, setCodeBeforeCursor] = useState("");
@@ -279,6 +277,8 @@ function Byte() {
     const [executingCode, setExecutingCode] = useState<boolean>(false)
     
     const [pingInterval, setPingInterval] = useState<NodeJS.Timer | null>(null)
+
+    const editorRef = React.useRef<ReactCodeMirrorRef>(null);
 
 
     let { id } = useParams();
@@ -1107,6 +1107,7 @@ function Byte() {
                                     </Tooltip>
                                 )}
                                 <Editor
+                                    ref={editorRef}
                                     parentStyles={editorStyle}
                                     language={programmingLanguages[byteData ? byteData.lang : 5]}
                                     code={code}
