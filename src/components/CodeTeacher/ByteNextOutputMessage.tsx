@@ -8,7 +8,7 @@ import {
     PopperPlacementType,
     styled
 } from "@mui/material";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {getAllTokens, themeHelpers} from "../../theme";
 import {useGlobalCtWebSocket} from "../../services/ct_websocket";
 import {
@@ -23,6 +23,7 @@ import {Typography} from "@material-ui/core";
 import {Close} from "@material-ui/icons";
 import Lottie from "react-lottie";
 import * as byteSuccess from "../../img/byteSuccess.json"
+import * as brightLights from "../../img/brightlights.json"
 
 export type ByteNextOutputMessageProps = {
     open: boolean;
@@ -51,6 +52,8 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
     const [success, setSuccess] = useState<boolean | null>(null);
     const [state, setState] = useState<State>(State.LOADING);
     const [executingOutputMessage, setExecutingOutputMessage] = useState<boolean>(false)
+    const [runAnimation, setRunAnimation] = useState<boolean>(false)
+
 
     const ctWs = useGlobalCtWebSocket();
 
@@ -128,7 +131,9 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
             console.log("Explanation: ", p.explanation)
             setResponse(p.explanation)
             setSuccess(p.success)
-            // setSuccess(true)
+            if (p.success){
+                setRunAnimation(true)
+            }
             setExecutingOutputMessage(false)
             setState(State.COMPLETED)
             return true
@@ -141,6 +146,23 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
         console.log("use effect for output message")
         getOutputMessage()
     }, [props.open])
+
+    useEffect(() => {
+        let timer: string | number | NodeJS.Timeout | undefined;
+    
+        if (runAnimation) {
+            // Set a timer to change state after 10 seconds
+            timer = setTimeout(() => {
+                setRunAnimation(false);
+                close();
+            }, 5000); // 5000 milliseconds = 5 seconds
+        }
+    
+        // Cleanup function to clear the timer if the component unmounts
+        return () => {
+            clearTimeout(timer);
+        };
+    }, [runAnimation]);
 
     const renderLoading = () => {
         if (response !== "") {
@@ -219,21 +241,13 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
         return null;
     }
 
-    const onAnimationComplete = () => {
-        console.log("here i am on animation complete")
-        setResponse("")
-        setSuccess(null)
-        setState(State.LOADING)
-        props.closeCallback()
-    }
-
     const byteSuccessOptions = {
-        loop: false,
+        loop: true,
         autoplay: true,
         animationData: byteSuccess,
         rendererSettings: {
             preserveAspectRatio: 'xMidYMid slice'
-        },
+        }
     };
 
     return (
@@ -253,7 +267,7 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                 },
             ]}
         >
-            {success ? (
+            {success && runAnimation ? (
                 <div style={{
                     display: 'flex',
                     flexDirection: 'row',

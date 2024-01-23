@@ -449,6 +449,8 @@ function Byte() {
                 })
 
                 setExecutingCode(!done)
+                console.log("done: ", done)
+                console.log("outputPopup: ", outputPopup)
                 if (done && !outputPopup) {
                     console.log("trying to set the output popup: ", outputPopup)
                     setOutputPopup(true)
@@ -784,6 +786,7 @@ function Byte() {
             setSuggestionPopup(false)
             setNextStepsPopup(true)
         }
+        console.log("output popup first her: ", outputPopup)
         deleteTypingTimer();
         sendExecRequest();
     };
