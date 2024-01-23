@@ -134,6 +134,8 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
             if (p.success){
                 setRunAnimation(true)
             }
+            // setSuccess(true)
+            // setRunAnimation(true)
             setExecutingOutputMessage(false)
             setState(State.COMPLETED)
             return true

@@ -798,14 +798,16 @@ function Byte() {
     };
 
     useEffect(() => {
+        console.log("button clicked ref: ", buttonClickedRef.current)
         if (firstRenderRef.current) {
             firstRenderRef.current = false; // Set it to false on the first render
             return; // Skip the rest of the useEffect on the first render
         }
         if (!outputPopup && buttonClickedRef.current) {
-            executeCode();
             buttonClickedRef.current = false;
+            executeCode();
         }
+        buttonClickedRef.current = false;
     }, [outputPopup]);
 
     useEffect(() => {
