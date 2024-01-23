@@ -30,7 +30,6 @@ export type ByteNextOutputMessageProps = {
     closeCallback: () => void;
     anchorEl: null | HTMLElement; // Add this
     placement: PopperPlacementType;
-    posMods: number[];
     lang: string;
     code: string;
     byteId: string;

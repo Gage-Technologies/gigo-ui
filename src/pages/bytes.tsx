@@ -1120,7 +1120,6 @@ function Byte() {
                                 closeCallback={() => { setOutputPopup(false) }}
                                 anchorEl={editorRef.current}
                                 placement={"right-start"}
-                                posMods={[0, 40]}
                                 lang={programmingLanguages[byteData ? byteData.lang : 5]}
                                 code={code}
                                 byteId={id || ""}
