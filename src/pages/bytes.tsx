@@ -258,7 +258,6 @@ function Byte() {
 
     const [workspaceCreated, setWorkspaceCreated] = useState(false);
     const [containerStyle, setContainerSyle] = useState<React.CSSProperties>(containerStyleDefault)
-    const aceEditorRef = React.useRef<ReactAce | null>(null);
     const [cursorPosition, setCursorPosition] = useState<{ row: number, column: number } | null>(null)
     const [codeBeforeCursor, setCodeBeforeCursor] = useState("");
     const [codeAfterCursor, setCodeAfterCursor] = useState("");
@@ -278,6 +277,7 @@ function Byte() {
     
     const [pingInterval, setPingInterval] = useState<NodeJS.Timer | null>(null)
 
+    const editorContainerRef = React.useRef<HTMLDivElement>(null);
     const editorRef = React.useRef<ReactCodeMirrorRef>(null);
 
 
@@ -930,61 +930,6 @@ function Byte() {
         return -1; // Function start not found
     }
 
-
-    useEffect(() => {
-        console.log("marker callback")
-
-        if (!aceEditorRef.current || cursorPosition === null) {
-            return;
-        }
-
-        console.log("marking editor")
-
-        const editor = aceEditorRef.current.editor;
-        const session = editor.getSession();
-        const code = session.getValue();
-
-        if (currentLineMarker != null) {
-            console.log("removing current marker")
-            session.removeMarker(currentLineMarker);
-        }
-
-        ctWs.sendWebsocketMessage({
-            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-            type: CtMessageType.WebSocketMessageTypeParseFileRequest,
-            origin: CtMessageOrigin.WebSocketMessageOriginClient,
-            created_at: Date.now(),
-            payload: {
-                relative_path: "main." + (programmingLanguages[byteData ? byteData.lang : 5] === "Go" ? "go" : "py"),
-                content: code
-            }
-        } satisfies CtMessage<CtParseFileRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtParseFileResponse>): boolean => {
-            //console.log("response message of next output: ", msg)
-            if (msg.type !== CtMessageType.WebSocketMessageTypeParseFileResponse) {
-                console.log("failed parse file", msg)
-                return true
-            }
-            const p: CtParseFileResponse = msg.payload as CtParseFileResponse;
-
-            // locate the symbol that the cursor is pointing to
-            for (let i = 0; i < p.nodes.length; ++i) {
-                let node = p.nodes[i]
-
-                // check if the cursor row is within the nodes content location
-                if (
-                    node.position.start_line <= cursorPosition.row &&
-                    node.position.end_line >= cursorPosition.row
-                ) {
-                    const newMarker = session.addMarker(new Range(node.position.start_line, 0, node.position.end_line, Infinity), "editorLineHighlighted", "fullLine");
-                    setCurrentLineMarker(newMarker);
-                    break;
-                }
-            }
-
-            return true
-        })
-    }, [code, cursorPosition])
-
     useEffect(() => {
         if (byteData === null) {
             setContainerSyle(containerStyleDefault);
@@ -1076,7 +1021,7 @@ function Byte() {
                             />
                             <Box
                                 style={editorAndTerminalStyle}
-                                ref={editorRef}
+                                ref={editorContainerRef}
                             >
                                 {code.length > 0 && (
                                     <Tooltip title="Run Code">
@@ -1121,7 +1066,7 @@ function Byte() {
                             <ByteNextOutputMessage
                                 open={outputPopup}
                                 closeCallback={() => { setOutputPopup(false) }}
-                                anchorEl={editorRef.current}
+                                anchorEl={editorContainerRef.current}
                                 placement={"right-start"}
                                 lang={programmingLanguages[byteData ? byteData.lang : 5]}
                                 code={code}
@@ -1137,7 +1082,7 @@ function Byte() {
                                     setSuggestionPopup(false)
                                 }}
                                 code={code}
-                                anchorEl={editorRef.current}
+                                anchorEl={editorContainerRef.current}
                                 placement="right-start"
                                 posMods={[0, 40]}
                                 maxWidth="20vw"
