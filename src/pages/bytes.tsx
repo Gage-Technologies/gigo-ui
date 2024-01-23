@@ -781,15 +781,32 @@ function Byte() {
         }
     };
 
+    const firstRenderRef = useRef(true);
+    const buttonClickedRef = useRef(false);
+
     const executeCode = () => {
         if (suggestionPopup) {
             setSuggestionPopup(false)
             setNextStepsPopup(true)
         }
-        console.log("output popup first her: ", outputPopup)
+        if (outputPopup) {
+            console.log("Waiting for outputPopup to be false");
+            return;
+        }
         deleteTypingTimer();
         sendExecRequest();
     };
+
+    useEffect(() => {
+        if (firstRenderRef.current) {
+            firstRenderRef.current = false; // Set it to false on the first render
+            return; // Skip the rest of the useEffect on the first render
+        }
+        if (!outputPopup && buttonClickedRef.current) {
+            executeCode();
+            buttonClickedRef.current = false;
+        }
+    }, [outputPopup]);
 
     useEffect(() => {
         console.log("cursor position: ", cursorPosition)
@@ -1071,7 +1088,15 @@ function Byte() {
                                                 borderRadius: "50%",
                                                 minWidth: 0,
                                             }}
-                                            onClick={executeCode}
+                                            // onClick={() => {
+                                            //     setOutputPopup(false);
+                                            //     executeCode();
+                                            // }}
+                                            onClick={() => {
+                                                setOutputPopup(false);
+                                                buttonClickedRef.current = true;
+                                                executeCode(); // Indicate button click
+                                            }}
                                         >
                                             <PlayArrow />
                                         </LoadingButton>
