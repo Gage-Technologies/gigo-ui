@@ -1,9 +1,9 @@
 import {
     Box,
-    Button,
+    Button, ButtonBase,
     Card,
-    CircularProgress, createTheme, IconButton, PaletteMode,
-    PopperPlacementType,
+    CircularProgress, createTheme, Divider, IconButton, InputAdornment, PaletteMode,
+    PopperPlacementType, Stack,
     styled,
     TextField,
     Tooltip,
@@ -20,7 +20,7 @@ import {
     CtByteMessageMessageType,
     CtByteNewOrGetChatRequest,
     CtByteNewOrGetChatResponse,
-    CtByteUserMessage,
+    CtByteUserMessage, CtCloseByteChatThreadRequest, CtCloseByteChatThreadResponse,
     CtGenericErrorPayload,
     CtMessage,
     CtMessageOrigin,
@@ -35,6 +35,9 @@ import ctIcon from "../../img/codeTeacher/CT-icon.svg"
 import CodeTeacherChatIcon from "./CodeTeacherChatIcon";
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import {getAllTokens} from "../../theme";
+import ForumIcon from '@mui/icons-material/Forum';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 export type ByteChatProps = {
     byteID: string;
@@ -109,6 +112,41 @@ export default function ByteChat(props: ByteChatProps) {
             free_credit_use: false,
         },
     ]);
+    const [threadVisibility, setThreadVisibility] = useState<{ [key: number]: boolean }>({});
+
+    const checkScrollToBottom = () => {
+        if (messagesContainerRef.current) {
+            const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
+            const isAtBottom = scrollHeight - Math.ceil(scrollTop + clientHeight) <= 1;
+            setIsAtBottom(isAtBottom);
+            if (isAtBottom) {
+                scrollToBottom();
+            }
+        }
+    };
+
+    const scrollToTop = () => {
+        if (messagesContainerRef.current) {
+            messagesContainerRef.current.scrollTop = 0;
+        }
+    };
+
+    useEffect(() => {
+        scrollToTop()
+    }, [props.description])
+
+    const toggleThreadVisibility = (threadNumber: number) => {
+        setThreadVisibility(prev => {
+            const newVisibility = { ...prev, [threadNumber]: !prev[threadNumber] };
+            // Trigger scroll check after state update to ensure DOM has updated
+            setTimeout(() => {
+                checkScrollToBottom();
+            }, 0);
+            return newVisibility;
+        });
+    };
+
+    const [currentThreadCount, setCurrentThreadCount] = useState(0)
 
     const launchCTChat = () => {
         ctWs.sendWebsocketMessage({
@@ -128,6 +166,7 @@ export default function ByteChat(props: ByteChatProps) {
             }
             const p: CtByteNewOrGetChatResponse = msg.payload as CtByteNewOrGetChatResponse;
             setChatId(p._id)
+            setCurrentThreadCount(p.thread_count)
             return true
         })
     }
@@ -135,6 +174,11 @@ export default function ByteChat(props: ByteChatProps) {
     useEffect(() => {
         launchCTChat()
     }, []);
+
+    useEffect(() => {
+        setThreadVisibility({ [currentThreadCount]: true });
+    }, [currentThreadCount]);
+
 
     useEffect(() => {
         let m: CtByteChatMessage[] = JSON.parse(JSON.stringify(messages))
@@ -197,7 +241,7 @@ export default function ByteChat(props: ByteChatProps) {
             byte_chat_id: "",
             assistant_id: "",
             user_id: "",
-            thread_number: m[m.length-1] && m[m.length-1].thread_number >= 0 ? m[m.length-1].thread_number : 0,
+            thread_number: currentThreadCount,
             message_type: CtByteMessageMessageType.User,
             content: userMessage,
             created_at: new Date(),
@@ -256,11 +300,51 @@ export default function ByteChat(props: ByteChatProps) {
                     free_credit_use: p.free_credit_use,
                 })
                 setMessages(m)
+
                 return true
             }
             return false
         })
     }
+
+    const closeThread = () => {
+        if (chatId === "")
+            return
+        ctWs.sendWebsocketMessage({
+            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            type: CtMessageType.WebSocketMessageTypeCloseByteChatThreadRequest,
+            origin: CtMessageOrigin.WebSocketMessageOriginClient,
+            created_at: Date.now(),
+            payload: {
+                _id: chatId
+            }
+        } satisfies CtMessage<CtCloseByteChatThreadRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtCloseByteChatThreadResponse>) => {
+            if (msg.type !== CtMessageType.WebSocketMessageTypeCloseByteChatThreadResponse) {
+                console.log("failed launching chat", msg)
+                return true
+            }
+            const p: CtCloseByteChatThreadResponse = msg.payload as CtCloseByteChatThreadResponse;
+            //handle if successful
+            if (p.success) {
+                console.log("thread count increased")
+                setCurrentThreadCount(prevCount => prevCount + 1);
+            }
+            return true
+        })
+
+
+    }
+
+    useEffect(() => {
+        // This effect runs when `currentThreadCount` changes.
+        // Update `threadVisibility` here to ensure it uses the latest `currentThreadCount`.
+        setThreadVisibility(prevVisibility => ({
+            ...prevVisibility,
+            [currentThreadCount]: true,
+        }));
+
+    }, [currentThreadCount]);
+
 
     const AnimCircularProgress = styled(CircularProgress)`
         animation: mui-rotation 2s linear infinite, respondingEffect 2s infinite alternate;
@@ -416,8 +500,6 @@ export default function ByteChat(props: ByteChatProps) {
         freeCreditUse: boolean = false,
         msgId: string
     ) => {
-
-        console.log("this is the ID of bot message: ", _id)
         return (
             <div
                 style={{
@@ -479,6 +561,11 @@ export default function ByteChat(props: ByteChatProps) {
                 return;
             }
 
+            setThreadVisibility(prevVisibility => ({
+                ...prevVisibility,
+                [currentThreadCount]: true,
+            }));
+
             setResponse('')
             sendUserCTChat();
         }
@@ -508,19 +595,6 @@ export default function ByteChat(props: ByteChatProps) {
         }
     }, []);
 
-    const messagesMemo = React.useMemo(() => (
-        <>
-            {messages.map((message: CtByteChatMessage) => (
-                message.message_type === CtByteMessageMessageType.Assistant
-                    ?
-                    renderBotMessage(message.content, false, message.assistant_id, message.premium_llm, message.free_credit_use, message._id)
-                    :
-                    renderUserMessage(message.content)
-            ))}
-            <div ref={messagesEndRef}/>
-        </>
-    ), [messages])
-
     const textInputMemo = React.useMemo(() => (
         <TextField
             disabled={disableChat}
@@ -532,8 +606,98 @@ export default function ByteChat(props: ByteChatProps) {
             maxRows={5}
             onChange={(e) => setUserMessage(e.target.value)}
             onKeyPress={handleKeyPress}
+            InputProps={{
+                endAdornment: (
+                    <InputAdornment position="end">
+                        <Tooltip title={"Start New Conversation Thread"}>
+                            <IconButton onClick={() => closeThread()} disabled={disableChat}>
+                                <ForumIcon/>
+                            </IconButton>
+                        </Tooltip>
+                    </InputAdornment>
+                ),
+            }}
         />
-    ), [userMessage, disableChat])
+    ), [userMessage, disableChat, chatId])
+
+    // Group messages by thread number
+    const groupedMessages = messages.reduce((acc, message) => {
+        const threadNumber = message.thread_number;
+        if (!acc[threadNumber]) acc[threadNumber] = [];
+        acc[threadNumber].push(message);
+        return acc;
+    }, {} as { [key: number]: CtByteChatMessage[] });
+
+    // Sort thread numbers to ensure they are processed in order
+    const renderGroupedMessages = () => {
+        // Ensure `sortedThreadNumbers` includes all threads up to the current count, including new ones
+        const allThreads = Array.from({ length: currentThreadCount + 1 }, (_, i) => i);
+        const sortedAllThreads = allThreads.sort((a, b) => a - b); // Ensure threads are sorted
+
+        return sortedAllThreads.map(threadNumber => {
+            const isThreadZero = threadNumber === 0;
+            const isVisible = threadVisibility[threadNumber] ?? isThreadZero;
+
+            return (
+                <React.Fragment key={threadNumber}>
+                    {isThreadZero || (threadNumber === currentThreadCount) ? (
+                        // For thread 0, render without the ability to toggle visibility
+                        <ThreadDivider
+                            threadNumber={threadNumber}
+                            onClick={() => {}}
+                            isVisible={true} // Always true for thread 0
+                            isCollapsible={false} // Thread 0 is not collapsible
+                        />
+                    ) : (
+                        // For other threads, maintain the toggle functionality
+                        <ThreadDivider
+                            threadNumber={threadNumber}
+                            onClick={() => toggleThreadVisibility(threadNumber)}
+                            isVisible={isVisible}
+                            isCollapsible={true}
+                        />
+                    )}
+                    {isVisible && groupedMessages[threadNumber]?.map(message =>
+                        message.message_type === CtByteMessageMessageType.Assistant
+                            ? renderBotMessage(message.content, false, message.assistant_id, message.premium_llm, message.free_credit_use, message._id)
+                            : renderUserMessage(message.content)
+                    )}
+                </React.Fragment>
+            );
+        });
+    };
+
+    const ThreadDivider = ({ threadNumber, onClick, isVisible, isCollapsible }: { threadNumber: number; onClick: () => void; isVisible: boolean, isCollapsible: boolean }) => {
+        return (
+            threadNumber !== 0
+            ?
+                <Box display="flex" alignItems="center" justifyContent="center" width="100%">
+                    <Box flexGrow={1} borderBottom="1px solid #ffffff40" sx={{ marginLeft: "20px" }} />
+                    {isCollapsible
+                        ?
+                        <Button sx={{height: "3vh"}} onClick={onClick}>
+                            <Typography variant="subtitle1" noWrap sx={{ color: "#fff", fontWeight: 200, fontSize: "0.7rem", marginX: 2, display: 'flex', alignItems: 'center', }}>
+                                {`Thread ${threadNumber} `}{isVisible ? <ExpandLessIcon fontSize={"small"} /> : <ExpandMoreIcon fontSize={"small"}/>}
+                            </Typography>
+                        </Button>
+                        :
+                        <Typography variant="subtitle1" noWrap sx={{ color: "#fff", fontWeight: 200, fontSize: "0.7rem", marginX: 2, display: 'flex', alignItems: 'center', }}>
+                            Active Thread
+                        </Typography>
+                    }
+                    <Box flexGrow={1} borderBottom="1px solid #ffffff40" sx={{ marginRight: "20px" }} />
+                </Box>
+            :
+                <></>
+        );
+    };
+
+    const messagesMemo = React.useMemo(() => (
+        <>
+            {renderGroupedMessages()}
+            <div ref={messagesEndRef}/>
+        </>
+    ), [(state === State.LOADING) ? null : messages, threadVisibility, currentThreadCount])
 
     return (
         <>
@@ -542,7 +706,8 @@ export default function ByteChat(props: ByteChatProps) {
                 display={"flex"}
                 flexDirection={"column"}
                 sx={{
-                    maxHeight: "68vh",
+                    scrollBehavior: 'smooth',
+                    height: "68vh",
                     overflowY: "auto",
                     pt: 2,
                     pb: 2,
@@ -550,9 +715,7 @@ export default function ByteChat(props: ByteChatProps) {
                 }}
             >
                 {messagesMemo}
-                {state === State.LOADING &&
-                    renderBotMessage(response, true, "", false, false, "")
-                }
+                {state === State.LOADING && renderBotMessage(response, true, "", false, false, "")}
             </Box>
             {!isAtBottom && (
                 <Box

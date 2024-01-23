@@ -18,7 +18,11 @@ export enum CtMessageType {
     WebSocketMessageTypeByteSuggestionRequest = 48,
     WebSocketMessageTypeByteSuggestionResponse = 49,
     WebSocketMessageTypeByteUserMessage = 50,
-    WebSocketMessageTypeByteAssistantMessage = 51
+    WebSocketMessageTypeByteAssistantMessage = 51,
+    WebSocketMessageTypeCloseByteChatThreadRequest = 52,
+    WebSocketMessageTypeCloseByteChatThreadResponse = 53,
+
+
 }
 
 export enum CtResponseCode {
@@ -196,6 +200,16 @@ export interface CtParseFileResponse {
     relative_path: string;
     nodes: Node[];
 }
+
+export interface CtCloseByteChatThreadRequest {
+    _id: string;
+}
+
+export interface CtCloseByteChatThreadResponse {
+    success: boolean;
+}
+
+
 
 export enum SymbolType {
     SymbolTypeUnknown,
