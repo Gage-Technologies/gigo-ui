@@ -251,21 +251,7 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
     };
 
     return (
-        <Popper
-            open={props.open}
-            anchorEl={props.anchorEl}
-            placement={props.placement}
-            sx={{
-                backgroundColor: "transparent"
-            }}
-            modifiers={[
-                {
-                    name: 'offset',
-                    options: {
-                        offset: props.posMods, // x, y offset
-                    },
-                },
-            ]}
+        <div
         >
             {success && runAnimation ? (
                 <div style={{
@@ -280,10 +266,13 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
             ) : (
                 <Box
                     sx={{
+                        position: "absolute",
                         display: 'flex',
                         flexDirection: 'row',
                         alignItems: 'start',
                         p: 1,
+                        zIndex: 5,
+                        right: "15vw",
                         ...({
                             borderRadius: '10px',
                             boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2);',
@@ -324,6 +313,6 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                     </div>
                 </Box>
             )}
-        </Popper>
+        </div>
     );
 }
