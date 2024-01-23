@@ -127,12 +127,24 @@ export default function ByteSuggestion(props: ByteSuggestionProps) {
         getByteSuggestion()
     }, [props.open])
 
+    const loadingAnim = React.useMemo(() => (
+        <Box sx={{ width: "100%", height: "fit-content" }}>
+            <AnimCircularProgress
+                size={16}
+                sx={{
+                    float: 'right',
+                    m: 1,
+                }}
+            />
+        </Box>
+    ), [])
+
     const renderLoading = () => {
         if (response !== "") {
             console.log("response\n", response)
             return (
                 <Box
-                    display={"block"}
+                    display={"box"}
                 >
                     <MarkdownRenderer
                         markdown={response}
@@ -142,16 +154,7 @@ export default function ByteSuggestion(props: ByteSuggestionProps) {
                             padding: '0px',
                         }}
                     />
-                    <Box sx={{ width: "100%", height: "fit-content" }}>
-
-                        <AnimCircularProgress
-                            size={16}
-                            sx={{
-                                float: 'right',
-                                m: 1,
-                            }}
-                        />
-                    </Box>
+                    {loadingAnim}
                 </Box>
             )
         }
@@ -223,10 +226,13 @@ export default function ByteSuggestion(props: ByteSuggestionProps) {
         >
             <Box
                 sx={{
+                    position: "absolute",
                     display: 'flex',
                     flexDirection: 'row',
                     alignItems: 'start',
                     p: 1,
+                    zIndex: 5,
+                    right: "15vw",
                     ...({
                         borderRadius: '10px',
                         boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2);',

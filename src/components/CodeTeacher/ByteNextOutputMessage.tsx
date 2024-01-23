@@ -165,12 +165,24 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
         };
     }, [runAnimation]);
 
+    const loadingAnim = React.useMemo(() => (
+        <Box sx={{ width: "100%", height: "fit-content" }}>
+            <AnimCircularProgress
+                size={16}
+                sx={{
+                    float: 'right',
+                    m: 1,
+                }}
+            />
+        </Box>
+    ), [])
+
     const renderLoading = () => {
         if (response !== "") {
             console.log("response\n", response)
             return (
                 <Box
-                    display={"block"}
+                    display={"box"}
                 >
                     <MarkdownRenderer
                         markdown={response}
@@ -180,16 +192,7 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                             padding: '0px',
                         }}
                     />
-                    <Box sx={{ width: "100%", height: "fit-content" }}>
-
-                        <AnimCircularProgress
-                            size={16}
-                            sx={{
-                                float: 'right',
-                                m: 1,
-                            }}
-                        />
-                    </Box>
+                    {loadingAnim}
                 </Box>
             )
         }
@@ -252,8 +255,7 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
     };
 
     return (
-        <div
-        >
+        <>
             {success && runAnimation ? (
                 <div style={{
                     display: 'flex',
@@ -314,6 +316,6 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                     </div>
                 </Box>
             )}
-        </div>
+        </>
     );
 }

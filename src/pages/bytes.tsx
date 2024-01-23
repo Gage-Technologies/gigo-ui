@@ -277,6 +277,8 @@ function Byte() {
 
     const [executingOutputMessage, setExecutingOutputMessage] = useState<boolean>(false)
     const [executingCode, setExecutingCode] = useState<boolean>(false)
+    
+    const [pingInterval, setPingInterval] = useState<NodeJS.Timer | null>(null)
 
 
     let { id } = useParams();
@@ -309,20 +311,21 @@ function Byte() {
     }
 
     const byteWebSocketPing = () => {
-        const pingMessage: WsMessage<BytesLivePingRequest> = {
+        if (pingInterval) {
+            clearInterval(pingInterval)
+            setPingInterval(null)
+        }
+
+        globalWs.sendWebsocketMessage({
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
             type: WsMessageType.ByteLivePing,
             payload: {
                 byte_attempt_id: byteAttemptId
             }
-        };
+        }, null);
 
-        const pingInterval = setInterval(() => {
-            globalWs.sendWebsocketMessage(pingMessage, null);
-            console.log("BytesLivePingRequest sent")
-        }, 60000); // Send a ping every minute (60000 milliseconds)
-
-        return pingInterval;
+        setPingInterval(setTimeout(() => byteWebSocketPing(), 60000))
+        console.log("BytesLivePingRequest sent")
     };
 
     const updateCode = (newCode: string) => {
@@ -340,9 +343,8 @@ function Byte() {
     };
 
     useEffect(() => {
-        let pingInterval: NodeJS.Timeout | null = null;
         if (byteAttemptId) {
-            pingInterval = byteWebSocketPing();
+            byteWebSocketPing();
         }
 
         return () => {
