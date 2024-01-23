@@ -227,6 +227,7 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                     overflowWrap: 'break-word',
                     borderRadius: '10px',
                     padding: '0px',
+                    width: "16vw"
                 }}
             />
         )
