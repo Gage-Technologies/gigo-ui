@@ -426,6 +426,11 @@ function Byte() {
                 const payload = msg.payload as ExecResponsePayload;
                 const { stdout, stderr, done } = payload;
 
+                // skip the processing if this is the first response
+                if (stdout.length === 0 && stderr.length === 0) {
+                    return false;
+                }
+
                 // merge all the lines together
                 let mergedRows: MergedOutputRow[] = [];
                 mergedRows = mergedRows.concat(stdout.map(row => ({
@@ -613,13 +618,7 @@ function Byte() {
         setLoading(true);
         getRecommendedBytes()
         getByte(byteId).then(() => {
-            startByteAttempt(byteId).then(() => {
-                if (!workspaceCreated && byteId) {
-                    createWorkspace(byteId)
-                        .then(() => setWorkspaceCreated(true))
-                        .catch((error) => console.error("Error creating workspace:", error));
-                }
-            });
+            startByteAttempt(byteId);
         }).finally(() => {
             setLoading(false);
         });
@@ -681,12 +680,12 @@ function Byte() {
 
             updateCode(newCode);
 
-            // Call createWorkspace only if it hasn't been called before
-            if (!workspaceCreated && id) {
-                createWorkspace(id)
-                    .then(() => setWorkspaceCreated(true)) // Set the flag to true once the workspace is created
-                    .catch(console.error);
-            }
+            // // Call createWorkspace only if it hasn't been called before
+            // if (!workspaceCreated && id) {
+            //     createWorkspace(id)
+            //         .then(() => setWorkspaceCreated(true)) // Set the flag to true once the workspace is created
+            //         .catch(console.error);
+            // }
         } else {
             setIsButtonActive(false);
         }
@@ -786,7 +785,8 @@ function Byte() {
     const firstRenderRef = useRef(true);
     const buttonClickedRef = useRef(false);
 
-    const executeCode = () => {
+    const executeCode = async () => {
+
         if (suggestionPopup) {
             setSuggestionPopup(false)
             setNextStepsPopup(true)
@@ -794,6 +794,11 @@ function Byte() {
         if (outputPopup) {
             console.log("Waiting for outputPopup to be false");
             return;
+        }
+        if (!workspaceCreated && byteData) {
+            await createWorkspace(byteData._id)
+                .then(() => setWorkspaceCreated(true))
+                .catch((error) => console.error("Error creating workspace:", error));
         }
         deleteTypingTimer();
         sendExecRequest();
