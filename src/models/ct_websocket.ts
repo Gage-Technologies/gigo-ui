@@ -134,6 +134,9 @@ export interface CtByteUserMessage {
     code_prefix: string;
     code_suffix: string;
     code_language: string;
+    byte_description: string;
+    difficulty: string;
+    byte_development_steps: string;
 }
 
 export interface CtByteAssistantMessage {

@@ -43,6 +43,7 @@ export type ByteChatProps = {
     byteID: string;
     description: string;
     devSteps: string;
+    difficulty: string;
     codePrefix: string;
     codeSuffix: string;
     codeLanguage: string;
@@ -261,7 +262,10 @@ export default function ByteChat(props: ByteChatProps) {
                 user_message: userMessage,
                 code_prefix: props.codePrefix,
                 code_suffix: props.codeSuffix,
-                code_language: props.codeLanguage
+                code_language: props.codeLanguage,
+                byte_description: props.difficulty,
+                difficulty: props.devSteps,
+                byte_development_steps: props.devSteps,
             }
         } satisfies CtMessage<CtByteUserMessage>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtByteAssistantMessage>) => {
             if (msg.type !== CtMessageType.WebSocketMessageTypeByteAssistantMessage) {

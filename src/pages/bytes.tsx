@@ -839,6 +839,8 @@ function Byte() {
                                         description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
                                         // @ts-ignore
                                         devSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
+                                        // @ts-ignore
+                                        difficulty={difficultyToString(determineDifficulty())}
                                         codePrefix={codeBeforeCursor}
                                         codeSuffix={codeAfterCursor}
                                         codeLanguage={programmingLanguages[byteData ? byteData.lang : 5]}
