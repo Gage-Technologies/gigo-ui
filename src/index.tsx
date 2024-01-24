@@ -55,22 +55,22 @@ const lazyLoadFallback = (
 
 root.render(
     <WebSocketProvider>
-        <BrowserRouter>
-            <GoogleOAuthProvider clientId={config.googleClient}>
-                <Provider store={store}>
-                    <PersistGate loading={null} persistor={persistor}>
-                        <CtWebSocketProvider>
+        <Provider store={store}>
+            <PersistGate loading={null} persistor={persistor}>
+                <CtWebSocketProvider>
+                    <GoogleOAuthProvider clientId={config.googleClient}>
+                        <BrowserRouter>
                             <AppWrapper>
                                 <Suspense fallback={lazyLoadFallback}>
                                     <Routing />
                                 </Suspense>
                             </AppWrapper>
-                        </CtWebSocketProvider>
-                    </PersistGate>
-                </Provider>
-            </GoogleOAuthProvider>
-        </BrowserRouter>
-    </WebSocketProvider>
+                        </BrowserRouter>
+                    </GoogleOAuthProvider>
+                </CtWebSocketProvider >
+            </PersistGate>
+        </Provider>
+    </WebSocketProvider >
 );
 
 // If you want to start measuring performance in your app, pass a function
