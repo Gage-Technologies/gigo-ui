@@ -2,76 +2,45 @@ import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import {
     Container,
-    createTheme,
-    Grid,
-    CssBaseline,
+    createTheme, CssBaseline,
     PaletteMode,
     ThemeProvider,
     Typography,
-    Box,
-    Paper, Card, Tooltip, Button, Divider, Tab, Tabs, TextField, Popper, DialogContent
+    Box, Tooltip, Button
 } from "@mui/material";
-import { getAllTokens, themeHelpers } from "../theme";
+import { getAllTokens } from "../theme";
 import { Close, PlayArrow } from "@material-ui/icons";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { useNavigate } from "react-router-dom";
-import AppWrapper from "../components/AppWrapper";
 import swal from "sweetalert";
-import * as animationData from "../img/85023-no-data.json";
-import ReactMarkdown from "react-markdown";
-import styled from "@emotion/styled";
-import { AwesomeButton } from "react-awesome-button";
-import AceEditor from "react-ace";
 import call from "../services/api-call";
-import 'ace-builds'
-import 'ace-builds/webpack-resolver'
-import { CodeComponent } from "react-markdown/lib/ast-to-react";
+import 'ace-builds';
+import 'ace-builds/webpack-resolver';
 import ByteSelectionMenu from "../components/ByteSelectionMenu";
 import config from "../config";
 import { useParams } from "react-router";
 import { useGlobalWebSocket } from "../services/websocket";
 import { WsGenericErrorPayload, WsMessage, WsMessageType } from "../models/websocket";
 import {
-    AgentWsRequestMessage, BytesLivePingRequest,
-    ByteUpdateCodeRequest,
-    ExecRequestPayload,
     ExecResponsePayload,
     OutputRow
 } from "../models/bytes";
 import { programmingLanguages } from "../services/vars";
 import { useGlobalCtWebSocket } from "../services/ct_websocket";
-import MenuItem from "@mui/material/MenuItem";
 import ByteNextStep from "../components/CodeTeacher/ByteNextStep";
-import { IAceEditor } from "react-ace/lib/types";
-import ReactAce from "react-ace/lib/ace";
-import {
-    CtByteNextOutputRequest,
-    CtByteNextOutputResponse, CtByteSuggestionRequest, CtByteSuggestionResponse,
-    CtGenericErrorPayload,
-    CtMessage,
-    CtMessageOrigin,
-    CtMessageType,
-    CtParseFileRequest, CtParseFileResponse,
-    CtValidationErrorPayload
-} from "../models/ct_websocket";
-import { KeyboardReturn, Nightlife } from "@mui/icons-material";
 import ace from "ace-builds/src-noconflict/ace";
-import "./bytes.css"
-import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
+import "./bytes.css";
 import ByteChat from "../components/CodeTeacher/ByteChat";
 import { LoadingButton } from "@mui/lab";
-import ByteSuggestions from "../components/CodeTeacher/ByteSuggestions";
 import ByteNextOutputMessage from "../components/CodeTeacher/ByteNextOutputMessage";
 import Editor from "../components/IDE/Editor";
 import chroma from 'chroma-js';
 import SheenPlaceholder from "../components/Loading/SheenPlaceholder";
 import { sleep } from "../services/utils";
-import { ReactCodeMirrorRef, ViewUpdate } from "@uiw/react-codemirror";
+import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import DifficultyAdjuster from "../components/ByteDifficulty";
-import {selectAuthState, updateAuthState} from "../reducers/auth/auth";
-import {initialBytesStateUpdate, selectBytesState, updateBytesState} from "../reducers/bytes/bytes";
-
-const Range = ace.require('ace/range').Range;
+import { selectAuthState } from "../reducers/auth/auth";
+import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../reducers/bytes/bytes";
 
 interface MergedOutputRow {
     error: boolean;
@@ -275,7 +244,7 @@ function Byte() {
     const [executingOutputMessage, setExecutingOutputMessage] = useState<boolean>(false)
     const [executingCode, setExecutingCode] = useState<boolean>(false)
     
-    const [pingInterval, setPingInterval] = useState<NodeJS.Timer | null>(null)
+    const pingInterval = React.useRef<NodeJS.Timer | null>(null)
 
     const editorContainerRef = React.useRef<HTMLDivElement>(null);
     const editorRef = React.useRef<ReactCodeMirrorRef>(null);
@@ -310,24 +279,6 @@ function Byte() {
         return "hard"
     }
 
-    const byteWebSocketPing = () => {
-        if (pingInterval) {
-            clearInterval(pingInterval)
-            setPingInterval(null)
-        }
-
-        globalWs.sendWebsocketMessage({
-            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-            type: WsMessageType.ByteLivePing,
-            payload: {
-                byte_attempt_id: byteAttemptId
-            }
-        }, null);
-
-        setPingInterval(setTimeout(() => byteWebSocketPing(), 60000))
-        console.log("BytesLivePingRequest sent")
-    };
-
     const updateCode = (newCode: string) => {
         const message = {
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
@@ -342,21 +293,49 @@ function Byte() {
         globalWs.sendWebsocketMessage(message, null);
     };
 
+    const byteWebSocketPing = () => {
+        globalWs.sendWebsocketMessage({
+            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            type: WsMessageType.ByteLivePing,
+            payload: {
+                byte_attempt_id: byteAttemptId
+            }
+        }, null);
+    };
+
+    const startPing = React.useCallback(() => {
+        if (byteAttemptId && pingInterval.current === null) {
+            byteWebSocketPing(); // Send the first ping immediately
+            pingInterval.current = setInterval(byteWebSocketPing, 60000); // Then start the interval
+        }
+    }, [byteAttemptId]);
+
+    const stopPing = () => {
+        if (pingInterval.current) {
+            clearInterval(pingInterval.current);
+            pingInterval.current = null;
+        }
+    };
+
     useEffect(() => {
-        if (byteAttemptId) {
-            byteWebSocketPing();
+        // Add event listeners for focus and blur
+        window.addEventListener('focus', startPing);
+        window.addEventListener('blur', stopPing);
+
+        // Start ping if tab is already in focus when component mounts
+        if (document.hasFocus()) {
+            startPing();
         }
 
         return () => {
-            if (pingInterval) {
-                clearInterval(pingInterval); // Clear the interval when the component unmounts or byteAttemptId changes
-            }
+            stopPing();
+            // Remove event listeners
+            window.removeEventListener('focus', startPing);
+            window.removeEventListener('blur', stopPing);
         };
     }, [byteAttemptId]);
 
     const sendExecRequest = (retryCount: number = 0) => {
-        console.log("sendExecRequest triggered");
-
         const message = {
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
             type: WsMessageType.AgentExecRequest,
@@ -368,8 +347,6 @@ function Byte() {
                 }
             }
         };
-
-        console.log("Sending message:", message);
 
         setIsReceivingData(true);
         setTerminalVisible(true)
@@ -384,12 +361,10 @@ function Byte() {
         globalWs.sendWebsocketMessage(
             message,
             (msg: WsMessage<any>): boolean => {
-                console.log("Received message:", msg);
-
                 if (msg.type !== WsMessageType.AgentExecResponse) {
                     if (msg.type === WsMessageType.GenericError) {
                         const payload = msg.payload as WsGenericErrorPayload;
-                        console.log("generic error: ", msg.payload.error)
+
                         if (payload.error === "workspace is not active") {
                             if (retryCount >= 20) {
                                 setOutput({
@@ -409,17 +384,13 @@ function Byte() {
                                 setExecutingCode(false)
                                 return true
                             }
-                            
-                            console.log("triggering retry")
                             // wait 1s and try again
                             sleep(1000).then(() => {
-                                console.log("executing retry")
                                 sendExecRequest(retryCount + 1)
                             })
                             return true
                         }
                     }
-                    console.log("error: ", msg);
                     return true;
                 }
 
@@ -456,10 +427,7 @@ function Byte() {
                 })
 
                 setExecutingCode(!done)
-                console.log("done: ", done)
-                console.log("outputPopup: ", outputPopup)
                 if (done && !outputPopup) {
-                    console.log("trying to set the output popup: ", outputPopup)
                     setOutputPopup(true)
                 }
 
@@ -605,8 +573,6 @@ function Byte() {
 
             if (res["message"] === "Workspace Created Successfully") {
                 // TODO implement what needs to be done if successful
-                console.log("agent_url: ", res['agent_url'])
-                console.log("workspace: ", res['workspace'])
             }
         } catch (error) {
             swal("Error", "An error occurred while creating the byte workspace.");
@@ -714,67 +680,6 @@ function Byte() {
         navigate(`/byte/${byteId}`);
     };
 
-    // const sendWebsocketMessageNextOutput = (byteId: string, userCode: string, codeOutput: string) => {
-    //     if (executingOutputMessage) {
-    //         return
-    //     }
-    //
-    //     console.log("next output starting")
-    //
-    //     console.log(" payload next output is: ", {
-    //         byte_id: byteId,
-    //         byte_description: bytesDescription,
-    //         code_language: bytesLang,
-    //         // @ts-ignore
-    //         byte_output: codeOutput,// changed from this because of an error codeOutput["stdout"][0]
-    //         code: userCode
-    //     })
-    //
-    //
-    //     setExecutingOutputMessage(true)
-    //     ctWs.sendWebsocketMessage({
-    //         sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-    //         type: CtMessageType.WebSocketMessageTypeByteNextOutputMessageRequest,
-    //         origin: CtMessageOrigin.WebSocketMessageOriginClient,
-    //         created_at: Date.now(),
-    //         payload: {
-    //             byte_id: byteId,
-    //             byte_description: bytesDescription,
-    //             code_language: bytesLang,
-    //             // @ts-ignore
-    //             byte_output: codeOutput, // changed from codeOutput["stdout"][0] because of an error
-    //             code: userCode
-    //         }
-    //     } satisfies CtMessage<CtByteNextOutputRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtByteNextOutputResponse>) => {
-    //         //console.log("response message of next output: ", msg)
-    //         if (msg.type !== CtMessageType.WebSocketMessageTypeByteNextOutputMessageResponse) {
-    //             console.log("failed next output message", msg)
-    //             setExecutingOutputMessage(false)
-    //             return true
-    //         }
-    //         const p: CtByteNextOutputResponse = msg.payload as CtByteNextOutputResponse;
-    //         setOutputMessage(p.complete_message)
-    //         setOutputPopup(true)
-    //         setExecutingOutputMessage(!p.done)
-    //         return p.done
-    //     })
-    // };
-
-    // useEffect(() => {
-    //     console.log("output is: ", output)
-    //     console.log("id is: ", id)
-    //     // @ts-ignore
-    //     if (id !== undefined && output && output.merged !== "Running...") {
-    //         console.log("next output called")
-    //         sendWebsocketMessageNextOutput(id, code, output.merged)
-    //     }
-    // }, [output])
-
-    useEffect(() => {
-        console.log("code changed: ", code)
-    }, [code])
-
-
     const deleteTypingTimer = () => {
         if (typingTimerRef.current) {
             clearTimeout(typingTimerRef.current);
@@ -792,7 +697,6 @@ function Byte() {
             setNextStepsPopup(true)
         }
         if (outputPopup) {
-            console.log("Waiting for outputPopup to be false");
             return;
         }
         if (!workspaceCreated && byteData) {
@@ -805,7 +709,6 @@ function Byte() {
     };
 
     useEffect(() => {
-        console.log("button clicked ref: ", buttonClickedRef.current)
         if (firstRenderRef.current) {
             firstRenderRef.current = false; // Set it to false on the first render
             return; // Skip the rest of the useEffect on the first render
@@ -818,8 +721,6 @@ function Byte() {
     }, [outputPopup]);
 
     useEffect(() => {
-        console.log("cursor position: ", cursorPosition)
-
         const lines = code.split("\n");
 
         // detect if any lines extend beyond 80 chars
@@ -829,8 +730,6 @@ function Byte() {
         if (cursorPosition === null) {
             return
         }
-
-        //console.log("line: ", lines[cursorPosition.row])
         if (lines[cursorPosition.row] === undefined) {
             return
         }
@@ -838,10 +737,6 @@ function Byte() {
         let suffix = lines[cursorPosition.row].slice(cursorPosition.column, lines[cursorPosition.row].length) + lines.filter((x, i) => i > cursorPosition.row).join("\n")
         setCodeBeforeCursor(preffix)
         setCodeAfterCursor(suffix)
-
-
-        console.log("preffix\n", preffix)
-        console.log("suffix\n", suffix)
     }, [code, cursorPosition])
 
     interface TerminalOutputProps {
@@ -882,59 +777,6 @@ function Byte() {
         )
     };
 
-    const [currentLineMarker, setCurrentLineMarker] = useState<number | null>(null);
-
-    // const editorMarkCallback = React.useCallback(() => {
-    //     console.log("marker callback")
-    //
-    //     if (!aceEditorRef.current) {
-    //         return;
-    //     }
-    //
-    //     console.log("marking editor")
-    //
-    //     const editor = aceEditorRef.current.editor;
-    //     const session = editor.getSession();
-    //     const Range = ace.require('ace/range').Range;
-    //
-    //     console.log("marked")
-    //
-    //     // Get the current cursor position
-    //     const cursor = editor.getCursorPosition();
-    //
-    //     // Add a new marker for the current line
-    //     const newMarker = session.addMarker(new Range(cursor.row, 0, cursor.row, 1), "editorLineHighlighted", "fullLine");
-    //     //@ts-ignore
-    //     setCurrentLineMarker(newMarker);
-    // }, [aceEditorRef.current, currentLineMarker])
-
-    function findFunctionStartLine(code: string, cursorLine: number) {
-        const lines = code.split('\n');
-        let depth = 0;
-
-        for (let i = cursorLine - 1; i >= 0; i--) {
-            const line = lines[i].trim();
-
-            // Check for function start patterns
-            if (line.match(/function\s+(\w+)?\s*\(/) || // function declaration/expression
-                line.match(/(\w+)\s*=\s*function\s*\(/) || // function expression
-                line.match(/(\w+)\s*=\s*\(/) || // arrow function
-                line.match(/(\w+):\s*function\s*\(/)) { // method shorthand
-                if (depth === 0) {
-                    return i;
-                }
-                depth--;
-            }
-
-            // Check for function end (simple approach)
-            if (line.endsWith('}')) {
-                depth++;
-            }
-        }
-
-        return -1; // Function start not found
-    }
-
     useEffect(() => {
         if (byteData === null) {
             setContainerSyle(containerStyleDefault);
@@ -963,7 +805,6 @@ function Byte() {
         dispatch(updateBytesState(state))
     }
 
-    console.log("byte difficulty update: ", determineDifficulty())
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
