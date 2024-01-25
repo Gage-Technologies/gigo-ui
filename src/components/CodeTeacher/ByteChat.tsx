@@ -1,8 +1,9 @@
 import {
+    alpha,
     Box,
     Button, ButtonBase,
     Card,
-    CircularProgress, createTheme, Divider, IconButton, InputAdornment, PaletteMode,
+    CircularProgress, createTheme, Divider, Grid, IconButton, InputAdornment, PaletteMode,
     PopperPlacementType, Stack,
     styled,
     TextField,
@@ -38,6 +39,7 @@ import {getAllTokens} from "../../theme";
 import ForumIcon from '@mui/icons-material/Forum';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import {grey} from "@mui/material/colors";
 
 export type ByteChatProps = {
     byteID: string;
@@ -115,6 +117,7 @@ export default function ByteChat(props: ByteChatProps) {
         },
     ]);
     const [threadVisibility, setThreadVisibility] = useState<{ [key: number]: boolean }>({});
+    const [showButtons, setShowButtons] = useState(false);
 
     const checkScrollToBottom = () => {
         if (messagesContainerRef.current) {
@@ -229,11 +232,16 @@ export default function ByteChat(props: ByteChatProps) {
             }
 
             setMessages(uniqueMessages)
+            console.log("last message thread: ", uniqueMessages[uniqueMessages.length-1].thread_number)
+            console.log("current thread count: ", currentThreadCount)
+            console.log("should show buttons: ", uniqueMessages[uniqueMessages.length-1].thread_number !== currentThreadCount)
+            setShowButtons(uniqueMessages[uniqueMessages.length-1].thread_number !== currentThreadCount)
             return true
         })
     }, [chatId])
 
     const sendUserCTChat = (overrideMessage?: string) => {
+        setShowButtons(false)
         setDisableChat(true)
         setState(State.LOADING)
         const messageContent = overrideMessage !== undefined ? overrideMessage : userMessage
@@ -334,11 +342,10 @@ export default function ByteChat(props: ByteChatProps) {
             if (p.success) {
                 console.log("thread count increased")
                 setCurrentThreadCount(prevCount => prevCount + 1);
+                setShowButtons(true)
             }
             return true
         })
-
-
     }
 
     useEffect(() => {
@@ -678,20 +685,20 @@ export default function ByteChat(props: ByteChatProps) {
             threadNumber !== 0
             ?
                 <Box display="flex" alignItems="center" justifyContent="center" width="100%">
-                    <Box flexGrow={1} borderBottom="1px solid #ffffff40" sx={{ marginLeft: "20px" }} />
+                    <Box flexGrow={1} borderBottom={`1px solid ${theme.palette.text.primary}`}  sx={{ marginLeft: "20px" }} />
                     {isCollapsible
                         ?
                         <Button sx={{height: "3vh"}} onClick={onClick}>
-                            <Typography variant="subtitle1" noWrap sx={{ color: "#fff", fontWeight: 200, fontSize: "0.7rem", marginX: 2, display: 'flex', alignItems: 'center', }}>
+                            <Typography variant="subtitle1" noWrap sx={{ color: theme.palette.text.primary, fontWeight: 200, fontSize: "0.7rem", marginX: 2, display: 'flex', alignItems: 'center', }}>
                                 {`Thread ${threadNumber} `}{isVisible ? <ExpandLessIcon fontSize={"small"} /> : <ExpandMoreIcon fontSize={"small"}/>}
                             </Typography>
                         </Button>
                         :
-                        <Typography variant="subtitle1" noWrap sx={{ color: "#fff", fontWeight: 200, fontSize: "0.7rem", marginX: 2, display: 'flex', alignItems: 'center', }}>
+                        <Typography variant="subtitle1" noWrap sx={{ color: theme.palette.text.primary, fontWeight: 200, fontSize: "0.7rem", marginX: 2, display: 'flex', alignItems: 'center', }}>
                             Active Thread
                         </Typography>
                     }
-                    <Box flexGrow={1} borderBottom="1px solid #ffffff40" sx={{ marginRight: "20px" }} />
+                    <Box flexGrow={1} borderBottom={`1px solid ${theme.palette.text.primary}`} sx={{ marginRight: "20px" }} />
                 </Box>
             :
                 <></>
@@ -707,6 +714,43 @@ export default function ByteChat(props: ByteChatProps) {
 
     const handleInitialQuestions = (question: string) => {
         sendUserCTChat(question);
+    }
+
+    const renderSuggestions = () => {
+        console.log("rendering suggestions: ", showButtons)
+        if (!showButtons)
+            return null
+        console.log("suggestions returned")
+        return (
+            <Grid container sx={{
+                marginBottom: '10px'
+            }} spacing={1}>
+                {props.questions.map((q, index) => (
+                    <Grid item xs={6}>
+                        <Button
+                            key={index}
+                            variant="outlined"
+                            sx={{
+                                fontSize: '0.65rem',
+                                textTransform: 'none',
+                                p: .7,
+                                textAlign: "left",
+                                color: mode === "light" ? alpha("#1d1d1d", 0.6) : alpha(grey[300], 0.6),
+                                border: mode === "light" ? `1px solid ${alpha("#1d1d1d", 0.2)}` : `1px solid ${alpha(grey[300], 0.2)}`,
+                                '&:hover': {
+                                    color: mode === "light" ? "#1d1d1d" : grey[300],
+                                    backgroundColor: alpha(grey[500], 0.2),
+                                    border: mode === "light" ? `1px solid ${alpha("#1d1d1d", 0.6)}` : `1px solid ${alpha(grey[500], 0.6)}`
+                                }
+                            }}
+                            onClick={() => handleInitialQuestions(q)}
+                        >
+                            {q}
+                        </Button>
+                    </Grid>
+                ))}
+            </Grid>
+        )
     }
 
     return (
@@ -727,30 +771,7 @@ export default function ByteChat(props: ByteChatProps) {
                 {messagesMemo}
                 {state === State.LOADING && renderBotMessage(response, true, "", false, false, "")}
             </Box>
-            {(messages.length === 3)
-                ?
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    flexDirection: 'column',
-                    gap: '5px',
-                    marginBottom: '10px'
-                }}>
-                    {props.questions.map((q, index) => (
-                        <Button
-                            key={index}
-                            variant="outlined"
-                            style={{fontSize: '0.65rem'}}
-                            onClick={() => handleInitialQuestions(q)}
-                        >
-                            {q}
-                        </Button>
-                    ))}
-                </div>
-                :
-                <></>
-            }
+            {renderSuggestions()}
             {!isAtBottom && (
                 <Box
                     display="flex"
