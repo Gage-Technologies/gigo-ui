@@ -47,6 +47,7 @@ export type ByteChatProps = {
     codePrefix: string;
     codeSuffix: string;
     codeLanguage: string;
+    questions: [];
 };
 
 export default function ByteChat(props: ByteChatProps) {
@@ -232,9 +233,10 @@ export default function ByteChat(props: ByteChatProps) {
         })
     }, [chatId])
 
-    const sendUserCTChat = () => {
+    const sendUserCTChat = (overrideMessage?: string) => {
         setDisableChat(true)
         setState(State.LOADING)
+        const messageContent = overrideMessage !== undefined ? overrideMessage : userMessage
         let m: CtByteChatMessage[] = JSON.parse(JSON.stringify(messages));
         m.push({
             _id: "new-um",
@@ -244,7 +246,7 @@ export default function ByteChat(props: ByteChatProps) {
             user_id: "",
             thread_number: currentThreadCount,
             message_type: CtByteMessageMessageType.User,
-            content: userMessage,
+            content: messageContent,
             created_at: new Date(),
             message_number: m[m.length-1] ? m[m.length-1].message_number + 1 : 0,
             premium_llm: false,
@@ -259,7 +261,7 @@ export default function ByteChat(props: ByteChatProps) {
             created_at: Date.now(),
             payload: {
                 byte_id: props.byteID,
-                user_message: userMessage,
+                user_message: messageContent,
                 code_prefix: props.codePrefix,
                 code_suffix: props.codeSuffix,
                 code_language: props.codeLanguage,
@@ -703,6 +705,10 @@ export default function ByteChat(props: ByteChatProps) {
         </>
     ), [(state === State.LOADING) ? null : messages, threadVisibility, currentThreadCount])
 
+    const handleInitialQuestions = (question: string) => {
+        sendUserCTChat(question);
+    }
+
     return (
         <>
             <Box
@@ -721,6 +727,30 @@ export default function ByteChat(props: ByteChatProps) {
                 {messagesMemo}
                 {state === State.LOADING && renderBotMessage(response, true, "", false, false, "")}
             </Box>
+            {(messages.length === 3)
+                ?
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    flexDirection: 'column',
+                    gap: '5px',
+                    marginBottom: '10px'
+                }}>
+                    {props.questions.map((q, index) => (
+                        <Button
+                            key={index}
+                            variant="outlined"
+                            style={{fontSize: '0.65rem'}}
+                            onClick={() => handleInitialQuestions(q)}
+                        >
+                            {q}
+                        </Button>
+                    ))}
+                </div>
+                :
+                <></>
+            }
             {!isAtBottom && (
                 <Box
                     display="flex"

@@ -841,6 +841,8 @@ function Byte() {
                                         devSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
                                         // @ts-ignore
                                         difficulty={difficultyToString(determineDifficulty())}
+                                        // @ts-ignore
+                                        questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
                                         codePrefix={codeBeforeCursor}
                                         codeSuffix={codeAfterCursor}
                                         codeLanguage={programmingLanguages[byteData ? byteData.lang : 5]}
@@ -921,6 +923,8 @@ function Byte() {
                                 byteId={id || ""}
                                 // @ts-ignore
                                 description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
+                                // @ts-ignore
+                                questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
                                 maxWidth={"20vw"}
                                 codeOutput={output?.merged || ""}
                             />
