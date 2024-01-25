@@ -731,6 +731,8 @@ export default function ByteChat(props: ByteChatProps) {
                             key={index}
                             variant="outlined"
                             sx={{
+                                height: "100%",
+                                width:"100%",
                                 fontSize: '0.65rem',
                                 textTransform: 'none',
                                 p: .7,
