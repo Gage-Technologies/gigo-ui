@@ -1,17 +1,23 @@
 User-agent: Googlebot
-Disallow:
+Allow: /
 
 User-agent: Bingbot
-Disallow:
+Allow: /
 
 User-agent: Bravebot
-Disallow:
+Allow: /
 
 User-agent: YouBot
-Disallow:
+Allow: /
 
 User-agent: GPTBot
-Disallow: /
+Allow: /
+
+User-agent: AhrefSiteAudit
+Allow: /
+
+User-agent: AhrefBot
+Allow: /
 
 User-agent: *
 Disallow: /
