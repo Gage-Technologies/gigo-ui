@@ -118,6 +118,7 @@ export default function ByteChat(props: ByteChatProps) {
     ]);
     const [threadVisibility, setThreadVisibility] = useState<{ [key: number]: boolean }>({});
     const [showButtons, setShowButtons] = useState(false);
+    const [newChat, setNewChat] = useState(false)
 
     const checkScrollToBottom = () => {
         if (messagesContainerRef.current) {
@@ -138,6 +139,8 @@ export default function ByteChat(props: ByteChatProps) {
 
     useEffect(() => {
         scrollToTop()
+        setNewChat(true)
+        setThreadVisibility({ [currentThreadCount]: false })
     }, [props.description])
 
     const toggleThreadVisibility = (threadNumber: number) => {
@@ -181,7 +184,7 @@ export default function ByteChat(props: ByteChatProps) {
     }, []);
 
     useEffect(() => {
-        setThreadVisibility({ [currentThreadCount]: true });
+        setThreadVisibility({ [currentThreadCount]: true })
     }, [currentThreadCount]);
 
 
@@ -504,6 +507,21 @@ export default function ByteChat(props: ByteChatProps) {
         );
     };
 
+    const handleBotColor = (msgId: string) => {
+        if (msgId == 'init' || msgId === 'init2' || msgId === 'init3') {
+            switch(props.difficulty){
+                case 'easy':
+                    return '#126353'
+                case 'medium':
+                    return '#242f6a'
+                case 'hard':
+                    return '#75233c'
+            }
+        } else {
+            return "#31343a40"
+        }
+    }
+
 
     const renderBotMessage = (
         content: string,
@@ -550,7 +568,7 @@ export default function ByteChat(props: ByteChatProps) {
                         marginRight: "auto",
                         marginBottom: "0px",
                         padding: "10px",
-                        backgroundColor: "#31343a40",
+                        backgroundColor: handleBotColor(msgId),
                         border: `1px solid ${premiumLlm ? "#84E8A2" : "#31343a"}`,
                         color: "white",
                         borderRadius: "10px",
@@ -680,6 +698,28 @@ export default function ByteChat(props: ByteChatProps) {
         });
     };
 
+    const handleActiveThread = () => {
+        if (newChat) {
+            return (
+                <Button sx={{height: "3vh"}} onClick={() => {
+                    setNewChat(false)
+                    setThreadVisibility({ [currentThreadCount]: true })
+                }}>
+                    <Typography variant="subtitle1" noWrap sx={{ color: theme.palette.text.primary, fontWeight: 200, fontSize: "0.7rem", marginX: 2, display: 'flex', alignItems: 'center', }}>
+                        Active Thread <ExpandMoreIcon fontSize={"small"}/>
+                    </Typography>
+                </Button>
+            )
+        } else {
+            return (
+                <Typography variant="subtitle1" noWrap sx={{ color: theme.palette.text.primary, fontWeight: 200, fontSize: "0.7rem", marginX: 2, display: 'flex', alignItems: 'center', }}>
+                    Active Thread
+                </Typography>
+            )
+        }
+
+    }
+
     const ThreadDivider = ({ threadNumber, onClick, isVisible, isCollapsible }: { threadNumber: number; onClick: () => void; isVisible: boolean, isCollapsible: boolean }) => {
         return (
             threadNumber !== 0
@@ -694,9 +734,9 @@ export default function ByteChat(props: ByteChatProps) {
                             </Typography>
                         </Button>
                         :
-                        <Typography variant="subtitle1" noWrap sx={{ color: theme.palette.text.primary, fontWeight: 200, fontSize: "0.7rem", marginX: 2, display: 'flex', alignItems: 'center', }}>
-                            Active Thread
-                        </Typography>
+                        <>
+                            {handleActiveThread()}
+                        </>
                     }
                     <Box flexGrow={1} borderBottom={`1px solid ${theme.palette.text.primary}`} sx={{ marginRight: "20px" }} />
                 </Box>
@@ -717,10 +757,8 @@ export default function ByteChat(props: ByteChatProps) {
     }
 
     const renderSuggestions = () => {
-        console.log("rendering suggestions: ", showButtons)
         if (!showButtons)
             return null
-        console.log("suggestions returned")
         return (
             <Grid container sx={{
                 marginBottom: '10px'
