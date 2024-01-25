@@ -19,6 +19,7 @@ export interface ExecRequestPayload {
 }
 
 export interface ExecResponsePayload {
+    command_id_string: string;
     stdout:     OutputRow[];
     stderr:     OutputRow[];
     status_code: number;

@@ -41,6 +41,7 @@ import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import DifficultyAdjuster from "../components/ByteDifficulty";
 import { selectAuthState } from "../reducers/auth/auth";
 import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../reducers/bytes/bytes";
+import StopIcon from "@mui/icons-material/Stop";
 
 interface MergedOutputRow {
     error: boolean;
@@ -240,6 +241,7 @@ function Byte() {
     const [suggestionPopup, setSuggestionPopup] = useState(false);
     const [nextStepsPopup, setNextStepsPopup] = useState(false);
     const [nextStepsActive, setNextStepsActive] = useState(false);
+    const [commandId, setCommandId] = useState("");
 
     const [executingOutputMessage, setExecutingOutputMessage] = useState<boolean>(false)
     const [executingCode, setExecutingCode] = useState<boolean>(false)
@@ -291,6 +293,26 @@ function Byte() {
         };
 
         globalWs.sendWebsocketMessage(message, null);
+    };
+
+    const cancelCodeExec = (commandId: string) => {
+        console.log("cancelCodeExec called. Command ID: ", commandId)
+
+        const message = {
+            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            type: WsMessageType.CancelExecRequest,
+            payload: {
+                byte_attempt_id: byteAttemptId,
+                payload: {
+                    command_id: commandId,
+                }
+            }
+        };
+
+        globalWs.sendWebsocketMessage(message, null);
+
+        // Set executingCode false to indicate that execution has been stopped
+        setExecutingCode(false);
     };
 
     const byteWebSocketPing = () => {
@@ -357,7 +379,7 @@ function Byte() {
             mergedLines: [{ timestamp: Date.now() * 1000, content: "Running...", error: false }],
         });
         setExecutingCode(true)
-
+        setCommandId("");
         globalWs.sendWebsocketMessage(
             message,
             (msg: WsMessage<any>): boolean => {
@@ -395,6 +417,10 @@ function Byte() {
                 }
 
                 const payload = msg.payload as ExecResponsePayload;
+
+                if (payload.command_id_string) {
+                    setCommandId(payload.command_id_string);
+                }
                 const { stdout, stderr, done } = payload;
 
                 // skip the processing if this is the first response
@@ -435,6 +461,7 @@ function Byte() {
                 return done
             }
         );
+        setIsReceivingData(false)
     };
 
 
@@ -746,8 +773,11 @@ function Byte() {
 
     const TerminalOutput: React.FC<TerminalOutputProps> = ({ output, style }) => {
         if (!terminalVisible) {
-            return null
+            return null;
         }
+
+        // Use executingCode to determine if the stop icon should be shown
+        const isRunning = executingCode;
 
         return (
             <Box style={{ ...terminalOutputStyle, ...style }}>
@@ -762,19 +792,25 @@ function Byte() {
                         padding: 1,
                         minWidth: "0px"
                     }}
-                    onClick={() => setTerminalVisible(false)}
+                    onClick={() => {
+                        if (isRunning) {
+                            cancelCodeExec(commandId); // Call cancelCodeExec with the stored command ID
+                        } else {
+                            setTerminalVisible(false);
+                        }
+                    }}
                 >
-                    <Close />
+                    {isRunning ? <StopIcon /> : <Close />}
                 </Button>
                 <code>
                     {output && output.mergedLines.map((line, index) => (
                         <span style={{ color: line.error ? "red" : "white" }}>
-                            {line.content + "\n"}
-                        </span>
+                        {line.content + "\n"}
+                    </span>
                     ))}
                 </code>
             </Box>
-        )
+        );
     };
 
     useEffect(() => {
