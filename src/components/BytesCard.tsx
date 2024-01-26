@@ -39,6 +39,7 @@ import DebugIcon from "./Icons/Debug";
 import BytesEasyBadge from "./Icons/bytes/BytesEasyBadge";
 import BytesMediumBadge from "./Icons/bytes/BytesMediumBadge";
 import BytesHardBadge from "./Icons/bytes/BytesHardBadge";
+import BytesLanguage from "./Icons/bytes/BytesLanguage";
 
 
 interface IProps {
@@ -60,6 +61,7 @@ interface IProps {
     completedEasy?: boolean;
     completedMedium?: boolean;
     completedHard?: boolean;
+    language?: string;
 }
 
 export default function BytesCard(props: IProps) {
@@ -109,26 +111,20 @@ export default function BytesCard(props: IProps) {
         },
         content: {
             paddingBottom: "4px",
-            paddingLeft: 0, // Remove left padding to align with the image
-            paddingRight: "8px", // You can adjust right padding as needed
+            paddingLeft: 0,
+            paddingRight: "8px",
             width: props.width
         },
         badgesContainer: {
             display: 'flex',
-            width: '100%', // Match the width of the image for alignment
-            justifyContent: 'center', // Center the badges horizontally
-            marginTop: '-8vh', // Adjust based on the height of your badges to overlap
+            width: '100%',
+            justifyContent: 'center',
+            marginTop: '-8vh',
         },
         container: {
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
-        },
-        badge: {
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden',
+            justifyContent: 'space-between',
         },
     };
 
@@ -185,20 +181,23 @@ export default function BytesCard(props: IProps) {
                 >
                     <CardMedia component="div" sx={styles.image}>
                             <BytesHardBadge
-                                finished={props.completedEasy === undefined ? false : props.completedEasy}
+                                finished={props.completedHard === undefined ? false : props.completedHard}
                                 inByte={props.inByte}
                             />
                             <BytesMediumBadge finished={props.completedMedium === undefined ? false : props.completedMedium}
                                               inByte={props.inByte}
                             />
-                            <BytesEasyBadge finished={props.completedHard === undefined ? false : props.completedHard}
+                            <BytesEasyBadge finished={props.completedEasy === undefined ? false : props.completedEasy}
                                             inByte={props.inByte}
                             />
                     </CardMedia>
                     <CardContent sx={styles.content}>
-                        <Typography gutterBottom variant="h6" component="div" sx={styles.title}>
-                            {props.bytesTitle}
-                        </Typography>
+                        <div style={styles.container}>
+                            <Typography gutterBottom variant="h6" component="div" sx={styles.title}>
+                                {props.bytesTitle}
+                            </Typography>
+                            <BytesLanguage language={props.language === undefined ? "Python" : props.language}/>
+                        </div>
                     </CardContent>
                 </Card>
             </ButtonBase>

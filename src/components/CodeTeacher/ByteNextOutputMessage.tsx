@@ -38,6 +38,7 @@ export type ByteNextOutputMessageProps = {
     acceptedCallback: () => void;
     onExpand: () => void;
     onHide: () => void;
+    onSuccess: () => void;
     lang: string;
     code: string;
     byteId: string;
@@ -206,6 +207,7 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
             setState(State.COMPLETED)
             if (p.success) {
                 setResponse("")
+                props.onSuccess()
             } else {
                 setResponse(p.explanation)
             }

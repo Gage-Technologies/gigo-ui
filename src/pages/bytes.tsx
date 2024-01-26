@@ -522,6 +522,7 @@ function Byte() {
                 completedEasy: byte["completed_easy"],
                 completedMedium: byte["completed_medium"],
                 completedHard: byte["completed_hard"],
+                language: programmingLanguages[byte.lang]
             }));
             setRecommendedBytes(enhancedBytes);
         } else {
@@ -634,6 +635,33 @@ function Byte() {
         }
         return false
     };
+
+    const markComplete = async () => {
+        let res = await call(
+            "/api/bytes/setCompleted",
+            "POST",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {
+                byte_id: byteAttemptId ,
+                difficulty: difficultyToString(determineDifficulty()),
+            },
+            null,
+            config.rootPath
+        );
+
+        if (res === undefined) {
+            swal("Server Error", "Cannot complete byte. Please try again later.");
+            return;
+        }
+
+        if (res["success"] !== true) {
+            swal("Server Error", "Cannot complete byte. Please try again later.");
+            return;
+        }
+    }
 
     useEffect(() => {
         const byteId = getByteIdFromUrl();
@@ -963,6 +991,9 @@ function Byte() {
                         acceptedCallback={() => { setOutputPopup(false) }}
                         onExpand={() => setActiveSidebarTab("debugOutput")}
                         onHide={() => setActiveSidebarTab(null)}
+                        onSuccess={() => {
+                            markComplete()
+                        }}
                         lang={programmingLanguages[byteData ? byteData.lang : 5]}
                         code={code}
                         byteId={id || ""}
@@ -1077,7 +1108,7 @@ function Byte() {
                             {renderEditorSideBar()}
                         </div>
                         <div style={byteSelectionMenuStyle}>
-                            {recommendedBytes && <ByteSelectionMenu bytes={recommendedBytes} onSelectByte={handleSelectByte} />}
+                            {recommendedBytes && <ByteSelectionMenu bytes={recommendedBytes} onSelectByte={handleSelectByte}/>}
                         </div>
                     </div>
                 </Container>

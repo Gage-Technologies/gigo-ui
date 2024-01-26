@@ -26,6 +26,7 @@ import renown10 from "../img/renown/renown10.svg"
 import {useAppSelector} from "../app/hooks";
 import ReactGA from "react-ga4";
 import BytesCard from "../components/BytesCard";
+import { programmingLanguages } from "../services/vars";
 
 
 function AllBytesScroll() {
@@ -117,6 +118,7 @@ function AllBytesScroll() {
                                                 bytesThumb={config.rootPath + "/static/bytes/t/" + byte["_id"]}
                                                 onClick={() => navigate("/byte/" + byte["_id"])}
                                                 role={authState.role}
+                                                language={programmingLanguages[byte["lang"]]}
                                             />
                                         </div>
                                     </div>

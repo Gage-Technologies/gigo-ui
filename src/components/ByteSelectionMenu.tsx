@@ -10,7 +10,8 @@ interface Byte {
     bytesThumb: string;
     completedEasy: boolean;
     completedMedium: boolean;
-    completedHard: boolean
+    completedHard: boolean;
+    language: string;
 }
 
 interface ByteSelectionMenuProps {
@@ -53,6 +54,7 @@ const ByteSelectionMenu: React.FC<ByteSelectionMenuProps> = ({ bytes, onSelectBy
                             height="20vh"
                             imageWidth="10vw"
                             imageHeight="15vh"
+                            language={byte.language}
                         />
                     </ListItem>
                 ))}

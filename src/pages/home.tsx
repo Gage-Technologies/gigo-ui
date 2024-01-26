@@ -64,6 +64,7 @@ import { LoadingButton } from "@mui/lab";
 import GIGOLandingPageNewYearsMobile from "../components/LandingNewYearsMobile";
 import GIGOLandingPageNewYears from "../components/LandingNewYears";
 import BytesCard from "../components/BytesCard";
+import {programmingLanguages} from "../services/vars";
 
 const gradientAnimation = keyframes`
   0% { background-position: 0% 50%; }
@@ -669,6 +670,7 @@ function Home() {
                                                 completedEasy={project["completed_easy"]}
                                                 completedMedium={project["completed_medium"]}
                                                 completedHard={project["completed_hard"]}
+                                                language={programmingLanguages[project["lang"]]}
                                             />
                                         </LazyLoad>
                                     </div>
