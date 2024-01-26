@@ -126,6 +126,7 @@ export default function Routing() {
                     <Route path={"/premium"} element={<PremiumDescription />} />
                     <Route path={"/buyingExclusive"} element={<BuyingExclusiveContent />} />
                     <Route path={"/aboutExclusive"} element={<ExclusiveContent />} />
+                    <Route path="/byte/:id" element={<Byte />} />
                     <Route element={<PrivateRoute />}>
                         {/*<Route path={"/journey"} element={<Journey />}/>*/}
                         {/*<Route path={"/journey/form"} element={<JourneyForm />}/>*/}
@@ -149,7 +150,6 @@ export default function Routing() {
                     </Route >
                     <Route element={<PrivateRoute softBlock={true} />}>
                         <Route path="/challenge/:id" element={<Challenge />} />
-                        <Route path="/byte/:id" element={<Byte />} />
                         <Route path="/attempt/:id" element={<AttemptPage />} />
                         <Route path="/user/:id" element={<User />} />
                     </Route>
