@@ -1123,7 +1123,7 @@ function NemesisOld() {
     }
 
     const antagonistBase = () => {
-        console.log("window width: " + window.innerWidth)
+
         return (
             <Grid item xs={2.5} style={{ height: "100%", position: "relative" }}>
                 <div style={window.innerWidth <= 2300 ? {
@@ -2178,7 +2178,7 @@ function NemesisOld() {
         }
 
         console.groupCollapsed(type);
-        console.log(data);
+        ;
         console.groupEnd();
     };
 

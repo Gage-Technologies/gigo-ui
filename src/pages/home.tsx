@@ -121,7 +121,7 @@ function Home() {
 
     // this enables us to push tutorial restarts from the app wrapper down into this page
     useEffect(() => {
-        console.log("run tutorial: ", runTutorial)
+
         if (tutorialState.home === !runTutorial) {
             return
         }

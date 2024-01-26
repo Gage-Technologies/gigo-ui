@@ -762,7 +762,7 @@ function CreateProject() {
 
 
     useEffect(() => {
-        console.log("location is: ", location)
+
         if(location.state) {
             // let updateState = Object.assign({}, initialCreateProjectStateUpdate);
             // //@ts-ignore
@@ -1065,7 +1065,7 @@ function CreateProject() {
     }
 
     React.useEffect(() => {
-        console.log("thumbnail : " + thumbnail);
+        ;
     }, [thumbnail]);
 
     /**
@@ -1106,7 +1106,7 @@ function CreateProject() {
             // execute file reader
             reader.readAsDataURL(clonedFile);
         } catch (e) {
-            console.log("ERROR: failed to read thumbnail: ", e);
+            ;
         }
     }
 

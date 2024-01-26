@@ -848,7 +848,7 @@ function User() {
         }
     }
 
-    console.log("friends list: ", friendsList)
+
 
     const handleAddFriends = () => {
         setAddFriendsPopupOpen(true);

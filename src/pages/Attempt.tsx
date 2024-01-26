@@ -197,7 +197,7 @@ function AttemptPage() {
                 return
             }
 
-            console.log("target: ", e.target.result)
+
 
             // send data url to image src
             setProjectImage(e.target.result);
@@ -207,13 +207,13 @@ function AttemptPage() {
             // execute file reader
             reader.readAsDataURL(clonedFile);
         } catch (e) {
-            console.log("ERROR: failed to read thumbnail: ", e);
+            ;
         }
     }
 
     const generateImage = async () => {
-        console.log("lol: ", projectImage)
-        console.log("prompt: ", prompt)
+
+
         // if (projectImage !== null || prompt === "")
         //     return false
 
@@ -324,7 +324,7 @@ function AttemptPage() {
         let edit;
 
         if (image != null) {
-            console.log("project is: ", projectImage)
+
             if (genImageId !== null && genImageId !== "") {
                 //@ts-ignore
                 params["gen_image_id"] = genImageId
@@ -392,7 +392,7 @@ function AttemptPage() {
                     return;
                 }
 
-                { console.log("res is: ", res["message"]) }
+                {  }
 
                 // if ("message" in res && res["message"] !== "success"){
                 //     if (sessionStorage.getItem("alive") === null)
@@ -505,7 +505,7 @@ function AttemptPage() {
         }
     };
     const getProjectInformation = async () => {
-        console.log("getting info")
+
         let attempt = await call(
             "/api/attempt/get",
             "post",
@@ -576,7 +576,7 @@ function AttemptPage() {
         // setProject(res["post"])
         setAttempt(res["post"])
         // setProjectDesc(res["post"]["description"])
-        console.log("setting info: ", res["description"])
+
         setProjectDesc(res["description"])
         // setAttemptDesc(res["description"])
         setAttemptDesc(res["evaluation"])
@@ -718,7 +718,7 @@ function AttemptPage() {
     let descriptionRef = useRef(null);
 
     const descriptionTab = () => {
-        console.log("description is: ", projectDesc)
+
         if (window.innerWidth > 1000) {
             return (
                 <MarkdownRenderer markdown={projectDesc} style={{
@@ -773,7 +773,7 @@ function AttemptPage() {
     //     setMainTab(newValue);
     //     if (newValue === "discussions") {
     //         getDiscussions().then(r => console.log(r))
-    //         console.log("run: ", runTutorial)
+
     //     }
     //     setDiscussionTab("main")
     //     setThread(false)
@@ -897,7 +897,7 @@ function AttemptPage() {
 
     const handleError = (e) => {
         e.target.src = alternativeImage; // replace with your alternative image URL
-        console.log("There was an error")
+
     };
 
     const attemptDescriptionTab = () => {
@@ -990,7 +990,7 @@ function AttemptPage() {
             }
         }
 
-        console.log("html project info: ", projectDesc)
+
 
         return (
             <div style={{ display: "flex", width: "80vw", height: "auto" }}>
@@ -1830,7 +1830,7 @@ function AttemptPage() {
                             />
                         ) : (
                             <div>
-                                {console.log("projectname: ", projectName)}
+                                {}
                                 {projectName}
                             </div>
                         )}

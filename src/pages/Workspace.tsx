@@ -266,12 +266,12 @@ const WorkspacePage = () => {
         try {
             jsonMessage = message.payload;
         } catch (e) {
-            console.log("websocket json decode error: ", e);
+            ;
             return
         }
 
         if (jsonMessage === null) {
-            console.log("unexpected null message")
+
             return
         }
 

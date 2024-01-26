@@ -103,7 +103,7 @@ const WorkspaceAdvancedPage = () => {
         if (workspace === null) {
             dispatch(deleteCache(`${cacheKey}:workspace`))
         } else {
-            console.log("workspace after set:", workspace);
+            ;
             dispatch(setCache(`${cacheKey}:workspace`, workspace))
         }
     }, [workspace])
@@ -160,12 +160,12 @@ const WorkspaceAdvancedPage = () => {
         try {
             jsonMessage = message.payload;
         } catch (e) {
-            console.log("websocket json decode error: ", e);
+            ;
             return
         }
 
         if (jsonMessage === null) {
-            console.log("unexpected null message")
+
             return
         }
 
@@ -190,7 +190,7 @@ const WorkspaceAdvancedPage = () => {
             setLoadingWorkspaceTransition(false)
         }
 
-        console.log("workspace error found: ", workspace.state)
+
 
         // handle workspace failure
         if (workspace.init_failure !== null && workspace.init_failure.stderr !== "" && workspace.state === 5) {
@@ -256,7 +256,7 @@ const WorkspaceAdvancedPage = () => {
     }
 
     useEffect(() => {
-        console.log('workspaceError after set:', workspaceError);
+        ;
     }, [workspaceError]);
 
 
@@ -281,7 +281,7 @@ const WorkspaceAdvancedPage = () => {
 
     useEffect(() => {
         let xpAttempt = window.sessionStorage.getItem('attemptXP')
-        console.log("attemptXP in workspace: ", xpAttempt)
+
         if (xpAttempt !== "undefined" && xpAttempt !== null) {
             setXpPopup(true)
             setXpData(JSON.parse(xpAttempt))
@@ -289,7 +289,7 @@ const WorkspaceAdvancedPage = () => {
         getHighestScore()
         const userAgent = navigator.userAgent;
         if (userAgent.includes("Firefox") && steps.length === 5) {
-            console.log("is firefox")
+
             // let tutorialSteps = steps
             // tutorialSteps.push({content: <h2>Firefox is incompatible with development environments and can cause unexpected issues.We suggest using a Chromium based browser such as Google Chrome, Brave, Edge, etc</h2>, target: 'body', 
             // //@ts-ignore
@@ -724,7 +724,7 @@ const WorkspaceAdvancedPage = () => {
 
     // useEffect to refresh the page when the mode changes
     useEffect(() => {
-        console.log("Mode changed to " + pageMode + " from " + oldMode);
+        ;
         if (pageMode === 'advanced' && oldMode !== 'advanced') {
             setOldMode('advanced');
             window.location.href = window.location.href.replace('launchpad', 'workspace');

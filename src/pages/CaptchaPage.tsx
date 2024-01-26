@@ -124,7 +124,7 @@ const CaptchaPage: React.FC<CaptchaProps> = ({setIsCaptchaVerified, redirectOnFa
             })
 
         } else {
-            console.log(res);
+            ;
             setIsCaptchaVerified(true);
         }
 
@@ -147,7 +147,7 @@ const CaptchaPage: React.FC<CaptchaProps> = ({setIsCaptchaVerified, redirectOnFa
         //     body: JSON.stringify({token}),
         // });
         //
-        // console.log('Verification successful!: ', token);
+        ;
     };
 
 

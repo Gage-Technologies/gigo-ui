@@ -35,7 +35,7 @@ function Journey() {
     );
 
     const aspectRatio = useAspectRatio();
-    console.log("aspectRatio: ", aspectRatio);
+    ;
     const handleTheme = () => {
         colorMode.toggleColorMode();
         localStorage.setItem('theme', mode === 'light' ? "dark" : 'light')
@@ -326,7 +326,7 @@ function useAspectRatio() {
             const width = window.screen.width;
             const height = window.screen.height;
             let divisor = gcd(width, height);
-            console.log("divisor: ", divisor);
+            ;
             // Dividing by GCD and truncating into integers
             let simplifiedWidth = Math.trunc(width / divisor);
             let simplifiedHeight = Math.trunc(height / divisor);
@@ -340,7 +340,7 @@ function useAspectRatio() {
         calculateAspectRatio();
 
         window.addEventListener('resize', calculateAspectRatio);
-        console.log("aspectRatio: ", aspectRatio);
+        ;
 
         return () => {
             window.removeEventListener('resize', calculateAspectRatio);

@@ -50,7 +50,7 @@ const clearReducers = async () => {
   store.dispatch(clearMessageCache())
   store.dispatch(clearChatState())
   store.dispatch(clearBytesState())
-  console.log("reducers clearead")
+
 }
 
 async function chunkFile(
@@ -64,11 +64,11 @@ async function chunkFile(
   rootPath = config.rootPath,
   completionCallback = null
 ) {
-  console.log("chunker")
+
 
   // exit if no file was passed
   if (!file) {
-    console.log("exit early: ", file)
+
     return;
   }
 
@@ -113,7 +113,7 @@ async function chunkFile(
 
   // specify reader callback to send upload chunks to the server
   reader.onload = async () => {
-    console.log("reading chunk")
+
 
     // increment the part count
     partCount++;
@@ -177,7 +177,7 @@ async function chunkFile(
   reader.onerror = () => {
   };
 
-  console.log("reading start")
+
 
   // execute recursive file chunk reader
   await reader.readAsArrayBuffer(file.slice(offset, endOffset));
@@ -270,7 +270,7 @@ async function apiCall(
       try {
         return response.json()
       } catch (err) {
-        console.log("failed to format api response to json: ", err)
+
         return response.text()
       }
     });
@@ -344,7 +344,7 @@ export default async function call(
 
       return result;
     } else {
-      console.log("calling chunker")
+
       // execute call via file chunker
       return await chunkFile(
         file,

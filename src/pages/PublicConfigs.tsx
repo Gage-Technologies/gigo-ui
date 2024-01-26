@@ -258,7 +258,7 @@ function PublicConfigs() {
         //         }
         //         fullTags.push(res["tags"][workspaceConfigs[i].tags[j]])
         //     }
-        //     console.log("configs second: ", fullTags)
+
         //
         //     // assign full tags to workspace
         //     workspaceConfigs[i].fullTags = fullTags
@@ -404,10 +404,10 @@ function PublicConfigs() {
     }
 
     const editConfig = async() => {
-        // console.log("description: ", editDescription)
-        // console.log("contnet: ", editContent)
-        // console.log("tags: ", editTags)
-        // console.log("id: ", editId)
+
+
+
+
 
         if (editTitle === "" || editDescription === "" || editContent === "" || editId === ""){
             swal("Error", "Please fill out all fields!")
@@ -449,13 +449,13 @@ function PublicConfigs() {
     }
 
     const getRevisions = async(config: WorkspaceConfig) => {
-        console.log("lang is: ", config)
+
         setRevision(true)
         setRevisionContent(config.content)
         setRevisionTitle(config.title)
         setRevisionId(config._id)
         setRevisionDescription(config.description)
-        console.log("tags are: ", config.fullTags)
+
         setRevisionTags(config.fullTags)
         setRevisionLanguage(config.languages)
         setRevisionUses(config.uses)
@@ -483,7 +483,7 @@ function PublicConfigs() {
         if (res !== undefined && res["revisions_and_tags"] !== undefined){
             let revisions = res["revisions_and_tags"]
             revisions.shift()
-            console.log("revisions are: ", revisions)
+
             setExtraRevisions(revisions)
         } else {
             swal("Error", "There was an issue getting other revisions. Please try again later.")
@@ -542,7 +542,7 @@ function PublicConfigs() {
     }
 
     const getRevisionsOfRevision = async(config: WorkspaceConfig) => {
-        console.log("lang is: ", config)
+
         setRevision(true)
         // @ts-ignore
         setRevisionContent(config["revision"].content)
@@ -585,8 +585,8 @@ function PublicConfigs() {
 
         if (res !== undefined && res["revisions_and_tags"] !== undefined){
             let revisions = res["revisions_and_tags"]
-            // console.log("revisions are: ", revisions)
-            // console.log("config ones: ", config)
+
+
             let revisionFull = []
             for (let i = 0; i < revisions.length; i++) {
                 if (!compareStructs(revisions[i], config)){
@@ -594,8 +594,8 @@ function PublicConfigs() {
                 }
             }
             // revisions.pop();
-            console.log("revisions are: ", revisions)
-            console.log("config ones: ", config)
+
+
             //@ts-ignore
             setExtraRevisions(revisionFull)
         } else {
@@ -873,7 +873,7 @@ function PublicConfigs() {
                                     {/*        onChange={(event, value: number[]) => {*/}
                                     {/*            let language = value*/}
 
-                                    {/*            console.log("language is: ", language)*/}
+                                    {/*            */}
 
                                     {/*            if (language === undefined) {*/}
                                     {/*                setEditLanguage([])*/}

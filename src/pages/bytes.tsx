@@ -297,7 +297,6 @@ function Byte() {
     };
 
     const cancelCodeExec = (commandId: string) => {
-        console.log("cancelCodeExec called. Command ID: ", commandId)
 
         const message = {
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
@@ -317,7 +316,6 @@ function Byte() {
     };
 
     const stdInExecRequest = (commandId: string, input: string) => {
-        console.log("stdInExecRequest called. Command ID: ", commandId, "Input: ", input);
 
         const message = {
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
@@ -376,7 +374,7 @@ function Byte() {
             window.removeEventListener('blur', stopPing);
         };
     }, [byteAttemptId]);
-    
+
     useEffect(() => {
         // Collapse the terminal when the difficulty changes
         setTerminalVisible(false);
@@ -848,7 +846,6 @@ function Byte() {
     //         // Add more commands as needed
     //     };
     //
-    //     console.log("Output is: " + output)
     //
     //     const formattedOutput = useMemo(() => {
     //         if (!output) return "";

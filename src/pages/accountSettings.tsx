@@ -281,7 +281,7 @@ function AccountSettings() {
     const setAvatar = (e: { topType: string; accessoriesType: string; avatarRef: {}; hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; } | ((prevState: { topType: string; accessoriesType: string; avatarRef: {}; hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; }) => { topType: string; accessoriesType: string; avatarRef: {}; hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; }) | ((prevState: { topType: string; accessoriesType: string; avatarRef: object; hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; }) => { topType: string; accessoriesType: string; avatarRef: object; hairColor: string; facialHairType: string; clotheType: string; clotheColor: string; eyeType: string; eyebrowType: string; mouthType: string; avatarStyle: string; skinColor: string; })) => {
 
         setAttributes(e)
-        console.log("e is: ", e)
+
         setAvatarRef(
             //@ts-ignore
             ReactDOM.findDOMNode(
@@ -352,13 +352,13 @@ function AccountSettings() {
         if ("message" in res) {
             const message = res.message;
             // Use the message as needed
-            console.log("Response message:", message);
+            ;
             if (message === "workspace settings edited successfully") {
                 swal("Success", "Your workspace settings were edited successfully.", "success")
             }
         } else {
             // Handle the case when the response does not have a "message" property
-            console.log("Response does not have a message property");
+            ;
             swal("Server Error", "An error occured editing your workspace settings.", "error")
         }
         // if (res["message"] === "workspace settings edited successfully") {
@@ -489,7 +489,7 @@ function AccountSettings() {
             setTab("membership   ")
             setMembershipType("info")
         }
-        console.log("sessionVar: ", storedValue)
+
         window.sessionStorage.removeItem("accountsPage");
         setLoading(true)
         apiLoad().then(r => console.log("here: ", r))
@@ -1150,9 +1150,9 @@ function AccountSettings() {
         if (membershipDates["last"] && membershipDates["last"] > 0 && membershipDates["upcoming"] && membershipDates["upcoming"] > 0) {
             percentageOfMembership = ((new Date().getTime() / 1000) - membershipDates["last"]) / (membershipDates["upcoming"] - membershipDates["last"])
 
-            console.log("start date: ", membershipDates["last"])
-            console.log("end date: ", membershipDates["upcoming"])
-            console.log("percentage: ", percentageOfMembership)
+
+
+
         }
 
         return (

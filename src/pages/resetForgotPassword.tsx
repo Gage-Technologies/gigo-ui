@@ -145,13 +145,13 @@ function ResetForgotPassword() {
 
     const resetForgotPassword = async () => {
         if (newPassword !== retypePassword) {
-            // console.log("New Password" + newPassword + "\n retyped Password" + retypePassword + "\n Valid Token" + validToken)
+
             swal("Invalid Password", "Please ensure your passwords match, are more than 5 characters")
             return;
         }
 
         if (!validToken) {
-            // console.log("New Password" + newPassword + "\n retyped Password" + retypePassword + "\n Valid Token" + validToken)
+
             swal("Token Invalid", "Your password reset link has expired. Please request a new one.")
             return;
         }

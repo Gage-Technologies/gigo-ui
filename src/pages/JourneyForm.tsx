@@ -132,7 +132,7 @@ function JourneyForm() {
 
     // const handleSubmit = (e: any) => {
     //     e.preventDefault();
-    //     console.log('Form data submitted:', formData);
+    ;
     // };
     const updateJourneyForm = (state: JourneyFormStateUpdate) => {
         // deep copy createProjectForm to local state copy to augment the local stat
@@ -214,7 +214,7 @@ function JourneyForm() {
     );
 
     const aspectRatio = useAspectRatio();
-    console.log("aspectRatio: ", aspectRatio);
+    ;
 
     const iconContainerStyles: React.CSSProperties = {
         width:
@@ -390,7 +390,7 @@ function JourneyForm() {
     };
 
     let sectionSwitch = () => {
-        console.log("sectionSwitch: ", section);
+        ;
         switch (section) {
             case -1:
                 return renderLearningGoalSection()
@@ -498,7 +498,7 @@ function JourneyForm() {
                                             required={true}
                                             value={journeyForm.learningGoal}
                                             onChange={(e) => {
-                                                console.log("learningGoal: ", e.target.value);
+                                                ;
                                                 // copy initial state
                                                 let updateState = Object.assign({}, initialJourneyFormState);
                                                 // update description in state update
@@ -643,10 +643,10 @@ function JourneyForm() {
                                 <Grid item xs={3}>
                                     <div
                                         onClick={() => {
-                                            console.log("clicked back")
+
                                             updateSectionState(-1);
                                             let updateState = Object.assign({}, initialJourneyFormStateUpdate);
-                                            console.log("current state: ", updateState.section);
+                                            ;
                                         }}
                                     >
                                         <AwesomeButton style={{
@@ -790,7 +790,7 @@ function JourneyForm() {
                                         onClick={() => {
                                             updateSectionState(0);
                                             let updateState = Object.assign({}, initialJourneyFormStateUpdate);
-                                            console.log("current state: ", updateState.section);
+                                            ;
                                         }}
                                     >
                                         <AwesomeButton style={{
@@ -1631,7 +1631,7 @@ function useAspectRatio() {
             const width = window.screen.width;
             const height = window.screen.height;
             let divisor = gcd(width, height);
-            console.log("divisor: ", divisor);
+            ;
             // Dividing by GCD and truncating into integers
             let simplifiedWidth = Math.trunc(width / divisor);
             let simplifiedHeight = Math.trunc(height / divisor);
@@ -1645,7 +1645,7 @@ function useAspectRatio() {
         calculateAspectRatio();
 
         window.addEventListener('resize', calculateAspectRatio);
-        console.log("aspectRatio: ", aspectRatio);
+        ;
 
         return () => {
             window.removeEventListener('resize', calculateAspectRatio);

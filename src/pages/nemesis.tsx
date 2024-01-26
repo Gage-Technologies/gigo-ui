@@ -853,7 +853,7 @@ function Nemesis() {
     //     }
     //
     //     console.groupCollapsed(type);
-    //     console.log(data);
+    ;
     //     console.groupEnd();
     // };
 

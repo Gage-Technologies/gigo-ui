@@ -211,7 +211,7 @@ function Login(this: any) {
             metadata: {"auth_provider": "github"},
         }
         trackEvent(payload);
-        console.log(gh)
+
         setExternal(true)
         setExternalToken(gh["code"])
         setExternalLogin("Github")
@@ -315,7 +315,7 @@ function Login(this: any) {
     }
 
     const onFailureGithub = (gh: any) => {
-        console.log('github failed:', gh);
+        ;
     };
 
     const retrieveOTPLink = async () => {
@@ -423,7 +423,7 @@ function Login(this: any) {
             authState.usedFreeTrial = auth["used_free_trial"]
             dispatch(updateAuthState(authState))
 
-            console.log("auth is: ", auth)
+
 
             await sleep(1000)
 

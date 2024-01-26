@@ -584,8 +584,8 @@ function Challenge() {
     }
 
     const generateImage = async () => {
-        console.log("lol: ", projectImage)
-        console.log("prompt: ", prompt)
+
+
         // if (projectImage !== null || prompt === "")
         //     return false
 
@@ -893,7 +893,7 @@ function Challenge() {
 
     useEffect(() => {
         setLoading(true)
-        console.log("getting data: ", id)
+
         getProjectInformation()
         getDiscussions().then(() => FilterDiscussions())
         setLoading(false)
@@ -1007,7 +1007,7 @@ function Challenge() {
 
     const handleError = (e) => {
         e.target.src = alternativeImage; // replace with your alternative image URL
-        console.log("There was an error")
+
     };
 
     const overviewTab = () => {
@@ -1312,7 +1312,7 @@ function Challenge() {
                 return
             }
 
-            console.log("target: ", e.target.result)
+
 
             // send data url to image src
             setProjectImage(e.target.result);
@@ -1322,7 +1322,7 @@ function Challenge() {
             // execute file reader
             reader.readAsDataURL(clonedFile);
         } catch (e) {
-            console.log("ERROR: failed to read thumbnail: ", e);
+            ;
         }
     }
 
@@ -2322,7 +2322,7 @@ function Challenge() {
                         }
                         break;
                     default:
-                        console.log(`Unknown discussionType: ${discussionType}`);
+                        ;
                 }
             }
 
@@ -3391,7 +3391,7 @@ function Challenge() {
         window.location.hash = "#" + newValue
         if (newValue === "discussions") {
             getDiscussions().then(() => FilterDiscussions())
-            console.log("run: ", runTutorial)
+
         }
         setDiscussionTab("main")
         setThread(false)
@@ -3601,7 +3601,7 @@ function Challenge() {
     }
 
     const deleteProjectFunction = async () => {
-        console.log("why: ", project)
+
         if (project === null || project.deleted) {
             return
 
@@ -3876,7 +3876,7 @@ function Challenge() {
         try {
             await navigator.clipboard.writeText(shareProject);
         } catch (err) {
-            console.log('Failed to copy text: ', err);
+            ;
         }
     }
 
@@ -4045,7 +4045,7 @@ function Challenge() {
             params["tier"] = tier - 1;
         }
 
-        console.log("removed tags here: ", removeTags)
+
 
         if (removeTags != null) {
             params["remove_tags"] = removeTags;
@@ -4058,7 +4058,7 @@ function Challenge() {
         let edit;
 
         if (image != null) {
-            console.log("project is: ", projectImage)
+
             if (genImageId !== null && genImageId !== "") {
                 //@ts-ignore
                 params["gen_image_id"] = genImageId
@@ -4383,7 +4383,7 @@ function Challenge() {
                                                         value: tag,
                                                     } as Tag);
                                                 }
-                                                // console.log("tag is: ", tag)
+
                                                 // currentAddedTags.push(tag);
                                             }
                                         });

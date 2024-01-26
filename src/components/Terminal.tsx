@@ -71,7 +71,6 @@ const ByteTerminal = ({ output, onClose, onStop, isRunning, onInputSubmit }: { o
             event.preventDefault();
             if (inputRef.current) {
                 const inputValue = inputRef.current.innerText;
-                console.log("Input submitted:", inputValue);
 
                 setTerminalContent(prevContent => {
                     const updatedContent = [...prevContent];

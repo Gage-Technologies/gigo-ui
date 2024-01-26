@@ -350,7 +350,7 @@ function CreateNewAccount() {
         let svg = new Blob([data], { type: "image/svg+xml" });
         setLoading(true)
 
-        console.log("svg is: ", svg)
+
 
         let payload: RecordWebUsage = {
             host: window.location.host,
@@ -427,8 +427,8 @@ function CreateNewAccount() {
             //@ts-ignore
             params["referral_user"] = name
         }
-        console.log("params: ", params)
-        console.log("attributes are: ", Attributes)
+
+
 
         let create = await call(
             "/api/user/createNewUser",
@@ -1184,7 +1184,7 @@ function CreateNewAccount() {
 
 
     const onFailureGithub = (gh: any) => {
-        console.log('github failed:', gh);
+        ;
     };
 
     const Tags = () => {
@@ -1213,7 +1213,7 @@ function CreateNewAccount() {
 
         setAttributes(e)
 
-        console.log("e for setting is: ", e)
+
         setAvatarRef(
             //@ts-ignore
             ReactDOM.findDOMNode(

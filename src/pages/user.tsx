@@ -133,7 +133,7 @@ function User() {
             return;
         }
 
-        console.log("url id: ", urlId)
+
 
         // check if the urlId is all numbers
         if (/^\d+$/.test(urlId)) {
