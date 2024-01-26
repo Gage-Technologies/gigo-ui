@@ -244,6 +244,7 @@ export default function ByteChat(props: ByteChatProps) {
     }, [chatId])
 
     const sendUserCTChat = (overrideMessage?: string) => {
+        setThreadVisibility({ [currentThreadCount]: true })
         setShowButtons(false)
         setDisableChat(true)
         setState(State.LOADING)
