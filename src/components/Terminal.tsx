@@ -4,6 +4,7 @@ import StopIcon from '@mui/icons-material/Stop';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { OutputRow } from "../models/bytes";
 
+
 interface MergedOutputRow {
     error: boolean;
     content: string;
@@ -27,7 +28,7 @@ const ByteTerminal = ({ output, onClose, onStop, isRunning, onInputSubmit }: { o
 
     // Adjust terminal styles based on the theme mode
     const terminalStyle: CSSProperties = {
-        backgroundColor: isLightMode ? "#f0f0f0" : "#333",
+        backgroundColor: isLightMode ? "#f4f5f4" : "#232a2f",
         color: isLightMode ? "black" : "white",
         fontFamily: "monospace",
         fontSize: "0.9rem",
