@@ -18,6 +18,9 @@ interface OutputState {
     mergedLines: MergedOutputRow[];
 }
 
+// NOTE: DO NOT REMOVE THE million-ignore comment!!!!
+
+// million-ignore
 const ByteTerminal = ({ output, onClose, onStop, isRunning, onInputSubmit }: { output: OutputState, onClose: () => void, onStop: () => void, isRunning: boolean, onInputSubmit: (input: string) => void }) => {
     const [terminalContent, setTerminalContent] = useState<JSX.Element[]>([]);
     const inputRef = useRef<HTMLDivElement>(null);
