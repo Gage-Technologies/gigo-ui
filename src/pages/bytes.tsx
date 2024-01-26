@@ -41,8 +41,6 @@ import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import DifficultyAdjuster from "../components/ByteDifficulty";
 import { selectAuthState } from "../reducers/auth/auth";
 import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../reducers/bytes/bytes";
-import StopIcon from "@mui/icons-material/Stop";
-import { ReactTerminal, TerminalContext } from "react-terminal";
 import ByteTerminal from "../components/Terminal";
 
 interface MergedOutputRow {
@@ -977,6 +975,10 @@ function Byte() {
                 )}
             </Box>
         )
+    }
+
+    if (window.innerWidth < 1000) {
+        navigate("/")
     }
 
     return (

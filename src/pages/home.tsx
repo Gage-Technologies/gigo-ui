@@ -602,7 +602,7 @@ function Home() {
     }
 
     const Bytes = () => {
-        if (byteContent === null || byteContent === undefined || byteContent.length === 0) {
+        if (byteContent === null || byteContent === undefined || byteContent.length === 0 || window.innerWidth < 1000) {
             return (<div />)
         }
 

@@ -3,6 +3,7 @@
 import {
     alpha,
     Autocomplete,
+    Box,
     Button, ButtonBase, Card, CardContent, CardMedia,
     Checkbox, createTheme, FormControl,
     FormControlLabel,
@@ -14,11 +15,11 @@ import {
 } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import React, {SyntheticEvent} from "react";
-import {useNavigate} from "react-router-dom";
+import React, { SyntheticEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import Menu from "@mui/material/Menu";
-import {programmingLanguages} from "../services/vars";
-import {useAppDispatch, useAppSelector} from "../app/hooks";
+import { programmingLanguages } from "../services/vars";
+import { useAppDispatch, useAppSelector } from "../app/hooks";
 import UserIcon from "./UserIcon";
 import {
     clearSearchParamsState, initialSearchStateUpdate,
@@ -44,9 +45,9 @@ import Tag from "../models/tag";
 import swal from "sweetalert";
 import User from "../models/user";
 import Post from "../models/post";
-import {initialAuthStateUpdate, selectAuthState, updateAuthState} from "../reducers/auth/auth";
+import { initialAuthStateUpdate, selectAuthState, updateAuthState } from "../reducers/auth/auth";
 import config from "../config";
-import {getAllTokens} from "../theme";
+import { getAllTokens } from "../theme";
 import options from "./Avatar/options";
 import renown1 from "../img/renown/renown1.svg"
 import renown2 from "../img/renown/renown2.svg"
@@ -59,6 +60,13 @@ import renown8 from "../img/renown/renown8.svg"
 import renown9 from "../img/renown/renown9.svg"
 import renown10 from "../img/renown/renown10.svg"
 import ProBannerCircle from "./Icons/ProBannerCircle";
+import { grey } from "@material-ui/core/colors";
+
+
+interface SearchOption {
+    type: "challenge" | "user" | "byte";
+    content: any;
+}
 
 
 const Search = styled('div')(({ theme }) => ({
@@ -146,7 +154,7 @@ export default function TopSearchBar(props: IProps) {
     // retrieve theme from local storage
     let userPref = localStorage.getItem('theme')
     const [mode, _] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
-        const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
+    const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
 
     // redux states for search params
     const dispatch = useAppDispatch();
@@ -172,46 +180,46 @@ export default function TopSearchBar(props: IProps) {
 
     const [searchParams, setSearchParams] = React.useState<SearchParamsState>(
         (reduxActiveSearchState)
-        ?
-        {
-            query: reduxQueryState,
-            languages: reduxLanguageState,
-            author: reduxAuthorState,
-            attemptsMin: reduxAttemptsMinState,
-            attemptsMax: reduxAttemptsMaxState,
-            completionsMin: reduxCompletionsMinState,
-            completionsMax: reduxCompletionsMaxState,
-            coffeeMin: reduxCoffeeMinState,
-            coffeeMax: reduxCoffeeMaxState,
-            viewsMin: reduxViewsMinState,
-            viewsMax: reduxViewsMaxState,
-            tags: reduxTags,
-            challengeType: reduxChallengeType,
-            visibility: reduxVisibilityState,
-            since: reduxSinceState,
-            until: reduxUntilState,
-            tier: reduxTierState,
-        }
-        :
-        {
-            query: '',
-            languages: [],
-            author: {} as User,
-            attemptsMin: '',
-            attemptsMax: '',
-            completionsMin: '',
-            completionsMax: '',
-            coffeeMin: '',
-            coffeeMax: '',
-            viewsMin: '',
-            viewsMax: '',
-            tags: [],
-            challengeType: -1,
-            visibility: -1,
-            since: -1,
-            until: -1,
-            tier: -1,
-        }
+            ?
+            {
+                query: reduxQueryState,
+                languages: reduxLanguageState,
+                author: reduxAuthorState,
+                attemptsMin: reduxAttemptsMinState,
+                attemptsMax: reduxAttemptsMaxState,
+                completionsMin: reduxCompletionsMinState,
+                completionsMax: reduxCompletionsMaxState,
+                coffeeMin: reduxCoffeeMinState,
+                coffeeMax: reduxCoffeeMaxState,
+                viewsMin: reduxViewsMinState,
+                viewsMax: reduxViewsMaxState,
+                tags: reduxTags,
+                challengeType: reduxChallengeType,
+                visibility: reduxVisibilityState,
+                since: reduxSinceState,
+                until: reduxUntilState,
+                tier: reduxTierState,
+            }
+            :
+            {
+                query: '',
+                languages: [],
+                author: {} as User,
+                attemptsMin: '',
+                attemptsMax: '',
+                completionsMin: '',
+                completionsMax: '',
+                coffeeMin: '',
+                coffeeMax: '',
+                viewsMin: '',
+                viewsMax: '',
+                tags: [],
+                challengeType: -1,
+                visibility: -1,
+                since: -1,
+                until: -1,
+                tier: -1,
+            }
     )
 
     const [optionsOpen, setOptionsOpen] = React.useState<boolean>(false);
@@ -234,7 +242,7 @@ export default function TopSearchBar(props: IProps) {
             viewsMax: '',
             tags: [],
             challengeType: -1,
-            visibility: -1 ,
+            visibility: -1,
             since: -1,
             until: -1,
             tier: -1,
@@ -358,7 +366,7 @@ export default function TopSearchBar(props: IProps) {
             params["completions_min"] = searchParams.completionsMin
         }
 
-        if (searchParams.completionsMax !== undefined && searchParams.completionsMax!== "") {
+        if (searchParams.completionsMax !== undefined && searchParams.completionsMax !== "") {
             // @ts-ignore
             params["completions_max"] = searchParams.completionsMax
         }
@@ -368,7 +376,7 @@ export default function TopSearchBar(props: IProps) {
             params["coffee_min"] = searchParams.coffeeMin
         }
 
-        if (searchParams.coffeeMax!== undefined && searchParams.coffeeMax!== "") {
+        if (searchParams.coffeeMax !== undefined && searchParams.coffeeMax !== "") {
             // @ts-ignore
             params["coffee_max"] = searchParams.coffeeMax
         }
@@ -378,7 +386,7 @@ export default function TopSearchBar(props: IProps) {
             params["views_min"] = searchParams.viewsMin
         }
 
-        if (searchParams.viewsMax !== undefined && searchParams.viewsMax!== "") {
+        if (searchParams.viewsMax !== undefined && searchParams.viewsMax !== "") {
             // @ts-ignore
             params["views_max"] = searchParams.viewsMax
         }
@@ -415,7 +423,7 @@ export default function TopSearchBar(props: IProps) {
 
         let urlParams = new URLSearchParams(params).toString()
 
-        navigate("/search?"+urlParams)
+        navigate("/search?" + urlParams)
 
     }
 
@@ -473,12 +481,12 @@ export default function TopSearchBar(props: IProps) {
     }, []);
 
     const [authorOptions, setAuthorOptions] = React.useState<User[]>([])
-    const handleAuthorSearch = async (e : any) => {
+    const handleAuthorSearch = async (e: any) => {
         if (typeof e.target.value !== "string") {
             return
         }
 
-        let res =  await call(
+        let res = await call(
             "/api/search/users",
             "post",
             null,
@@ -512,10 +520,10 @@ export default function TopSearchBar(props: IProps) {
 
     }
 
-    const [searchOptions, setSearchOptions] = React.useState<Post[]>([])
-    const handleSearchSubmit =  async (e : any) => {
+    const [searchOptions, setSearchOptions] = React.useState<SearchOption[]>([])
+    const handleSearchSubmit = async (e: any) => {
         let updateState = Object.assign({}, initialSearchStateUpdate);
-        if (e !== null){
+        if (e !== null) {
             updateState.query = e.target.value
             if (e) {
                 // update attempts in state update
@@ -532,7 +540,7 @@ export default function TopSearchBar(props: IProps) {
         if (searchParams.tags !== undefined && searchParams.tags !== null && searchParams.tags.length > 0) {
             updateState.tags = [];
             // @ts-ignore
-            searchParams.tags.forEach((tag) => {updateState.tags.push(tag)})
+            searchParams.tags.forEach((tag) => { updateState.tags.push(tag) })
         }
 
 
@@ -541,10 +549,10 @@ export default function TopSearchBar(props: IProps) {
 
     }
 
-    const handleSelect = async (e : any) => {
+    const handleSelect = async (e: any) => {
         if (!hasOptionBeenSelected) {
             let updateState = Object.assign({}, initialSearchStateUpdate);
-            if (e !== null){
+            if (e !== null) {
                 updateState.query = e.target.value
                 if (e) {
                     // update attempts in state update
@@ -561,7 +569,7 @@ export default function TopSearchBar(props: IProps) {
             if (searchParams.tags !== undefined && searchParams.tags !== null && searchParams.tags.length > 0) {
                 updateState.tags = [];
                 // @ts-ignore
-                searchParams.tags.forEach((tag) => {updateState.tags.push(tag)})
+                searchParams.tags.forEach((tag) => { updateState.tags.push(tag) })
             }
 
 
@@ -584,20 +592,28 @@ export default function TopSearchBar(props: IProps) {
             query: searchConfig.query,
             search_rec_id: "0",
             skip: 0,
-            limit: window.innerWidth > 1000 ? 5 : 3,
+            limit: 3,
+        }
+
+        let bytesParams = {
+            query: searchConfig.query,
+            skip: 0,
+            limit: 5,
         }
 
         if (searchConfig.author._id !== undefined && searchConfig.author._id !== "") {
-           // @ts-ignore
+            // @ts-ignore
             params["author"] = searchConfig.author._id
         }
 
         if (searchConfig.languages !== undefined && searchConfig.languages.length > 0) {
             // @ts-ignore
             params["languages"] = searchConfig.languages
+            // @ts-ignore
+            bytesParams["languages"] = searchConfig.languages
         }
 
-        if (searchConfig.attemptsMin !== undefined && searchConfig.attemptsMin!== "") {
+        if (searchConfig.attemptsMin !== undefined && searchConfig.attemptsMin !== "") {
             // @ts-ignore
             params["attempts_min"] = searchConfig.attemptsMin
         }
@@ -612,7 +628,7 @@ export default function TopSearchBar(props: IProps) {
             params["completions_min"] = searchConfig.completionsMin
         }
 
-        if (searchConfig.completionsMax !== undefined && searchConfig.completionsMax!== "") {
+        if (searchConfig.completionsMax !== undefined && searchConfig.completionsMax !== "") {
             // @ts-ignore
             params["completions_max"] = searchConfig.completionsMax
         }
@@ -622,7 +638,7 @@ export default function TopSearchBar(props: IProps) {
             params["coffee_min"] = searchConfig.coffeeMin
         }
 
-        if (searchConfig.coffeeMax!== undefined && searchConfig.coffeeMax!== "") {
+        if (searchConfig.coffeeMax !== undefined && searchConfig.coffeeMax !== "") {
             // @ts-ignore
             params["coffee_max"] = searchConfig.coffeeMax
         }
@@ -632,7 +648,7 @@ export default function TopSearchBar(props: IProps) {
             params["views_min"] = searchConfig.viewsMin
         }
 
-        if (searchConfig.viewsMax !== undefined && searchConfig.viewsMax!== "") {
+        if (searchConfig.viewsMax !== undefined && searchConfig.viewsMax !== "") {
             // @ts-ignore
             params["views_max"] = searchConfig.viewsMax
         }
@@ -668,7 +684,7 @@ export default function TopSearchBar(props: IProps) {
         }
 
 
-        let posts =  await call(
+        let posts = await call(
             "/api/search/posts",
             "post",
             null,
@@ -678,7 +694,7 @@ export default function TopSearchBar(props: IProps) {
             params
         )
 
-        let users =  await call(
+        let users = await call(
             "/api/search/users",
             "post",
             null,
@@ -688,19 +704,30 @@ export default function TopSearchBar(props: IProps) {
             params
         )
 
-        const [res, res2] = await Promise.all([
+        let bytes = await call(
+            "/api/search/bytes",
+            "post",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            bytesParams
+        )
+
+        const [res, res2, res3] = await Promise.all([
             posts,
-            users
+            users,
+            bytes
         ])
 
 
-        if (res === undefined || res2 === undefined) {
+        if (res === undefined || res2 === undefined || res3 === undefined) {
             swal("Server Error", "We can't get in touch with the GIGO servers right now. Sorry about that! " +
                 "We'll get crackin' on that right away!")
             return
         }
 
-        if (res["challenges"] === undefined && res2["users"] === undefined) {
+        if (res["challenges"] === undefined || res2["users"] === undefined || res3["posts"] === undefined) {
             if (res["message"] === undefined) {
                 swal("Server Error", "Man... We don't know what happened, but there's some weird stuff going on. " +
                     "We'll get working on this, come back in a few minutes")
@@ -711,8 +738,14 @@ export default function TopSearchBar(props: IProps) {
         }
 
 
-        let finalSearchOptions = res["challenges"].concat(res2["users"])
-        setSearchOptions(finalSearchOptions)
+        // @ts-ignore
+        let finalSearchOptions = res3["posts"].map(x => ({ type: "byte", content: x })).
+            // @ts-ignore
+            concat(res["challenges"].map(x => ({ type: "challenge", content: x }))).
+            // @ts-ignore
+            concat(res2["users"].map(x => ({ type: "user", content: x })))
+        console.log("updating search options: ", finalSearchOptions)
+        setSearchOptions(JSON.parse(JSON.stringify(finalSearchOptions)))
     }
 
     let loggedIn = false
@@ -722,14 +755,14 @@ export default function TopSearchBar(props: IProps) {
     }
 
 
-    const handleSearchCompleted =  async (postID: string) => {
+    const handleSearchCompleted = async (postID: string) => {
         if (loggedIn) {
             let params = {
                 post_id: postID,
                 query: searchParams.query,
             }
 
-            let res =  await call(
+            let res = await call(
                 "/api/search/complete",
                 "post",
                 null,
@@ -754,7 +787,7 @@ export default function TopSearchBar(props: IProps) {
 
 
     const [tagOptions, setTagOptions] = React.useState<Tag[]>([])
-    const handleTagSearch =  async (e : any) => {
+    const handleTagSearch = async (e: any) => {
         if (typeof e.target.value !== "string") {
             return
         }
@@ -803,7 +836,7 @@ export default function TopSearchBar(props: IProps) {
                     <Grid container sx={{
                         justifyContent: "center",
                         width: "100%",
-                    }} direction="row"   alignItems="center">
+                    }} direction="row" alignItems="center">
                         <Autocomplete
                             multiple
                             limitTags={5}
@@ -842,7 +875,7 @@ export default function TopSearchBar(props: IProps) {
                         justifyContent: "center",
                         width: "100%",
                         paddingBottom: "1vw",
-                    }} direction="column"   alignItems="center">
+                    }} direction="column" alignItems="center">
                         <InputLabel id={"challengeTypeInputLabel"}>Challenge Type</InputLabel>
                         <Select
                             labelId={"challengeType"}
@@ -968,7 +1001,7 @@ export default function TopSearchBar(props: IProps) {
                     <Grid container sx={{
                         justifyContent: "center",
                         width: "100%",
-                    }} direction="row"   alignItems="center">
+                    }} direction="row" alignItems="center">
                         <TextField
                             id="date"
                             label="From"
@@ -1045,7 +1078,7 @@ export default function TopSearchBar(props: IProps) {
                     <Grid container sx={{
                         justifyContent: "center",
                         width: "100%",
-                    }} direction="row"   alignItems="center">
+                    }} direction="row" alignItems="center">
                         <Autocomplete
                             id="authorInputAutocomplete"
                             size={"small"}
@@ -1054,7 +1087,7 @@ export default function TopSearchBar(props: IProps) {
                                 return option.user_name
                             }}
                             renderInput={(params) => (
-                                <TextField {...params}  placeholder="Search" />
+                                <TextField {...params} placeholder="Search" />
                             )}
                             onInputChange={(e) => {
                                 handleAuthorSearch(e)
@@ -1087,7 +1120,7 @@ export default function TopSearchBar(props: IProps) {
                     <Grid container sx={{
                         justifyContent: "center",
                         width: "100%",
-                    }} direction="row"   alignItems="center">
+                    }} direction="row" alignItems="center">
                         <TextField
                             label={"min"}
                             variant={`outlined`}
@@ -1144,7 +1177,7 @@ export default function TopSearchBar(props: IProps) {
                     <Grid container sx={{
                         justifyContent: "center",
                         width: "100%",
-                    }} direction="row"   alignItems="center">
+                    }} direction="row" alignItems="center">
                         <TextField
                             label={"min"}
                             variant={`outlined`}
@@ -1201,7 +1234,7 @@ export default function TopSearchBar(props: IProps) {
                     <Grid container sx={{
                         justifyContent: "center",
                         width: "100%",
-                    }} direction="row"   alignItems="center">
+                    }} direction="row" alignItems="center">
                         <TextField
                             label={"min"}
                             variant={`outlined`}
@@ -1258,7 +1291,7 @@ export default function TopSearchBar(props: IProps) {
                     <Grid container sx={{
                         justifyContent: "center",
                         width: "100%",
-                    }} direction="row"   alignItems="center">
+                    }} direction="row" alignItems="center">
                         <TextField
                             label={"min"}
                             variant={`outlined`}
@@ -1315,7 +1348,7 @@ export default function TopSearchBar(props: IProps) {
                         justifyContent: "center",
                         width: "100%",
                         paddingBottom: "1vw",
-                    }} direction="column"   alignItems="center">
+                    }} direction="column" alignItems="center">
                         <InputLabel id={"visibilityInputLabel"}>Visibility</InputLabel>
                         <Select
                             labelId={"visibility"}
@@ -1364,7 +1397,7 @@ export default function TopSearchBar(props: IProps) {
                     <Grid container sx={{
                         justifyContent: "center",
                         width: "100%",
-                    }} direction="row"   alignItems="center">
+                    }} direction="row" alignItems="center">
                         <Autocomplete
                             multiple
                             limitTags={5}
@@ -1407,7 +1440,7 @@ export default function TopSearchBar(props: IProps) {
 
                             }}
                             // @ts-ignore
-                            value={searchParams.tags.map((v: {id: string, value: string}) => {
+                            value={searchParams.tags.map((v: { id: string, value: string }) => {
                                 // return string for user defined tags so that the colliding ids do not cause issues
                                 if (v.id === "-1") {
                                     return v.value
@@ -1468,7 +1501,7 @@ export default function TopSearchBar(props: IProps) {
             default:
                 imgSrc = renown10;
                 break;
-    
+
         }
         return imgSrc;
     }
@@ -1476,22 +1509,25 @@ export default function TopSearchBar(props: IProps) {
     const renderGroup = (params: any) => {
         let color = window.innerWidth > 1000
             ?
-                params.group.toLowerCase() === "post" ? theme.palette.primary.main : theme.palette.secondary.main
+            // @ts-ignore
+            params.group.toLowerCase() === "challenge" ? theme.palette.primary.main : params.group.toLowerCase() === "user" ? theme.palette.secondary.main : mode === "light" ? grey[900] : grey[300]
             :
-                null;
+            null;
 
         let text = window.innerWidth > 1000
             ?
-                params.group.toLowerCase() === "post" ? "Challenges" : "Users"
+            params.group
             :
-                null;
+            null;
 
         // let textColor = params.group.toLowerCase() === "post" ? theme.palette.primary.main : theme.palette.secondary.main;
         // this is important if we are using gradients
-        let textColor = params.group.toLowerCase() === "post" ? theme.palette.primary.light : theme.palette.secondary.light;
+        // @ts-ignore
+        let textColor = params.group.toLowerCase() === "challenge" ? theme.palette.primary.light : params.group.toLowerCase() === "user" ? theme.palette.secondary.light : grey[300];
         if (mode === "light")
-            textColor = params.group.toLowerCase() === "post" ? theme.palette.primary.dark : theme.palette.secondary.dark;
-    
+            // @ts-ignore
+            textColor = params.group.toLowerCase() === "challenge" ? theme.palette.primary.dark : params.group.toLowerCase() === "user" ? theme.palette.secondary.dark : grey[900];
+
         const gradientBackground = {
             background: `linear-gradient(45deg, ${color}20 20%, transparent 100%, transparent 100%)`,
             borderRadius: 0,
@@ -1504,16 +1540,295 @@ export default function TopSearchBar(props: IProps) {
             color: textColor,
             fontSize: 14,
         };
-    
+
+        let children = params.children
+        if (params.group.toLowerCase() === "byte") {
+            children = (
+                <Box
+                    display={"flex"}
+                    flexDirection={"row"}
+                    justifyContent={"space-evenly"}
+                    sx={{
+                        marginBottom: "10px",
+                        ml: 1,
+                        mr: 2
+                    }}
+                >
+                    {children}
+                </Box>
+            )
+        }
+
         return (
             <>
                 <Typography key={params.key} variant="subtitle1" component={Paper} sx={gradientBackground}>
                     {text}
                 </Typography>
-                {params.children}
+                {children}
             </>
         );
     };
+
+    const renderSearchOption = (option: SearchOption) => {
+        if (option.type === "byte") {
+            // @ts-ignore
+            let textColor = grey[300];
+            if (mode === "light")
+                // @ts-ignore
+                textColor = grey[900];
+
+            return (
+                <Card sx={{
+                    display: 'flex',
+                    textAlign: "left",
+                    backgroundColor: "transparent",
+                    backgroundImage: "none",
+                    boxShadow: "none",
+                    cursor: 'pointer',
+                    width: "85px",
+                    '&:hover': {
+                        // @ts-ignore
+                        backgroundColor: alpha(grey[300], 0.25),
+                    }
+                }}>
+                    <Button
+                        sx={{
+                            width: "100%",
+                            "&:hover": {
+                                backgroundColor: "none"
+                            }
+                        }}
+                        onClick={async () => {
+                            // @ts-ignore
+                            navigate("/byte/" + option.content._id)
+                        }}
+                    >
+                        <Box
+                            display={'flex'}
+                            justifyContent={'center'}
+                            flexDirection={'column'}
+                        >
+                            <img
+                                // @ts-ignore
+                                src={config.rootPath + "/static/bytes/t/" + option.content._id}
+                                alt="No Image"
+                                style={{
+                                    borderRadius: "10px",
+                                    height: 120,
+                                    width: 70,
+                                    minWidth: 60,
+                                    // paddingLeft: "-10px",
+                                }}
+                            />
+                            <Typography
+                                align="left"
+                                variant="body2"
+                                component={Box}
+                                sx={{
+                                    textOverflow: "wrap",
+                                    overflow: "hidden",
+                                    fontSize: ".6rem",
+                                    color: textColor
+                                }}
+                            >
+                                {
+                                    // @ts-ignore
+                                    option.content.name
+                                }
+                            </Typography>
+                        </Box>
+                    </Button>
+                </Card>
+            )
+        }
+
+        if (option.type === "user") {
+            return (
+                <div
+                    style={{
+                        paddingBottom: '10px',
+                        paddingLeft: '10px',
+                    }}
+                >
+                    <Card sx={{
+                        display: 'flex',
+                        textAlign: "left",
+                        width: "99%",
+                        height: 75,
+                        border: 1,
+                        borderColor: theme.palette.secondary.main + "75",
+                        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1);",
+                        backgroundColor: "transparent",
+                        backgroundImage: "none",
+                        cursor: 'pointer',
+                        '&:hover': {
+                            backgroundColor: theme.palette.secondary.main + "25",
+                        }
+                    }}>
+                        <Button
+                            sx={{
+                                width: "100%",
+                                "&:hover": {
+                                    backgroundColor: "none"
+                                }
+                            }}
+                            onClick={async () => {
+                                // @ts-ignore
+                                await handleSearchCompleted(option.content._id)
+                                // @ts-ignore
+                                navigate("/user/" + option.content._id)
+                                window.location.reload()
+                            }}
+                        >
+                            <div style={{ display: "flex", flexDirection: "row", width: "95%", justifyContent: "left" }}>
+                                <div>
+                                    <UserIcon
+                                        userId={
+                                            // @ts-ignore
+                                            option.content._id
+                                        }
+                                        userTier={
+                                            //@ts-ignore
+                                            option.content.user_rank}
+                                        userThumb={
+                                            //@ts-ignore
+                                            config.rootPath + option.content.pfp_path}
+                                        backgroundName={
+                                            //@ts-ignore
+                                            option.content.name}
+                                        backgroundPalette={
+                                            //@ts-ignore
+                                            option.content.color_palette}
+                                        backgroundRender={
+                                            //@ts-ignore
+                                            option.content.render_in_front}
+                                        pro={
+                                            // @ts-ignore
+                                            option.content.user_status.toString() === "1"}
+                                        size={50}
+                                        imageTop={2}
+                                    />
+                                </div>
+                                <Typography variant="h5" component="div" sx={{
+                                    ml: 1,
+                                    mt: 1,
+                                    fontSize: 16,
+                                }}>
+                                    {
+                                        //@ts-ignore
+                                        option.content.user_name}
+                                </Typography>
+                            </div>
+                            <Tooltip
+                                title={`Renown ${
+                                    //@ts-ignore
+                                    option.content.tier + 1}`}
+                            >
+                                <img
+                                    style={{
+                                        height: "99%",
+                                        width: "auto",
+                                        opacity: "0.85",
+                                        overflow: "hidden",
+                                    }}
+                                    src={handleRenownCheck(
+                                        //@ts-ignore
+                                        option.content.tier)}
+                                />
+                            </Tooltip>
+                        </Button>
+                    </Card>
+                </div>
+            )
+        }
+
+        return (
+            <div
+                style={{
+                    paddingBottom: '10px',
+                    paddingLeft: '10px',
+                }}
+            >
+                <Card sx={{
+                    display: 'flex',
+                    textAlign: "left",
+                    width: "99%",
+                    height: 75,
+                    border: 1,
+                    borderColor: theme.palette.primary.main + "75",
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1);",
+                    backgroundColor: "transparent",
+                    backgroundImage: "none",
+                    cursor: 'pointer',
+                    '&:hover': {
+                        backgroundColor: theme.palette.primary.main + "25",
+                    }
+                }}>
+                    <Button
+                        sx={{
+                            width: "100%",
+                            "&:hover": {
+                                backgroundColor: "none"
+                            }
+                        }}
+                        onClick={async () => {
+                            // @ts-ignore
+                            await handleSearchCompleted(option.content._id)
+                            // @ts-ignore
+                            navigate("/challenge/" + option.content._id)
+                        }}
+                    >
+                        <CardMedia
+                            component="img"
+                            // @ts-ignore
+                            image={config.rootPath + option.content.thumbnail}
+                            alt="No Image"
+                            sx={{
+                                borderRadius: "10px",
+                                height: 60,
+                                width: 220,
+                                minWidth: 100,
+                                paddingLeft: "-10px",
+                            }}
+                        />
+                        <CardContent
+                            sx={{
+                                width: "100%",
+                                height: "170%",
+                                paddingTop: "20px",
+                                paddingBottom: "15px",
+                            }}
+                        >
+                            <Typography align="left" variant="inherit" component="div" sx={{
+                                textOverflow: "ellipsis",
+                                overflow: "hidden",
+                                display: '-webkit-box',
+                                WebkitLineClamp: 1,
+                                WebkitBoxOrient: 'vertical',
+                            }}>
+                                {
+                                    // @ts-ignore
+                                    option.content.title
+                                }
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{
+                                textOverflow: "ellipsis",
+                                overflow: "hidden",
+                                display: '-webkit-box',
+                                WebkitLineClamp: 2,
+                                WebkitBoxOrient: 'vertical',
+                            }}>
+                                {
+                                    // @ts-ignore
+                                    option.content.description
+                                }
+                            </Typography>
+                        </CardContent>
+                    </Button>
+                </Card>
+            </div>
+        )
+    }
 
     const fullSizedSearch = () => {
         return (
@@ -1525,13 +1840,13 @@ export default function TopSearchBar(props: IProps) {
                     }}
                 >
                     <SearchIconWrapper>
-                        <SearchIcon/>
+                        <SearchIcon />
                     </SearchIconWrapper>
                     <FilterIconButton sx={{
                         color: theme.palette.primary.contrastText,
                         left: `calc(${props.width} - 60px)`
                     }} onClick={handleClick}>
-                        <FilterListIcon/>
+                        <FilterListIcon />
                     </FilterIconButton>
                     <form onSubmit={e => handleSubmit(e)}>
                         <Autocomplete
@@ -1547,188 +1862,26 @@ export default function TopSearchBar(props: IProps) {
                             onOpen={() => setOptionsOpen(true)}
                             onClose={() => setOptionsOpen(false)}
                             options={searchOptions}
-                            getOptionLabel={(option: Post | string) => {
+                            getOptionLabel={(option: SearchOption | string) => {
                                 if (typeof option === "string") {
                                     return option
                                 }
-                                return option.title === undefined ?
-                                    //@ts-ignore
-                                    option.user_name : option.title
+                                switch (option.type) {
+                                    case "challenge":
+                                        return option.content.title
+                                    case "byte":
+                                        return option.content.name
+                                    case "user":
+                                        return option.content.user_name
+                                }
                             }}
                             groupBy={(option) =>
                                 // @ts-ignore
-                                option.author_id !== undefined && option.author_id !== null ? "Post": "User"
+                                option.type
                             }
                             renderGroup={renderGroup}
                             //@ts-ignore
-                            renderOption={(props, option) => (
-                                <div
-                                    style={{
-                                        paddingBottom: '10px',
-                                        paddingLeft: '10px',
-                                    }}
-                                >
-                                    {/* @ts-ignore */}
-                                    {option.author_id !== undefined  && option.author_id !== null ? (
-                                        <Card sx={{
-                                            display: 'flex',
-                                            textAlign: "left",
-                                            width: "99%",
-                                            height: 75,
-                                            border: 1,
-                                            borderColor: theme.palette.primary.main + "75",
-                                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1);",
-                                            backgroundColor: "transparent",
-                                            backgroundImage: "none",
-                                            cursor: 'pointer',
-                                            '&:hover': {
-                                                backgroundColor: theme.palette.primary.main + "25",
-                                            }
-                                        }}>
-                                            <Button
-                                                sx={{width: "100%"}}
-                                                onClick={async () => {
-                                                    // @ts-ignore
-                                                    await handleSearchCompleted(option._id)
-                                                    // @ts-ignore
-                                                    navigate("/challenge/" + option._id)
-                                                }}
-                                            >
-                                                <CardMedia
-                                                    component="img"
-                                                    // @ts-ignore
-                                                    image={config.rootPath + option.thumbnail}
-                                                    alt="No Image"
-                                                    sx={{
-                                                        borderRadius: "10px",
-                                                        height: 60,
-                                                        width: 220,
-                                                        minWidth: 100,
-                                                        paddingLeft: "-10px",
-                                                    }}
-                                                />
-                                                <CardContent
-                                                    sx={{
-                                                        width: "100%",
-                                                        height: "170%",
-                                                        paddingTop: "20px",
-                                                        paddingBottom: "15px",
-                                                    }}
-                                                >
-                                                    <Typography align="left" variant="inherit" component="div" sx={{
-                                                        textOverflow: "ellipsis",
-                                                        overflow: "hidden",
-                                                        display: '-webkit-box',
-                                                        WebkitLineClamp: 1,
-                                                        WebkitBoxOrient: 'vertical',
-                                                    }}>
-                                                        {
-                                                            // @ts-ignore
-                                                            option.title
-                                                        }
-                                                    </Typography>
-                                                    <Typography variant="body2" color="text.secondary" sx={{
-                                                        textOverflow: "ellipsis",
-                                                        overflow: "hidden",
-                                                        display: '-webkit-box',
-                                                        WebkitLineClamp: 2,
-                                                        WebkitBoxOrient: 'vertical',
-                                                    }}>
-                                                        {
-                                                            // @ts-ignore
-                                                            option.description
-                                                        }
-                                                    </Typography>
-                                                </CardContent>
-                                            </Button>
-                                        </Card>
-                                    ) : (
-                                        <Card sx={{
-                                            display: 'flex',
-                                            textAlign: "left",
-                                            width: "99%",
-                                            height: 75,
-                                            border: 1,
-                                            borderColor: theme.palette.secondary.main + "75",
-                                            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1);",
-                                            backgroundColor: "transparent",
-                                            backgroundImage: "none",
-                                            cursor: 'pointer',
-                                            '&:hover': {
-                                                backgroundColor: theme.palette.secondary.main + "25",
-                                            }
-                                        }}>
-                                            <Button
-                                                sx={{width: "100%"}}
-                                                onClick={async () => {
-                                                    // @ts-ignore
-                                                    await handleSearchCompleted(option._id)
-                                                    // @ts-ignore
-                                                    navigate("/user/" + option._id)
-                                                    window.location.reload()
-                                                }}
-                                            >
-                                                <div style={{display: "flex", flexDirection: "row", width: "95%", justifyContent: "left"}}>
-                                                    <div>
-                                                        <UserIcon
-                                                            userId={
-                                                                // @ts-ignore
-                                                                option._id
-                                                            }
-                                                            userTier={
-                                                                //@ts-ignore
-                                                                option.user_rank}
-                                                            userThumb={
-                                                                //@ts-ignore
-                                                                config.rootPath + option.pfp_path}
-                                                            backgroundName={
-                                                                //@ts-ignore
-                                                                option.name}
-                                                            backgroundPalette={
-                                                                //@ts-ignore
-                                                                option.color_palette}
-                                                            backgroundRender={
-                                                                //@ts-ignore
-                                                                option.render_in_front}
-                                                            pro={
-                                                                // @ts-ignore
-                                                                option.user_status.toString() === "1"}
-                                                            size={50}
-                                                            imageTop={2}
-                                                        />
-                                                    </div>
-                                                    <Typography variant="h5" component="div" sx={{
-                                                        ml: 1,
-                                                        mt: 1,
-                                                        fontSize: 16,
-                                                    }}>
-                                                        {
-                                                            //@ts-ignore
-                                                            option.user_name}
-                                                    </Typography>
-                                                </div>
-                                                <Tooltip
-                                                    title={`Renown ${
-                                                        //@ts-ignore
-                                                        option.tier + 1}`}
-                                                >
-                                                    <img
-                                                        style={{
-                                                            height: "99%",
-                                                            width: "auto",
-                                                            opacity: "0.85",
-                                                            overflow: "hidden",
-                                                        }}
-                                                        src={handleRenownCheck(
-                                                            //@ts-ignore
-                                                            option.tier)}
-                                                    />
-                                                </Tooltip>
-                                            </Button>
-                                        </Card>
-                                    )}
-                                </div>
-                            )}
+                            renderOption={(props, option) => renderSearchOption(option)}
                             onInputChange={(e) => {
                                 handleSearchSubmit(e)
                             }}
@@ -1741,14 +1894,15 @@ export default function TopSearchBar(props: IProps) {
                             }}
                             ListboxProps={
                                 {
-                                    style:{
+                                    style: {
                                         maxHeight: '90vh',
                                     }
                                 }
                             }
                             renderInput={(params) => {
-                                const {InputLabelProps,InputProps,...rest} = params;
-                                return <StyledInputBase {...params.InputProps} {...rest} placeholder="Search for Challenges!"  />}}
+                                const { InputLabelProps, InputProps, ...rest } = params;
+                                return <StyledInputBase {...params.InputProps} {...rest} placeholder="Search for Challenges!" />
+                            }}
                         />
                     </form>
                 </Search>
@@ -1799,7 +1953,7 @@ export default function TopSearchBar(props: IProps) {
                     }}
                 >
                     <SearchIconWrapper>
-                        <SearchIcon/>
+                        <SearchIcon />
                     </SearchIconWrapper>
                     {/*TODO: This is the options for search*/}
                     <form onSubmit={e => handleSubmit(e)}>
@@ -1815,27 +1969,19 @@ export default function TopSearchBar(props: IProps) {
                                         width: "100vw",
                                     }}
                                 >
-                                   {children}
+                                    {children}
                                 </Popper>
                             )}
                             open={optionsOpen}
                             onOpen={() => setOptionsOpen(true)}
                             onClose={() => setOptionsOpen(false)}
-                            options={searchOptions}
-                            getOptionLabel={(option: Post | string) => {
+                            options={searchOptions.filter(x => x.type === "challenge")}
+                            getOptionLabel={(option: SearchOption | string) => {
                                 if (typeof option === "string") {
                                     return option
                                 }
-                                return option.title === undefined ?
-                                    //@ts-ignore
-                                    option.user_name : option.title
+                                return option.content.title
                             }}
-                            groupBy={(option) =>
-                                // @ts-ignore
-                                option.author_id !== undefined && option.author_id !== null ? "Post": "User"
-                            }
-                            renderGroup={renderGroup}
-                            //@ts-ignore
                             renderOption={(props, option) => (
                                 <div
                                     style={{
@@ -1844,7 +1990,7 @@ export default function TopSearchBar(props: IProps) {
                                     }}
                                 >
                                     {/* @ts-ignore */}
-                                    {option.author_id !== undefined  && option.author_id !== null ? (
+                                    {(
                                         <Card sx={{
                                             display: 'flex',
                                             textAlign: "left",
@@ -1861,18 +2007,18 @@ export default function TopSearchBar(props: IProps) {
                                             }
                                         }}>
                                             <Button
-                                                sx={{width: "100%"}}
+                                                sx={{ width: "100%" }}
                                                 onClick={async () => {
                                                     // @ts-ignore
-                                                    await handleSearchCompleted(option._id)
+                                                    await handleSearchCompleted(option.content._id)
                                                     // @ts-ignore
-                                                    navigate("/challenge/" + option._id)
+                                                    navigate("/challenge/" + option.content._id)
                                                 }}
                                             >
                                                 <CardMedia
                                                     component="img"
                                                     // @ts-ignore
-                                                    image={config.rootPath + option.thumbnail}
+                                                    image={config.rootPath + option.content.thumbnail}
                                                     alt="No Image"
                                                     sx={{
                                                         borderRadius: "10px",
@@ -1899,7 +2045,7 @@ export default function TopSearchBar(props: IProps) {
                                                     }}>
                                                         {
                                                             // @ts-ignore
-                                                            option.title
+                                                            option.content.title
                                                         }
                                                     </Typography>
                                                     <Typography variant="body2" color="text.secondary" sx={{
@@ -1911,14 +2057,12 @@ export default function TopSearchBar(props: IProps) {
                                                     }}>
                                                         {
                                                             // @ts-ignore
-                                                            option.description
+                                                            option.content.description
                                                         }
                                                     </Typography>
                                                 </CardContent>
                                             </Button>
                                         </Card>
-                                    ) : (
-                                        <></>
                                     )}
                                 </div>
                             )}
@@ -1934,14 +2078,15 @@ export default function TopSearchBar(props: IProps) {
                             }}
                             ListboxProps={
                                 {
-                                    style:{
+                                    style: {
                                         maxHeight: '90vh',
                                     }
                                 }
                             }
                             renderInput={(params) => {
-                                const {InputLabelProps,InputProps,...rest} = params;
-                                return <StyledInputBase {...params.InputProps} {...rest} placeholder="Search"  />}}
+                                const { InputLabelProps, InputProps, ...rest } = params;
+                                return <StyledInputBase {...params.InputProps} {...rest} placeholder="Search" />
+                            }}
                         />
                     </form>
                 </Search>
