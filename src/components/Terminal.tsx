@@ -41,9 +41,33 @@ const ByteTerminal = ({ output, onClose, onStop, isRunning, onInputSubmit }: { o
             if (inputRef.current) {
                 const inputValue = inputRef.current.innerText;
                 console.log("Input submitted:", inputValue);
+
+                // Update the terminal content to include the user input
+                setTerminalContent(prevContent => {
+                    const updatedContent = [...prevContent];
+                    if (updatedContent.length > 0) {
+                        const lastLineIndex = updatedContent.length - 1;
+                        updatedContent[lastLineIndex] = (
+                            <span key={`line-${lastLineIndex}`} style={{ color: theme.palette.text.primary }}>
+                            {updatedContent[lastLineIndex].props.children + inputValue}
+                        </span>
+                        );
+                    }
+                    // Add a new line to move the terminal to the next line
+                    updatedContent.push(
+                        <span key={`newline-${Date.now()}`} style={{ color: theme.palette.text.primary }}>
+                        {"\n"}
+                    </span>
+                    );
+                    return updatedContent;
+                });
+
+                // Clear the input field
                 inputRef.current.innerText = "";
+
+                // Call the onInputSubmit function with the user input
                 if (onInputSubmit) {
-                    onInputSubmit(inputValue); // Call the onInputSubmit function with the user input
+                    onInputSubmit(inputValue);
                 }
             }
         }
@@ -103,7 +127,7 @@ const ByteTerminal = ({ output, onClose, onStop, isRunning, onInputSubmit }: { o
                         padding: 0
                     }}
                 >
-                    {isRunning ? <StopIcon /> : <CloseIcon />}
+                    {isRunning ? <StopIcon style={{ color: "red" }} /> : <CloseIcon />}
                 </Button>
             </Tooltip>
             <div style={{ outline: "none", color: theme.palette.text.primary }}>
