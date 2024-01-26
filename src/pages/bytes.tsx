@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useEffect, useRef, useState } from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import {
     Container,
     createTheme, CssBaseline,
@@ -42,6 +42,8 @@ import DifficultyAdjuster from "../components/ByteDifficulty";
 import { selectAuthState } from "../reducers/auth/auth";
 import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../reducers/bytes/bytes";
 import StopIcon from "@mui/icons-material/Stop";
+import { ReactTerminal, TerminalContext } from "react-terminal";
+import ByteTerminal from "../components/Terminal";
 
 interface MergedOutputRow {
     error: boolean;
@@ -314,6 +316,25 @@ function Byte() {
 
         // Set executingCode false to indicate that execution has been stopped
         setExecutingCode(false);
+    };
+
+    const stdInExecRequest = (commandId: string, input: string) => {
+        console.log("stdInExecRequest called. Command ID: ", commandId, "Input: ", input);
+
+        const message = {
+            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            type: WsMessageType.StdinExecRequest,
+            payload: {
+                byte_attempt_id: byteAttemptId,
+                payload: {
+                    command_id: commandId,
+                    input: input + "\n"
+                }
+            }
+        };
+
+        globalWs.sendWebsocketMessage(message, null);
+
     };
 
     const byteWebSocketPing = () => {
@@ -711,6 +732,11 @@ function Byte() {
         navigate(`/byte/${byteId}`);
     };
 
+    // Add a function to handle closing the terminal
+    const handleCloseTerminal = () => {
+        setTerminalVisible(false);
+    };
+
     const deleteTypingTimer = () => {
         if (typingTimerRef.current) {
             clearTimeout(typingTimerRef.current);
@@ -790,54 +816,54 @@ function Byte() {
         setCodeAfterCursor(suffix)
     }, [code, cursorPosition])
 
-    interface TerminalOutputProps {
-        output: OutputState | null;
-        style?: React.CSSProperties;
-    }
-
-    const TerminalOutput: React.FC<TerminalOutputProps> = ({ output, style }) => {
-        if (!terminalVisible) {
-            return null;
-        }
-
-        // Use executingCode to determine if the stop icon should be shown
-        const isRunning = executingCode;
-
-        return (
-            <Box style={{ ...terminalOutputStyle, ...style }}>
-                <Tooltip title={isRunning ? "Stop Program" : "Close Terminal"}>
-                    <Button
-                        variant="text"
-                        color="error"
-                        sx={{
-                            position: "absolute",
-                            right: 10,
-                            top: 10,
-                            borderRadius: "50%",
-                            padding: 1,
-                            minWidth: "0px"
-                        }}
-                        onClick={() => {
-                            if (isRunning) {
-                                cancelCodeExec(commandId); // Call cancelCodeExec with the stored command ID
-                            } else {
-                                setTerminalVisible(false);
-                            }
-                        }}
-                    >
-                        {isRunning ? <StopIcon /> : <Close />}
-                    </Button>
-                </Tooltip>
-                <code>
-                    {output && output.mergedLines.map((line, index) => (
-                        <span style={{ color: line.error ? "red" : "white" }}>
-                            {line.content + "\n"}
-                        </span>
-                    ))}
-                </code>
-            </Box>
-        );
-    };
+    // interface TerminalOutputProps {
+    //     output: OutputState | null;
+    //     style?: React.CSSProperties;
+    //     executeCode: () => void; // Function to execute code
+    //     cancelCodeExec: (commandId: string) => void; // Function to cancel code execution
+    //     isRunning: boolean; // Whether code is currently executing
+    //     commandId: string; // Command ID for execution
+    // }
+    //
+    // const TerminalOutput: React.FC<TerminalOutputProps> = ({ output, style, executeCode, cancelCodeExec, isRunning, commandId }) => {
+    //     const { setBufferedContent } = useContext(TerminalContext);
+    //     // Define terminal commands
+    //     const terminalCommands = {
+    //         cancel: {
+    //             description: "Cancel the running code",
+    //             fn: () => {
+    //                 if (isRunning) {
+    //                     cancelCodeExec(commandId);
+    //                     return "Cancelling code execution...";
+    //                 }
+    //                 return "No code is running";
+    //             }
+    //         },
+    //         // Add more commands as needed
+    //     };
+    //
+    //     console.log("Output is: " + output)
+    //
+    //     const formattedOutput = useMemo(() => {
+    //         if (!output) return "";
+    //         return output.mergedLines.map(line => `${line.error ? "Error: " : ""}${line.content}`).join("\n");
+    //     }, [output]);
+    //
+    //     return (
+    //         <Box style={{ ...style }}>
+    //             <ReactTerminal
+    //                 commands={terminalCommands}
+    //                 welcomeMessage="Welcome to Byte terminal"
+    //                 prompt=">>"
+    //                 theme="material-dark"
+    //                 errorMessage="Command not found"
+    //                 outputRender={() => (
+    //                     <pre>{formattedOutput}</pre>
+    //                 )}
+    //             />
+    //         </Box>
+    //     );
+    // };
 
     useEffect(() => {
         if (byteData === null) {
@@ -1012,10 +1038,6 @@ function Byte() {
                                                 borderRadius: "50%",
                                                 minWidth: 0,
                                             }}
-                                            // onClick={() => {
-                                            //     setOutputPopup(false);
-                                            //     executeCode();
-                                            // }}
                                             onClick={() => {
                                                 setOutputPopup(false);
                                                 buttonClickedRef.current = true;
@@ -1033,10 +1055,17 @@ function Byte() {
                                     code={code}
                                     theme={mode}
                                     onChange={(val, view) => handleEditorChange(val)}
-                                    // onUpdate={(update) => handleEditorUpdate(update)}
                                     onCursorChange={(bytePosition, line, column) => setCursorPosition({ row: line, column: column })}
                                 />
-                                <TerminalOutput output={output} style={terminalOutputStyle} />
+                                {terminalVisible && output && (
+                                    <ByteTerminal
+                                        output={output}
+                                        onClose={handleCloseTerminal}
+                                        onStop={() => cancelCodeExec(commandId)}
+                                        onInputSubmit={(input: string) => stdInExecRequest(commandId, input)}
+                                        isRunning={executingCode}
+                                    />
+                                )}
                             </Box>
                             {renderEditorSideBar()}
                         </div>
