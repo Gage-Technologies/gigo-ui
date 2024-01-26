@@ -376,6 +376,11 @@ function Byte() {
             window.removeEventListener('blur', stopPing);
         };
     }, [byteAttemptId]);
+    
+    useEffect(() => {
+        // Collapse the terminal when the difficulty changes
+        setTerminalVisible(false);
+    }, [bytesState.byteDifficulty]);
 
     const sendExecRequest = (retryCount: number = 0) => {
         const message = {
