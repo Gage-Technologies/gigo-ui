@@ -1,5 +1,6 @@
 import * as React from "react"
 import {
+    Box,
     Button,
     ButtonBase,
     Card, CardActions,
@@ -35,6 +36,9 @@ import renown8 from "../img/renown/renown8.svg"
 import renown9 from "../img/renown/renown9.svg"
 import renown10 from "../img/renown/renown10.svg"
 import DebugIcon from "./Icons/Debug";
+import BytesEasyBadge from "./Icons/bytes/BytesEasyBadge";
+import BytesMediumBadge from "./Icons/bytes/BytesMediumBadge";
+import BytesHardBadge from "./Icons/bytes/BytesHardBadge";
 
 
 interface IProps {
@@ -52,6 +56,10 @@ interface IProps {
     style?: React.CSSProperties;
     onMouseEnter?: (e: React.MouseEvent<HTMLDivElement>) => void;
     onMouseLeave?: (e: React.MouseEvent<HTMLDivElement>) => void;
+    inByte?: boolean,
+    completedEasy?: boolean;
+    completedMedium?: boolean;
+    completedHard?: boolean;
 }
 
 export default function BytesCard(props: IProps) {
@@ -81,6 +89,9 @@ export default function BytesCard(props: IProps) {
             width: props.imageWidth,
             minWidth: 200,
             backgroundImage: "url(" + props.bytesThumb + ")",
+            display: 'flex',        // Enable flexbox
+            flexDirection: 'column', // Stack children vertically
+            justifyContent: 'flex-end',
             // backgroundImage: "linear-gradient(45deg, rgba(255,255,255,0) 45%, rgba(0,0,0,1) 91%), url(" + props.bytesThumb + ")",
             // objectFit: "fill",
         },
@@ -101,7 +112,24 @@ export default function BytesCard(props: IProps) {
             paddingLeft: 0, // Remove left padding to align with the image
             paddingRight: "8px", // You can adjust right padding as needed
             width: props.width
-        }
+        },
+        badgesContainer: {
+            display: 'flex',
+            width: '100%', // Match the width of the image for alignment
+            justifyContent: 'center', // Center the badges horizontally
+            marginTop: '-8vh', // Adjust based on the height of your badges to overlap
+        },
+        container: {
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+        },
+        badge: {
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+        },
     };
 
     const cardStyle = {
@@ -155,7 +183,18 @@ export default function BytesCard(props: IProps) {
                     onMouseEnter={props.onMouseEnter}
                     onMouseLeave={props.onMouseLeave}
                 >
-                    <CardMedia component="div" sx={styles.image} />
+                    <CardMedia component="div" sx={styles.image}>
+                            <BytesHardBadge
+                                finished={props.completedEasy === undefined ? false : props.completedEasy}
+                                inByte={props.inByte}
+                            />
+                            <BytesMediumBadge finished={props.completedMedium === undefined ? false : props.completedMedium}
+                                              inByte={props.inByte}
+                            />
+                            <BytesEasyBadge finished={props.completedHard === undefined ? false : props.completedHard}
+                                            inByte={props.inByte}
+                            />
+                    </CardMedia>
                     <CardContent sx={styles.content}>
                         <Typography gutterBottom variant="h6" component="div" sx={styles.title}>
                             {props.bytesTitle}

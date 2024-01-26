@@ -8,6 +8,9 @@ interface Byte {
     name: string;
     content: string;
     bytesThumb: string;
+    completedEasy: boolean;
+    completedMedium: boolean;
+    completedHard: boolean
 }
 
 interface ByteSelectionMenuProps {
@@ -35,6 +38,10 @@ const ByteSelectionMenu: React.FC<ByteSelectionMenuProps> = ({ bytes, onSelectBy
                         marginBottom: '7%'
                     }}>
                         <BytesCard
+                            inByte={true}
+                            completedEasy={byte.completedEasy}
+                            completedMedium={byte.completedMedium}
+                            completedHard={byte.completedHard}
                             bytesId={byte.id}
                             bytesTitle={byte.name}
                             bytesThumb={config.rootPath + "/static/bytes/t/" + byte.id}

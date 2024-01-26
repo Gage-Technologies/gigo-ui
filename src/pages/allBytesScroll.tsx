@@ -103,6 +103,9 @@ function AllBytesScroll() {
                                     <div>
                                         <div style={{padding: 30, display: "flex"}}>
                                             <BytesCard
+                                                completedEasy={byte["completed_easy"]}
+                                                completedMedium={byte["completed_medium"]}
+                                                completedHard={byte["completed_hard"]}
                                                 height={"52vh"}
                                                 imageHeight={"43vh"}
                                                 // TODO mobile => make width 'fit-content'
