@@ -12,20 +12,23 @@ import {
     Popper,
     PopperPlacementType,
     styled,
-    Tooltip
+    Tooltip,
+    alpha
 } from "@mui/material";
 import { getAllTokens, themeHelpers } from "../../theme";
 import MarkdownRenderer from "../Markdown/MarkdownRenderer";
 import { Close } from "@material-ui/icons";
 import { Typography } from "@material-ui/core";
-import { Checklist } from "@mui/icons-material";
+import { Checklist, Circle } from "@mui/icons-material";
 import { useGlobalCtWebSocket } from "../../services/ct_websocket";
 import { CtByteNextStepsRequest, CtByteNextStepsResponse, CtGenericErrorPayload, CtMessage, CtMessageOrigin, CtMessageType, CtValidationErrorPayload } from "../../models/ct_websocket";
+import CodeTeacherChatIcon from "./CodeTeacherChatIcon";
 
 export type ByteNextStepProps = {
-    open: boolean;
-    closeCallback: () => void;
+    trigger: boolean;
     acceptedCallback: () => void;
+    onExpand: () => void;
+    onHide: () => void;
     currentCode: string;
     maxWidth: string;
     bytesID: string;
@@ -48,44 +51,59 @@ export default function ByteNextStep(props: ByteNextStepProps) {
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
     const [response, setResponse] = useState<string>("");
     const [state, setState] = useState<State>(State.WAITING)
+    const [hidden, setHidden] = useState<boolean>(true);
 
     const ctWs = useGlobalCtWebSocket();
 
     const WaitingButton = styled(Button)`
         animation: nextStepsButtonAuraEffect 2s infinite alternate;
-        border-radius: 50%;
         padding: 8px;
         min-width: 0px;
-        border: none;
-        &:hover {
-            border: none;
-        }
 
         @keyframes nextStepsButtonAuraEffect {
         0% {
             box-shadow: 0 0 3px #84E8A2, 0 0 6px #84E8A2;
-            background-color: #84E8A2;
+            color: #84E8A2;
+            border: 1px solid #84E8A2;
         }
         20% {
             box-shadow: 0 0 3px #29C18C, 0 0 6px #29C18C;
-            background-color: #29C18C;
+            color: #29C18C;
+            border: 1px solid #29C18C;
         }
         40% {
             box-shadow: 0 0 3px #1C8762, 0 0 6px #1C8762;
-            background-color: #1C8762;
+            color: #1C8762;
+            border: 1px solid #1C8762;
         }
         60% {
             box-shadow: 0 0 3px #2A63AC, 0 0 6px #2A63AC;
-            background-color: #2A63AC;
+            color: #2A63AC;
+            border: 1px solid #2A63AC;
         }
         80% {
             box-shadow: 0 0 3px #3D8EF7, 0 0 6px #3D8EF7;
-            background-color: #3D8EF7;
+            color: #3D8EF7;
+            border: 1px solid #3D8EF7;
         }
         100% {
             box-shadow: 0 0 3px #63A4F8, 0 0 6px #63A4F8;
-            background-color: #63A4F8;
+            color: #63A4F8;
+            border: 1px solid #63A4F8;
         }
+        }
+    `;
+
+    const HiddenButton = styled(Button)`
+        background-color: transparent;
+        padding: 8px;
+        min-width: 0px;
+        color: ${alpha(theme.palette.text.primary, 0.6)};
+        border: 1px solid ${alpha(theme.palette.text.primary, 0.6)};
+        &:hover {
+            background-color: ${alpha(theme.palette.text.primary, 0.4)};
+            color: ${theme.palette.text.primary};
+            border: 1px solid ${alpha(theme.palette.text.primary, 0.8)};
         }
     `;
 
@@ -120,13 +138,30 @@ export default function ByteNextStep(props: ByteNextStepProps) {
         }
     `;
 
-    const close = () => {
-        setResponse("")
-        setState(State.WAITING)
-        props.closeCallback()
+    useEffect(() => {
+        if (state !== State.LOADING && hidden) {
+            setResponse("")
+            setState(State.WAITING)
+        }
+    }, [props.trigger, hidden])
+
+    const hide = () => {
+        setHidden(true)
+        props.onHide()
+    }
+
+    const expand = () => {
+        setHidden(false)
+        props.onExpand()
     }
 
     const launchNextSteps = React.useCallback(() => {
+        if (state === State.LOADING) {
+            return
+        }
+
+        setState(State.LOADING)
+        expand()
         console.log('next steps payload: ', {
             byte_id: props.bytesID,
             byte_description: props.bytesDescription,
@@ -168,24 +203,54 @@ export default function ByteNextStep(props: ByteNextStepProps) {
             <>
                 <Tooltip arrow title="Code Teacher wants to help you with the next step. Click the button to accept the help.">
                     <WaitingButton
+                        sx={{
+                            height: "30px",
+                            width: "30px",
+                            minWidth: "24px",
+                            marginLeft: "10px"
+                        }}
                         variant="outlined"
                         onClick={() => {
-                            setState(State.LOADING)
-                            props.acceptedCallback()
                             launchNextSteps()
-                        }}
-                        size="small"
-                        sx={{
-                            fontSize: 10,
-                            height: 14,
-                            width: 14,
+                            props.acceptedCallback()
                         }}
                     >
+                        <Circle style={{ fontSize: "12px" }} />
                     </WaitingButton>
                 </Tooltip>
             </>
         )
     }, [props.bytesID, props.bytesDescription, props.bytesDevSteps, props.bytesLang, props.codePrefix, props.codeSuffix])
+
+    const renderHidden = React.useMemo(() => (
+        <HiddenButton
+            sx={{
+                height: "30px",
+                width: "30px",
+                minWidth: "24px",
+                marginLeft: "10px"
+            }}
+            variant="outlined"
+            onClick={() => expand()}
+        >
+            <Circle style={{ fontSize: "12px" }} />
+        </HiddenButton>
+    ), [])
+
+    const renderHiddenDisabled = React.useMemo(() => (
+        <HiddenButton
+            disabled={true}
+            sx={{
+                height: "30px",
+                width: "30px",
+                minWidth: "24px",
+                marginLeft: "10px"
+            }}
+            variant="outlined"
+        >
+            <Circle style={{ fontSize: "12px" }} />
+        </HiddenButton>
+    ), [])
 
     const loadingAnim = React.useMemo(() => (
         <Box sx={{ width: "100%", height: "fit-content" }}>
@@ -199,125 +264,105 @@ export default function ByteNextStep(props: ByteNextStepProps) {
         </Box>
     ), [])
 
-    const renderLoading = () => {
-        if (response !== "") {
-            console.log("response\n", response)
-            return (
-                <Box
-                    display={"box"}
-                >
-                    <MarkdownRenderer
-                        markdown={response}
-                        style={{
-                            overflowWrap: 'break-word',
-                            borderRadius: '10px',
-                            padding: '0px',
-                        }}
-                    />
-                    {loadingAnim}
-                </Box>
-            )
-        }
+    const headerLoadingAnim = React.useMemo(() => (
+        <AnimCircularProgress size={24} />
+    ), [])
 
+    const renderExpanded = () => {
         return (
             <Box
-                display={"flex"}
-                justifyContent={'space-between'}
-                alignItems={'start'}
                 sx={{
-                    flexDirection: "row",
+                    overflow: "auto",
+                    pl: 1,
+                    height: "100%",
+                    backgroundColor: "transparent",
+                    border: "none",
+                    boxShadow: "none",
+                    width: "100%"
                 }}
             >
-                <Typography variant="body1">
-                    CT: Next Steps
-                </Typography>
-                <AnimCircularProgress
-                    size={24}
+                <Box
+                    display={"inline-flex"}
+                    justifyContent={"space-between"}
                     sx={{
-                        ml: 2
+                        border: `1px solid ${theme.palette.text.primary}`,
+                        borderRadius: "6px",
+                        mb: 2,
+                        p: 1,
+                        width: "100%"
+                    }}
+                >
+                    <CodeTeacherChatIcon
+                        style={{
+                            height: "24px",
+                            width: "24px"
+                        }}
+                    />
+                    <Box
+                        sx={{
+                            ml: 2
+                        }}
+                    >
+                        What To Do Next
+                    </Box>
+                    {state !== State.LOADING || response.length > 0 ? (
+                        <Button
+                            variant="text"
+                            color="error"
+                            sx={{
+                                borderRadius: "50%",
+                                padding: 0.5,
+                                minWidth: "0px",
+                                // marginLeft: "auto",
+                                height: "24px",
+                                width: "24px"
+                            }}
+                            onClick={hide}
+                        >
+                            <Close />
+                        </Button>
+                    ) : headerLoadingAnim}
+                </Box>
+                <MarkdownRenderer
+                    markdown={response}
+                    style={{
+                        overflowWrap: 'break-word',
+                        borderRadius: '10px',
+                        padding: '0px',
                     }}
                 />
+                {state === State.LOADING && response.length > 0 && loadingAnim}
             </Box>
         )
     }
 
-    const renderCompleted = () => {
-        return (
-            <MarkdownRenderer
-                markdown={response}
-                style={{
-                    overflowWrap: 'break-word',
-                    borderRadius: '10px',
-                    padding: '0px',
-                }}
-            />
-        )
+    if (hidden && props.trigger && state === State.WAITING) {
+        return renderWaiting
     }
 
-    const renderContent = () => {
-        console.log("next steps state: ", state)
-        switch (state) {
-            case State.LOADING:
-                return renderLoading();
-            case State.COMPLETED:
-                return renderCompleted();
-            default:
-                return renderWaiting;
-        }
+    if (hidden && response.length > 0) {
+        return renderHidden
     }
 
-    if (!props.open) {
-        return null;
+    if (hidden) {
+        return renderHiddenDisabled
     }
 
     return (
         <Box
             sx={{
-                position: "absolute",
                 display: 'flex',
                 flexDirection: 'row',
                 alignItems: 'start',
                 p: 1,
                 zIndex: 5,
-                right: "15vw",
-                ...(state === State.WAITING ? {
-
-                } : {
-                    borderRadius: '10px',
-                    boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2);',
-                    ...themeHelpers.frostedGlass,
-                    backgroundColor: 'rgba(19,19,19,0.31)',
-                    maxWidth: props.maxWidth
-                })
+                boxShadow: "none",
+                backgroundColor: "transparent",
+                width: props.maxWidth,
+                height: "100%"
             }}
         >
-            {state !== State.WAITING && response.length > 0 && (
-                <Button
-                    variant="text"
-                    color="error"
-                    sx={{
-                        position: "absolute",
-                        right: 10,
-                        top: 10,
-                        borderRadius: "50%",
-                        padding: 1,
-                        minWidth: "0px"
-                    }}
-                    onClick={close}
-                >
-                    <Close />
-                </Button>
-            )}
-            <DialogContent
-                sx={{
-                    backgroundColor: 'transparent',
-                    maxHeight: '70vh',
-                    overflow: 'auto',
-                    mt: response.length > 0 ? 2 : undefined,
-                }}
-            >
-                {renderContent()}
-            </DialogContent>
+            {renderExpanded()}
         </Box>
     );
 }

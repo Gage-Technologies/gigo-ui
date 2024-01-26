@@ -6,11 +6,12 @@ import {
     PaletteMode,
     Popper,
     PopperPlacementType,
-    styled
+    styled,
+    alpha
 } from "@mui/material";
-import React, {useEffect, useRef, useState} from "react";
-import {getAllTokens, themeHelpers} from "../../theme";
-import {useGlobalCtWebSocket} from "../../services/ct_websocket";
+import React, { useEffect, useRef, useState } from "react";
+import { getAllTokens, themeHelpers } from "../../theme";
+import { useGlobalCtWebSocket } from "../../services/ct_websocket";
 import {
     CtByteNextOutputRequest, CtByteNextOutputResponse,
     CtGenericErrorPayload,
@@ -19,23 +20,31 @@ import {
     CtMessageType, CtValidationErrorPayload
 } from "../../models/ct_websocket";
 import MarkdownRenderer from "../Markdown/MarkdownRenderer";
-import {Typography} from "@material-ui/core";
-import {Close} from "@material-ui/icons";
+import { Typography } from "@material-ui/core";
+import { BugReportOutlined, Close } from "@material-ui/icons";
 import Lottie from "react-lottie";
 import * as byteSuccess from "../../img/byteSuccess.json"
 import * as brightLights from "../../img/brightlights.json"
+import CodeTeacherChatIcon from "./CodeTeacherChatIcon";
+import { truncate } from "fs/promises";
+import { LoadingButton } from "@mui/lab";
+import { Player } from "@lottiefiles/react-lottie-player";
+import config from "../../config";
+import BytesCard from "../BytesCard";
+import { useNavigate } from "react-router-dom";
 
 export type ByteNextOutputMessageProps = {
-    open: boolean;
-    closeCallback: () => void;
-    anchorEl: null | HTMLElement; // Add this
-    placement: PopperPlacementType;
+    trigger: boolean;
+    acceptedCallback: () => void;
+    onExpand: () => void;
+    onHide: () => void;
     lang: string;
     code: string;
     byteId: string;
     description: string;
     maxWidth: string;
-    codeOutput: string
+    codeOutput: string;
+    nextByte?: any;
 };
 
 enum State {
@@ -51,10 +60,34 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
     const [success, setSuccess] = useState<boolean | null>(null);
     const [state, setState] = useState<State>(State.LOADING);
     const [executingOutputMessage, setExecutingOutputMessage] = useState<boolean>(false)
-    const [runAnimation, setRunAnimation] = useState<boolean>(false)
+    const [hidden, setHidden] = useState<boolean>(true);
 
 
     const ctWs = useGlobalCtWebSocket();
+
+    const navigate = useNavigate();
+
+    const HiddenButton = styled(Button)`
+        background-color: transparent;
+        padding: 8px;
+        min-width: 0px;
+        color: ${alpha(theme.palette.text.primary, 0.6)};
+        &:hover {
+            background-color: ${alpha(theme.palette.text.primary, 0.4)};
+            color: ${theme.palette.text.primary};
+        }
+    `;
+
+    const HiddenLoadingButton = styled(LoadingButton)`
+        background-color: transparent;
+        padding: 8px;
+        min-width: 0px;
+        color: ${alpha(theme.palette.text.primary, 0.6)};
+        &:hover {
+            background-color: ${alpha(theme.palette.text.primary, 0.4)};
+            color: ${theme.palette.text.primary};
+        }
+    `;
 
     const AnimCircularProgress = styled(CircularProgress)`
         animation: mui-rotation 2s linear infinite, respondingEffect 2s infinite alternate;
@@ -87,23 +120,66 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
         }
     `;
 
-    const close = () => {
-        setResponse("")
-        setSuccess(null)
-        setState(State.LOADING)
-        props.closeCallback()
+    const hide = () => {
+        setHidden(true)
+        props.onHide()
     }
 
+    const expand = () => {
+        setHidden(false)
+        props.onExpand()
+    }
+
+
+    const renderHidden = React.useMemo(() => (
+        <HiddenButton
+            sx={{
+                height: "30px",
+                width: "30px",
+                minWidth: "24px",
+                marginLeft: "10px"
+            }}
+            onClick={() => expand()}
+        >
+            <BugReportOutlined style={{ fontSize: "24px" }} />
+        </HiddenButton>
+    ), [])
+
+    const renderHiddenDisabled = React.useMemo(() => (
+        <HiddenButton
+            disabled={true}
+            sx={{
+                height: "30px",
+                width: "30px",
+                minWidth: "24px",
+                marginLeft: "10px"
+            }}
+        >
+            <BugReportOutlined style={{ fontSize: "24px" }} />
+        </HiddenButton>
+    ), [])
+
+    const renderHiddenLoading = React.useMemo(() => (
+        <HiddenLoadingButton
+            loading={true}
+            sx={{
+                height: "30px",
+                width: "30px",
+                minWidth: "24px",
+                marginLeft: "10px"
+            }}
+        >
+            <BugReportOutlined style={{ fontSize: "24px" }} />
+        </HiddenLoadingButton>
+    ), [])
+
     const getOutputMessage = () => {
-        console.log("executingOutputmessage: ", executingOutputMessage)
         if (executingOutputMessage) {
             return
         }
-
-        console.log("next output starting")
-
-
         setExecutingOutputMessage(true)
+        props.acceptedCallback()
+
         ctWs.sendWebsocketMessage({
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
             type: CtMessageType.WebSocketMessageTypeByteNextOutputMessageRequest,
@@ -125,45 +201,28 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                 return true
             }
             const p: CtByteNextOutputResponse = msg.payload as CtByteNextOutputResponse;
-            console.log("p is: ", p)
-            console.log("complete output message: ", p.success)
-            console.log("Explanation: ", p.explanation)
-            setResponse(p.explanation)
+
             setSuccess(p.success)
-            if (p.success){
-                setRunAnimation(true)
-            }
-            // setSuccess(true)
-            // setRunAnimation(true)
-            setExecutingOutputMessage(false)
             setState(State.COMPLETED)
+            if (p.success) {
+                setResponse("")
+            } else {
+                setResponse(p.explanation)
+            }
+            expand()
+            setExecutingOutputMessage(false)
             return true
         })
     };
 
     useEffect(() => {
-        if (!props.open)
+        if (!props.trigger || executingOutputMessage)
             return
-        console.log("use effect for output message")
+        setState(State.LOADING)
+        setSuccess(null)
+        setResponse("")
         getOutputMessage()
-    }, [props.open])
-
-    useEffect(() => {
-        let timer: string | number | NodeJS.Timeout | undefined;
-    
-        if (runAnimation) {
-            // Set a timer to change state after 10 seconds
-            timer = setTimeout(() => {
-                setRunAnimation(false);
-                close();
-            }, 5000); // 5000 milliseconds = 5 seconds
-        }
-    
-        // Cleanup function to clear the timer if the component unmounts
-        return () => {
-            clearTimeout(timer);
-        };
-    }, [runAnimation]);
+    }, [props.trigger])
 
     const loadingAnim = React.useMemo(() => (
         <Box sx={{ width: "100%", height: "fit-content" }}>
@@ -177,146 +236,206 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
         </Box>
     ), [])
 
-    const renderLoading = () => {
-        if (response !== "") {
-            console.log("response\n", response)
-            return (
-                <Box
-                    display={"box"}
-                >
-                    <MarkdownRenderer
-                        markdown={response}
-                        style={{
-                            overflowWrap: 'break-word',
-                            borderRadius: '10px',
-                            padding: '0px',
-                        }}
-                    />
-                    {loadingAnim}
-                </Box>
-            )
-        }
+    const headerLoadingAnim = React.useMemo(() => (
+        <AnimCircularProgress size={24} />
+    ), [])
 
+    const renderExpanded = () => {
         return (
             <Box
-                display={"flex"}
-                justifyContent={'space-between'}
-                alignItems={'start'}
                 sx={{
-                    flexDirection: "row",
+                    overflow: "auto",
+                    pl: 1,
+                    height: "100%",
+                    backgroundColor: "transparent",
+                    border: "none",
+                    boxShadow: "none",
+                    width: "100%"
                 }}
             >
-                <Typography variant="body1">
-                    CT: Output Analysis
-                </Typography>
-                <AnimCircularProgress
-                    size={24}
+                <Box
+                    display={"inline-flex"}
+                    justifyContent={"space-between"}
                     sx={{
-                        ml: 2
+                        border: `1px solid ${theme.palette.text.primary}`,
+                        borderRadius: "6px",
+                        mb: 2,
+                        p: 1,
+                        width: "100%"
+                    }}
+                >
+                    <CodeTeacherChatIcon
+                        style={{
+                            height: "24px",
+                            width: "24px"
+                        }}
+                    />
+                    <Box
+                        sx={{
+                            ml: 2
+                        }}
+                    >
+                        Debug
+                    </Box>
+                    {state !== State.LOADING || response.length > 0 ? (
+                        <Button
+                            variant="text"
+                            color="error"
+                            sx={{
+                                borderRadius: "50%",
+                                padding: 0.5,
+                                minWidth: "0px",
+
+                                height: "24px",
+                                width: "24px"
+                            }}
+                            onClick={() => hide()}
+                        >
+                            <Close />
+                        </Button>
+                    ) : headerLoadingAnim}
+                </Box>
+                <MarkdownRenderer
+                    markdown={response}
+                    style={{
+                        overflowWrap: 'break-word',
+                        borderRadius: '10px',
+                        padding: '0px',
                     }}
                 />
+                {state === State.LOADING && response.length > 0 && loadingAnim}
             </Box>
         )
     }
 
-    const renderCompleted = () => {
+
+    const renderSuccesPage = () => {
         return (
-            <MarkdownRenderer
-                markdown={response}
-                style={{
-                    overflowWrap: 'break-word',
-                    borderRadius: '10px',
-                    padding: '0px',
-                    width: "16vw"
+            <Box
+                display={"flex"}
+                flexDirection={"column"}
+                sx={{
+                    alignItems: 'center',
+                    maxWidth: props.maxWidth,
+                    height: "100%",
+                    width: "100%"
                 }}
-            />
+            >
+                <Typography component={Box} variant="h4">
+                    Byte Completed!
+                </Typography>
+                <Player
+                    src={byteSuccess}
+                    loop={false}
+                    keepLastFrame={true}
+                    autoplay={true}
+                    renderer="svg"
+                />
+                {props.nextByte && (
+                    <>
+                        <Typography component={Box} variant="h6" sx={{mb: 2}}>
+                            Next Up
+                        </Typography>
+                        <BytesCard
+                            bytesId={props.nextByte._id}
+                            bytesTitle={props.nextByte.name}
+                            bytesThumb={config.rootPath + "/static/bytes/t/" + props.nextByte._id}
+                            onClick={() => navigate(`/byte/${props.nextByte._id}`)}
+                            style={{ cursor: 'pointer', transition: 'transform 0.3s ease' }}
+                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                            width="10vw"
+                            height="20vh"
+                            imageWidth="10vw"
+                            imageHeight="15vh"
+                        />
+                    </>
+                )}
+                <Box
+                    display={"flex"}
+                    flexDirection={"row"}
+                    justifyContent={"space-between"}
+                    sx={{
+                        width: "100%",
+                        marginTop: "auto",
+                        mb: 2
+                    }}
+                >
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        sx={{
+                            ml: "20px",
+                        }}
+                        onClick={() => {
+                            hide()
+                        }}
+                    >
+                        Keep Hacking
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        color="success"
+                        sx={{
+                            mr: "10px",
+                            color: "#15cf91",
+                            border: "1px solid #15cf9160",
+                            "&:hover": {
+                                color: "#15cf91",
+                                backgroundColor: "#15cf9140",
+                                border: "1px solid #15cf91",
+                            }
+                        }}
+                        onClick={() => {
+                            setSuccess(false)
+                            setResponse("")
+                            setState(State.LOADING)
+                            hide()
+                            navigate(`/byte/${props.nextByte._id}`)
+                        }}
+                    >
+                        Continue
+                    </Button>
+                </Box>
+            </Box>
         )
     }
 
     const renderContent = () => {
-        switch (state) {
-            case State.LOADING:
-                return renderLoading();
-            case State.COMPLETED:
-                return renderCompleted();
+        if (hidden && (response.length > 0 || success)) {
+            return renderHidden
         }
-    }
 
-    if (!props.open) {
-        return null;
-    }
-
-    const byteSuccessOptions = {
-        loop: true,
-        autoplay: true,
-        animationData: byteSuccess,
-        rendererSettings: {
-            preserveAspectRatio: 'xMidYMid slice'
+        if (hidden && state === State.LOADING && (props.trigger || executingOutputMessage)) {
+            return renderHiddenLoading
         }
-    };
 
-    return (
-        <>
-            {success && runAnimation ? (
-                <div style={{
+        if (hidden) {
+            return renderHiddenDisabled
+        }
+
+        if (success) {
+            return renderSuccesPage()
+        }
+
+        return (
+            <Box
+                sx={{
                     display: 'flex',
                     flexDirection: 'row',
-                    alignItems: 'center',
-                    maxWidth: props.maxWidth
-                }}>
-                    <Lottie options={byteSuccessOptions} speed={2} direction={-1}
-                            isClickToPauseDisabled={true}/>
-                </div>
-            ) : (
-                <Box
-                    sx={{
-                        position: "absolute",
-                        display: 'flex',
-                        flexDirection: 'row',
-                        alignItems: 'start',
-                        p: 1,
-                        zIndex: 5,
-                        right: "15vw",
-                        ...({
-                            borderRadius: '10px',
-                            boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.2);',
-                            ...themeHelpers.frostedGlass,
-                            backgroundColor: 'rgba(19,19,19,0.31)',
-                            maxWidth: props.maxWidth
-                        })
-                    }}
-                >
-                    <div>
-                        {response.length > 0 && (
-                            <Button
-                                variant="text"
-                                color="error"
-                                sx={{
-                                    position: "absolute",
-                                    right: 10,
-                                    top: 10,
-                                    borderRadius: "50%",
-                                    padding: 1,
-                                    minWidth: "0px"
-                                }}
-                                onClick={close}
-                            >
-                                <Close/>
-                            </Button>
-                        )}
-                        <DialogContent
-                            sx={{
-                                backgroundColor: 'transparent',
-                                maxHeight: '70vh',
-                                overflow: 'auto',
-                                mt: response.length > 0 ? 2 : undefined,
-                            }}
-                        >
-                            {renderContent()}
-                        </DialogContent>
-                    </div>
-                </Box>
-            )}
-        </>
-    );
+                    alignItems: 'start',
+                    p: 1,
+                    zIndex: 5,
+                    boxShadow: "none",
+                    backgroundColor: "transparent",
+                    width: props.maxWidth,
+                    height: "100%"
+                }}
+            >
+                {renderExpanded()}
+            </Box>
+        )
+    }
+
+    return renderContent()
 }

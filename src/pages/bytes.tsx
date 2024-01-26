@@ -240,16 +240,17 @@ function Byte() {
     const typingTimerRef = useRef(null);
     const [suggestionPopup, setSuggestionPopup] = useState(false);
     const [nextStepsPopup, setNextStepsPopup] = useState(false);
-    const [nextStepsActive, setNextStepsActive] = useState(false);
     const [commandId, setCommandId] = useState("");
 
     const [executingOutputMessage, setExecutingOutputMessage] = useState<boolean>(false)
     const [executingCode, setExecutingCode] = useState<boolean>(false)
-    
+
     const pingInterval = React.useRef<NodeJS.Timer | null>(null)
 
     const editorContainerRef = React.useRef<HTMLDivElement>(null);
     const editorRef = React.useRef<ReactCodeMirrorRef>(null);
+
+    const [activeSidebarTab, setActiveSidebarTab] = React.useState<string | null>(null);
 
 
     let { id } = useParams();
@@ -387,8 +388,8 @@ function Byte() {
                     if (msg.type === WsMessageType.GenericError) {
                         const payload = msg.payload as WsGenericErrorPayload;
 
-                        if (payload.error === "workspace is not active") {
-                            if (retryCount >= 20) {
+                        if (payload.error === "workspace is not active" || payload.error === "cannot find workspace or workspace agent") {
+                            if (retryCount >= 60) {
                                 setOutput({
                                     stdout: [],
                                     stderr: [{
@@ -402,7 +403,7 @@ function Byte() {
                                         content: "Failed to connect to DevSpace",
                                     }],
                                 })
-                
+
                                 setExecutingCode(false)
                                 return true
                             }
@@ -577,7 +578,7 @@ function Byte() {
         }
     };
 
-    const createWorkspace = async (byteId: string) => {
+    const createWorkspace = async (byteId: string): Promise<boolean> => {
         try {
             const response = await call(
                 "/api/bytes/createWorkspace",
@@ -595,15 +596,18 @@ function Byte() {
 
             if (res === undefined) {
                 swal("Server Error", "Cannot fetch byte data. Please try again later.");
-                return;
+                return false;
             }
 
             if (res["message"] === "Workspace Created Successfully") {
                 // TODO implement what needs to be done if successful
+                setWorkspaceCreated(true)
+                return true
             }
         } catch (error) {
             swal("Error", "An error occurred while creating the byte workspace.");
         }
+        return false
     };
 
     useEffect(() => {
@@ -721,15 +725,35 @@ function Byte() {
 
         if (suggestionPopup) {
             setSuggestionPopup(false)
-            setNextStepsPopup(true)
+            if (activeSidebarTab === null || activeSidebarTab !== "nextSteps") {
+                setNextStepsPopup(true)
+            }
         }
         if (outputPopup) {
             return;
         }
         if (!workspaceCreated && byteData) {
-            await createWorkspace(byteData._id)
-                .then(() => setWorkspaceCreated(true))
-                .catch((error) => console.error("Error creating workspace:", error));
+            for (let i = 0; i < 5; i++) {
+                let created = await createWorkspace(byteData._id);
+                if (created) {
+                    break
+                }
+                if (i === 4) {
+                    setOutput({
+                        stdout: [],
+                        stderr: [{
+                            timestamp: Date.now() * 1000,
+                            content: "Failed to create DevSpace"
+                        }],
+                        merged: "Failed to create DevSpace",
+                        mergedLines: [{
+                            error: true,
+                            timestamp: Date.now() * 1000,
+                            content: "Failed to create DevSpace",
+                        }],
+                    })
+                }
+            }
         }
         deleteTypingTimer();
         sendExecRequest();
@@ -781,32 +805,34 @@ function Byte() {
 
         return (
             <Box style={{ ...terminalOutputStyle, ...style }}>
-                <Button
-                    variant="text"
-                    color="error"
-                    sx={{
-                        position: "absolute",
-                        right: 10,
-                        top: 10,
-                        borderRadius: "50%",
-                        padding: 1,
-                        minWidth: "0px"
-                    }}
-                    onClick={() => {
-                        if (isRunning) {
-                            cancelCodeExec(commandId); // Call cancelCodeExec with the stored command ID
-                        } else {
-                            setTerminalVisible(false);
-                        }
-                    }}
-                >
-                    {isRunning ? <StopIcon /> : <Close />}
-                </Button>
+                <Tooltip title={isRunning ? "Stop Program" : "Close Terminal"}>
+                    <Button
+                        variant="text"
+                        color="error"
+                        sx={{
+                            position: "absolute",
+                            right: 10,
+                            top: 10,
+                            borderRadius: "50%",
+                            padding: 1,
+                            minWidth: "0px"
+                        }}
+                        onClick={() => {
+                            if (isRunning) {
+                                cancelCodeExec(commandId); // Call cancelCodeExec with the stored command ID
+                            } else {
+                                setTerminalVisible(false);
+                            }
+                        }}
+                    >
+                        {isRunning ? <StopIcon /> : <Close />}
+                    </Button>
+                </Tooltip>
                 <code>
                     {output && output.mergedLines.map((line, index) => (
                         <span style={{ color: line.error ? "red" : "white" }}>
-                        {line.content + "\n"}
-                    </span>
+                            {line.content + "\n"}
+                        </span>
                     ))}
                 </code>
             </Box>
@@ -839,6 +865,89 @@ function Byte() {
         state.initialized = true
         state.byteDifficulty = difficulty
         dispatch(updateBytesState(state))
+    }
+
+    const getNextByte = () => {
+        if (recommendedBytes === null) {
+            return undefined
+        }
+        // attempt to locate the current bytes position in the list of recommendations
+        // @ts-ignore
+        let idx = recommendedBytes.findIndex(x => x._id == byteData?._id)
+        if (idx === undefined) {
+            idx = -1
+        }
+
+        // find the first byte that is later than the index with the same language
+        // @ts-ignore
+        let byte = recommendedBytes.find((x, i) => i > idx && x.lang === byteData?.lang)
+        if (byte) {
+            return byte
+        }
+
+        // retrieve the first index from the list that is the same language
+        // @ts-ignore
+        byte = recommendedBytes.find((x, i) => x.lang === byteData?.lang)
+        if (byte) {
+            return byte
+        }
+
+        // fallback on the first byte
+        return recommendedBytes[0]
+    }
+
+    const renderEditorSideBar = () => {
+        return (
+            <Box
+                display={"flex"}
+                flexDirection={"column"}
+                sx={{
+                    width: "fit-content",
+                    padding: "0px",
+                    gap: "10px",
+                    height: "100%"
+                }}
+            >
+                {(activeSidebarTab === null || activeSidebarTab === "nextSteps") && (
+                    <ByteNextStep
+                        trigger={nextStepsPopup}
+                        acceptedCallback={() => {
+                            setNextStepsPopup(false)
+                        }}
+                        onExpand={() => setActiveSidebarTab("nextSteps")}
+                        onHide={() => setActiveSidebarTab(null)}
+                        currentCode={code}
+                        maxWidth="20vw"
+                        bytesID={id || ""}
+                        // @ts-ignore
+                        bytesDescription={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
+                        // @ts-ignore
+                        bytesDevSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
+                        bytesLang={programmingLanguages[byteData ? byteData.lang : 5]}
+                        codePrefix={codeBeforeCursor}
+                        codeSuffix={codeAfterCursor}
+                    />
+                )}
+                {(activeSidebarTab === null || activeSidebarTab === "debugOutput") && (
+                    <ByteNextOutputMessage
+                        trigger={outputPopup}
+                        acceptedCallback={() => { setOutputPopup(false) }}
+                        onExpand={() => setActiveSidebarTab("debugOutput")}
+                        onHide={() => setActiveSidebarTab(null)}
+                        lang={programmingLanguages[byteData ? byteData.lang : 5]}
+                        code={code}
+                        byteId={id || ""}
+                        // @ts-ignore
+                        description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
+                        // @ts-ignore
+                        questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
+                        maxWidth={"20vw"}
+                        codeOutput={output?.merged || ""}
+                        nextByte={getNextByte()}
+                    />
+                )}
+            </Box>
+        )
     }
 
     return (
@@ -885,26 +994,6 @@ function Byte() {
                                     />
                                 )}
                             </div>
-                            <ByteNextStep
-                                open={nextStepsPopup}
-                                closeCallback={() => {
-                                    setNextStepsActive(false)
-                                    setNextStepsPopup(false)
-                                }}
-                                acceptedCallback={() => {
-                                    setNextStepsActive(true)
-                                }}
-                                currentCode={code}
-                                maxWidth="20vw"
-                                bytesID={id || ""}
-                                // @ts-ignore
-                                bytesDescription={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
-                                // @ts-ignore
-                                bytesDevSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
-                                bytesLang={programmingLanguages[byteData ? byteData.lang : 5]}
-                                codePrefix={codeBeforeCursor}
-                                codeSuffix={codeAfterCursor}
-                            />
                             <Box
                                 style={editorAndTerminalStyle}
                                 ref={editorContainerRef}
@@ -949,35 +1038,7 @@ function Byte() {
                                 />
                                 <TerminalOutput output={output} style={terminalOutputStyle} />
                             </Box>
-                            <ByteNextOutputMessage
-                                open={outputPopup}
-                                closeCallback={() => { setOutputPopup(false) }}
-                                anchorEl={editorContainerRef.current}
-                                placement={"right-start"}
-                                lang={programmingLanguages[byteData ? byteData.lang : 5]}
-                                code={code}
-                                byteId={id || ""}
-                                // @ts-ignore
-                                description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
-                                // @ts-ignore
-                                questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
-                                maxWidth={"20vw"}
-                                codeOutput={output?.merged || ""}
-                            />
-                            {/* <ByteSuggestions
-                                open={suggestionPopup}
-                                closeCallback={() => {
-                                    setSuggestionPopup(false)
-                                }}
-                                code={code}
-                                anchorEl={editorContainerRef.current}
-                                placement="right-start"
-                                posMods={[0, 40]}
-                                maxWidth="20vw"
-                                byteId={id || ""}
-                                description={bytesDescription}
-                                lang={bytesLang}
-                            /> */}
+                            {renderEditorSideBar()}
                         </div>
                         <div style={byteSelectionMenuStyle}>
                             {recommendedBytes && <ByteSelectionMenu bytes={recommendedBytes} onSelectByte={handleSelectByte} />}
