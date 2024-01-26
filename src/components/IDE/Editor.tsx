@@ -19,6 +19,7 @@ export type EditorProps = {
     gutterStyles?: React.CSSProperties;
     code: string;
     theme?: string;
+    readonly: boolean;
     onChange?: (val: string, viewUpdate: ViewUpdate) => void;
     onUpdate?: (viewUpdate: ViewUpdate) => void;
     onCursorChange?: (bytePosition: number, lineNumber: number, columnNumber: number) => void;
@@ -114,6 +115,7 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
                 extensions={getExtensions()}
                 onChange={onChange}
                 onUpdate={onUpdate}
+                readOnly={props.readonly}
             />
         </Box>
     )

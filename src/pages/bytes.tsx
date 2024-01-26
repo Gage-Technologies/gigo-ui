@@ -828,6 +828,7 @@ function Byte() {
             buttonClickedRef.current = false;
             if (!authState.authenticated) {
                 navigate("/signup")
+                return
             }
             executeCode();
         }
@@ -1086,6 +1087,7 @@ function Byte() {
                                                 buttonClickedRef.current = true;
                                                 if (!authState.authenticated) {
                                                     navigate("/signup")
+                                                    return
                                                 }
 
                                                 executeCode(); // Indicate button click
@@ -1101,6 +1103,7 @@ function Byte() {
                                     language={programmingLanguages[byteData ? byteData.lang : 5]}
                                     code={code}
                                     theme={mode}
+                                    readonly={!authState.authenticated}
                                     onChange={(val, view) => handleEditorChange(val)}
                                     onCursorChange={(bytePosition, line, column) => setCursorPosition({ row: line, column: column })}
                                 />

@@ -629,9 +629,9 @@ export default function ByteChat(props: ByteChatProps) {
 
     const textInputMemo = React.useMemo(() => (
         <TextField
-            disabled={disableChat && authState.authenticated}
+            disabled={disableChat || !authState.authenticated}
             fullWidth
-            label="Ask Code Teacher!"
+            label={authState.authenticated ? "Ask Code Teacher!" : "Signup To Chat With Code Teacher"}
             variant="outlined"
             value={userMessage}
             multiline={true}
@@ -642,7 +642,7 @@ export default function ByteChat(props: ByteChatProps) {
                 endAdornment: (
                     <InputAdornment position="end">
                         <Tooltip title={"Start New Conversation Thread"}>
-                            <IconButton onClick={() => closeThread()} disabled={disableChat}>
+                            <IconButton onClick={() => closeThread()} disabled={disableChat || !authState.authenticated}>
                                 <ForumIcon/>
                             </IconButton>
                         </Tooltip>
