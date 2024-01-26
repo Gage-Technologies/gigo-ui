@@ -666,9 +666,9 @@ function Home() {
                                                 bytesThumb={config.rootPath + "/static/bytes/t/" + project["_id"]}
                                                 onClick={() => navigate("/byte/" + project["_id"])}
                                                 role={authState.role}
-                                                completedEasy={true}
-                                                completedMedium={true}
-                                                completedHard={true}
+                                                completedEasy={project["completed_easy"]}
+                                                completedMedium={project["completed_medium"]}
+                                                completedHard={project["completed_hard"]}
                                             />
                                         </LazyLoad>
                                     </div>

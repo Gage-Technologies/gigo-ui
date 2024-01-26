@@ -517,7 +517,10 @@ function Byte() {
             const enhancedBytes = res["rec_bytes"].map((byte: any) => ({
                 ...byte,
                 id: byte._id,
-                bytesThumb: byteImages[Math.floor(Math.random() * byteImages.length)]
+                bytesThumb: byteImages[Math.floor(Math.random() * byteImages.length)],
+                completedEasy: byte["completed_easy"],
+                completedMedium: byte["completed_medium"],
+                completedHard: byte["completed_hard"],
             }));
             setRecommendedBytes(enhancedBytes);
         } else {
