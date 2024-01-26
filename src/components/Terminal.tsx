@@ -54,13 +54,13 @@ const ByteTerminal = ({ output, onClose, onStop, isRunning, onInputSubmit }: { o
 
     useEffect(() => {
         if (!output) return;
-        const formattedOutput = output.mergedLines.map((line, index) => {
-            const lineEndsInNewline = line.content.endsWith("\n");
-            return (
-                <span key={index} style={{ color: line.error ? "red" : theme.palette.text.primary }}>
-                    {line.content}{lineEndsInNewline ? "" : " "}
-                </span>
-            );
+        const formattedOutput = output.mergedLines.flatMap((line, index) => {
+            // Split the content by new line characters and render each line separately
+            return line.content.split("\n").map((content, lineIndex) => (
+                <div key={`line-${index}-${lineIndex}`} style={{ color: line.error ? "red" : theme.palette.text.primary }}>
+                    {content}
+                </div>
+            ));
         });
         setTerminalContent(formattedOutput);
     }, [output, theme.palette.text.primary]);
