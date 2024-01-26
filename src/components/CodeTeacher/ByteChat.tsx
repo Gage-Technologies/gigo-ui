@@ -512,11 +512,11 @@ export default function ByteChat(props: ByteChatProps) {
         if (msgId == 'init' || msgId === 'init2' || msgId === 'init3') {
             switch(props.difficulty){
                 case 'easy':
-                    return '#126353'
+                    return 'rgb(13,107,93,0.5)'
                 case 'medium':
-                    return '#242f6a'
+                    return 'rgb(40,59,111,0.5)'
                 case 'hard':
-                    return '#75233c'
+                    return 'rgb(130,47,69,0.5)'
             }
         } else {
             return "#31343a40"
