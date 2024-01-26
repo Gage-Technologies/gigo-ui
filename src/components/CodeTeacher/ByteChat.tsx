@@ -629,7 +629,7 @@ export default function ByteChat(props: ByteChatProps) {
 
     const textInputMemo = React.useMemo(() => (
         <TextField
-            disabled={disableChat}
+            disabled={disableChat && authState.authenticated}
             fullWidth
             label="Ask Code Teacher!"
             variant="outlined"

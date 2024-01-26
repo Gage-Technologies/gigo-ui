@@ -668,7 +668,9 @@ function Byte() {
         setLoading(true);
         getRecommendedBytes()
         getByte(byteId).then(() => {
-            startByteAttempt(byteId);
+            if (authState.authenticated) {
+                startByteAttempt(byteId);
+            }
         }).finally(() => {
             setLoading(false);
         });
@@ -824,6 +826,9 @@ function Byte() {
         }
         if (!outputPopup && buttonClickedRef.current) {
             buttonClickedRef.current = false;
+            if (!authState.authenticated) {
+                navigate("/signup")
+            }
             executeCode();
         }
         buttonClickedRef.current = false;
@@ -1079,6 +1084,10 @@ function Byte() {
                                             onClick={() => {
                                                 setOutputPopup(false);
                                                 buttonClickedRef.current = true;
+                                                if (!authState.authenticated) {
+                                                    navigate("/signup")
+                                                }
+
                                                 executeCode(); // Indicate button click
                                             }}
                                         >

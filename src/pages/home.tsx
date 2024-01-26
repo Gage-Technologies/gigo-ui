@@ -204,8 +204,25 @@ function Home() {
 
     const [isFetching, setIsFetching] = useInfiniteScroll(infiniteScrollHandler, true, 1440, stopScroll)
 
-    const apiLoad = async () => {
+    const loadByteData = async () => {
+        let bytes = await call(
+            "/api/bytes/getRecommendedBytes",
+            "post",
+            null,
+            null,
+            null,
+            //@ts-ignore
+            {},
+            null,
+            config.rootPath
+        )
 
+        if (bytes !== undefined && bytes["rec_bytes"] !== undefined) {
+            setByteContent(bytes["rec_bytes"])
+        }
+    }
+
+    const apiLoad = async () => {
         if ((activeData.length === 0 || recData.length === 0 || followData.length === 0 || topRec.length === 0) && loggedIn) {
             let active = call(
                 "/api/home/active",
@@ -231,18 +248,6 @@ function Home() {
                 config.rootPath
             )
 
-            let bytes = call(
-                "/api/bytes/getRecommendedBytes",
-                "post",
-                null,
-                null,
-                null,
-                //@ts-ignore
-                {},
-                null,
-                config.rootPath
-            )
-
             let top = call(
                 "/api/home/top",
                 "post",
@@ -255,18 +260,16 @@ function Home() {
                 config.rootPath
             )
 
-            const [res, res2, res3, res4] = await Promise.all([
+            const [res, res2, res4] = await Promise.all([
                 active,
                 follow,
-                bytes,
                 top
             ])
 
             if (
                 (res === undefined || res["projects"] === undefined ||
                     res2 === undefined || res2["projects"] === undefined ||
-                    res3 === undefined || res3["rec_bytes"] === undefined) ||
-                res4 === undefined || res4["projects"] === undefined && loggedIn
+                res4 === undefined || res4["projects"] === undefined) && loggedIn
             ) {
                 swal("There has been an issue loading data. Please try again later.")
             }
@@ -274,7 +277,6 @@ function Home() {
             setActiveData(res["projects"])
             setFollowData(res2["projects"])
             // setUserProjects(res3["projects"])
-            setByteContent(res3["rec_bytes"])
             setTopRec(res4["projects"])
         }
     }
@@ -284,6 +286,7 @@ function Home() {
         let xpLogin = window.sessionStorage.getItem('loginXP')
         setLoading(true)
 
+        loadByteData()
         if (authState.authenticated !== false) {
             apiLoad().then(r => console.log("here: ", r))
         }
