@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, {useEffect, useState, useRef, CSSProperties} from "react";
 import { Button, Tooltip, useTheme } from "@mui/material";
-import CloseIcon from '@mui/icons-material/Close';
 import StopIcon from '@mui/icons-material/Stop';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { OutputRow } from "../models/bytes";
 
 interface MergedOutputRow {
@@ -21,6 +21,36 @@ const ByteTerminal = ({ output, onClose, onStop, isRunning, onInputSubmit }: { o
     const [terminalContent, setTerminalContent] = useState<JSX.Element[]>([]);
     const inputRef = useRef<HTMLDivElement>(null);
     const theme = useTheme();
+
+    // Determine if the theme mode is light or dark
+    const isLightMode = theme.palette.mode === 'light';
+
+    // Adjust terminal styles based on the theme mode
+    const terminalStyle: CSSProperties = {
+        backgroundColor: isLightMode ? "#f0f0f0" : "#333",
+        color: isLightMode ? "black" : "white",
+        fontFamily: "monospace",
+        fontSize: "0.9rem",
+        padding: "10px",
+        marginTop: "20px",
+        borderRadius: "5px",
+        whiteSpace: "pre-wrap",
+        height: "200px",
+        overflowY: 'auto',
+        wordWrap: 'break-word',
+        position: "relative"
+    };
+
+    const inputStyle: CSSProperties = {
+        minHeight: "20px",
+        cursor: "text",
+        caretColor: isLightMode ? "black" : "white",
+        display: "inline",
+        backgroundColor: isLightMode ? "#ddd" : "#222",
+        color: isLightMode ? "black" : "white",
+        padding: "2px 5px",
+        borderRadius: "4px",
+    };
 
     useEffect(() => {
         if (!output) return;
@@ -42,30 +72,26 @@ const ByteTerminal = ({ output, onClose, onStop, isRunning, onInputSubmit }: { o
                 const inputValue = inputRef.current.innerText;
                 console.log("Input submitted:", inputValue);
 
-                // Update the terminal content to include the user input
                 setTerminalContent(prevContent => {
                     const updatedContent = [...prevContent];
                     if (updatedContent.length > 0) {
                         const lastLineIndex = updatedContent.length - 1;
                         updatedContent[lastLineIndex] = (
                             <span key={`line-${lastLineIndex}`} style={{ color: theme.palette.text.primary }}>
-                            {updatedContent[lastLineIndex].props.children + inputValue}
-                        </span>
+                                {updatedContent[lastLineIndex].props.children + inputValue}
+                            </span>
                         );
                     }
-                    // Add a new line to move the terminal to the next line
                     updatedContent.push(
                         <span key={`newline-${Date.now()}`} style={{ color: theme.palette.text.primary }}>
-                        {"\n"}
-                    </span>
+                            {"\n"}
+                        </span>
                     );
                     return updatedContent;
                 });
 
-                // Clear the input field
                 inputRef.current.innerText = "";
 
-                // Call the onInputSubmit function with the user input
                 if (onInputSubmit) {
                     onInputSubmit(inputValue);
                 }
@@ -84,16 +110,7 @@ const ByteTerminal = ({ output, onClose, onStop, isRunning, onInputSubmit }: { o
             ref={inputRef}
             contentEditable
             spellCheck={false}
-            style={{
-                minHeight: "20px",
-                cursor: "text",
-                caretColor: "white",
-                display: "inline",
-                backgroundColor: "#222",
-                color: "white",
-                padding: "2px 5px",
-                borderRadius: "4px",
-            }}
+            style={inputStyle}
             onKeyPress={handleInputKeyPress}
         />
     );
@@ -101,19 +118,7 @@ const ByteTerminal = ({ output, onClose, onStop, isRunning, onInputSubmit }: { o
     const lastLineRequiresInput = output && output.mergedLines.length > 0 && !output.mergedLines[output.mergedLines.length - 1].content.endsWith("\n");
 
     return (
-        <div style={{
-            backgroundColor: "#333",
-            fontFamily: "monospace",
-            fontSize: "0.9rem",
-            padding: "10px",
-            marginTop: "20px",
-            borderRadius: "5px",
-            whiteSpace: "pre-wrap",
-            height: "200px",
-            overflowY: 'auto',
-            wordWrap: 'break-word',
-            position: "relative"
-        }}>
+        <div style={terminalStyle}>
             <Tooltip title={isRunning ? "Stop Execution" : "Close Terminal"}>
                 <Button
                     onClick={isRunning ? onStop : onClose}
@@ -127,7 +132,7 @@ const ByteTerminal = ({ output, onClose, onStop, isRunning, onInputSubmit }: { o
                         padding: 0
                     }}
                 >
-                    {isRunning ? <StopIcon style={{ color: "red" }} /> : <CloseIcon />}
+                    {isRunning ? <StopIcon style={{ color: "red" }} /> : <HighlightOffIcon style={{ color: "red" }}/>}
                 </Button>
             </Tooltip>
             <div style={{ outline: "none", color: theme.palette.text.primary }}>
