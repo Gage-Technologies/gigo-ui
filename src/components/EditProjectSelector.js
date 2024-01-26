@@ -58,7 +58,7 @@ function ProjectSelector({ originalLabel, onProjectSelect, theme, style = {}}) {
         console.log("l")
     };
 
-    const getProjectIcon = (projectType: string) => {
+    const getProjectIcon = (projectType) => {
         switch (projectType) {
             case "Playground":
                 return (
