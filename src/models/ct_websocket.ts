@@ -79,6 +79,7 @@ export interface CtByteNextStepsResponse {
 export interface CtByteNextOutputRequest {
     byte_id: string;
     byte_description: string;
+    byte_development_steps: string;
     code: string;
     byte_output: string;
     code_language: string;

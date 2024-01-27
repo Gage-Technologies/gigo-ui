@@ -31,7 +31,7 @@ import {
 import {initialAuthState, selectAuthState, selectAuthStateThumbnail} from "../../reducers/auth/auth";
 import config from "../../config";
 import UserIcon from "../UserIcon";
-import {useAppSelector} from "../../app/hooks";
+import {useAppDispatch, useAppSelector} from "../../app/hooks";
 import ctIcon from "../../img/codeTeacher/CT-icon.svg"
 import CodeTeacherChatIcon from "./CodeTeacherChatIcon";
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
@@ -40,6 +40,39 @@ import ForumIcon from '@mui/icons-material/Forum';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import {grey} from "@mui/material/colors";
+import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../../reducers/bytes/bytes";
+
+const InitialSuggestionButton = styled(Button)`
+    animation: initSuggestionButtonAuraEffect 2s infinite alternate;
+
+    @keyframes initSuggestionButtonAuraEffect {
+        0% {
+            color: #84E8A2;
+            border: 1px solid #84E8A2;
+        }
+        20% {
+            color: #29C18C;
+            border: 1px solid #29C18C;
+        }
+        40% {
+            color: #1C8762;
+            border: 1px solid #1C8762;
+        }
+        60% {
+            color: #2A63AC;
+            border: 1px solid #2A63AC;
+        }
+        80% {
+            color: #3D8EF7;
+            border: 1px solid #3D8EF7;
+        }
+        100% {
+            color: #63A4F8;
+            border: 1px solid #63A4F8;
+        }
+    }
+`;
+
 
 export type ByteChatProps = {
     byteID: string;
@@ -59,7 +92,10 @@ export default function ByteChat(props: ByteChatProps) {
 
     let ctWs = useGlobalCtWebSocket();
     let authState = useAppSelector(selectAuthState);
+    const bytesState = useAppSelector(selectBytesState)
     const thumbnail = useAppSelector(selectAuthStateThumbnail);
+
+    const dispatch = useAppDispatch();
 
     enum State {
         WAITING = 'waiting',
@@ -816,43 +852,67 @@ export default function ByteChat(props: ByteChatProps) {
         </>
     ), [(state === State.LOADING) ? null : messages, threadVisibility, currentThreadCount])
 
-    const handleInitialQuestions = (question: string) => {
+    const handleInitialQuestions = (question: string, index: number) => {
+        if (index === 0 && !bytesState.acceptedExplanationSuggestion) {
+            // copy the existing state
+            let state = Object.assign({}, initialBytesStateUpdate)
+            // update the state
+            state.acceptedExplanationSuggestion = true
+            dispatch(updateBytesState(state))
+        }
         sendUserCTChat(question);
     }
 
     const renderSuggestions = () => {
         if (!showButtons)
             return null
+
+        // trim the list to the top 3 if it is longer
+        let questions: string[] = props.questions;
+        if (questions.length > 3) {
+            questions = props.questions.slice(0, 3)
+        }
+
+        // prepend the persistent question
+        questions.unshift("Explain the byte in greater detail.")
+
         return (
             <Grid container sx={{
                 marginBottom: '10px'
             }} spacing={1}>
-                {props.questions.map((q, index) => (
-                    <Grid item xs={6}>
-                        <Button
-                            key={index}
-                            variant="outlined"
-                            sx={{
-                                height: "100%",
-                                width:"100%",
-                                fontSize: '0.65rem',
-                                textTransform: 'none',
-                                p: .7,
-                                textAlign: "left",
-                                color: mode === "light" ? alpha("#1d1d1d", 0.6) : alpha(grey[300], 0.6),
-                                border: mode === "light" ? `1px solid ${alpha("#1d1d1d", 0.2)}` : `1px solid ${alpha(grey[300], 0.2)}`,
-                                '&:hover': {
-                                    color: mode === "light" ? "#1d1d1d" : grey[300],
-                                    backgroundColor: alpha(grey[500], 0.2),
-                                    border: mode === "light" ? `1px solid ${alpha("#1d1d1d", 0.6)}` : `1px solid ${alpha(grey[500], 0.6)}`
-                                }
-                            }}
-                            onClick={() => handleInitialQuestions(q)}
-                        >
-                            {q}
-                        </Button>
-                    </Grid>
-                ))}
+                {questions.map((q, index) => {
+                    let QuestionButton: any = Button
+                    if (index === 0 && !bytesState.acceptedExplanationSuggestion) {
+                        QuestionButton = InitialSuggestionButton
+                    }
+
+                    return (
+                        <Grid item xs={6}>
+                            <QuestionButton
+                                key={index}
+                                variant="outlined"
+                                sx={{
+                                    height: "100%",
+                                    width:"100%",
+                                    fontSize: '0.65rem',
+                                    textTransform: 'none',
+                                    p: .7,
+                                    textAlign: "left",
+                                    color: mode === "light" ? alpha("#1d1d1d", 0.6) : alpha(grey[300], 0.6),
+                                    border: mode === "light" ? `1px solid ${alpha("#1d1d1d", 0.2)}` : `1px solid ${alpha(grey[300], 0.2)}`,
+                                    '&:hover': {
+                                        color: mode === "light" ? "#1d1d1d" : grey[300],
+                                        backgroundColor: alpha(grey[500], 0.2),
+                                        border: mode === "light" ? `1px solid ${alpha("#1d1d1d", 0.6)}` : `1px solid ${alpha(grey[500], 0.6)}`
+                                    }
+                                }}
+                                onClick={() => handleInitialQuestions(q, index)}
+                            >
+                                {q}
+                            </QuestionButton>
+                        </Grid>
+                    )
+                })}
             </Grid>
         )
     }

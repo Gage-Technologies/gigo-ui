@@ -1012,6 +1012,8 @@ function Byte() {
                         description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
                         // @ts-ignore
                         questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
+                        // @ts-ignore
+                        dev_steps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
                         maxWidth={"20vw"}
                         codeOutput={output?.merged || ""}
                         nextByte={getNextByte()}

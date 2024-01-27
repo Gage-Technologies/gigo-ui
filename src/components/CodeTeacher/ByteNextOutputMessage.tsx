@@ -43,6 +43,7 @@ export type ByteNextOutputMessageProps = {
     code: string;
     byteId: string;
     description: string;
+    dev_steps: string;
     maxWidth: string;
     codeOutput: string;
     nextByte?: any;
@@ -189,6 +190,7 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
             payload: {
                 byte_id: props.byteId,
                 byte_description: props.description,
+                byte_development_steps: props.dev_steps,
                 code_language: props.lang,
                 // @ts-ignore
                 byte_output: props.codeOutput, // changed from codeOutput["stdout"][0] because of an error

@@ -8,21 +8,25 @@ import {DefaultWorkspaceConfig, WorkspaceConfig} from "../../models/workspace";
 export interface BytesState {
     initialized: boolean;
     byteDifficulty: number;
+    acceptedExplanationSuggestion: boolean;
 }
 
 export interface BytesStateUpdate {
     initialized: boolean | null;
     byteDifficulty: number | null;
+    acceptedExplanationSuggestion: boolean | null;
 }
 
 export const initialBytesState: BytesState = {
     initialized: false,
-    byteDifficulty: 0
+    byteDifficulty: 0,
+    acceptedExplanationSuggestion: true,
 };
 
 export const initialBytesStateUpdate: BytesStateUpdate = {
     initialized: null,
     byteDifficulty: null,
+    acceptedExplanationSuggestion: null,
 };
 
 export const bytesSlice = createSlice({
@@ -42,6 +46,10 @@ export const bytesSlice = createSlice({
             if (update.payload.byteDifficulty !== null) {
                 state.byteDifficulty = update.payload.byteDifficulty
             }
+
+            if (update.payload.acceptedExplanationSuggestion !== null) {
+                state.acceptedExplanationSuggestion = update.payload.acceptedExplanationSuggestion
+            }
         },
     }
 });
@@ -54,5 +62,6 @@ export const {updateBytesState, clearBytesState} = bytesSlice.actions;
 export const selectBytesState = (state: RootState) => state.bytes;
 export const selectBytesInitialized = (state: RootState) => state.bytes.initialized;
 export const selectBytesDifficulty = (state: RootState) => state.bytes.byteDifficulty;
+export const selectBytesExplanationSuggestion = (state: RootState) => state.bytes.acceptedExplanationSuggestion;
 
 export default bytesSlice.reducer;
