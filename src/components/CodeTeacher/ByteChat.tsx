@@ -28,7 +28,7 @@ import {
     CtMessageType,
     CtValidationErrorPayload
 } from "../../models/ct_websocket";
-import {initialAuthState, selectAuthStateThumbnail} from "../../reducers/auth/auth";
+import {initialAuthState, selectAuthState, selectAuthStateThumbnail} from "../../reducers/auth/auth";
 import config from "../../config";
 import UserIcon from "../UserIcon";
 import {useAppSelector} from "../../app/hooks";
@@ -53,12 +53,13 @@ export type ByteChatProps = {
 };
 
 export default function ByteChat(props: ByteChatProps) {
+    console.log("chat: ", props)
     let userPref = localStorage.getItem('theme');
     const [mode, _] = useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
 
     let ctWs = useGlobalCtWebSocket();
-    let authState = Object.assign({}, initialAuthState)
+    let authState = useAppSelector(selectAuthState);
     const thumbnail = useAppSelector(selectAuthStateThumbnail);
 
     enum State {
@@ -138,6 +139,9 @@ export default function ByteChat(props: ByteChatProps) {
     };
 
     useEffect(() => {
+        if (!authState.authenticated) {
+            return
+        }
         scrollToTop()
         setNewChat(true)
         setThreadVisibility({ [currentThreadCount]: false })
@@ -180,7 +184,9 @@ export default function ByteChat(props: ByteChatProps) {
     }
 
     useEffect(() => {
-        launchCTChat()
+        if (authState.authenticated) {
+            launchCTChat()
+        }
     }, []);
 
     useEffect(() => {
@@ -198,7 +204,7 @@ export default function ByteChat(props: ByteChatProps) {
     }, [props.description]);
 
     useEffect(() => {
-        if (chatId === "")
+        if (chatId === "" || !authState.authenticated)
             return
         ctWs.sendWebsocketMessage({
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
@@ -244,6 +250,10 @@ export default function ByteChat(props: ByteChatProps) {
     }, [chatId])
 
     const sendUserCTChat = (overrideMessage?: string) => {
+        if (!authState.authenticated) {
+            return
+        }
+
         setThreadVisibility({ [currentThreadCount]: true })
         setShowButtons(false)
         setDisableChat(true)
@@ -326,7 +336,7 @@ export default function ByteChat(props: ByteChatProps) {
     }
 
     const closeThread = () => {
-        if (chatId === "")
+        if (chatId === "" || !authState.authenticated)
             return
         ctWs.sendWebsocketMessage({
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
