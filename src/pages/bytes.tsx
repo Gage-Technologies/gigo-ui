@@ -548,6 +548,12 @@ function Byte() {
                 let outlineContent = res["rec_bytes"][`outline_content_${difficultyToString(determineDifficulty())}`]
                 setInitialCode(outlineContent);
                 setCode(outlineContent);
+                setCodeBeforeCursor("")
+                setCodeAfterCursor(outlineContent)
+                setCursorPosition({row: 0, column: 0})
+                setEasyCode(res["rec_bytes"]["outline_content_easy"])
+                setMediumCode(res["rec_bytes"]["outline_content_medium"])
+                setHardCode(res["rec_bytes"]["outline_content_hard"])
 
                 setByteData(res["rec_bytes"])
                 setWorkspaceCreated(false);
