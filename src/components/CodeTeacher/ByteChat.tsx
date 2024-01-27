@@ -53,7 +53,6 @@ export type ByteChatProps = {
 };
 
 export default function ByteChat(props: ByteChatProps) {
-    console.log("chat: ", props)
     let userPref = localStorage.getItem('theme');
     const [mode, _] = useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
@@ -298,9 +297,6 @@ export default function ByteChat(props: ByteChatProps) {
             }
 
             setMessages(uniqueMessages)
-            console.log("last message thread: ", uniqueMessages[uniqueMessages.length-1].thread_number)
-            console.log("current thread count: ", currentThreadCount)
-            console.log("should show buttons: ", uniqueMessages[uniqueMessages.length-1].thread_number !== currentThreadCount)
             setShowButtons(uniqueMessages[uniqueMessages.length-1].thread_number !== currentThreadCount)
             return true
         })
