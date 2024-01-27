@@ -100,8 +100,8 @@ function Byte() {
     const combinedSectionStyle: React.CSSProperties = {
         display: 'flex',
         height: '80vh',
-        width: '80vw',
-        marginLeft: '5%',
+        width: 'calc(100vw - 360px)',
+        marginLeft: '30px',
         marginRight: 'auto',
         borderRadius: theme.shape.borderRadius,
         overflow: 'hidden',
@@ -115,15 +115,17 @@ function Byte() {
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'flex-start',
-        gap: '1rem',
+        gap: '30px',
         marginTop: '1rem',
+        maxHeight: "80vh",
+        overflow: "hidden"
     };
 
     // Byte selection menu style
     const byteSelectionMenuStyle: React.CSSProperties = {
-        width: '20%',
+        width: '300px',
         maxHeight: '80vh',
-        overflow: 'auto'
+        overflow: 'hidden'
     };
 
     const containerStyleDefault: React.CSSProperties = {
@@ -180,14 +182,14 @@ function Byte() {
 
     const difficultyAdjusterStyle: React.CSSProperties = {
         width: "fit-content",
-        marginLeft: "5%"
+        marginLeft: "30px"
     };
 
     const titleStyle: React.CSSProperties = {
         textAlign: 'center',
         marginTop: "14px",
         marginBottom: "2px",
-        width: "calc(80vw - 164px)",
+        width: "calc(100vw - 500px)",
     };
 
     const topContainerStyle: React.CSSProperties = {

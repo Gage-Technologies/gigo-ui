@@ -44,8 +44,8 @@ import BytesLanguage from "./Icons/bytes/BytesLanguage";
 
 interface IProps {
     role?: any | null;
-    width: number | string,
-    height: number | string,
+    width?: number | string,
+    height?: number | string,
     imageWidth: number | string,
     imageHeight: number | string,
     bytesId: string,
@@ -100,9 +100,10 @@ export default function BytesCard(props: IProps) {
             WebkitBoxOrient: 'vertical',
             textAlign: "left",
             fontSize: "1em",
-            width: props.width,
             margin: 0,
-            paddingLeft: 0
+            paddingLeft: 0,
+            minWidth: 200,
+            ...(props.width ? {width: props.width} : {width: props.imageWidth})
         },
         content: {
             paddingBottom: "4px",
@@ -202,13 +203,26 @@ export default function BytesCard(props: IProps) {
                                 inByte={props.inByte}
                             />
                         </Box>
+                        <Box 
+                            display={"flex"}
+                            flexDirection={"column"}
+                            style={{ 
+                                position: 'absolute', 
+                                bottom: '10px', 
+                                right: '10px',
+                                height: "fit-content",
+                                width: "fit-content",
+                                gap: '10px',
+                            }}
+                        >
+                            <BytesLanguage language={props.language === undefined ? "Python" : props.language} />
+                        </Box>
                     </div>
                     <CardContent sx={styles.content}>
                         <div style={styles.container}>
                             <Typography gutterBottom variant="h6" component="div" sx={styles.title}>
                                 {props.bytesTitle}
                             </Typography>
-                            <BytesLanguage language={props.language === undefined ? "Python" : props.language} />
                         </div>
                     </CardContent>
                 </Card>

@@ -13,7 +13,9 @@ import {
     PaletteMode,
     ThemeProvider,
     Typography,
-    Tooltip
+    Tooltip,
+    Popover,
+    styled
 } from "@mui/material";
 import { getAllTokens, isHoliday, themeHelpers } from "../theme";
 import ProjectCard from "../components/ProjectCard";
@@ -72,6 +74,37 @@ const gradientAnimation = keyframes`
   100% { background-position: 0% 50%; }
 `;
 
+const StartCodingButton = styled(LoadingButton)`
+    animation: startCodingAuraEffect 5s infinite alternate;
+
+    @keyframes startCodingAuraEffect {
+        0% {
+            background-color: #84E8A2;
+            border: 1px solid #84E8A2;
+        }
+        20% {
+            background-color: #29C18C;
+            border: 1px solid #29C18C;
+        }
+        40% {
+            background-color: #1C8762;
+            border: 1px solid #1C8762;
+        }
+        60% {
+            background-color: #2A63AC;
+            border: 1px solid #2A63AC;
+        }
+        80% {
+            background-color: #3D8EF7;
+            border: 1px solid #3D8EF7;
+        }
+        100% {
+            background-color: #63A4F8;
+            border: 1px solid #63A4F8;
+        }
+    }
+`;
+
 
 function Home() {
     let userPref = localStorage.getItem('theme')
@@ -106,6 +139,20 @@ function Home() {
     const [proMonthlyLink, setProMonthlyLink] = useState("");
     const [proYearlyLink, setProYearlyLink] = useState("");
     const [loadingProLinks, setLoadingProLinks] = useState(false)
+
+    const [startingByte, setStartingByte] = useState(false)
+
+    /////// New Bytes
+    const [newBytesPopoverOpen, setNewBytesPopoverOpen] = useState(false);
+
+    const handleNewBytesPopoverOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setNewBytesPopoverOpen(true);
+    };
+
+    const handleNewBytesPopoverClose = () => {
+        setNewBytesPopoverOpen(false);
+    };
+    //////
 
     ReactGA.initialize("G-38KBFJZ6M6");
 
@@ -623,14 +670,64 @@ function Home() {
                 paddingBottom: "10px",
                 height: "100%"
             }}>
-                <div style={{ display: "inline-flex" }}>
-                    <Typography variant="h6" gutterBottom sx={{
-                        paddingLeft: "10px",
-                        paddingTop: "6px",
-                        fontSize: "1.2em"
-                    }}>
-                        🍌  Bytes
-                    </Typography>
+                <div style={{ display: "inline-flex" }}>               
+                    <Tooltip
+                        title={
+                            !newBytesPopoverOpen ? (
+                                <Box>
+                                    <Typography variant="body1">Just Released!</Typography>
+                                    <Button 
+                                        size="small" 
+                                        onClick={handleNewBytesPopoverOpen}
+                                        sx={{
+                                            p: "4px",
+                                            fontSize: "10px"
+                                        }}
+                                    >
+                                        Learn More
+                                    </Button>
+                                </Box>
+                            ): (
+                                <Box>
+                                    <Typography variant="body1">Just Released!</Typography>
+                                    <Typography variant="body2">
+                                    Bytes are bite-sized coding challenges that are deeply integrated with Code Teacher, offering a personalized learning experience.
+                                    </Typography>
+                                    <Button 
+                                        size="small" 
+                                        onClick={handleNewBytesPopoverClose}
+                                        sx={{
+                                            p: "4px",
+                                            fontSize: "10px"
+                                        }}
+                                    >
+                                        Less Info
+                                    </Button>
+                                </Box>
+                            )
+                        }
+                        open={!runTutorial} // Tooltip always open
+                        disableFocusListener
+                        disableHoverListener
+                        disableTouchListener
+                        arrow
+                        placement="top"
+                        sx={{
+                            backgroundColor: '#353535', // Dark background for tooltip
+                            color: 'white', // Light text for contrast
+                            fontSize: '0.9rem', // Readable text size
+                            borderRadius: '4px', // Rounded corners for modern look
+                            padding: '8px 12px', // Spacing inside the tooltip
+                        }}
+                    >
+                        <Typography variant="h6" gutterBottom sx={{
+                            paddingLeft: "10px",
+                            paddingTop: "6px",
+                            fontSize: "1.2em"
+                        }}>
+                            🍌  Bytes
+                        </Typography>
+                    </Tooltip>
                     <Button variant="text"
                             href={"/bytes"}
                             sx={{
@@ -890,44 +987,44 @@ function Home() {
                                 </Tooltip>
                             </Box>
                             <Box sx={{ my: 2 }}>
-                                <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <StarIcon sx={{ color: theme.palette.primary.main, fontSize: ".8em", mr: 1 }} />
-                                    <span style={{ color: theme.palette.primary.main }}>Access to Code Teacher</span>
+                                <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center'}}>
+                                    <StarIcon sx={{ fontSize: ".8em", mr: 1 }} />
+                                    <span style={{}}>Smarter Code Teacher</span>
                                 </Typography>
                                 <Typography variant="body1" component="div" sx={{ fontSize: ".7em", ml: 3 }}>
-                                    Your personal AI tutor.
+                                    Get better help and guidance on your coding journey.
                                 </Typography>
                                 <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <StarIcon sx={{ color: theme.palette.primary.main, fontSize: ".8em", mr: 1 }} />
-                                    <span style={{ color: theme.palette.primary.main }}>Private Projects</span>
+                                    <StarIcon sx={{ fontSize: ".8em", mr: 1 }} />
+                                    <span style={{}}>Private Projects</span>
                                 </Typography>
                                 <Typography variant="body1" component="div" sx={{ fontSize: ".7em", ml: 3 }}>
                                     Learn in stealth mode.
                                 </Typography>
                                 <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <StarIcon sx={{ color: theme.palette.primary.main, fontSize: ".8em", mr: 1 }} />
-                                    <span style={{ color: theme.palette.primary.main }}>More DevSpace Resources</span>
+                                    <StarIcon sx={{ fontSize: ".8em", mr: 1 }} />
+                                    <span style={{}}>More DevSpace Resources</span>
                                 </Typography>
                                 <Typography variant="body1" component="div" sx={{ fontSize: ".7em", ml: 3 }}>
                                     8 CPU cores, 8GB RAM, 50GB disk space.
                                 </Typography>
                                 <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <StarIcon sx={{ color: theme.palette.primary.main, fontSize: ".8em", mr: 1 }} />
-                                    <span style={{ color: theme.palette.primary.main }}>Three Concurrent DevSpaces</span>
+                                    <StarIcon sx={{ fontSize: ".8em", mr: 1 }} />
+                                    <span style={{}}>Three Concurrent DevSpaces</span>
                                 </Typography>
                                 <Typography variant="body1" component="div" sx={{ fontSize: ".7em", ml: 3 }}>
                                     Run multiple projects.
                                 </Typography>
                                 <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <StarIcon sx={{ color: theme.palette.primary.main, fontSize: ".8em", mr: 1 }} />
-                                    <span style={{ color: theme.palette.primary.main }}>Two Streak Freezes a Week</span>
+                                    <StarIcon sx={{ fontSize: ".8em", mr: 1 }} />
+                                    <span style={{}}>Two Streak Freezes a Week</span>
                                 </Typography>
                                 <Typography variant="body1" component="div" sx={{ fontSize: ".7em", ml: 3 }}>
                                     Preserve your streak.
                                 </Typography>
                                 <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <StarIcon sx={{ color: theme.palette.primary.main, fontSize: ".8em", mr: 1 }} />
-                                    <span style={{ color: theme.palette.primary.main }}>Premium VsCode Theme</span>
+                                    <StarIcon sx={{ fontSize: ".8em", mr: 1 }} />
+                                    <span style={{}}>Premium VsCode Theme</span>
                                 </Typography>
                                 <Typography variant="body1" component="div" sx={{ fontSize: ".7em", ml: 3 }}>
                                     Enhance your coding experience.
@@ -941,8 +1038,8 @@ function Home() {
                     content: "Tutorials will start on important pages to guide you through the platform. This is the only mandatory tutorial. If you skip a tutorial, you can always restart it using the help button at the bottom of the left-hand sidebar (desktop) or the user icon drop down (mobile).",
                 },
                 {
-                    title: "Get Started!",
-                    content: "Pick a project from the recommendations or search for one in the search bar.",
+                    title: "Let's Get Started!",
+                    content: "Start coding now, or select either a Byte or a Challenge to initiate your journey!",
                 }
             ]
 
@@ -1031,39 +1128,81 @@ function Home() {
                         </Button>
                     )}
                     {tutorialStepIndex === steps.length - 1 ? (
-                        <Button
-                            onClick={async () => {
-                                setRunTutorial(false)
-                                let authState = Object.assign({}, initialAuthStateUpdate)
-                                // copy the existing state
-                                let state = Object.assign({}, tutorialState)
-                                // update the state
-                                state.home = true
-                                authState.tutorialState = state
-                                // @ts-ignore
-                                dispatch(updateAuthState(authState))
-
-                                // send api call to backend to mark the challenge tutorial as completed
-                                await call(
-                                    "/api/user/markTutorial",
-                                    "post",
-                                    null,
-                                    null,
-                                    null,
+                        <>
+                            <Button
+                                onClick={async () => {
+                                    setRunTutorial(false)
+                                    let authState = Object.assign({}, initialAuthStateUpdate)
+                                    // copy the existing state
+                                    let state = Object.assign({}, tutorialState)
+                                    // update the state
+                                    state.home = true
+                                    authState.tutorialState = state
                                     // @ts-ignore
-                                    {
-                                        tutorial_key: "home"
-                                    }
-                                )
-                            }}
-                            variant="contained"
-                            color="success"
-                            sx={{
-                                fontSize: "0.8rem",
-                            }}
-                        >
-                            Finish
-                        </Button>
+                                    dispatch(updateAuthState(authState))
+
+                                    // send api call to backend to mark the challenge tutorial as completed
+                                    await call(
+                                        "/api/user/markTutorial",
+                                        "post",
+                                        null,
+                                        null,
+                                        null,
+                                        // @ts-ignore
+                                        {
+                                            tutorial_key: "home"
+                                        }
+                                    )
+                                }}
+                                variant="contained"
+                                color="primary"
+                                sx={{
+                                    fontSize: "0.8rem",
+                                }}
+                            >
+                                I want to browse
+                            </Button>
+                            <StartCodingButton
+                                loading={startingByte}
+                                onClick={async () => {
+                                    setStartingByte(true)
+
+                                    let authState = Object.assign({}, initialAuthStateUpdate)
+                                    // copy the existing state
+                                    let state = Object.assign({}, tutorialState)
+                                    // update the state
+                                    state.home = true
+                                    authState.tutorialState = state
+                                    // @ts-ignore
+                                    dispatch(updateAuthState(authState))
+
+                                    // send api call to backend to mark the challenge tutorial as completed
+                                    await call(
+                                        "/api/user/markTutorial",
+                                        "post",
+                                        null,
+                                        null,
+                                        null,
+                                        // @ts-ignore
+                                        {
+                                            tutorial_key: "home"
+                                        }
+                                    )
+
+                                    setStartingByte(false)
+                                    setRunTutorial(false)
+
+                                    navigate("/byte/1750943457427324928")
+                                }}
+                                variant="contained"
+                                color="success"
+                                sx={{
+                                    // fontSize: "0.8rem",
+                                }}
+                            >
+                                Start Coding!
+                            </StartCodingButton>
+                        </>
                     ) : (
                         <Button
                             onClick={() => setTutorialStepIndex(tutorialStepIndex + 1)}

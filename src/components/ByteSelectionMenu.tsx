@@ -27,14 +27,18 @@ const ByteSelectionMenu: React.FC<ByteSelectionMenuProps> = ({ bytes, onSelectBy
             overflowY: 'auto',
             overflowX: 'hidden',
             borderRadius: '4px',
-            padding: '20px',
+            // padding: '20px',
             backgroundColor: 'transparent',
             boxSizing: 'border-box'
         }}>
-            <List>
+            <List
+                sx={{
+                    p: 0
+                }}
+            >
                 {bytes.map((byte) => (
                     <ListItem key={byte.id} style={{
-                        justifyContent: 'center',
+                        // justifyContent: 'center',
                         alignItems: 'center',
                         marginBottom: '9%'
                     }}>
@@ -50,10 +54,10 @@ const ByteSelectionMenu: React.FC<ByteSelectionMenuProps> = ({ bytes, onSelectBy
                             style={{ cursor: 'pointer', transition: 'transform 0.3s ease' }}
                             onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
                             onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                            width="10vw"
-                            height="20vh"
-                            imageWidth="10vw"
-                            imageHeight="15vh"
+                            width={"100%"}
+                            height="250px"
+                            imageWidth="250px"
+                            imageHeight="200px"
                             language={byte.language}
                         />
                     </ListItem>

@@ -2147,7 +2147,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
             {renderNewYearConfetti()}
             <CssBaseline>
                 <Box sx={{
-                    mb: window.location.pathname.startsWith("/launchpad/") && query.get("editor") === "true" ? "0px" : "20px",
+                    mb: "0px",
                     // height: "64px",
                 }}>
                     {appBarRenderer()}

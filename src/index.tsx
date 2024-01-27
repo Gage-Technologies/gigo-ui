@@ -24,6 +24,7 @@ import call from './services/api-call';
 import { Box, CircularProgress } from '@material-ui/core';
 import ace from 'ace-builds/src-noconflict/ace';
 import { CtWebSocketProvider } from "./services/ct_websocket";
+import AutoScaler from './components/AutoScaler';
 
 // create callback to register last activity in session storage
 function setTimestamp() {
@@ -59,13 +60,15 @@ root.render(
             <PersistGate loading={null} persistor={persistor}>
                 <CtWebSocketProvider>
                     <GoogleOAuthProvider clientId={config.googleClient}>
-                        <BrowserRouter>
-                            <AppWrapper>
-                                <Suspense fallback={lazyLoadFallback}>
-                                    <Routing />
-                                </Suspense>
-                            </AppWrapper>
-                        </BrowserRouter>
+                        {/* <AutoScaler> */}
+                            <BrowserRouter>
+                                <AppWrapper>
+                                    <Suspense fallback={lazyLoadFallback}>
+                                        <Routing />
+                                    </Suspense>
+                                </AppWrapper>
+                            </BrowserRouter>
+                        {/* </AutoScaler> */}
                     </GoogleOAuthProvider>
                 </CtWebSocketProvider >
             </PersistGate>
