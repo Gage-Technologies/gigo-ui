@@ -90,12 +90,7 @@ export default function BytesCard(props: IProps) {
             height: props.imageHeight,
             width: props.imageWidth,
             minWidth: 200,
-            backgroundImage: "url(" + props.bytesThumb + ")",
-            display: 'flex',        // Enable flexbox
-            flexDirection: 'column', // Stack children vertically
-            justifyContent: 'flex-end',
-            // backgroundImage: "linear-gradient(45deg, rgba(255,255,255,0) 45%, rgba(0,0,0,1) 91%), url(" + props.bytesThumb + ")",
-            // objectFit: "fill",
+            objectFit: "cover",
         },
         title: {
             textOverflow: "ellipsis",
@@ -179,24 +174,25 @@ export default function BytesCard(props: IProps) {
                     onMouseEnter={props.onMouseEnter}
                     onMouseLeave={props.onMouseLeave}
                 >
-                    <CardMedia component="div" sx={styles.image}>
-                            <BytesHardBadge
-                                finished={props.completedHard === undefined ? false : props.completedHard}
-                                inByte={props.inByte}
-                            />
-                            <BytesMediumBadge finished={props.completedMedium === undefined ? false : props.completedMedium}
-                                              inByte={props.inByte}
-                            />
-                            <BytesEasyBadge finished={props.completedEasy === undefined ? false : props.completedEasy}
-                                            inByte={props.inByte}
-                            />
-                    </CardMedia>
+                    {/* @ts-ignore */}
+                    <img style={styles.image} src={props.bytesThumb} loading="lazy" />
+                    <BytesHardBadge
+                        finished={props.completedHard === undefined ? false : props.completedHard}
+                        inByte={props.inByte}
+                    />
+                    <BytesMediumBadge finished={props.completedMedium === undefined ? false : props.completedMedium}
+                        inByte={props.inByte}
+                    />
+                    <BytesEasyBadge finished={props.completedEasy === undefined ? false : props.completedEasy}
+                        inByte={props.inByte}
+                    />
+                    {/* </CardMedia> */}
                     <CardContent sx={styles.content}>
                         <div style={styles.container}>
                             <Typography gutterBottom variant="h6" component="div" sx={styles.title}>
                                 {props.bytesTitle}
                             </Typography>
-                            <BytesLanguage language={props.language === undefined ? "Python" : props.language}/>
+                            <BytesLanguage language={props.language === undefined ? "Python" : props.language} />
                         </div>
                     </CardContent>
                 </Card>

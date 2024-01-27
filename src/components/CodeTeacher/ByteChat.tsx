@@ -814,6 +814,7 @@ export default function ByteChat(props: ByteChatProps) {
                     scrollBehavior: 'smooth',
                     height: "68vh",
                     overflowY: "auto",
+                    overflowX: "hidden",
                     pt: 2,
                     pb: 2,
                     marginBottom: 1,
