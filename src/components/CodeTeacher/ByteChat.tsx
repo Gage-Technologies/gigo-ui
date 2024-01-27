@@ -139,6 +139,69 @@ export default function ByteChat(props: ByteChatProps) {
     };
 
     useEffect(() => {
+        setChatId("");
+        setResponse("")
+        setState(State.WAITING)
+        setUserMessage("")
+        setThreadVisibility({});
+        setShowButtons(false);
+        setNewChat(false);
+
+        if (props.byteID === undefined) {
+            return
+        }
+
+        setMessages([
+            {
+                _id: "init2",
+                byte_id: props.byteID,
+                byte_chat_id: props.byteID,
+                assistant_id: "init",
+                user_id: authState.id,
+                thread_number: 0,
+                message_type: CtByteMessageMessageType.Assistant,
+                content: `Hey! I'm Code Teacher!`, // place the description and dev steps here
+                created_at: new Date(0),
+                message_number: -1,
+                premium_llm: false,
+                free_credit_use: false,
+            },
+            {
+                _id: "init",
+                byte_id: props.byteID,
+                byte_chat_id: props.byteID,
+                assistant_id: "init",
+                user_id: authState.id,
+                thread_number: 0,
+                message_type: CtByteMessageMessageType.Assistant,
+                content: `${props.description}`, // place the description and dev steps here
+                created_at: new Date(0),
+                message_number: -1,
+                premium_llm: false,
+                free_credit_use: false,
+            },
+            {
+                _id: "init3",
+                byte_id: props.byteID,
+                byte_chat_id: props.byteID,
+                assistant_id: "init",
+                user_id: authState.id,
+                thread_number: 0,
+                message_type: CtByteMessageMessageType.Assistant,
+                content: `Have Questions? Ask Me!`, // place the description and dev steps here
+                created_at: new Date(0),
+                message_number: -1,
+                premium_llm: false,
+                free_credit_use: false,
+            },
+        ])
+
+        if (authState.authenticated) {
+            launchCTChat()
+        }
+    }, [props.byteID])
+
+    useEffect(() => {
         if (!authState.authenticated) {
             return
         }
@@ -182,12 +245,6 @@ export default function ByteChat(props: ByteChatProps) {
             return true
         })
     }
-
-    useEffect(() => {
-        if (authState.authenticated) {
-            launchCTChat()
-        }
-    }, []);
 
     useEffect(() => {
         setThreadVisibility({ [currentThreadCount]: true })

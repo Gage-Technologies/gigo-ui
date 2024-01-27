@@ -565,15 +565,6 @@ function Byte() {
         }
     };
 
-    function getByteIdFromUrl() {
-        const currentUrl = window.location.href;
-        let urlParts = currentUrl.split('/');
-        // Remove any empty strings from the end of the array (caused by trailing slashes)
-        urlParts = urlParts.filter(part => part !== '');
-        const byteId = urlParts[urlParts.length - 1];
-        return byteId;
-    }
-
     const startByteAttempt = async (byteId: string) => {
         try {
             const response = await call(
@@ -670,12 +661,18 @@ function Byte() {
     }
 
     useEffect(() => {
-        const byteId = getByteIdFromUrl();
+        if (id === undefined) {
+            return
+        }
+
+        setOutput(null)
+        setExecutingCode(false)
+        setTerminalVisible(false)
         setLoading(true);
         getRecommendedBytes()
-        getByte(byteId).then(() => {
-            if (authState.authenticated) {
-                startByteAttempt(byteId);
+        getByte(id).then(() => {
+            if (authState.authenticated && id) {
+                startByteAttempt(id);
             }
         }).finally(() => {
             setLoading(false);
