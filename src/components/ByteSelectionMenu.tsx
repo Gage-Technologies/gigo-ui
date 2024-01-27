@@ -36,7 +36,7 @@ const ByteSelectionMenu: React.FC<ByteSelectionMenuProps> = ({ bytes, onSelectBy
                     <ListItem key={byte.id} style={{
                         justifyContent: 'center',
                         alignItems: 'center',
-                        marginBottom: '7%'
+                        marginBottom: '9%'
                     }}>
                         <BytesCard
                             inByte={true}
