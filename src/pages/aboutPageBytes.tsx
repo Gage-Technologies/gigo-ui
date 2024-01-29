@@ -1,11 +1,8 @@
 
 
 import * as React from "react";
-import { useEffect } from "react";
 import {
-    Box, Button,
-    Card,
-    Container,
+    Box,
     createTheme,
     CssBaseline,
     Grid,
@@ -14,21 +11,6 @@ import {
     Typography
 } from "@mui/material";
 import {getAllTokens, getDesignTokens, isHoliday} from "../theme";
-import XpPopup from "../components/XpPopup";
-import ProjectCard from "../components/ProjectCard";
-import AppWrapper from "../components/AppWrapper";
-import { useAppDispatch, useAppSelector } from "../app/hooks";
-import { initialAuthState, initialAuthStateUpdate, selectAuthState, updateAuthState } from "../reducers/auth/auth";
-import { useNavigate } from "react-router-dom";
-import call from "../services/api-call";
-import config from "../config";
-import swal from "sweetalert";
-import Lottie from "react-lottie";
-import * as animationData from '../img/85023-no-data.json'
-import Carousel from "../components/Carousel";
-import { ThreeDots } from "react-loading-icons";
-import aboutUsImg from "../img/aboutUsBackground.png"
-import loginImg from "../img/login/login_background.png";
 import { AwesomeButton } from "react-awesome-button";
 import 'react-awesome-button/dist/styles.css';
 
@@ -41,10 +23,6 @@ import debugDemo from "../components/Icons/bytes/demo-debug.mp4"
 import difficultyDemo from "../components/Icons/bytes/demo-difficulty.mp4"
 //@ts-ignore
 import nextStepsDemo from "../components/Icons/bytes/demo-nextsteps.mp4"
-import AboutPageLearnIcon from "../components/Icons/aboutPage/AboutPageLearn";
-import AboutPageEasyIcon from "../components/Icons/aboutPage/AboutPageEasy";
-import AboutPageConnectionIcon from "../components/Icons/aboutPage/AboutPageConnection";
-import AboutPageWorldIcon from "../components/Icons/aboutPage/AboutPageWorld";
 import CTIcon from "../components/Icons/bytes/ct-logo.svg";
 import NSIcon from "../components/Icons/bytes/ns-icon.svg";
 import DebugIcon from "../components/Icons/Debug";
@@ -58,143 +36,6 @@ function AboutBytes() {
 
     // For now, this is always set to the default theme to keep consistency
     const theme = React.useMemo(() => createTheme(getDesignTokens(mode)), [mode]);
-
-    // load auth state from storage
-    const authState = useAppSelector(selectAuthState);
-
-    const [loading, setLoading] = React.useState(false)
-    const [inTrial, setInTrial] = React.useState(false)
-    const [membership, setMembership] = React.useState(0)
-    const [membershipDates, setMembershipDates] = React.useState({ start: 0, last: 0, upcoming: 0 })
-
-
-    let navigate = useNavigate();
-    let dispatch = useAppDispatch();
-
-    const stripeNavigate = async () => {
-        let res = await call(
-            "/api/stripe/premiumMembershipSession",
-            "post",
-            null,
-            null,
-            null,
-            // @ts-ignore
-            {},
-            null,
-            config.rootPath
-        )
-
-        if (res["message"] === "You must be logged in to access the GIGO system.") {
-            let authState = Object.assign({}, initialAuthState)
-            // @ts-ignore
-            dispatch(updateAuthState(authState))
-            navigate("/login")
-        }
-        if (res !== undefined && res["return url"] !== undefined) {
-            window.location.replace(res["return url"])
-        }
-    }
-
-    const getSubData = async () => {
-        let follow = call(
-            "/api/user/subscription",
-            "post",
-            null,
-            null,
-            null,
-            //@ts-ignore
-            {},
-            null,
-            config.rootPath
-        )
-
-        const [res] = await Promise.all([
-            follow
-        ])
-
-        if (res === undefined) {
-            swal("There has been an issue loading data. Please try again later.")
-        }
-
-        setMembershipDates({
-            start: res["membershipStart"],
-            last: res["lastPayment"],
-            upcoming: res["upcomingPayment"]
-        })
-        setInTrial(res["inTrial"])
-        setMembership(res["subscription"])
-
-    }
-
-    const UnixDateConverter = (unixTimestamp: number) => {
-        let date = new Date(unixTimestamp * 1000);
-        let day = date.getDate();
-        let month = date.getMonth() + 1;
-        let year = date.getFullYear();
-
-        if (day === 0) {
-            return "N/A"
-        } else {
-            return month + "/" + day + "/" + year;
-        }
-    }
-
-    const getCountdown = (upcomingDateInSeconds: number) => {
-        const upcomingDate = upcomingDateInSeconds * 1000; // Convert to milliseconds
-        const now = new Date().getTime();
-        const differenceInMilliseconds = upcomingDate - now;
-
-        if (differenceInMilliseconds <= 0) {
-            return "Expired";
-        }
-
-        const days = Math.floor(differenceInMilliseconds / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((differenceInMilliseconds % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((differenceInMilliseconds % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((differenceInMilliseconds % (1000 * 60)) / 1000);
-
-        return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-    }
-
-    // Changed "Become A Pro" to "Stay A Pro"
-
-    useEffect(() => {
-        if (authState.authenticated)
-            getSubData()
-    }, [])
-
-    let height = "200px"
-    let width = "200px"
-
-    if (window.innerWidth <= 1000) {
-        height = "180px"
-        width = "180px"
-    }
-
-    let textWidth = "250px"
-
-    if (window.innerWidth <= 1000) {
-        if (window.innerWidth <= 280) {
-            textWidth = "150px"
-        } else {
-            textWidth = "200px"
-        }
-    }
-
-    const holiday = isHoliday()
-
-    const renderThemeColor = () => {
-
-        if (holiday === "Christmas") {
-            if (mode === "light") {
-                return "#79bbd0"
-            } else {
-                return "#aa0000"
-            }
-        } else {
-            return "theme.palette.primary.light"
-        }
-    }
 
     //@ts-ignore
     const VideoAsGif = ({ videoSrc }) => {
@@ -326,7 +167,7 @@ function AboutBytes() {
                         <Grid item xs={4}>
                             <h2 style={{textAlign: 'left'}}>Customizable Difficulty Levels</h2>
                             <p>Adjust the difficulty level of each challenge, making it suitable for
-                                various experience levels. Each difficulty has it's own goal unique to that level of programming. 
+                                various experience levels. Each difficulty has it's own goal unique to that level of programming.
                             </p>
                             <div style={{display: 'flex', justifyContent: 'center'}}>
                                 <Box sx={{
