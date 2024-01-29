@@ -67,6 +67,7 @@ import GIGOLandingPageNewYearsMobile from "../components/LandingNewYearsMobile";
 import GIGOLandingPageNewYears from "../components/LandingNewYears";
 import BytesCard from "../components/BytesCard";
 import {programmingLanguages} from "../services/vars";
+import AboutBytesIcon from "../components/Icons/bytes/aboutPage";
 
 const gradientAnimation = keyframes`
   0% { background-position: 0% 50%; }
@@ -720,12 +721,24 @@ function Home() {
                             padding: '8px 12px', // Spacing inside the tooltip
                         }}
                     >
-                        <Typography variant="h6" gutterBottom sx={{
-                            paddingLeft: "10px",
-                            paddingTop: "6px",
-                            fontSize: "1.2em"
-                        }}>
-                            🍌  Bytes
+                        <Typography
+                            variant="h6"
+                            gutterBottom
+                            sx={{
+                                paddingLeft: "10px",
+                                paddingTop: "6px",
+                                fontSize: "1.2em",
+                                display: 'flex',
+                                alignItems: 'center'
+                            }}>
+                            <AboutBytesIcon
+                                style={{
+                                    height: "20px",
+                                    width: "20px",
+                                    marginRight: "5px"
+                                }}
+                            />
+                            Bytes
                         </Typography>
                     </Tooltip>
                     <Button variant="text"

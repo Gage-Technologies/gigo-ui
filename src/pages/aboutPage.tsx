@@ -168,11 +168,13 @@ function About() {
                         <Grid item xs={2}/>
                         <Grid item xs={3}>
                             <h2 style={{textAlign: 'left'}}>Learn by Doing</h2>
-                            <p>GIGO offers users the opportunity to tackle and craft genuine coding challenges. Through problem-solving and project development, users gain a deeper understanding of programming</p>
+                            <p>GIGO offers users the opportunity to tackle and craft genuine coding challenges. Through
+                                problem-solving and project development, users gain a deeper understanding of
+                                programming</p>
                         </Grid>
                         <Grid item xs={2}/>
-                        <Grid item xs={3} >
-                            <AboutPageLearnIcon style={iconStyles} aspectRatio={aspectRatio.toString()} />
+                        <Grid item xs={3}>
+                            <AboutPageLearnIcon style={iconStyles} aspectRatio={aspectRatio.toString()}/>
                         </Grid>
                         <Grid item xs={2}/>
                     </Grid>
@@ -182,12 +184,13 @@ function About() {
                     <Grid container spacing={0}>
                         <Grid item xs={2}/>
                         <Grid item xs={3}>
-                            <AboutPageEasyIcon style={iconStyles} aspectRatio={aspectRatio.toString()} />
+                            <AboutPageEasyIcon style={iconStyles} aspectRatio={aspectRatio.toString()}/>
                         </Grid>
                         <Grid item xs={2}/>
                         <Grid item xs={3}>
                             <h2 style={{textAlign: 'left'}}>Take it Easy</h2>
-                            <p>Our preconfigured development environments, running on our robust in-house infrastructure, allow you to jump straight into writing and running code.</p>
+                            <p>Our preconfigured development environments, running on our robust in-house
+                                infrastructure, allow you to jump straight into writing and running code.</p>
                         </Grid>
                         <Grid item xs={2}/>
                     </Grid>
@@ -198,11 +201,12 @@ function About() {
                         <Grid item xs={2}/>
                         <Grid item xs={3}>
                             <h2 style={{textAlign: 'left'}}>Connect</h2>
-                            <p>Engage, collaborate, and socialize with a network of programmers who share your passion for technology.</p>
+                            <p>Engage, collaborate, and socialize with a network of programmers who share your passion
+                                for technology.</p>
                         </Grid>
                         <Grid item xs={2}/>
-                        <Grid item xs={3} >
-                            <AboutPageConnectionIcon style={iconStyles} aspectRatio={aspectRatio.toString()} />
+                        <Grid item xs={3}>
+                            <AboutPageConnectionIcon style={iconStyles} aspectRatio={aspectRatio.toString()}/>
                         </Grid>
                         <Grid item xs={2}/>
                     </Grid>
@@ -212,16 +216,23 @@ function About() {
                     <Grid container spacing={0}>
                         <Grid item xs={2}/>
                         <Grid item xs={3}>
-                            <AboutPageWorldIcon style={iconStyles} aspectRatio={aspectRatio.toString()} />
+                            <AboutPageWorldIcon style={iconStyles} aspectRatio={aspectRatio.toString()}/>
                         </Grid>
                         <Grid item xs={2}/>
                         <Grid item xs={3}>
                             <h2 style={{textAlign: 'left'}}>Real World Experience</h2>
-                            <p>Our extensive library of tutorials, interactive projects, and challenges are designed to level up your skills for today's tech industry.</p>
+                            <p>Our extensive library of tutorials, interactive projects, and challenges are designed to
+                                level up your skills for today's tech industry.</p>
                         </Grid>
                         <Grid item xs={2}/>
                     </Grid>
                     <br/><br/><br/><br/><br/><br/>
+                    <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center">
+                        <Button variant={'outlined'} href={"/aboutBytes"}>
+                            Learn About Bytes
+                        </Button>
+                    </Box>
+                    <br/>
                     <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center">
                         <Button variant={'outlined'} onClick={handleExpand}>
                             {isExpanded ? 'Show Less' : 'Learn More'}
@@ -230,11 +241,26 @@ function About() {
                         {isExpanded && (
                             <div style={{display: "flex", textAlign: "center", flexDirection: "column", width: "100%"}}>
                                 <div style={{height: "20px"}}/>
-                                <body style={{width: "55%", alignSelf: "center", lineHeight: 2, textAlign: "justify", color: theme.palette.text.primary}}>
-                                GIGO is a community that is more than just another coding platform; it's a revolution in software development, education, and collaboration. We believe that the future of the tech industry lies in collective growth. That's why GIGO aims to dismantle the barriers that hold back most novice and intermediate programmers. Our community is dedicated to collaborative learning, knowledge sharing, and advancing both individual coders and the tech industry as a whole.
+                                <body style={{
+                                    width: "55%",
+                                    alignSelf: "center",
+                                    lineHeight: 2,
+                                    textAlign: "justify",
+                                    color: theme.palette.text.primary
+                                }}>
+                                GIGO is a community that is more than just another coding platform; it's a revolution in
+                                software development, education, and collaboration. We believe that the future of the
+                                tech industry lies in collective growth. That's why GIGO aims to dismantle the barriers
+                                that hold back most novice and intermediate programmers. Our community is dedicated to
+                                collaborative learning, knowledge sharing, and advancing both individual coders and the
+                                tech industry as a whole.
                                 <br/>
                                 <br/>
-                                One of the most daunting barriers to coding is setting up a functional development environment. With GIGO, those hours spent installing dependencies, configuring servers, and resolving version conflicts are a thing of the past. Our preconfigured development environments, running on our robust in-house infrastructure, allows you to jump straight into writing and running code.
+                                One of the most daunting barriers to coding is setting up a functional development
+                                environment. With GIGO, those hours spent installing dependencies, configuring servers,
+                                and resolving version conflicts are a thing of the past. Our preconfigured development
+                                environments, running on our robust in-house infrastructure, allows you to jump straight
+                                into writing and running code.
                                 <br/>
                                 <br/>
                                 <br/>

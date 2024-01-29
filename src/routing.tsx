@@ -8,7 +8,6 @@ import TrackedOutlet from './components/OutletTracking';
 import PublicConfigs from "./pages/PublicConfigs";
 import Unsubscribe from "./pages/unsubscribe";
 import config from './config';
-import Byte from "./pages/bytes";
 const CurateAdminPage = React.lazy(() => import("./pages/curateAdmin"));
 const Home = React.lazy(() => import("./pages/home"));
 const Challenge = React.lazy(() => import("./pages/Challenge"));
@@ -42,6 +41,8 @@ const JourneyForm = React.lazy(() => import("./pages/JourneyForm"));
 const NotFoundPage = React.lazy(() => import("./pages/NotFoundPage"));
 const StripeCancel = React.lazy(() => import("./pages/stripe/StripeCancel"));
 const AllBytesScroll = React.lazy(() => import("./pages/allBytesScroll"));
+const AboutBytes = React.lazy(() => import("./pages/aboutPageBytes"));
+const Byte = React.lazy(() => import("./pages/bytes"));
 
 export default function Routing() {
     // initialize redux dispatcher
@@ -127,6 +128,7 @@ export default function Routing() {
                     <Route path={"/buyingExclusive"} element={<BuyingExclusiveContent />} />
                     <Route path={"/aboutExclusive"} element={<ExclusiveContent />} />
                     <Route path="/byte/:id" element={<Byte />} />
+                    <Route path={"/aboutBytes"} element={<AboutBytes />} />
                     <Route element={<PrivateRoute />}>
                         {/*<Route path={"/journey"} element={<Journey />}/>*/}
                         {/*<Route path={"/journey/form"} element={<JourneyForm />}/>*/}

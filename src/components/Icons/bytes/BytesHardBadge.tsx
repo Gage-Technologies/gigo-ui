@@ -6,7 +6,7 @@ export type ByteBadgeProps = {
     finished: boolean;
     inByte?: boolean;
 };
-function BytesHardBadge(props: any) {
+function BytesHardBadge(props: ByteBadgeProps) {
     const size = props.inByte ? '2vw' : '3vw';
     const marginLeft = props.inByte ? '-15px' : undefined;
     let style = {

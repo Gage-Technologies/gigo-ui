@@ -8,6 +8,7 @@ import {
     Typography,
     Box, Tooltip, Button
 } from "@mui/material";
+import XpPopup from "../components/XpPopup";
 import { getAllTokens } from "../theme";
 import { Close, PlayArrow } from "@material-ui/icons";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
@@ -42,6 +43,7 @@ import DifficultyAdjuster from "../components/ByteDifficulty";
 import { selectAuthState } from "../reducers/auth/auth";
 import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../reducers/bytes/bytes";
 import ByteTerminal from "../components/Terminal";
+
 
 interface MergedOutputRow {
     error: boolean;
@@ -91,6 +93,8 @@ function Byte() {
     let userPref = localStorage.getItem('theme');
     const [mode, _] = useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
+    const [xpPopup, setXpPopup] = React.useState(false)
+    const [xpData, setXpData] = React.useState(null)
 
     const authState = useAppSelector(selectAuthState);
     const bytesState = useAppSelector(selectBytesState)
@@ -660,6 +664,11 @@ function Byte() {
             swal("Server Error", "Cannot complete byte. Please try again later.");
             return;
         }
+
+        if (res["xp"] !== undefined) {
+            setXpData(res["xp"])
+            setXpPopup(true)
+        }
     }
 
     useEffect(() => {
@@ -1004,6 +1013,8 @@ function Byte() {
                         onHide={() => setActiveSidebarTab(null)}
                         onSuccess={() => {
                             markComplete()
+
+
                         }}
                         lang={programmingLanguages[byteData ? byteData.lang : 5]}
                         code={code}
@@ -1131,6 +1142,22 @@ function Byte() {
                         </div>
                     </div>
                 </Container>
+                {xpPopup ? (<XpPopup oldXP={
+                    //@ts-ignore
+                    (xpData["xp_update"]["old_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]} levelUp={
+                    //@ts-ignore
+                    xpData["level_up_reward"] !== null} maxXP={100}
+                    //@ts-ignore
+                                     newXP={(xpData["xp_update"]["new_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]}
+                    //@ts-ignore
+                                     nextLevel={xpData["xp_update"]["old_level"] !== undefined ? xpData["xp_update"]["new_level"] : xpData["xp_update"]["next_level"]}
+                    //@ts-ignore
+                                     gainedXP={xpData["xp_update"]["new_xp"] - xpData["xp_update"]["old_xp"]}
+                    //@ts-ignore
+                                     reward={xpData["level_up_reward"]}
+                    //@ts-ignore
+                                     renown={xpData["xp_update"]["current_renown"]} popupClose={null}
+                                     homePage={true} />) : null}
             </CssBaseline>
         </ThemeProvider >
     );
