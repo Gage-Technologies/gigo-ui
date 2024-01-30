@@ -36,7 +36,7 @@ import Editor from "../components/IDE/Editor";
 import chroma from 'chroma-js';
 import SheenPlaceholder from "../components/Loading/SheenPlaceholder";
 import { sleep } from "../services/utils";
-import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
+import { Extension, ReactCodeMirrorRef } from "@uiw/react-codemirror";
 import DifficultyAdjuster from "../components/ByteDifficulty";
 import { selectAuthState } from "../reducers/auth/auth";
 import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../reducers/bytes/bytes";
@@ -50,6 +50,9 @@ import { CtByteSuggestionRequest, CtByteSuggestionResponse, CtGenericErrorPayloa
 import { ctHighlightCodeRangeFullLines } from "../components/IDE/Extensions/CtHighlightExtension";
 import LinkIcon from '@mui/icons-material/Link';
 import LinkOffIcon from '@mui/icons-material/LinkOff';
+import { CtPopupExtensionEngine, createCtPopupExtension } from "../components/IDE/Extensions/CtPopupExtension";
+import ReactDOM from "react-dom";
+import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
 
 
 interface MergedOutputRow {
@@ -267,7 +270,8 @@ function Byte() {
 
     const editorContainerRef = React.useRef<HTMLDivElement>(null);
     const editorRef = React.useRef<ReactCodeMirrorRef>(null);
-    const outputRef = React.useRef<ReactCodeMirrorRef>(null);
+    const popupEngineRef = React.useRef<CtPopupExtensionEngine | null>(null);
+    const popupExtRef = React.useRef<Extension | null>(null);
 
     const [activeSidebarTab, setActiveSidebarTab] = React.useState<string | null>(null);
 
@@ -275,6 +279,7 @@ function Byte() {
     const [lspActive, setLspActive] = React.useState(false)
     const [workspaceState, setWorkspaceState] = useState<null | number>(null);
     const [workspaceId, setWorkspaceId] = useState<string>('')
+    const [SuggestionPortal, setSuggestionPortal] = React.useState<React.ReactPortal | null>(null)
 
     const [connectButtonLoading, setConnectButtonLoading] = useState<boolean>(false)
 
@@ -307,6 +312,15 @@ function Byte() {
         }
         return "hard"
     }
+
+    useEffect(() => {
+        if (popupEngineRef.current !== null) {
+            return
+        }
+        let {ext, engine} = createCtPopupExtension();
+        popupExtRef.current = ext;
+        popupEngineRef.current = engine;
+    }, [])
 
     const updateCode = React.useCallback((newCode: string) => {
         const message = {
@@ -1110,6 +1124,30 @@ function Byte() {
             console.log("end line: ", endLine)
             //@ts-ignore
             ctHighlightCodeRangeFullLines(editorRef.current.view, startLine, endLine);
+
+            if (popupEngineRef.current) {
+                const d = document.createElement('div')
+                d.id = "ct-suggestion-container"
+                setSuggestionPortal(ReactDOM.createPortal((
+                    <Box id="ct-suggestion-internal">
+                        <MarkdownRenderer 
+                            markdown={p.suggestion} 
+                            style={{
+                                overflowWrap: 'break-word',
+                                borderRadius: '10px',
+                                padding: '0px',
+                            }}
+                        />
+
+                        {/* Add button here to dismiss or accept - we need to remove the SuggestionPortal state too */}
+                    </Box>
+                ), d))
+                popupEngineRef.current.addPopupRange({
+                    from: startLine,
+                    to: endLine,
+                    content: d
+                })
+            }
             return false
         })
     };
@@ -1386,6 +1424,7 @@ function Byte() {
                                     // lspUrl={byteData ? (byteData.lang === 5 ? "ws://localhost:42081" : "ws://localhost:42083") : undefined}
                                     lspUrl={byteData && lspActive ? `wss://${byteData._id}-lsp.${config.coderPath.replace("https://", "")}` : undefined}
                                     diagnosticLevel={selectDiagnosticLevel()}
+                                    extensions={popupExtRef.current ? [popupExtRef.current] : undefined}
                                     wrapperStyles={{
                                         width: '100%',
                                         height: '100%',
@@ -1417,6 +1456,7 @@ function Byte() {
                         </div>
                     </div>
                 </Container>
+                {SuggestionPortal ? (SuggestionPortal) : null}
                 {xpPopup ? (<XpPopup oldXP={
                     //@ts-ignore
                     (xpData["xp_update"]["old_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]} levelUp={

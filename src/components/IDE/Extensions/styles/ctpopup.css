@@ -1,0 +1,14 @@
+.ctsuggestions.cm-tooltip-section {
+    position: relative;
+}
+
+.ctsuggestions.cm-tooltip-section:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 4px; /* Width of the gradient border */
+    background: linear-gradient(to bottom, #29C18C, #3D8EF7); /* Gradient color */
+    z-index: 1;
+}

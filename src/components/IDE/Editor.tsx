@@ -36,6 +36,7 @@ export type EditorProps = {
     onChange?: (val: string, viewUpdate: ViewUpdate) => void;
     onUpdate?: (viewUpdate: ViewUpdate) => void;
     onCursorChange?: (bytePosition: number, lineNumber: number, columnNumber: number) => void;
+    extensions?: Extension[]
 };
 
 const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorProps, ref) => {
@@ -182,6 +183,9 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
         }
         if (wsLanguageServer) {
             exts = exts.concat(wsLanguageServer)
+        }
+        if (props.extensions) {
+            exts = exts.concat(props.extensions)
         }
 
         return exts
