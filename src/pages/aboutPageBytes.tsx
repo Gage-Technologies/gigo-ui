@@ -29,6 +29,10 @@ import DebugIcon from "../components/Icons/Debug";
 import ByteEasySelectionIcon from "../img/bytes/difficulty/ByteEasySelection";
 import ByteMediumSelectionIcon from "../img/bytes/difficulty/ByteMediumSelection";
 import ByteHardSelectionIcon from "../img/bytes/difficulty/ByteHardSelection";
+import AboutPageLearnIcon from "../components/Icons/aboutPage/AboutPageLearn";
+import AboutPageEasyIcon from "../components/Icons/aboutPage/AboutPageEasy";
+import AboutPageConnectionIcon from "../components/Icons/aboutPage/AboutPageConnection";
+import AboutPageWorldIcon from "../components/Icons/aboutPage/AboutPageWorld";
 function AboutBytes() {
     let userPref = localStorage.getItem('theme')
 
@@ -38,9 +42,27 @@ function AboutBytes() {
     const theme = React.useMemo(() => createTheme(getDesignTokens(mode)), [mode]);
 
     //@ts-ignore
-    const VideoAsGif = ({ videoSrc }) => {
+    const DesktopVideo = ({ videoSrc }) => {
         return (
             <Box sx={{height: "auto", width: "40vw"}}>
+                <video
+                    src={videoSrc}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    style={{width: '100%', height: 'auto', borderRadius: "10px", border: "solid 2px #008664"}}
+                >
+                    Your browser does not support the video tag.
+                </video>
+            </Box>
+        );
+    };
+
+    //@ts-ignore
+    const MobileVideo = ({ videoSrc }) => {
+        return (
+            <Box sx={{height: "auto", width: "100vw", p: 2}}>
                 <video
                     src={videoSrc}
                     autoPlay
@@ -100,7 +122,7 @@ function AboutBytes() {
                         </Grid>
                         <Grid item xs={1} />
                         <Grid item xs={4} style={{ paddingTop: "5vh" }}>
-                            <VideoAsGif videoSrc={chatDemo} />
+                            <DesktopVideo videoSrc={chatDemo} />
                         </Grid>
                         <Grid item xs={1} />
                     </Grid>
@@ -110,7 +132,7 @@ function AboutBytes() {
                     <Grid container spacing={0}>
                         <Grid item xs={1}/>
                         <Grid item xs={4}>
-                            <VideoAsGif videoSrc={debugDemo}/>
+                            <DesktopVideo videoSrc={debugDemo}/>
                         </Grid>
                         <Grid item xs={1}/>
                         <Grid item xs={4}>
@@ -151,7 +173,7 @@ function AboutBytes() {
                         </Grid>
                         <Grid item xs={1}/>
                         <Grid item xs={4}>
-                            <VideoAsGif videoSrc={nextStepsDemo}/>
+                            <DesktopVideo videoSrc={nextStepsDemo}/>
                         </Grid>
                         <Grid item xs={1}/>
                     </Grid>
@@ -161,7 +183,7 @@ function AboutBytes() {
                     <Grid container spacing={0}>
                         <Grid item xs={1}/>
                         <Grid item xs={4}>
-                        <VideoAsGif videoSrc={difficultyDemo}/>
+                        <DesktopVideo videoSrc={difficultyDemo}/>
                         </Grid>
                         <Grid item xs={1}/>
                         <Grid item xs={4}>
@@ -194,11 +216,135 @@ function AboutBytes() {
         )
     }
 
+    const renderMobile = () => {
+        const textStyle = {
+            textAlign: 'center',
+            margin: '10px 20px'
+        };
+
+        return(
+            <>
+                <Box style={{width: "100%", height: "500px", backgroundColor: theme.palette.secondary.dark}}>
+                    <div style={{display: 'flex', justifyContent: 'center'}}>
+                        <AboutBytesIcon
+                            style={{height: "250px", width: "250px", paddingTop: "40px", paddingBottom: "20px"}}/>
+                    </div>
+                    <Grid container spacing={0}>
+                        <Grid item xs={12}>
+                            <h1 style={textStyle as React.CSSProperties}>GIGO Bytes</h1>
+                            <p style={textStyle as React.CSSProperties}>A transformative way for learners to sharpen
+                                their coding skills. Mini coding challenges, designed to fit into your busy
+                                schedule.</p>
+                        </Grid>
+                    </Grid>
+                </Box>
+                <br/><br/>
+                <Grid container spacing={0}>
+                    <Grid item xs={12}>
+                        <div style={{display: 'flex', justifyContent: 'center'}}>
+                            <img alt="Code Teacher" src={CTIcon} style={{width: "50vw", height: "50vw"}}/>
+                        </div>
+                        <h2 style={textStyle as React.CSSProperties}>Code Teacher</h2>
+                        <p style={textStyle as React.CSSProperties}>GIGO Bytes are integrated with Code Teacher to offer
+                            a unique and personalized learning experience. Code Teacher acts as your own personal AI
+                            tutor, providing tailored guidance and support throughout your coding journey.</p>
+                        <Grid item xs={4} style={{paddingTop: "5vh"}}>
+                            <MobileVideo videoSrc={chatDemo}/>
+                        </Grid>
+                    </Grid>
+                </Grid>
+                <br/><br/>
+                <hr style={{width: '80%', border: `1px solid ${theme.palette.secondary.contrastText}`, margin: '0 auto'}}/>
+                <br/><br/>
+                <Grid container spacing={0}>
+                    <Grid item xs={12}>
+                        <div style={{display: 'flex', justifyContent: 'center'}}>
+                            <DebugIcon style={{height: '50vw', width: '50vw'}}/>
+                        </div>
+                        <h2 style={textStyle as React.CSSProperties}>Need to Debug?</h2>
+                        <p style={textStyle as React.CSSProperties}>When you run into errors, Code Teacher is there to
+                            automatically correct them, turning
+                            every mistake into a learning opportunity.</p>
+                        <Grid item xs={4} style={{paddingTop: "5vh"}}>
+                            <MobileVideo videoSrc={debugDemo}/>
+                        </Grid>
+                    </Grid>
+                </Grid>
+                <br/><br/>
+                <hr style={{
+                    width: '80%',
+                    border: `1px solid ${theme.palette.secondary.contrastText}`,
+                    margin: '0 auto'
+                }}/>
+                <br/><br/>
+                <Grid container spacing={0}>
+                    <Grid item xs={12}>
+                        <div style={{display: 'flex', justifyContent: 'center'}}>
+                            <Box sx={{
+                                border: 'solid 4px',
+                                borderColor: '#84E8A2',
+                                borderRadius: "32px",
+                                width: "50vw",
+                                height: "50vw",
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                mt: 1
+                            }}>
+                                <img alt="Code Teacher" src={NSIcon} style={{width: "30vw", height: "30vw"}}/>
+                            </Box>
+                        </div>
+                        <h2 style={textStyle as React.CSSProperties}>Feeling Stuck?</h2>
+                        <p style={textStyle as React.CSSProperties}>Code Teacher will offer intelligent suggestions on
+                            'What To Do Next?', ensuring a smooth
+                            learning curve.</p>
+                        <Grid item xs={4} style={{paddingTop: "5vh"}}>
+                            <MobileVideo videoSrc={nextStepsDemo}/>
+                        </Grid>
+                    </Grid>
+                </Grid>
+                <br/><br/>
+                <hr style={{
+                    width: '80%',
+                    border: `1px solid ${theme.palette.secondary.contrastText}`,
+                    margin: '0 auto'
+                }}/>
+                <br/><br/>
+                <Grid container spacing={0}>
+                    <Grid item xs={12}>
+                        <div style={{display: 'flex', justifyContent: 'center'}}>
+                            <Box sx={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                mt: 1,
+                                gap: "20px"
+                            }}>
+                                <ByteEasySelectionIcon style={{height: "30vw"}}/>
+                                <ByteMediumSelectionIcon style={{height: "30vw"}}/>
+                                <ByteHardSelectionIcon style={{height: "30vw"}}/>
+                            </Box>
+                        </div>
+                        <h2 style={textStyle as React.CSSProperties}>Customizable Difficulty</h2>
+                        <p style={textStyle as React.CSSProperties}>Adjust the difficulty level of each challenge,
+                            making it suitable for
+                            various experience levels. Each difficulty has it's own goal unique to that level of
+                            programming.</p>
+                        <Grid item xs={4} style={{paddingTop: "5vh"}}>
+                            <MobileVideo videoSrc={difficultyDemo}/>
+                        </Grid>
+                    </Grid>
+                </Grid>
+                <br/><br/>
+            </>
+        )
+    }
+
     return (
         <ThemeProvider theme={theme}>
-            <CssBaseline>
+        <CssBaseline>
                 <div>
-                    {renderDesktop()}
+                    {window.innerWidth > 1000 ? renderDesktop() : renderMobile()}
                 </div>
             </CssBaseline>
         </ThemeProvider>
