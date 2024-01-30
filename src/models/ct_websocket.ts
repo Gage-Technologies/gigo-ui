@@ -104,7 +104,8 @@ export interface CtByteSuggestionRequest {
 export interface CtByteSuggestionResponse {
     suggestion_id: string;
     token: string;
-    complete_message: string;
+    code_section: string;
+    suggestion: string;
     done: boolean;
     premium_llm: boolean;
     free_credit_use: boolean;

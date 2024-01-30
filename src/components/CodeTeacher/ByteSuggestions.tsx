@@ -109,8 +109,8 @@ export default function ByteSuggestion(props: ByteSuggestionProps) {
                 return true
             }
             const p: CtByteSuggestionResponse = msg.payload as unknown as CtByteSuggestionResponse;
-            console.log("complete suggestion message: ", p.complete_message)
-            setResponse(p.complete_message)
+            console.log("complete suggestion message: ", p.suggestion)
+            setResponse(p.suggestion)
             if (p.done) {
                 setState(State.COMPLETED)
                 return true

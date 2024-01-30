@@ -45,6 +45,9 @@ import { debounce } from "lodash";
 import {LaunchLspRequest} from "../models/launch_lsp";
 import {Workspace} from "../models/workspace";
 import CodeSource from "../models/codeSource";
+import StopIcon from "@mui/icons-material/Stop";
+import { CtByteSuggestionRequest, CtByteSuggestionResponse, CtGenericErrorPayload, CtMessage, CtMessageOrigin, CtMessageType, CtValidationErrorPayload } from "../models/ct_websocket";
+import { ctHighlightCodeRangeFullLines } from "../components/IDE/Extensions/CtHighlightExtension";
 import LinkIcon from '@mui/icons-material/Link';
 import LinkOffIcon from '@mui/icons-material/LinkOff';
 
@@ -264,6 +267,7 @@ function Byte() {
 
     const editorContainerRef = React.useRef<HTMLDivElement>(null);
     const editorRef = React.useRef<ReactCodeMirrorRef>(null);
+    const outputRef = React.useRef<ReactCodeMirrorRef>(null);
 
     const [activeSidebarTab, setActiveSidebarTab] = React.useState<string | null>(null);
 
@@ -960,7 +964,9 @@ function Byte() {
             }
         }
         deleteTypingTimer();
-        sendExecRequest();
+        setOutputPopup(true)
+        sendSuggestionRequest();
+        // sendExecRequest();
     };
 
     useEffect(() => {
@@ -1063,6 +1069,57 @@ function Byte() {
         s.background = `linear-gradient(to bottom, ${color1} 0%, ${color2} 20%, ${color3} 40%, transparent 70%)`;
         setContainerSyle(s);
     }, [byteData]);
+
+
+    const sendSuggestionRequest = (retryCount: number = 0) => {
+        console.log("byte suggestion starting")
+
+
+        ctWs.sendWebsocketMessage({
+            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            type: CtMessageType.WebSocketMessageTypeByteSuggestionRequest,
+            origin: CtMessageOrigin.WebSocketMessageOriginClient,
+            created_at: Date.now(),
+            payload: {
+                //@ts-ignore
+                lang: programmingLanguages[byteData ? byteData.lang : 5],
+                code: code,
+                //@ts-ignore
+                byte_description: byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : "",
+                //@ts-ignore
+                byte_id: id,
+                assistant_id: ""
+            }
+        } satisfies CtMessage<CtByteSuggestionRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtByteSuggestionResponse>) => {
+            //console.log("response message of next output: ", msg)
+            if (msg.type !== CtMessageType.WebSocketMessageTypeByteSuggestionResponse) {
+                console.log("failed suggestion message", msg)
+                return true
+            }
+            const p: CtByteSuggestionResponse = msg.payload as unknown as CtByteSuggestionResponse;
+            console.log("code section: ", p.code_section)
+            console.log("code suggestion: ", p.suggestion)
+            const codeSection = p.code_section;
+            const startIndex = code.indexOf(codeSection);
+            const endIndex = startIndex + codeSection.length;
+
+            const lines = code.split("\n");
+            const startLine = lines.slice(0, startIndex).length;
+            const endLine = lines.slice(0, endIndex).length;
+            console.log("start line: ", startLine)
+            console.log("end line: ", endLine)
+            //@ts-ignore
+            ctHighlightCodeRangeFullLines(editorRef.current.view, startLine, endLine);
+            return false
+        })
+    };
+
+    const successCheck = () => {
+        console.log("success check: ", true)
+        sendSuggestionRequest();
+        //find out what lines it is at
+        //call the highlight function and fill in the start and end with that info
+    }
 
 
     const updateDifficulty = (difficulty: number) => {
@@ -1179,7 +1236,7 @@ function Byte() {
                         codeSuffix={codeAfterCursor}
                     />
                 )}
-                {(activeSidebarTab === null || activeSidebarTab === "debugOutput") && (
+                {/* {(activeSidebarTab === null || activeSidebarTab === "debugOutput") && (
                     <ByteNextOutputMessage
                         trigger={outputPopup}
                         acceptedCallback={() => { setOutputPopup(false) }}
@@ -1203,7 +1260,7 @@ function Byte() {
                         codeOutput={output?.merged || ""}
                         nextByte={getNextByte()}
                     />
-                )}
+                )} */}
                 {activeSidebarTab === null && (
                     <Tooltip title={stateTooltipTitle}>
                         <Box
