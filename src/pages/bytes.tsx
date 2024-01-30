@@ -1,12 +1,12 @@
 import * as React from "react";
-import {useEffect, useMemo, useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {
     Container,
     createTheme, CssBaseline,
     PaletteMode,
     ThemeProvider,
     Typography,
-    Box, Tooltip, Button
+    Box, Tooltip
 } from "@mui/material";
 import XpPopup from "../components/XpPopup";
 import { getAllTokens } from "../theme";
@@ -29,8 +29,6 @@ import {
 import { programmingLanguages } from "../services/vars";
 import { useGlobalCtWebSocket } from "../services/ct_websocket";
 import ByteNextStep from "../components/CodeTeacher/ByteNextStep";
-import ace from "ace-builds/src-noconflict/ace";
-import "./bytes.css";
 import ByteChat from "../components/CodeTeacher/ByteChat";
 import { LoadingButton } from "@mui/lab";
 import ByteNextOutputMessage from "../components/CodeTeacher/ByteNextOutputMessage";
@@ -43,6 +41,7 @@ import DifficultyAdjuster from "../components/ByteDifficulty";
 import { selectAuthState } from "../reducers/auth/auth";
 import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../reducers/bytes/bytes";
 import ByteTerminal from "../components/Terminal";
+import { debounce } from "lodash";
 
 
 interface MergedOutputRow {
@@ -287,7 +286,7 @@ function Byte() {
         return "hard"
     }
 
-    const updateCode = (newCode: string) => {
+    const updateCode = React.useCallback((newCode: string) => {
         const message = {
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
             type: WsMessageType.ByteUpdateCode,
@@ -299,7 +298,11 @@ function Byte() {
         };
 
         globalWs.sendWebsocketMessage(message, null);
-    };
+    }, [globalWs, byteAttemptId, bytesState]);
+
+    const debouncedUpdateCode = React.useCallback(debounce(updateCode, 1000, {
+        trailing: true
+    }), [updateCode]);
 
     const cancelCodeExec = (commandId: string) => {
 
@@ -741,7 +744,7 @@ function Byte() {
         if (newCode && newCode !== "// Write your code here..." && newCode !== initialCode) {
             setIsButtonActive(true);
 
-            updateCode(newCode);
+            debouncedUpdateCode(newCode);
 
             // // Call createWorkspace only if it hasn't been called before
             // if (id) {
@@ -1030,6 +1033,18 @@ function Byte() {
         )
     }
 
+    const selectDiagnosticLevel = React.useCallback((): "hint" | "info" | "warning" | "error" => {
+        switch (bytesState.byteDifficulty) {
+            case 0:
+                return "error"
+            case 1:
+                return "warning"
+            case 2:
+                return "hint"
+        }
+        return "hint"
+    }, [bytesState.byteDifficulty])
+
     if (window.innerWidth < 1000) {
         navigate("/")
     }
@@ -1120,6 +1135,8 @@ function Byte() {
                                     readonly={!authState.authenticated}
                                     onChange={(val, view) => handleEditorChange(val)}
                                     onCursorChange={(bytePosition, line, column) => setCursorPosition({ row: line, column: column })}
+                                    lspUrl={byteData && byteData.lang === 5 ? "ws://localhost:42081" : "ws://localhost:42083"}
+                                    diagnosticLevel={selectDiagnosticLevel()}
                                 />
                                 {terminalVisible && output && (
                                     <ByteTerminal

@@ -1,5 +1,5 @@
-import React from "react";
-import CodeMirror, { ViewUpdate, Text, ReactCodeMirrorRef } from '@uiw/react-codemirror';
+import React, { useEffect, useState } from "react";
+import CodeMirror, { ViewUpdate, Text, ReactCodeMirrorRef, Extension } from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';
 import { python } from '@codemirror/lang-python';
 import { go } from '@codemirror/legacy-modes/mode/go';
@@ -10,6 +10,7 @@ import { Box } from "@mui/material";
 import { indentUnit } from '@codemirror/language';
 import { autocompleteExtension } from "./Extensions/ACTesting";
 import { ctTextHighlightExtension, ctTextHighlightTheme, highlightTesterKeymap } from "./Extensions/CtHighlightExtension";
+import { languageServer } from './Extensions/Lsp';
 
 export type EditorProps = {
     language: string;
@@ -20,6 +21,8 @@ export type EditorProps = {
     code: string;
     theme?: string;
     readonly: boolean;
+    lspUrl?: string;
+    diagnosticLevel?: "hint" | "info" | "warning" | "error",
     onChange?: (val: string, viewUpdate: ViewUpdate) => void;
     onUpdate?: (viewUpdate: ViewUpdate) => void;
     onCursorChange?: (bytePosition: number, lineNumber: number, columnNumber: number) => void;
@@ -52,6 +55,8 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
     useDynamicStyles('custom-cm-editor-style', ".cm-editor", props.editorStyles ? props.editorStyles : defaultProps.editorStyles);
     useDynamicStyles('custom-cm-gutters-style', ".cm-gutters", props.gutterStyles ? props.gutterStyles : defaultProps.gutterStyles);
 
+    const [wsLanguageServer, setWsLanguageServer] = useState<Extension[] | null>(null);
+
     const selectLang = () => {
         switch (props.language.toLowerCase()) {
             case "go":
@@ -65,6 +70,39 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
         }
     }
 
+    useEffect(() => {
+        if (!props.lspUrl) {
+            return
+        }
+
+        // get fp for the language
+        let fp = "/tmp/pyrun/main.py"
+        let root = "/tmp/pyrun"
+        let lspLangCode = "python"
+        if (props.language.toLowerCase() === "go" || props.language.toLowerCase() === "golang") {
+            root = "/tmp/gorun"
+            fp = "/tmp/gorun/main.go"
+            lspLangCode = "go"
+        }
+
+        console.log("creating lsp")
+        const lsp = languageServer({
+            // WebSocket server uri and other client options.
+            // @ts-ignore
+            serverUri: props.lspUrl,
+            rootUri: `file://${root}`,
+
+            documentUri: `file://${fp}`,
+            languageId: lspLangCode, // As defined at https://microsoft.github.io/language-server-protocol/specification#textDocumentItem.
+
+            allowHTMLContent: true,
+            level: props.diagnosticLevel !== undefined ? props.diagnosticLevel : "error",
+        });
+
+        // update the lsp
+        setWsLanguageServer(lsp)
+    }, [props.language, props.lspUrl])
+
     const getExtensions = () => {
         let exts = [
             // this indents with 4 spaces
@@ -72,12 +110,16 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
             // autocompleteExtension,
             ctTextHighlightExtension,
             ctTextHighlightTheme,
-            highlightTesterKeymap
+            highlightTesterKeymap,
         ];
         let lang = selectLang();
         if (lang) {
             exts.push(lang)
         }
+        if (wsLanguageServer) {
+            exts = exts.concat(wsLanguageServer)
+        }
+
         return exts
     }
 

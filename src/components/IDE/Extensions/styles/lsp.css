@@ -1,0 +1,59 @@
+.cm-tooltip {
+    display: block;
+    margin-left: 0px;
+    white-space: pre;
+    border-radius: 4px;
+    max-width: 40vw;
+    overflow: auto;
+    font-family: monospace;
+
+    /*border: 1px solid rgba(255,255,255,0.18);*/
+}
+
+.cm-tooltip-section {
+    padding: 3px 6px 3px 8px;
+    border: 1px solid rgba(255,255,255,0.18);
+    width: fit-content;
+}
+
+.documentation.cm-tooltip-section {
+    border-left: 4px solid #999;
+}
+
+.lint.cm-tooltip-section {
+}
+
+.cm-diagnostic-warning {
+    background-color: #ffa50030;
+}
+
+.cm-diagnostic-error {
+    background-color: #ff000030;
+}
+
+.cm-diagnostic-info {
+    background-color: #0000ff30;
+}
+
+.cm-diagnostic-hint {
+    background-color: #00800030;
+}
+
+.bytes-hover-info-header {
+    margin: 0px !important;
+    padding: 0px !important;
+}
+
+.cm-tooltip-autocomplete {
+    border: 1px solid rgba(255,255,255,0.18);
+}
+
+.cm-tooltip.cm-tooltip-autocomplete > ul {
+    padding: 4px;
+}
+
+.cm-tooltip.cm-tooltip-autocomplete > ul > li {
+    font-family: monospace;
+    border-radius: 4px;
+    margin: 4px;
+}
