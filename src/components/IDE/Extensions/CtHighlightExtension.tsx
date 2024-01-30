@@ -118,8 +118,8 @@ export function ctHighlightCodeRangeFullLines(view: EditorView, startLine: numbe
     const effects = [ctHighlightText.of({ from: startIndex, to: endIndex })];
     view.dispatch({ effects });
 
-    // Attach a mousemove listener to the editor
-    view.dom.addEventListener('mousemove', (event) => onMouseMove(event, view, startIndex, endIndex));
+    // // Attach a mousemove listener to the editor
+    // view.dom.addEventListener('mousemove', (event) => onMouseMove(event, view, startIndex, endIndex));
 }
 
 function onMouseMove(event: MouseEvent, view: EditorView, startIndex: number, endIndex: number) {
