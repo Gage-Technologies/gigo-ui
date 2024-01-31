@@ -282,6 +282,8 @@ function Byte() {
     const [SuggestionPortal, setSuggestionPortal] = React.useState<React.ReactPortal | null>(null)
 
     const [connectButtonLoading, setConnectButtonLoading] = useState<boolean>(false)
+    const [startSuggestionLine, setStartSuggestionLine] = React.useState<number | null>(null)
+    const [endSuggestionLine, setEndSuggestionLine] = React.useState<number | null>(null)
 
 
     let { id } = useParams();
@@ -945,6 +947,16 @@ function Byte() {
 
     const executeCode = async () => {
 
+        if (startSuggestionLine !== null || endSuggestionLine !== null){
+            //@ts-ignore
+            removeCtHighlightCodeRange(editorRef.current.view, startSuggestionLine, endSuggestionLine);
+            //@ts-ignore
+            popupEngineRef.current?.removePopupRange(endSuggestionLine, startSuggestionLine)
+            setSuggestionPortal(null)
+            setStartSuggestionLine(null)
+            setEndSuggestionLine(null)
+        }
+
         if (suggestionPopup) {
             setSuggestionPopup(false)
             if (activeSidebarTab === null || activeSidebarTab !== "nextSteps") {
@@ -1018,91 +1030,6 @@ function Byte() {
         setCodeAfterCursor(suffix)
     }, [code, cursorPosition])
 
-    // interface TerminalOutputProps {
-    //     output: OutputState | null;
-    //     style?: React.CSSProperties;
-    //     executeCode: () => void; // Function to execute code
-    //     cancelCodeExec: (commandId: string) => void; // Function to cancel code execution
-    //     isRunning: boolean; // Whether code is currently executing
-    //     commandId: string; // Command ID for execution
-    // }
-    //
-    // const TerminalOutput: React.FC<TerminalOutputProps> = ({ output, style, executeCode, cancelCodeExec, isRunning, commandId }) => {
-    //     const { setBufferedContent } = useContext(TerminalContext);
-    //     // Define terminal commands
-    //     const terminalCommands = {
-    //         cancel: {
-    //             description: "Cancel the running code",
-    //             fn: () => {
-    //                 if (isRunning) {
-    //                     cancelCodeExec(commandId);
-    //                     return "Cancelling code execution...";
-    //                 }
-    //                 return "No code is running";
-    //             }
-    //         },
-    //         // Add more commands as needed
-    //     };
-    //
-    //
-    //     const formattedOutput = useMemo(() => {
-    //         if (!output) return "";
-    //         return output.mergedLines.map(line => `${line.error ? "Error: " : ""}${line.content}`).join("\n");
-    //     }, [output]);
-    //
-    //     return (
-    //         <Box style={{ ...style }}>
-    //             <ReactTerminal
-    //                 commands={terminalCommands}
-    //                 welcomeMessage="Welcome to Byte terminal"
-    //                 prompt=">>"
-    //                 theme="material-dark"
-    //                 errorMessage="Command not found"
-    //                 outputRender={() => (
-    //                     <pre>{formattedOutput}</pre>
-    //                 )}
-    //             />
-    //         </Box>
-    //     );
-    // };
-
-    // const executeSuggestion = (suggestion: string, endLine: number, startLine: number) => {
-    //     console.log("suggestion is: ", suggestion)
-    //     console.log("start line is,: ", startLine)
-    //     console.log("end line is: ", endLine)
-    //     //@ts-ignore
-    //     let language = programmingLanguages[byteData.lang].toLowerCase();
-    //     const regex = new RegExp(`\`\`\`${language}([\\s\\S]*?)\`\`\``, 'g');
-    //     const matches: string[] = [];
-    //     let match;
-    
-    //     while ((match = regex.exec(suggestion)) !== null) {
-    //         matches.push(match[1].trim());
-    //     }
-    
-    //     console.log("matches is: ", matches)
-
-    //     setCode((prevCode) => {
-    //         let lines = prevCode.split('\n');
-
-    //         console.log("start line: ", startLine)
-    //         console.log("end line: ", endLine)
-    //         console.log("lines length: ", lines.length)
-    //         console.log("matches length: ", matches.length)
-
-    //         if (startLine < 0 || startLine > endLine || matches.length !== (endLine - startLine + 1)) {
-    //             console.error('Invalid line numbers or mismatch in the length of matches array');
-    //             return prevCode;
-    //         }
-
-    //         for (let i = startLine; i <= endLine; i++) {
-    //             lines[i] = matches[i - startLine];
-    //         }
-
-    //         return lines.join('\n');
-    //     });
-    // }
-
     const executeSuggestion = (suggestion: string, codeSection: string) => {
         console.log("suggestion is: ", suggestion);
         console.log("code sedtion: ", codeSection)
@@ -1144,37 +1071,50 @@ function Byte() {
                         overflowWrap: 'break-word',
                         borderRadius: '10px',
                         padding: '0px',
+                        width: "90%",
                     }}
                 />
-                <div style={{position: "sticky", bottom: 0, zIndex: 1, padding: "10px", backgroundColor: theme.palette.background.default}}>
-                    <Box display="flex" justifyContent="space-between">
-                        <Button onClick={() => {
-                                //@ts-ignore
-                                removeCtHighlightCodeRange(editorRef.current.view, startLine, endLine);
-                                //@ts-ignore
-                                popupEngineRef.current?.removePopupRange(endLine, startLine)
-                                setSuggestionPortal(null)
-                            }}>
-                            Dismiss
-                        </Button>
-                        <Button onClick={() => {
-                            console.log("start line inline: ", startLine)
-                            //@ts-ignore
-                            executeSuggestion(suggestion, codeSection)
+                <Box className="ctsuggestons-buttons" style={{
+                    position: "sticky",
+                    width: "100%",
+                    padding: "10px",
+                    display: "flex",
+                    justifyContent: "space-evenly",
+                    bottom: -10,
+                    left: 0,
+                    backgroundColor: "#333338"
+                }}>
+                    <Button onClick={() => {
                             //@ts-ignore
                             removeCtHighlightCodeRange(editorRef.current.view, startLine, endLine);
                             //@ts-ignore
                             popupEngineRef.current?.removePopupRange(endLine, startLine)
-                        }}>
-                            Execute
-                        </Button>
-                    </Box>
-                </div>
+                            setSuggestionPortal(null)
+                            setStartSuggestionLine(null)
+                            setEndSuggestionLine(null)
+                        }} variant='contained'>
+                        Dismiss
+                    </Button>
+                    <Button onClick={() => {
+                        console.log("start line inline: ", startLine)
+                        //@ts-ignore
+                        executeSuggestion(suggestion, codeSection)
+                        //@ts-ignore
+                        removeCtHighlightCodeRange(editorRef.current.view, startLine, endLine);
+                        //@ts-ignore
+                        popupEngineRef.current?.removePopupRange(endLine, startLine)
+                        setStartSuggestionLine(null)
+                        setEndSuggestionLine(null)
+                    }} variant='contained'>
+                        Execute
+                    </Button>
+                </Box>
 
             {/* Add button here to dismiss or accept - we need to remove the SuggestionPortal state too */}
             </Box>
         )
     }
+
 
     useEffect(() => {
         if (byteData === null) {
@@ -1232,6 +1172,8 @@ function Byte() {
             const endLine = lines.slice(0, endIndex).length;
             console.log("start line: ", startLine)
             console.log("end line: ", endLine)
+            setStartSuggestionLine(startLine)
+            setEndSuggestionLine(endLine)
             //@ts-ignore
             ctHighlightCodeRangeFullLines(editorRef.current.view, startLine, endLine);
 
