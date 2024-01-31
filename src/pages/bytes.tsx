@@ -1082,7 +1082,7 @@ function Byte() {
                     justifyContent: "space-evenly",
                     bottom: -10,
                     left: 0,
-                    backgroundColor: "#333338"
+                    backgroundColor: mode === 'dark' ? "#333338" : "#f5f5f5"
                 }}>
                     <Button onClick={() => {
                             //@ts-ignore
