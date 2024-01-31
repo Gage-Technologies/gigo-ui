@@ -11,13 +11,22 @@ export class CtPopupExtensionEngine {
     private popupRanges: PopupRange[] = [];
 
     addPopupRange(range: PopupRange): void {
+        console.log("popup range her: ", this.popupRanges)
+        console.log("range being added: ", range)
         // add the range and popup content to the range state
         this.popupRanges.push(range);
+        console.log("new popup range: ", this.popupRanges)
     }
 
     removePopupRange(to: number, from: number): void {
-        // remove any ranges that match the to & from
-        this.popupRanges = this.popupRanges.filter((r) => r.to !== to || r.from === from);
+        // console.log("to: ", to)
+        // console.log("from: ", from)
+        // console.log("first popup ranges: ", this.popupRanges)
+        // // remove any ranges that match the to & from
+        // this.popupRanges = this.popupRanges.filter((r) => r.to !== to || r.from === from);
+        // console.log("popup ranges again: ", this.popupRanges)
+
+        this.popupRanges = []
     }
 
     async requestHoverTooltip(view: EditorView, offset: number): Promise<Tooltip | null> {
@@ -31,9 +40,12 @@ export class CtPopupExtensionEngine {
         const dom = document.createElement('div');
         dom.classList.add('ctsuggestions');
         if (typeof popup.content === "string") {
-            dom.innerHTML = popup.content;
+            dom.innerHTML = `<div class="ct-suggestion-content">${popup.content}</div>`;
         } else {
-            dom.appendChild(popup.content)
+            const contentDiv = document.createElement('div');
+            contentDiv.classList.add('ct-suggestion-content');
+            contentDiv.appendChild(popup.content);
+            dom.appendChild(contentDiv);
         }
         return {pos: offset, end: undefined, create: (view) => ({dom}), above: true};
     }

@@ -1,3 +1,4 @@
+
 .ctsuggestions.cm-tooltip-section {
     position: relative;
 }
@@ -11,4 +12,14 @@
     width: 4px; /* Width of the gradient border */
     background: linear-gradient(to bottom, #29C18C, #3D8EF7); /* Gradient color */
     z-index: 1;
+}
+
+.ctsuggestions {
+    max-width: 30vw;
+    max-height:40vh;
+}
+
+.ct-suggestion-content {
+    max-width: 100%;
+    overflow-wrap: break-word;
 }

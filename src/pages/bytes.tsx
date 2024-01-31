@@ -47,9 +47,9 @@ import {Workspace} from "../models/workspace";
 import CodeSource from "../models/codeSource";
 import StopIcon from "@mui/icons-material/Stop";
 import { CtByteSuggestionRequest, CtByteSuggestionResponse, CtGenericErrorPayload, CtMessage, CtMessageOrigin, CtMessageType, CtValidationErrorPayload } from "../models/ct_websocket";
-import { ctHighlightCodeRangeFullLines } from "../components/IDE/Extensions/CtHighlightExtension";
 import LinkIcon from '@mui/icons-material/Link';
 import LinkOffIcon from '@mui/icons-material/LinkOff';
+import { ctHighlightCodeRangeFullLines, removeCtHighlightCodeRange } from "../components/IDE/Extensions/CtHighlightExtension";
 import { CtPopupExtensionEngine, createCtPopupExtension } from "../components/IDE/Extensions/CtPopupExtension";
 import ReactDOM from "react-dom";
 import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
@@ -1066,6 +1066,116 @@ function Byte() {
     //     );
     // };
 
+    // const executeSuggestion = (suggestion: string, endLine: number, startLine: number) => {
+    //     console.log("suggestion is: ", suggestion)
+    //     console.log("start line is,: ", startLine)
+    //     console.log("end line is: ", endLine)
+    //     //@ts-ignore
+    //     let language = programmingLanguages[byteData.lang].toLowerCase();
+    //     const regex = new RegExp(`\`\`\`${language}([\\s\\S]*?)\`\`\``, 'g');
+    //     const matches: string[] = [];
+    //     let match;
+    
+    //     while ((match = regex.exec(suggestion)) !== null) {
+    //         matches.push(match[1].trim());
+    //     }
+    
+    //     console.log("matches is: ", matches)
+
+    //     setCode((prevCode) => {
+    //         let lines = prevCode.split('\n');
+
+    //         console.log("start line: ", startLine)
+    //         console.log("end line: ", endLine)
+    //         console.log("lines length: ", lines.length)
+    //         console.log("matches length: ", matches.length)
+
+    //         if (startLine < 0 || startLine > endLine || matches.length !== (endLine - startLine + 1)) {
+    //             console.error('Invalid line numbers or mismatch in the length of matches array');
+    //             return prevCode;
+    //         }
+
+    //         for (let i = startLine; i <= endLine; i++) {
+    //             lines[i] = matches[i - startLine];
+    //         }
+
+    //         return lines.join('\n');
+    //     });
+    // }
+
+    const executeSuggestion = (suggestion: string, codeSection: string) => {
+        console.log("suggestion is: ", suggestion);
+        console.log("code sedtion: ", codeSection)
+    
+        //@ts-ignore
+        // let language = programmingLanguages[byteData.lang].toLowerCase();
+        let language = "go"
+        const regex = new RegExp(`\`\`\`${language}([\\s\\S]*?)\`\`\``, 'g');
+        const matches: string[] = [];
+        let match;
+    
+        while ((match = regex.exec(suggestion)) !== null) {
+            // Split multiline matches into separate lines
+            matches.push(...match[1].trim().split('\n'));
+        }
+    
+        console.log("matches is: ", matches);
+
+        // Joining the matches array into a single string
+        const matchString = matches.join('\n');
+
+        // Replace the codeSection in the code state with matchString
+        setCode((prevCode) => {
+            if (prevCode.includes(codeSection)) {
+                return prevCode.replace(codeSection, matchString);
+            } else {
+                console.error('codeSection not found in the code');
+                return prevCode;
+            }
+        });
+    };    
+
+    const suggestionPopupRender = (suggestion: string, endLine: number | undefined, startLine: number | undefined, codeSection: string) => {
+        return (
+            <Box id="ct-suggestion-internal">
+                <MarkdownRenderer 
+                    markdown={suggestion} 
+                    style={{
+                        overflowWrap: 'break-word',
+                        borderRadius: '10px',
+                        padding: '0px',
+                    }}
+                />
+                <div style={{position: "sticky", bottom: 0, zIndex: 1, padding: "10px", backgroundColor: theme.palette.background.default}}>
+                    <Box display="flex" justifyContent="space-between">
+                        <Button onClick={() => {
+                                //@ts-ignore
+                                removeCtHighlightCodeRange(editorRef.current.view, startLine, endLine);
+                                //@ts-ignore
+                                popupEngineRef.current?.removePopupRange(endLine, startLine)
+                                setSuggestionPortal(null)
+                            }}>
+                            Dismiss
+                        </Button>
+                        <Button onClick={() => {
+                            console.log("start line inline: ", startLine)
+                            //@ts-ignore
+                            executeSuggestion(suggestion, codeSection)
+                            //@ts-ignore
+                            removeCtHighlightCodeRange(editorRef.current.view, startLine, endLine);
+                            //@ts-ignore
+                            popupEngineRef.current?.removePopupRange(endLine, startLine)
+                        }}>
+                            Execute
+                        </Button>
+                    </Box>
+                </div>
+
+            {/* Add button here to dismiss or accept - we need to remove the SuggestionPortal state too */}
+            </Box>
+        )
+    }
+
     useEffect(() => {
         if (byteData === null) {
             setContainerSyle(containerStyleDefault);
@@ -1129,18 +1239,7 @@ function Byte() {
                 const d = document.createElement('div')
                 d.id = "ct-suggestion-container"
                 setSuggestionPortal(ReactDOM.createPortal((
-                    <Box id="ct-suggestion-internal">
-                        <MarkdownRenderer 
-                            markdown={p.suggestion} 
-                            style={{
-                                overflowWrap: 'break-word',
-                                borderRadius: '10px',
-                                padding: '0px',
-                            }}
-                        />
-
-                        {/* Add button here to dismiss or accept - we need to remove the SuggestionPortal state too */}
-                    </Box>
+                    suggestionPopupRender(p.suggestion, endLine, startLine, codeSection)
                 ), d))
                 popupEngineRef.current.addPopupRange({
                     from: startLine,
