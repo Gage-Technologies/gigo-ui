@@ -82,7 +82,7 @@ function About() {
         height: '90vh',
         background: `radial-gradient(circle, rgba(0,0,0,0) 50%, ${hexToRGBA(theme.palette.background.default)} 70%, ${hexToRGBA(theme.palette.background.default)} 83%), linear-gradient(180deg, rgba(0,0,0,0) 51%, rgba(0,0,0,0) 52%, ${hexToRGBA(theme.palette.background.default)} 92%, ${hexToRGBA(theme.palette.background.default)}` , // Vignette gradient
         position: 'absolute',
-        left: '0%',
+        left: '3%',
         bottom: (aspectRatio !== '21:9') && (sidebarOpen || chatOpen) ? '-1%' : '0%',
         zIndex: 2, // Set a higher zIndex to appear above the SVG
     };
@@ -234,9 +234,9 @@ function About() {
                     </Box>
                     <br/>
                     <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center">
-                        <Button variant={'outlined'} onClick={handleExpand}>
-                            {isExpanded ? 'Show Less' : 'Learn More'}
-                        </Button>
+                        {/*<Button variant={'outlined'} onClick={handleExpand}>*/}
+                        {/*    {isExpanded ? 'Show Less' : 'Learn More'}*/}
+                        {/*</Button>*/}
                         <br/>
                         {isExpanded && (
                             <div style={{display: "flex", textAlign: "center", flexDirection: "column", width: "100%"}}>
