@@ -1036,7 +1036,7 @@ function Byte() {
     
         //@ts-ignore
         // let language = programmingLanguages[byteData.lang].toLowerCase();
-        let language = "go"
+        const language = programmingLanguages[byteData.lang].toLowerCase();
         const regex = new RegExp(`\`\`\`${language}([\\s\\S]*?)\`\`\``, 'g');
         const matches: string[] = [];
         let match;
@@ -1134,6 +1134,47 @@ function Byte() {
         setContainerSyle(s);
     }, [byteData]);
 
+    function findSubstringStartEndLines(code: string, codeSection: string): {startLine: number, endLine: number} {
+        const startIndex = code.indexOf(codeSection);
+        if (startIndex === -1) {
+            console.log("Substring not found");
+            return {startLine: -1, endLine: -1}; // Substring not found
+        }
+        const endIndex = startIndex + codeSection.length;
+    
+        const lines = code.split("\n");
+        let accumulatedLength = 0;
+        let startLine = 0;
+        let endLine = 0;
+    
+        for (let i = 0; i < lines.length; i++) {
+            // Update accumulatedLength for the current line and include the newline character
+            accumulatedLength += lines[i].length + 1; // +1 for the newline character
+    
+            // Determine startLine
+            if (accumulatedLength > startIndex && startLine === 0) {
+                startLine = i + 1; // +1 to convert from 0-based to 1-based index
+            }
+    
+            // Determine endLine
+            if (accumulatedLength >= endIndex) {
+                endLine = i + 1; // +1 to convert from 0-based to 1-based index
+                break; // No need to continue once endLine is found
+            }
+        }
+
+        if (startLine === endLine){
+            if (startLine === 0){
+                endLine = endLine + 1
+            } else {
+                startLine = startLine - 1
+            }
+        }
+    
+        console.log(`Start line: ${startLine}, End line: ${endLine}`);
+        return {startLine, endLine};
+    }
+
 
     const sendSuggestionRequest = (retryCount: number = 0) => {
         console.log("byte suggestion starting")
@@ -1164,16 +1205,31 @@ function Byte() {
             console.log("code section: ", p.code_section)
             console.log("code suggestion: ", p.suggestion)
             const codeSection = p.code_section;
-            const startIndex = code.indexOf(codeSection);
-            const endIndex = startIndex + codeSection.length;
 
-            const lines = code.split("\n");
-            const startLine = lines.slice(0, startIndex).length;
-            const endLine = lines.slice(0, endIndex).length;
-            console.log("start line: ", startLine)
-            console.log("end line: ", endLine)
+
+            // const startIndex = code.indexOf(codeSection);
+            // console.log("code is: ", code)
+            // console.log("start index: ", startIndex)
+            // const endIndex = startIndex + codeSection.length;
+
+            // const lines = code.split("\n");
+            // let startLine = lines.slice(0, startIndex).length;
+            // let endLine = lines.slice(0, endIndex).length;
+            // console.log("start line: ", startLine)
+            // console.log("end line: ", endLine)
+            // setStartSuggestionLine(startLine)
+            // setEndSuggestionLine(endLine)
+
+            let startLine = findSubstringStartEndLines(code, codeSection).startLine
+            let endLine = findSubstringStartEndLines(code, codeSection).endLine
+
+            console.log("start line is: ", startLine)
+            console.log("end line is: ", endLine)
+
             setStartSuggestionLine(startLine)
             setEndSuggestionLine(endLine)
+
+
             //@ts-ignore
             ctHighlightCodeRangeFullLines(editorRef.current.view, startLine, endLine);
 
