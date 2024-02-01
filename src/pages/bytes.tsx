@@ -1030,43 +1030,115 @@ function Byte() {
         setCodeAfterCursor(suffix)
     }, [code, cursorPosition])
 
+    // const executeSuggestion = (suggestion: string, codeSection: string) => {
+    //     console.log("suggestion is: ", suggestion);
+    //     console.log("code section: ", codeSection);
+    
+    //     // Updated regex to match everything after "<<CODE IMPROVEMENT>>"
+    //     const improvementRegex = /<<CODE IMPROVEMENT>>\n([\s\S]*?)(?=\n<<CODE IMPROVEMENT>>|$)/g;
+    
+    //     let matches: string[] = [];
+    //     let match;
+    
+    //     // Match using the updated regex
+    //     while ((match = improvementRegex.exec(suggestion)) !== null) {
+    //         // Assuming the code follows immediately after "<<CODE IMPROVEMENT>>" and capture accordingly
+    //         matches.push(...match[1].trim().split('\n'));
+    //     }
+    
+    //     console.log("matches is: ", matches);
+    
+    //     const matchString = matches.join('\n');
+    
+    //     // Function to replace codeSection in the code state with matchString
+    //     setCode((prevCode) => {
+    //         console.log("prevCode: ", prevCode)
+    //         console.log("code section: ", codeSection)
+    //         if (prevCode.includes(codeSection)) {
+    //             return prevCode.replace(codeSection, matchString);
+    //         } else {
+    //             console.error('codeSection not found in the code');
+    //             return prevCode;
+    //         }
+    //     });
+    // };
+
     const executeSuggestion = (suggestion: string, codeSection: string) => {
         console.log("suggestion is: ", suggestion);
-        console.log("code sedtion: ", codeSection)
+        console.log("code section: ", codeSection);
     
-        //@ts-ignore
-        // let language = programmingLanguages[byteData.lang].toLowerCase();
-        const language = programmingLanguages[byteData.lang].toLowerCase();
-        const regex = new RegExp(`\`\`\`${language}([\\s\\S]*?)\`\`\``, 'g');
-        const matches: string[] = [];
+        // Updated regex to match everything after "<<CODE IMPROVEMENT>>"
+        const improvementRegex = /<<CODE IMPROVEMENT>>\n([\s\S]*?)(?=\n<<CODE IMPROVEMENT>>|$)/g;
+    
+        let matches: string[] = [];
         let match;
     
-        while ((match = regex.exec(suggestion)) !== null) {
-            // Split multiline matches into separate lines
+        // Match using the updated regex
+        while ((match = improvementRegex.exec(suggestion)) !== null) {
+            // Assuming the code follows immediately after "<<CODE IMPROVEMENT>>" and capture accordingly
             matches.push(...match[1].trim().split('\n'));
         }
     
-        console.log("matches is: ", matches);
-
-        // Joining the matches array into a single string
         const matchString = matches.join('\n');
-
-        // Replace the codeSection in the code state with matchString
+    
+        // Function to replace codeSection in the code state with matchString
         setCode((prevCode) => {
-            if (prevCode.includes(codeSection)) {
-                return prevCode.replace(codeSection, matchString);
+            console.log("prevCode: ", prevCode);
+            console.log("code section: ", codeSection);
+    
+            // Function to create a normalized version for comparison, but maintain indexes for replacement
+            const findIndexesAfterNormalization = (source: string, search: string): { start: number, end: number } => {
+                const normalizedSource = source.toLowerCase().replace(/\s+/g, ' ');
+                const normalizedSearch = search.toLowerCase().replace(/\s+/g, ' ');
+                const start = normalizedSource.indexOf(normalizedSearch);
+                if (start === -1) {
+                    return { start: -1, end: -1 }; // Not found
+                }
+                const end = start + search.length;
+                return { start, end }; // Return original indexes
+            };
+    
+            const { start, end } = findIndexesAfterNormalization(prevCode, codeSection);
+            if (start !== -1 && end !== -1) {
+                // Replace using the original indexes in prevCode to maintain formatting
+                const before = prevCode.substring(0, start);
+                const after = prevCode.substring(end);
+                return before + matchString + after;
             } else {
                 console.error('codeSection not found in the code');
                 return prevCode;
             }
         });
-    };    
+    };
+    
+    
+    
+    
 
     const suggestionPopupRender = (suggestion: string, endLine: number | undefined, startLine: number | undefined, codeSection: string) => {
+
+        //todo: remove after testing
+        let counter = 0; // To track the replacement count
+        const newStateValue = suggestion; // Assuming you want to insert this as a dynamic value
+
+        const resultString = newStateValue.replace(/<<CODE IMPROVEMENT>>/g, () => {
+            counter += 1;
+            if (counter === 1) {
+                // Replace the first occurrence with ```[state value]
+                //@ts-ignore
+                return `\`\`\`[${programmingLanguages[byteData.lang]}]`;
+            } else {
+                // Replace the second (and any subsequent, though not specified) occurrences with ```
+                return "\`\`\`";
+            }
+        });
+
+
+
         return (
             <Box id="ct-suggestion-internal">
                 <MarkdownRenderer 
-                    markdown={suggestion} 
+                    markdown={resultString} 
                     style={{
                         overflowWrap: 'break-word',
                         borderRadius: '10px',
@@ -1134,46 +1206,52 @@ function Byte() {
         setContainerSyle(s);
     }, [byteData]);
 
-    function findSubstringStartEndLines(code: string, codeSection: string): {startLine: number, endLine: number} {
-        const startIndex = code.indexOf(codeSection);
+    function findSubstringStartEndLines(codeSection: string): { startLine: number, endLine: number } {
+        // Function to normalize spaces within each line of the code
+        const normalizeSpaces = (input: string): string =>
+            input.split('\n').map(line => line.trim().replace(/\s+/g, ' ')).join('\n');
+    
+        // Normalize the input code and code section
+        const normalizedCode = normalizeSpaces(code);
+        const normalizedCodeSection = normalizeSpaces(codeSection);
+    
+        const startIndex = normalizedCode.indexOf(normalizedCodeSection);
         if (startIndex === -1) {
             console.log("Substring not found");
-            return {startLine: -1, endLine: -1}; // Substring not found
+            return { startLine: -1, endLine: -1 }; // Substring not found
         }
-        const endIndex = startIndex + codeSection.length;
+        const endIndex = startIndex + normalizedCodeSection.length;
     
-        const lines = code.split("\n");
+        const lines = normalizedCode.split("\n");
         let accumulatedLength = 0;
         let startLine = 0;
         let endLine = 0;
     
         for (let i = 0; i < lines.length; i++) {
-            // Update accumulatedLength for the current line and include the newline character
             accumulatedLength += lines[i].length + 1; // +1 for the newline character
     
-            // Determine startLine
             if (accumulatedLength > startIndex && startLine === 0) {
-                startLine = i + 1; // +1 to convert from 0-based to 1-based index
+                startLine = i + 1; // Convert from 0-based to 1-based index
             }
     
-            // Determine endLine
-            if (accumulatedLength >= endIndex) {
-                endLine = i + 1; // +1 to convert from 0-based to 1-based index
-                break; // No need to continue once endLine is found
+            if (accumulatedLength >= endIndex && endLine === 0) {
+                endLine = i + 1; // Convert from 0-based to 1-based index
+                break; // End loop once endLine is found
             }
         }
 
-        if (startLine === endLine){
-            if (startLine === 0){
-                endLine = endLine + 1
-            } else {
-                startLine = startLine - 1
-            }
+        if (startLine === 0){
+            endLine = endLine + 1
+        } else {
+            startLine = startLine - 1
         }
     
         console.log(`Start line: ${startLine}, End line: ${endLine}`);
-        return {startLine, endLine};
+        return { startLine, endLine };
     }
+    
+    
+    
 
 
     const sendSuggestionRequest = (retryCount: number = 0) => {
@@ -1204,6 +1282,7 @@ function Byte() {
             const p: CtByteSuggestionResponse = msg.payload as unknown as CtByteSuggestionResponse;
             console.log("code section: ", p.code_section)
             console.log("code suggestion: ", p.suggestion)
+            console.log("code is: ", code)
             const codeSection = p.code_section;
 
 
@@ -1220,8 +1299,8 @@ function Byte() {
             // setStartSuggestionLine(startLine)
             // setEndSuggestionLine(endLine)
 
-            let startLine = findSubstringStartEndLines(code, codeSection).startLine
-            let endLine = findSubstringStartEndLines(code, codeSection).endLine
+            let startLine = findSubstringStartEndLines(codeSection).startLine
+            let endLine = findSubstringStartEndLines(codeSection).endLine
 
             console.log("start line is: ", startLine)
             console.log("end line is: ", endLine)
