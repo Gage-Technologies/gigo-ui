@@ -64,7 +64,7 @@ import { LoadingButton } from "@mui/lab";
 import GIGOLandingPageNewYearsMobile from "../components/Landing/LandingNewYearsMobile";
 import GIGOLandingPageNewYears from "../components/Landing/LandingNewYears";
 import BytesCard from "../components/BytesCard";
-import {programmingLanguages} from "../services/vars";
+import { programmingLanguages } from "../services/vars";
 import AboutBytesIcon from "../components/Icons/bytes/aboutPage";
 import GIGOLandingPageValentines from "../components/Landing/LandingValentines";
 import GIGOLandingPageValentinesMobile from "../components/Landing/LandingValentinesMobile";
@@ -317,7 +317,7 @@ function Home() {
             if (
                 (res === undefined || res["projects"] === undefined ||
                     res2 === undefined || res2["projects"] === undefined ||
-                res4 === undefined || res4["projects"] === undefined) && loggedIn
+                    res4 === undefined || res4["projects"] === undefined) && loggedIn
             ) {
                 swal("There has been an issue loading data. Please try again later.")
             }
@@ -671,14 +671,14 @@ function Home() {
                 paddingBottom: "10px",
                 height: "100%"
             }}>
-                <div style={{ display: "inline-flex" }}>               
+                <div style={{ display: "inline-flex" }}>
                     <Tooltip
                         title={
                             !newBytesPopoverOpen ? (
                                 <Box>
                                     <Typography variant="body1">Just Released!</Typography>
-                                    <Button 
-                                        size="small" 
+                                    <Button
+                                        size="small"
                                         onClick={handleNewBytesPopoverOpen}
                                         sx={{
                                             p: "4px",
@@ -688,14 +688,14 @@ function Home() {
                                         Learn More
                                     </Button>
                                 </Box>
-                            ): (
+                            ) : (
                                 <Box>
                                     <Typography variant="body1">Just Released!</Typography>
                                     <Typography variant="body2">
-                                    Bytes are bite-sized coding challenges that are deeply integrated with Code Teacher, offering a personalized learning experience.
+                                        Bytes are bite-sized coding challenges that are deeply integrated with Code Teacher, offering a personalized learning experience.
                                     </Typography>
-                                    <Button 
-                                        size="small" 
+                                    <Button
+                                        size="small"
                                         onClick={handleNewBytesPopoverClose}
                                         sx={{
                                             p: "4px",
@@ -713,9 +713,15 @@ function Home() {
                         disableTouchListener
                         arrow
                         placement="top"
+                        PopperProps={{
+                            sx: {
+                                zIndex: 800,
+                                left: !newBytesPopoverOpen ? "40px !important" : "100px !important"
+                            }
+                        }}
                         sx={{
-                            backgroundColor: '#353535', // Dark background for tooltip
-                            color: 'white', // Light text for contrast
+                            // backgroundColor: '#353535', // Dark background for tooltip
+                            // color: 'white', // Light text for contrast
                             fontSize: '0.9rem', // Readable text size
                             borderRadius: '4px', // Rounded corners for modern look
                             padding: '8px 12px', // Spacing inside the tooltip
@@ -742,12 +748,12 @@ function Home() {
                         </Typography>
                     </Tooltip>
                     <Button variant="text"
-                            href={"/bytes"}
-                            sx={{
-                                fontSize: "0.8em",
-                                fontWeight: "light",
-                                textTransform: "lowercase",
-                            }}
+                        href={"/bytes"}
+                        sx={{
+                            fontSize: "0.8em",
+                            fontWeight: "light",
+                            textTransform: "lowercase",
+                        }}
                     >
                         (show all)
                     </Button>
@@ -974,7 +980,7 @@ function Home() {
                                     </Box>
                                 </>
                             )}
-                            <Typography variant="body2" sx={{ fontSize: ".8em", mb: 2 , textAlign: 'center' }}>
+                            <Typography variant="body2" sx={{ fontSize: ".8em", mb: 2, textAlign: 'center' }}>
                                 Give a month, Get a month! For every friend you refer, both of you get a free month of GIGO Pro!
                             </Typography>
                             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
@@ -1000,7 +1006,7 @@ function Home() {
                                 </Tooltip>
                             </Box>
                             <Box sx={{ my: 2 }}>
-                                <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center'}}>
+                                <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
                                     <StarIcon sx={{ fontSize: ".8em", mr: 1 }} />
                                     <span style={{}}>Smarter Code Teacher</span>
                                 </Typography>
