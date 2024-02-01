@@ -53,21 +53,21 @@ import ArrowBackIosNewSharpIcon from '@mui/icons-material/ArrowBackIosNewSharp';
 import HappyHalloweenIcon from "../components/Icons/HappyHalloween";
 import PumpkinIcon from "../components/Icons/Pumpkin";
 import Pumpkin2Icon from "../components/Icons/Pumpkin2";
-import HalloweenBannerIcon from "../components/Icons/HalloweenBanner";
-import GIGOLandingPage from "../components/Landing";
-import GIGOLandingPageMobile from "../components/LandingMobile";
-import GIGOLandingPageChristmas from "../components/LandingChristmas";
-import GIGOLandingPageChristmasMobile from "../components/LandingChristmasMobile";
+import GIGOLandingPage from "../components/Landing/Landing";
+import GIGOLandingPageMobile from "../components/Landing/LandingMobile";
+import GIGOLandingPageChristmas from "../components/Landing/LandingChristmas";
+import GIGOLandingPageChristmasMobile from "../components/Landing/LandingChristmasMobile";
 import { keyframes } from '@mui/system';
 import StarIcon from '@mui/icons-material/Star';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/CheckCircleOutline';
 import { LoadingButton } from "@mui/lab";
-import GIGOLandingPageNewYearsMobile from "../components/LandingNewYearsMobile";
-import GIGOLandingPageNewYears from "../components/LandingNewYears";
+import GIGOLandingPageNewYearsMobile from "../components/Landing/LandingNewYearsMobile";
+import GIGOLandingPageNewYears from "../components/Landing/LandingNewYears";
 import BytesCard from "../components/BytesCard";
 import {programmingLanguages} from "../services/vars";
 import AboutBytesIcon from "../components/Icons/bytes/aboutPage";
+import GIGOLandingPageValentines from "../components/Landing/LandingValentines";
+import GIGOLandingPageValentinesMobile from "../components/Landing/LandingValentinesMobile";
 
 const gradientAnimation = keyframes`
   0% { background-position: 0% 50%; }
@@ -1250,6 +1250,9 @@ function Home() {
             if (holiday === "New Years") {
                 return (<GIGOLandingPageNewYearsMobile />)
             }
+            if (holiday === "Valentines") {
+                return (<GIGOLandingPageValentinesMobile />)
+            }
             return (<GIGOLandingPageMobile />)
         }
 
@@ -1259,6 +1262,10 @@ function Home() {
 
         if (holiday === "New Years") {
             return (<GIGOLandingPageNewYears />)
+        }
+
+        if (holiday === "Valentines") {
+            return (<GIGOLandingPageValentines />)
         }
 
         return (<GIGOLandingPage />)

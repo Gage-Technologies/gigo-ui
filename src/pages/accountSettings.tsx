@@ -980,7 +980,7 @@ function AccountSettings() {
                     </Box>
                     <Box my={4} />
                     <Typography variant="h4" align="center" gutterBottom>
-                        What Exclusive Content Is
+                        What Is Exclusive Content?
                     </Typography>
                     <Box my={2}>
                         <Typography variant="body1" align="left" paragraph>

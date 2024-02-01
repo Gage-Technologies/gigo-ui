@@ -70,7 +70,6 @@ import christmasLogin219 from "../img/christmas-login-21-9.png";
 import { RecordWebUsage, WebTrackingEvent } from "../models/web_usage";
 import { useLocation } from 'react-router-dom';
 import { sleep } from "../services/utils";
-import GIGOLandingPageChristmasMobile from "../components/LandingChristmasMobile";
 import { debounce } from "lodash";
 
 
