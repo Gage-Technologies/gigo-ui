@@ -1068,18 +1068,27 @@ function Byte() {
         console.log("code section: ", codeSection);
     
         // Updated regex to match everything after "<<CODE IMPROVEMENT>>"
-        const improvementRegex = /<<CODE IMPROVEMENT>>\n([\s\S]*?)(?=\n<<CODE IMPROVEMENT>>|$)/g;
+        // const improvementRegex = /<<CODE IMPROVEMENT>>\n([\s\S]*?)(?=\n<<CODE IMPROVEMENT>>|$)/g;
+        const improvementRegex = /<<CODE IMPROVEMENT>>([\s\S]*?)(?=(\n<<CODE IMPROVEMENT>>|$))/g;
+
     
         let matches: string[] = [];
         let match;
+
+
     
         // Match using the updated regex
         while ((match = improvementRegex.exec(suggestion)) !== null) {
-            // Assuming the code follows immediately after "<<CODE IMPROVEMENT>>" and capture accordingly
-            matches.push(...match[1].trim().split('\n'));
+            console.log("match is: ", match[1])
+
+            matches.push(match[1].trim());
         }
+
+        console.log("matches are: ", matches)
     
-        const matchString = matches.join('\n');
+        //switch this to the commented one if you ever want matches to have multiple values
+        // const matchString = matches.join('\n');
+        const matchString = matches;
     
         // Function to replace codeSection in the code state with matchString
         setCode((prevCode) => {
@@ -1103,6 +1112,9 @@ function Byte() {
                 // Replace using the original indexes in prevCode to maintain formatting
                 const before = prevCode.substring(0, start);
                 const after = prevCode.substring(end);
+                console.log("before: ", before)
+                console.log("matchstring: ", matchString)
+                console.log("after: ", after)
                 return before + matchString + after;
             } else {
                 console.error('codeSection not found in the code');
@@ -1117,7 +1129,6 @@ function Byte() {
 
     const suggestionPopupRender = (suggestion: string, endLine: number | undefined, startLine: number | undefined, codeSection: string) => {
 
-        //todo: remove after testing
         let counter = 0; // To track the replacement count
         const newStateValue = suggestion; // Assuming you want to insert this as a dynamic value
 
