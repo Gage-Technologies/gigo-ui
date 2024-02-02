@@ -992,7 +992,7 @@ function Byte() {
         deleteTypingTimer();
         setOutputPopup(true)
         sendSuggestionRequest();
-        // sendExecRequest();
+        sendExecRequest();
     };
 
     useEffect(() => {
@@ -1461,7 +1461,7 @@ function Byte() {
                         codeSuffix={codeAfterCursor}
                     />
                 )}
-                {/* {(activeSidebarTab === null || activeSidebarTab === "debugOutput") && (
+                {(activeSidebarTab === null || activeSidebarTab === "debugOutput") && (
                     <ByteNextOutputMessage
                         trigger={outputPopup}
                         acceptedCallback={() => { setOutputPopup(false) }}
@@ -1485,7 +1485,7 @@ function Byte() {
                         codeOutput={output?.merged || ""}
                         nextByte={getNextByte()}
                     />
-                )} */}
+                )}
                 {activeSidebarTab === null && (
                     <Tooltip title={stateTooltipTitle}>
                         <Box
