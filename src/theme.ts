@@ -517,7 +517,7 @@ export const getValentinesTokens = (mode: PaletteMode) => ({
                 :
                 {
                     primary: {
-                        light: '#63a4f8',
+                        light: '#ff74ac',
                         main: '#f19b9e',
                         dark: '#ff3f8d',
                         contrastText: '#ffffff',

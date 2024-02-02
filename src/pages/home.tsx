@@ -68,6 +68,7 @@ import { programmingLanguages } from "../services/vars";
 import AboutBytesIcon from "../components/Icons/bytes/aboutPage";
 import GIGOLandingPageValentines from "../components/Landing/LandingValentines";
 import GIGOLandingPageValentinesMobile from "../components/Landing/LandingValentinesMobile";
+import {AwesomeButton} from "react-awesome-button";
 
 const gradientAnimation = keyframes`
   0% { background-position: 0% 50%; }
@@ -672,61 +673,61 @@ function Home() {
                 height: "100%"
             }}>
                 <div style={{ display: "inline-flex" }}>
-                    <Tooltip
-                        title={
-                            !newBytesPopoverOpen ? (
-                                <Box>
-                                    <Typography variant="body1">Just Released!</Typography>
-                                    <Button
-                                        size="small"
-                                        onClick={handleNewBytesPopoverOpen}
-                                        sx={{
-                                            p: "4px",
-                                            fontSize: "10px"
-                                        }}
-                                    >
-                                        Learn More
-                                    </Button>
-                                </Box>
-                            ) : (
-                                <Box>
-                                    <Typography variant="body1">Just Released!</Typography>
-                                    <Typography variant="body2">
-                                        Bytes are bite-sized coding challenges that are deeply integrated with Code Teacher, offering a personalized learning experience.
-                                    </Typography>
-                                    <Button
-                                        size="small"
-                                        onClick={handleNewBytesPopoverClose}
-                                        sx={{
-                                            p: "4px",
-                                            fontSize: "10px"
-                                        }}
-                                    >
-                                        Less Info
-                                    </Button>
-                                </Box>
-                            )
-                        }
-                        open={!runTutorial} // Tooltip always open
-                        disableFocusListener
-                        disableHoverListener
-                        disableTouchListener
-                        arrow
-                        placement="top"
-                        PopperProps={{
-                            sx: {
-                                zIndex: 800,
-                                left: !newBytesPopoverOpen ? "40px !important" : "100px !important"
-                            }
-                        }}
-                        sx={{
-                            // backgroundColor: '#353535', // Dark background for tooltip
-                            // color: 'white', // Light text for contrast
-                            fontSize: '0.9rem', // Readable text size
-                            borderRadius: '4px', // Rounded corners for modern look
-                            padding: '8px 12px', // Spacing inside the tooltip
-                        }}
-                    >
+                    {/*<Tooltip*/}
+                    {/*    title={*/}
+                    {/*        !newBytesPopoverOpen ? (*/}
+                    {/*            <Box>*/}
+                    {/*                <Typography variant="body1">Just Released!</Typography>*/}
+                    {/*                <Button*/}
+                    {/*                    size="small"*/}
+                    {/*                    onClick={handleNewBytesPopoverOpen}*/}
+                    {/*                    sx={{*/}
+                    {/*                        p: "4px",*/}
+                    {/*                        fontSize: "10px"*/}
+                    {/*                    }}*/}
+                    {/*                >*/}
+                    {/*                    Learn More*/}
+                    {/*                </Button>*/}
+                    {/*            </Box>*/}
+                    {/*        ) : (*/}
+                    {/*            <Box>*/}
+                    {/*                <Typography variant="body1">Just Released!</Typography>*/}
+                    {/*                <Typography variant="body2">*/}
+                    {/*                    Bytes are bite-sized coding challenges that are deeply integrated with Code Teacher, offering a personalized learning experience.*/}
+                    {/*                </Typography>*/}
+                    {/*                <Button*/}
+                    {/*                    size="small"*/}
+                    {/*                    onClick={handleNewBytesPopoverClose}*/}
+                    {/*                    sx={{*/}
+                    {/*                        p: "4px",*/}
+                    {/*                        fontSize: "10px"*/}
+                    {/*                    }}*/}
+                    {/*                >*/}
+                    {/*                    Less Info*/}
+                    {/*                </Button>*/}
+                    {/*            </Box>*/}
+                    {/*        )*/}
+                    {/*    }*/}
+                    {/*    open={!runTutorial} // Tooltip always open*/}
+                    {/*    disableFocusListener*/}
+                    {/*    disableHoverListener*/}
+                    {/*    disableTouchListener*/}
+                    {/*    arrow*/}
+                    {/*    placement="top"*/}
+                    {/*    PopperProps={{*/}
+                    {/*        sx: {*/}
+                    {/*            zIndex: 800,*/}
+                    {/*            left: !newBytesPopoverOpen ? "40px !important" : "100px !important"*/}
+                    {/*        }*/}
+                    {/*    }}*/}
+                    {/*    sx={{*/}
+                    {/*        // backgroundColor: '#353535', // Dark background for tooltip*/}
+                    {/*        // color: 'white', // Light text for contrast*/}
+                    {/*        fontSize: '0.9rem', // Readable text size*/}
+                    {/*        borderRadius: '4px', // Rounded corners for modern look*/}
+                    {/*        padding: '8px 12px', // Spacing inside the tooltip*/}
+                    {/*    }}*/}
+                    {/*>*/}
                         <Typography
                             variant="h6"
                             gutterBottom
@@ -746,7 +747,7 @@ function Home() {
                             />
                             Bytes
                         </Typography>
-                    </Tooltip>
+                    {/*</Tooltip>*/}
                     <Button variant="text"
                         href={"/bytes"}
                         sx={{
@@ -1244,37 +1245,106 @@ function Home() {
         )
     }
 
-    const renderLanding = () => {
-        if (loggedIn) {
-            return null
-        }
+    const Header = () => {
+        if (byteContent.length > 0) {
+            // Generate a random index based on the length of byteContent
+            const randomIndex = Math.floor(Math.random() * byteContent.length);
+            const project = byteContent[randomIndex];
 
-        if (window.innerWidth < 1000) {
-            if (holiday === "Christmas") {
-                return (<GIGOLandingPageChristmasMobile />)
+            // Now use this project to render your component
+            return (
+                <Box sx={{
+                    width: "100%",
+                    height: "600px",
+                    backgroundColor: theme.palette.primary.light,
+                    zIndex: 3,
+                    m: 2,
+                    borderRadius: "12px"
+                }}>
+                    <div style={{width: "100%", display: "flex", flexDirection: "row", justifyContent: "center"}}>
+                        <div style={{position: "relative", top: "100px", width: '50%'}}>
+                            <Typography variant={"h1"}
+                                        sx={{color: theme.palette.background.default, textTransform: 'none'}}>
+                                Take a Byte Today
+                            </Typography>
+                            <Typography variant={"subtitle1"}
+                                        sx={{color: theme.palette.text.primary, textTransform: "none", m: 3, ml: 0}}>
+                                Bite-sized coding challenges that are deeply integrated with Code Teacher, offering a
+                                personalized learning experience.
+                            </Typography>
+                        </div>
+                        <Box sx={{pt: 5}}>
+                            <div style={{width: "16vw"}}>
+                                <LazyLoad once scroll unmountIfInvisible>
+                                    <BytesCard
+                                        height={"52vh"}
+                                        imageHeight={"43vh"}
+                                        width={'13vw'}
+                                        imageWidth={"13vw"}
+                                        bytesId={project["_id"]}
+                                        bytesTitle={project["name"]}
+                                        bytesDesc={project["description_medium"]}
+                                        bytesThumb={config.rootPath + "/static/bytes/t/" + project["_id"]}
+                                        onClick={() => navigate("/byte/" + project["_id"])}
+                                        role={authState.role}
+                                        completedEasy={project["completed_easy"]}
+                                        completedMedium={project["completed_medium"]}
+                                        completedHard={project["completed_hard"]}
+                                        language={programmingLanguages[project["lang"]]}
+                                    />
+                                </LazyLoad>
+                            </div>
+                        </Box>
+                    </div>
+                    <Box sx={{display: 'flex', justifyContent: 'center'}}>
+                        <AwesomeButton style={{
+                            width: "auto",
+                            height: "50px",
+                            '--button-primary-color': theme.palette.primary.main,
+                            '--button-primary-color-dark': theme.palette.primary.dark,
+                            '--button-primary-color-light': "white",
+                            '--button-primary-color-hover': theme.palette.primary.main,
+                            fontSize: "28px"
+                        }} type="primary" href={`/byte/${project["_id"]}`}>
+                            <span>Take a Byte</span>
+                        </AwesomeButton>
+                    </Box>
+                </Box>
+            );
+        }
+    }
+
+        const renderLanding = () => {
+            if (loggedIn) {
+                return null
             }
-            if (holiday === "New Years") {
-                return (<GIGOLandingPageNewYearsMobile />)
+
+            if (window.innerWidth < 1000) {
+                if (holiday === "Christmas") {
+                    return (<GIGOLandingPageChristmasMobile/>)
+                }
+                if (holiday === "New Years") {
+                return (<GIGOLandingPageNewYearsMobile/>)
             }
             if (holiday === "Valentines") {
-                return (<GIGOLandingPageValentinesMobile />)
+                return (<GIGOLandingPageValentinesMobile/>)
             }
-            return (<GIGOLandingPageMobile />)
+            return (<GIGOLandingPageMobile/>)
         }
 
         if (holiday === "Christmas") {
-            return (<GIGOLandingPageChristmas />)
+            return (<GIGOLandingPageChristmas/>)
         }
 
         if (holiday === "New Years") {
-            return (<GIGOLandingPageNewYears />)
+            return (<GIGOLandingPageNewYears/>)
         }
 
         if (holiday === "Valentines") {
-            return (<GIGOLandingPageValentines />)
+            return (<GIGOLandingPageValentines/>)
         }
 
-        return (<GIGOLandingPage />)
+        return (<GIGOLandingPage/>)
     }
 
     return (
@@ -1288,10 +1358,10 @@ function Home() {
                     {xpPopup ? (<XpPopup oldXP={
                         //@ts-ignore
                         (xpData["xp_update"]["old_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]} levelUp={
-                            //@ts-ignore
-                            xpData["level_up_reward"] === null ? false : true} maxXP={100}
                         //@ts-ignore
-                        newXP={(xpData["xp_update"]["new_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]}
+                        xpData["level_up_reward"] === null ? false : true} maxXP={100}
+                        //@ts-ignore
+                                         newXP={(xpData["xp_update"]["new_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]}
                         //@ts-ignore
                         nextLevel={xpData["xp_update"]["old_level"] !== undefined ? xpData["xp_update"]["new_level"] : xpData["xp_update"]["next_level"]}
                         //@ts-ignore
@@ -1385,9 +1455,8 @@ function Home() {
                                 <></>
                             }
 
-
-
-                            {TopRecommendations()}
+                            {Header()}
+                            {/*{TopRecommendations()}*/}
                         </Box>
                         <Box
                             sx={{
