@@ -952,7 +952,6 @@ function Byte() {
             removeCtHighlightCodeRange(editorRef.current.view, startSuggestionLine, endSuggestionLine);
             //@ts-ignore
             popupEngineRef.current?.removePopupRange(endSuggestionLine, startSuggestionLine)
-            // setSuggestionPortal(null)
             setStartSuggestionLine(null)
             setEndSuggestionLine(null)
         }
@@ -995,7 +994,7 @@ function Byte() {
         deleteTypingTimer();
         setOutputPopup(true)
         //this is here for testing the suggetion popup
-        // setSuggestionPopup(true)
+        setSuggestionPopup(true)
         // sendSuggestionRequest();
         sendExecRequest();
     };
@@ -1231,6 +1230,7 @@ function Byte() {
         navigate("/")
     }
 
+    //this is used for clearing out the suggestion ui and information
     const suggestionCallback = (startLine: number, endLine: number, newCode: string | null) => {
         console.log("suggestion callback close")
         console.log("code is: ", newCode)
@@ -1243,9 +1243,17 @@ function Byte() {
         removeCtHighlightCodeRange(editorRef.current.view, startLine, endLine);
         //@ts-ignore
         popupEngineRef.current?.removePopupRange(endLine, startLine)
-        // setSuggestionPortal(null)
         setStartSuggestionLine(null)
         setEndSuggestionLine(null)
+    }
+
+    //this is used for setting the start and endline  here for the sole reason of if a user runs the code, get a suggestion
+    // and then runs the code again without executing or dismissing, it double highlights it
+    //this gets called when the suggestion websocket is used so we can check in the execute code if the necessary ui for suggestions has been closed or not
+    const suggestionApiCallback = (startLine: number, endLine: number) => {
+        console.log("here in apic allback")
+        setStartSuggestionLine(startLine)
+        setEndSuggestionLine(endLine)
     }
 
     return (
@@ -1369,10 +1377,10 @@ function Byte() {
                         </div>
                     </div>
                 </Container>
-                {/* {SuggestionPortal ? (SuggestionPortal) : null} */}
                 <ByteSuggestion
                         lang={programmingLanguages[byteData ? byteData.lang : 5]}
                         closeCallback={suggestionCallback}
+                        apiCallback={suggestionApiCallback}
                         code={code}
                         byteId={id || ""}
                         open={suggestionPopup}

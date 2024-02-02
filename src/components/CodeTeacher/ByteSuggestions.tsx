@@ -37,14 +37,13 @@ export type ByteSuggestionProps = {
     description: string;
     popupRef: MutableRefObject<CtPopupExtensionEngine | null>;
     codeMirrorRef: React.RefObject<ReactCodeMirrorRef>;
+    apiCallback: (startLine: number, endLine: number) => void;
 };
 
 export default function ByteSuggestion(props: ByteSuggestionProps) {
     let userPref = localStorage.getItem("theme");
     const [mode, _] = useState<PaletteMode>(userPref === "light" ? "light" : "dark");
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
-    const [response, setResponse] = useState<string>("");
-    const [code, setCode] = React.useState<string>(props.code);
 
     const [SuggestionPortal, setSuggestionPortal] = React.useState<React.ReactPortal | null>(null)
 
@@ -52,37 +51,6 @@ export default function ByteSuggestion(props: ByteSuggestionProps) {
     // const [endSuggestionLine, setEndSuggestionLine] = React.useState<number | null>(null)
 
     const ctWs = useGlobalCtWebSocket();
-
-    const AnimCircularProgress = styled(CircularProgress)`
-        animation: mui-rotation 2s linear infinite, respondingEffect 2s infinite alternate;
-
-        @keyframes respondingEffect {
-            0% {
-            color: #84E8A2;
-            }
-            20% {
-            color: #29C18C;
-            }
-            40% {
-            color: #1C8762;
-            }
-            60% {
-            color: #2A63AC;
-            }
-            80% {
-            color: #3D8EF7;
-            }
-            100% {
-            color: #63A4F8;
-            }
-        }
-
-        @keyframes mui-rotation {
-            100% {
-            transform: rotate(360deg);
-            }
-        }
-    `;
 
     function findSubstringStartEndLines(codeSection: string): { startLine: number, endLine: number } {
         // Function to normalize spaces within each line of the code
@@ -188,39 +156,6 @@ export default function ByteSuggestion(props: ByteSuggestionProps) {
         })();
 
         return newCode;
-
-    
-        //Function to replace codeSection in the code state with matchString
-        // setCode((prevCode) => {
-        //     console.log("prevCode: ", prevCode);
-        //     console.log("code section: ", codeSection);
-    
-        //     // Function to create a normalized version for comparison, but maintain indexes for replacement
-        //     const findIndexesAfterNormalization = (source: string, search: string): { start: number, end: number } => {
-        //         const normalizedSource = source.toLowerCase().replace(/\s+/g, ' ');
-        //         const normalizedSearch = search.toLowerCase().replace(/\s+/g, ' ');
-        //         const start = normalizedSource.indexOf(normalizedSearch);
-        //         if (start === -1) {
-        //             return { start: -1, end: -1 }; // Not found
-        //         }
-        //         const end = start + search.length;
-        //         return { start, end }; // Return original indexes
-        //     };
-    
-        //     const { start, end } = findIndexesAfterNormalization(prevCode, codeSection);
-        //     if (start !== -1 && end !== -1) {
-        //         // Replace using the original indexes in prevCode to maintain formatting
-        //         const before = prevCode.substring(0, start);
-        //         const after = prevCode.substring(end);
-        //         console.log("before: ", before)
-        //         console.log("matchstring: ", matchString)
-        //         console.log("after: ", after)
-        //         return before + matchString + after;
-        //     } else {
-        //         console.error('codeSection not found in the code');
-        //         return prevCode;
-        //     }
-        // });
     };
 
     const suggestionPopupRender = (suggestion: string, endLine: number | undefined, startLine: number | undefined, codeSection: string) => {
@@ -263,16 +198,6 @@ export default function ByteSuggestion(props: ByteSuggestionProps) {
                     left: 0,
                     backgroundColor: mode === 'dark' ? "#333338" : "#f5f5f5"
                 }}>
-                    {/* <Button onClick={() => {
-                            // //@ts-ignore
-                            // removeCtHighlightCodeRange(editorRef.current.view, startLine, endLine);
-                            // //@ts-ignore
-                            // popupEngineRef.current?.removePopupRange(endLine, startLine)
-                            // setSuggestionPortal(null)
-                            // setStartSuggestionLine(null)
-                            // setEndSuggestionLine(null)
-                            props.closeCallback()
-                        }} variant='contained'> */}
                     <Button onClick={() => {
                         props.closeCallback(startLine, endLine, null)
                         setSuggestionPortal(null)
@@ -349,6 +274,8 @@ export default function ByteSuggestion(props: ByteSuggestionProps) {
 
             //@ts-ignore
             ctHighlightCodeRangeFullLines(props.codeMirrorRef.current.view, startLine, endLine);
+
+            props.apiCallback(startLine, endLine)
 
 
             if (props.popupRef.current) {
