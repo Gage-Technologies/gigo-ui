@@ -200,7 +200,7 @@ export default function ByteSuggestion(props: ByteSuggestionProps) {
                         props.closeCallback(startLine, endLine, newCode)
                         setSuggestionPortal(null)
                     }} variant='contained'>
-                        Execute
+                        Accept
                     </Button>
                 </Box>
 
