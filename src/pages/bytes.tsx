@@ -53,6 +53,7 @@ import { ctHighlightCodeRangeFullLines, removeCtHighlightCodeRange } from "../co
 import { CtPopupExtensionEngine, createCtPopupExtension } from "../components/IDE/Extensions/CtPopupExtension";
 import ReactDOM from "react-dom";
 import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
+import ByteSuggestion from "../components/CodeTeacher/ByteSuggestions";
 
 
 interface MergedOutputRow {
@@ -751,7 +752,6 @@ function Byte() {
         }
         //@ts-ignore
         typingTimerRef.current = setTimeout(() => {
-            setSuggestionPopup(true);
             setNextStepsPopup(true);
         }, 15000);
     };
@@ -952,7 +952,7 @@ function Byte() {
             removeCtHighlightCodeRange(editorRef.current.view, startSuggestionLine, endSuggestionLine);
             //@ts-ignore
             popupEngineRef.current?.removePopupRange(endSuggestionLine, startSuggestionLine)
-            setSuggestionPortal(null)
+            // setSuggestionPortal(null)
             setStartSuggestionLine(null)
             setEndSuggestionLine(null)
         }
@@ -962,6 +962,9 @@ function Byte() {
             if (activeSidebarTab === null || activeSidebarTab !== "nextSteps") {
                 setNextStepsPopup(true)
             }
+        }
+        if (activeSidebarTab === null || activeSidebarTab !== "nextSteps") {
+            setNextStepsPopup(true)
         }
         if (outputPopup) {
             return;
@@ -991,7 +994,9 @@ function Byte() {
         }
         deleteTypingTimer();
         setOutputPopup(true)
-        sendSuggestionRequest();
+        //this is here for testing the suggetion popup
+        // setSuggestionPopup(true)
+        // sendSuggestionRequest();
         sendExecRequest();
     };
 
@@ -1034,169 +1039,134 @@ function Byte() {
     //     console.log("suggestion is: ", suggestion);
     //     console.log("code section: ", codeSection);
     
-    //     // Updated regex to match everything after "<<CODE IMPROVEMENT>>"
-    //     const improvementRegex = /<<CODE IMPROVEMENT>>\n([\s\S]*?)(?=\n<<CODE IMPROVEMENT>>|$)/g;
+    //     const improvementRegex = /<<CODE IMPROVEMENT>>([\s\S]*?)(?=(\n<<CODE IMPROVEMENT>>|$))/g;
+
     
     //     let matches: string[] = [];
     //     let match;
+
+
     
     //     // Match using the updated regex
     //     while ((match = improvementRegex.exec(suggestion)) !== null) {
-    //         // Assuming the code follows immediately after "<<CODE IMPROVEMENT>>" and capture accordingly
-    //         matches.push(...match[1].trim().split('\n'));
+    //         console.log("match is: ", match[1])
+
+    //         matches.push(match[1].trim());
     //     }
+
+    //     console.log("matches are: ", matches)
     
-    //     console.log("matches is: ", matches);
-    
-    //     const matchString = matches.join('\n');
+    //     //switch this to the commented one if you ever want matches to have multiple values
+    //     // const matchString = matches.join('\n');
+    //     const matchString = matches;
     
     //     // Function to replace codeSection in the code state with matchString
     //     setCode((prevCode) => {
-    //         console.log("prevCode: ", prevCode)
-    //         console.log("code section: ", codeSection)
-    //         if (prevCode.includes(codeSection)) {
-    //             return prevCode.replace(codeSection, matchString);
+    //         console.log("prevCode: ", prevCode);
+    //         console.log("code section: ", codeSection);
+    
+    //         // Function to create a normalized version for comparison, but maintain indexes for replacement
+    //         const findIndexesAfterNormalization = (source: string, search: string): { start: number, end: number } => {
+    //             const normalizedSource = source.toLowerCase().replace(/\s+/g, ' ');
+    //             const normalizedSearch = search.toLowerCase().replace(/\s+/g, ' ');
+    //             const start = normalizedSource.indexOf(normalizedSearch);
+    //             if (start === -1) {
+    //                 return { start: -1, end: -1 }; // Not found
+    //             }
+    //             const end = start + search.length;
+    //             return { start, end }; // Return original indexes
+    //         };
+    
+    //         const { start, end } = findIndexesAfterNormalization(prevCode, codeSection);
+    //         if (start !== -1 && end !== -1) {
+    //             // Replace using the original indexes in prevCode to maintain formatting
+    //             const before = prevCode.substring(0, start);
+    //             const after = prevCode.substring(end);
+    //             console.log("before: ", before)
+    //             console.log("matchstring: ", matchString)
+    //             console.log("after: ", after)
+    //             return before + matchString + after;
     //         } else {
     //             console.error('codeSection not found in the code');
     //             return prevCode;
     //         }
     //     });
     // };
-
-    const executeSuggestion = (suggestion: string, codeSection: string) => {
-        console.log("suggestion is: ", suggestion);
-        console.log("code section: ", codeSection);
-    
-        // Updated regex to match everything after "<<CODE IMPROVEMENT>>"
-        // const improvementRegex = /<<CODE IMPROVEMENT>>\n([\s\S]*?)(?=\n<<CODE IMPROVEMENT>>|$)/g;
-        const improvementRegex = /<<CODE IMPROVEMENT>>([\s\S]*?)(?=(\n<<CODE IMPROVEMENT>>|$))/g;
-
-    
-        let matches: string[] = [];
-        let match;
-
-
-    
-        // Match using the updated regex
-        while ((match = improvementRegex.exec(suggestion)) !== null) {
-            console.log("match is: ", match[1])
-
-            matches.push(match[1].trim());
-        }
-
-        console.log("matches are: ", matches)
-    
-        //switch this to the commented one if you ever want matches to have multiple values
-        // const matchString = matches.join('\n');
-        const matchString = matches;
-    
-        // Function to replace codeSection in the code state with matchString
-        setCode((prevCode) => {
-            console.log("prevCode: ", prevCode);
-            console.log("code section: ", codeSection);
-    
-            // Function to create a normalized version for comparison, but maintain indexes for replacement
-            const findIndexesAfterNormalization = (source: string, search: string): { start: number, end: number } => {
-                const normalizedSource = source.toLowerCase().replace(/\s+/g, ' ');
-                const normalizedSearch = search.toLowerCase().replace(/\s+/g, ' ');
-                const start = normalizedSource.indexOf(normalizedSearch);
-                if (start === -1) {
-                    return { start: -1, end: -1 }; // Not found
-                }
-                const end = start + search.length;
-                return { start, end }; // Return original indexes
-            };
-    
-            const { start, end } = findIndexesAfterNormalization(prevCode, codeSection);
-            if (start !== -1 && end !== -1) {
-                // Replace using the original indexes in prevCode to maintain formatting
-                const before = prevCode.substring(0, start);
-                const after = prevCode.substring(end);
-                console.log("before: ", before)
-                console.log("matchstring: ", matchString)
-                console.log("after: ", after)
-                return before + matchString + after;
-            } else {
-                console.error('codeSection not found in the code');
-                return prevCode;
-            }
-        });
-    };
     
     
     
     
 
-    const suggestionPopupRender = (suggestion: string, endLine: number | undefined, startLine: number | undefined, codeSection: string) => {
+    // const suggestionPopupRender = (suggestion: string, endLine: number | undefined, startLine: number | undefined, codeSection: string) => {
 
-        let counter = 0; // To track the replacement count
-        const newStateValue = suggestion; // Assuming you want to insert this as a dynamic value
+    //     let counter = 0; // To track the replacement count
+    //     const newStateValue = suggestion; // Assuming you want to insert this as a dynamic value
 
-        const resultString = newStateValue.replace(/<<CODE IMPROVEMENT>>/g, () => {
-            counter += 1;
-            if (counter === 1) {
-                // Replace the first occurrence with ```[state value]
-                //@ts-ignore
-                return `\`\`\`[${programmingLanguages[byteData.lang]}]`;
-            } else {
-                // Replace the second (and any subsequent, though not specified) occurrences with ```
-                return "\`\`\`";
-            }
-        });
+    //     const resultString = newStateValue.replace(/<<CODE IMPROVEMENT>>/g, () => {
+    //         counter += 1;
+    //         if (counter === 1) {
+    //             // Replace the first occurrence with ```[state value]
+    //             //@ts-ignore
+    //             return `\`\`\`[${programmingLanguages[byteData.lang]}]`;
+    //         } else {
+    //             // Replace the second (and any subsequent, though not specified) occurrences with ```
+    //             return "\`\`\`";
+    //         }
+    //     });
 
 
 
-        return (
-            <Box id="ct-suggestion-internal">
-                <MarkdownRenderer 
-                    markdown={resultString} 
-                    style={{
-                        overflowWrap: 'break-word',
-                        borderRadius: '10px',
-                        padding: '0px',
-                        width: "90%",
-                    }}
-                />
-                <Box className="ctsuggestons-buttons" style={{
-                    position: "sticky",
-                    width: "100%",
-                    padding: "10px",
-                    display: "flex",
-                    justifyContent: "space-evenly",
-                    bottom: -10,
-                    left: 0,
-                    backgroundColor: mode === 'dark' ? "#333338" : "#f5f5f5"
-                }}>
-                    <Button onClick={() => {
-                            //@ts-ignore
-                            removeCtHighlightCodeRange(editorRef.current.view, startLine, endLine);
-                            //@ts-ignore
-                            popupEngineRef.current?.removePopupRange(endLine, startLine)
-                            setSuggestionPortal(null)
-                            setStartSuggestionLine(null)
-                            setEndSuggestionLine(null)
-                        }} variant='contained'>
-                        Dismiss
-                    </Button>
-                    <Button onClick={() => {
-                        console.log("start line inline: ", startLine)
-                        //@ts-ignore
-                        executeSuggestion(suggestion, codeSection)
-                        //@ts-ignore
-                        removeCtHighlightCodeRange(editorRef.current.view, startLine, endLine);
-                        //@ts-ignore
-                        popupEngineRef.current?.removePopupRange(endLine, startLine)
-                        setStartSuggestionLine(null)
-                        setEndSuggestionLine(null)
-                    }} variant='contained'>
-                        Execute
-                    </Button>
-                </Box>
+    //     return (
+    //         <Box id="ct-suggestion-internal">
+    //             <MarkdownRenderer 
+    //                 markdown={resultString} 
+    //                 style={{
+    //                     overflowWrap: 'break-word',
+    //                     borderRadius: '10px',
+    //                     padding: '0px',
+    //                     width: "90%",
+    //                 }}
+    //             />
+    //             <Box className="ctsuggestons-buttons" style={{
+    //                 position: "sticky",
+    //                 width: "100%",
+    //                 padding: "10px",
+    //                 display: "flex",
+    //                 justifyContent: "space-evenly",
+    //                 bottom: -10,
+    //                 left: 0,
+    //                 backgroundColor: mode === 'dark' ? "#333338" : "#f5f5f5"
+    //             }}>
+    //                 <Button onClick={() => {
+    //                         //@ts-ignore
+    //                         removeCtHighlightCodeRange(editorRef.current.view, startLine, endLine);
+    //                         //@ts-ignore
+    //                         popupEngineRef.current?.removePopupRange(endLine, startLine)
+    //                         setSuggestionPortal(null)
+    //                         setStartSuggestionLine(null)
+    //                         setEndSuggestionLine(null)
+    //                     }} variant='contained'>
+    //                     Dismiss
+    //                 </Button>
+    //                 <Button onClick={() => {
+    //                     console.log("start line inline: ", startLine)
+    //                     //@ts-ignore
+    //                     executeSuggestion(suggestion, codeSection)
+    //                     //@ts-ignore
+    //                     removeCtHighlightCodeRange(editorRef.current.view, startLine, endLine);
+    //                     //@ts-ignore
+    //                     popupEngineRef.current?.removePopupRange(endLine, startLine)
+    //                     setStartSuggestionLine(null)
+    //                     setEndSuggestionLine(null)
+    //                 }} variant='contained'>
+    //                     Execute
+    //                 </Button>
+    //             </Box>
 
-            {/* Add button here to dismiss or accept - we need to remove the SuggestionPortal state too */}
-            </Box>
-        )
-    }
+    //         {/* Add button here to dismiss or accept - we need to remove the SuggestionPortal state too */}
+    //         </Box>
+    //     )
+    // }
 
 
     useEffect(() => {
@@ -1217,134 +1187,134 @@ function Byte() {
         setContainerSyle(s);
     }, [byteData]);
 
-    function findSubstringStartEndLines(codeSection: string): { startLine: number, endLine: number } {
-        // Function to normalize spaces within each line of the code
-        const normalizeSpaces = (input: string): string =>
-            input.split('\n').map(line => line.trim().replace(/\s+/g, ' ')).join('\n');
+    // function findSubstringStartEndLines(codeSection: string): { startLine: number, endLine: number } {
+    //     // Function to normalize spaces within each line of the code
+    //     const normalizeSpaces = (input: string): string =>
+    //         input.split('\n').map(line => line.trim().replace(/\s+/g, ' ')).join('\n');
     
-        // Normalize the input code and code section
-        const normalizedCode = normalizeSpaces(code);
-        const normalizedCodeSection = normalizeSpaces(codeSection);
+    //     // Normalize the input code and code section
+    //     const normalizedCode = normalizeSpaces(code);
+    //     const normalizedCodeSection = normalizeSpaces(codeSection);
     
-        const startIndex = normalizedCode.indexOf(normalizedCodeSection);
-        if (startIndex === -1) {
-            console.log("Substring not found");
-            return { startLine: -1, endLine: -1 }; // Substring not found
-        }
-        const endIndex = startIndex + normalizedCodeSection.length;
+    //     const startIndex = normalizedCode.indexOf(normalizedCodeSection);
+    //     if (startIndex === -1) {
+    //         console.log("Substring not found");
+    //         return { startLine: -1, endLine: -1 }; // Substring not found
+    //     }
+    //     const endIndex = startIndex + normalizedCodeSection.length;
     
-        const lines = normalizedCode.split("\n");
-        let accumulatedLength = 0;
-        let startLine = 0;
-        let endLine = 0;
+    //     const lines = normalizedCode.split("\n");
+    //     let accumulatedLength = 0;
+    //     let startLine = 0;
+    //     let endLine = 0;
     
-        for (let i = 0; i < lines.length; i++) {
-            accumulatedLength += lines[i].length + 1; // +1 for the newline character
+    //     for (let i = 0; i < lines.length; i++) {
+    //         accumulatedLength += lines[i].length + 1; // +1 for the newline character
     
-            if (accumulatedLength > startIndex && startLine === 0) {
-                startLine = i + 1; // Convert from 0-based to 1-based index
-            }
+    //         if (accumulatedLength > startIndex && startLine === 0) {
+    //             startLine = i + 1; // Convert from 0-based to 1-based index
+    //         }
     
-            if (accumulatedLength >= endIndex && endLine === 0) {
-                endLine = i + 1; // Convert from 0-based to 1-based index
-                break; // End loop once endLine is found
-            }
-        }
+    //         if (accumulatedLength >= endIndex && endLine === 0) {
+    //             endLine = i + 1; // Convert from 0-based to 1-based index
+    //             break; // End loop once endLine is found
+    //         }
+    //     }
 
-        if (startLine === 0){
-            endLine = endLine + 1
-        } else {
-            startLine = startLine - 1
-        }
+    //     if (startLine === 0){
+    //         endLine = endLine + 1
+    //     } else {
+    //         startLine = startLine - 1
+    //     }
     
-        console.log(`Start line: ${startLine}, End line: ${endLine}`);
-        return { startLine, endLine };
-    }
+    //     console.log(`Start line: ${startLine}, End line: ${endLine}`);
+    //     return { startLine, endLine };
+    // }
     
     
     
 
 
-    const sendSuggestionRequest = (retryCount: number = 0) => {
-        console.log("byte suggestion starting")
+    // const sendSuggestionRequest = (retryCount: number = 0) => {
+    //     console.log("byte suggestion starting")
 
 
-        ctWs.sendWebsocketMessage({
-            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-            type: CtMessageType.WebSocketMessageTypeByteSuggestionRequest,
-            origin: CtMessageOrigin.WebSocketMessageOriginClient,
-            created_at: Date.now(),
-            payload: {
-                //@ts-ignore
-                lang: programmingLanguages[byteData ? byteData.lang : 5],
-                code: code,
-                //@ts-ignore
-                byte_description: byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : "",
-                //@ts-ignore
-                byte_id: id,
-                assistant_id: ""
-            }
-        } satisfies CtMessage<CtByteSuggestionRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtByteSuggestionResponse>) => {
-            //console.log("response message of next output: ", msg)
-            if (msg.type !== CtMessageType.WebSocketMessageTypeByteSuggestionResponse) {
-                console.log("failed suggestion message", msg)
-                return true
-            }
-            const p: CtByteSuggestionResponse = msg.payload as unknown as CtByteSuggestionResponse;
-            console.log("code section: ", p.code_section)
-            console.log("code suggestion: ", p.suggestion)
-            console.log("code is: ", code)
-            const codeSection = p.code_section;
+    //     ctWs.sendWebsocketMessage({
+    //         sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+    //         type: CtMessageType.WebSocketMessageTypeByteSuggestionRequest,
+    //         origin: CtMessageOrigin.WebSocketMessageOriginClient,
+    //         created_at: Date.now(),
+    //         payload: {
+    //             //@ts-ignore
+    //             lang: programmingLanguages[byteData ? byteData.lang : 5],
+    //             code: code,
+    //             //@ts-ignore
+    //             byte_description: byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : "",
+    //             //@ts-ignore
+    //             byte_id: id,
+    //             assistant_id: ""
+    //         }
+    //     } satisfies CtMessage<CtByteSuggestionRequest>, (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtByteSuggestionResponse>) => {
+    //         //console.log("response message of next output: ", msg)
+    //         if (msg.type !== CtMessageType.WebSocketMessageTypeByteSuggestionResponse) {
+    //             console.log("failed suggestion message", msg)
+    //             return true
+    //         }
+    //         const p: CtByteSuggestionResponse = msg.payload as unknown as CtByteSuggestionResponse;
+    //         console.log("code section: ", p.code_section)
+    //         console.log("code suggestion: ", p.suggestion)
+    //         console.log("code is: ", code)
+    //         const codeSection = p.code_section;
 
 
-            // const startIndex = code.indexOf(codeSection);
-            // console.log("code is: ", code)
-            // console.log("start index: ", startIndex)
-            // const endIndex = startIndex + codeSection.length;
+    //         // const startIndex = code.indexOf(codeSection);
+    //         // console.log("code is: ", code)
+    //         // console.log("start index: ", startIndex)
+    //         // const endIndex = startIndex + codeSection.length;
 
-            // const lines = code.split("\n");
-            // let startLine = lines.slice(0, startIndex).length;
-            // let endLine = lines.slice(0, endIndex).length;
-            // console.log("start line: ", startLine)
-            // console.log("end line: ", endLine)
-            // setStartSuggestionLine(startLine)
-            // setEndSuggestionLine(endLine)
+    //         // const lines = code.split("\n");
+    //         // let startLine = lines.slice(0, startIndex).length;
+    //         // let endLine = lines.slice(0, endIndex).length;
+    //         // console.log("start line: ", startLine)
+    //         // console.log("end line: ", endLine)
+    //         // setStartSuggestionLine(startLine)
+    //         // setEndSuggestionLine(endLine)
 
-            let startLine = findSubstringStartEndLines(codeSection).startLine
-            let endLine = findSubstringStartEndLines(codeSection).endLine
+    //         let startLine = findSubstringStartEndLines(codeSection).startLine
+    //         let endLine = findSubstringStartEndLines(codeSection).endLine
 
-            console.log("start line is: ", startLine)
-            console.log("end line is: ", endLine)
+    //         console.log("start line is: ", startLine)
+    //         console.log("end line is: ", endLine)
 
-            setStartSuggestionLine(startLine)
-            setEndSuggestionLine(endLine)
+    //         setStartSuggestionLine(startLine)
+    //         setEndSuggestionLine(endLine)
 
 
-            //@ts-ignore
-            ctHighlightCodeRangeFullLines(editorRef.current.view, startLine, endLine);
+    //         //@ts-ignore
+    //         ctHighlightCodeRangeFullLines(editorRef.current.view, startLine, endLine);
 
-            if (popupEngineRef.current) {
-                const d = document.createElement('div')
-                d.id = "ct-suggestion-container"
-                setSuggestionPortal(ReactDOM.createPortal((
-                    suggestionPopupRender(p.suggestion, endLine, startLine, codeSection)
-                ), d))
-                popupEngineRef.current.addPopupRange({
-                    from: startLine,
-                    to: endLine,
-                    content: d
-                })
-            }
-            return false
-        })
-    };
+    //         if (popupEngineRef.current) {
+    //             const d = document.createElement('div')
+    //             d.id = "ct-suggestion-container"
+    //             setSuggestionPortal(ReactDOM.createPortal((
+    //                 suggestionPopupRender(p.suggestion, endLine, startLine, codeSection)
+    //             ), d))
+    //             popupEngineRef.current.addPopupRange({
+    //                 from: startLine,
+    //                 to: endLine,
+    //                 content: d
+    //             })
+    //         }
+    //         return false
+    //     })
+    // };
 
-    const successCheck = () => {
-        console.log("success check: ", true)
-        sendSuggestionRequest();
-        //find out what lines it is at
-        //call the highlight function and fill in the start and end with that info
-    }
+    // const successCheck = () => {
+    //     console.log("success check: ", true)
+    //     sendSuggestionRequest();
+    //     //find out what lines it is at
+    //     //call the highlight function and fill in the start and end with that info
+    // }
 
 
     const updateDifficulty = (difficulty: number) => {
@@ -1468,6 +1438,7 @@ function Byte() {
                         onExpand={() => setActiveSidebarTab("debugOutput")}
                         onHide={() => setActiveSidebarTab(null)}
                         onSuccess={() => {
+                            setSuggestionPopup(true)
                             markComplete()
 
 
@@ -1520,6 +1491,23 @@ function Byte() {
 
     if (window.innerWidth < 1000) {
         navigate("/")
+    }
+
+    const suggestionCallback = (startLine: number, endLine: number, newCode: string | null) => {
+        console.log("suggestion callback close")
+        console.log("code is: ", newCode)
+
+        if (newCode !== null){
+            setCode(newCode)
+        }
+
+        //@ts-ignore
+        removeCtHighlightCodeRange(editorRef.current.view, startLine, endLine);
+        //@ts-ignore
+        popupEngineRef.current?.removePopupRange(endLine, startLine)
+        // setSuggestionPortal(null)
+        setStartSuggestionLine(null)
+        setEndSuggestionLine(null)
     }
 
     return (
@@ -1643,7 +1631,18 @@ function Byte() {
                         </div>
                     </div>
                 </Container>
-                {SuggestionPortal ? (SuggestionPortal) : null}
+                {/* {SuggestionPortal ? (SuggestionPortal) : null} */}
+                <ByteSuggestion
+                        lang={programmingLanguages[byteData ? byteData.lang : 5]}
+                        closeCallback={suggestionCallback}
+                        code={code}
+                        byteId={id || ""}
+                        open={suggestionPopup}
+                        codeMirrorRef={editorRef}
+                        popupRef={popupEngineRef}
+                        // @ts-ignore
+                        description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
+                />
                 {xpPopup ? (<XpPopup oldXP={
                     //@ts-ignore
                     (xpData["xp_update"]["old_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]} levelUp={
