@@ -97,8 +97,6 @@ export default function ByteSuggestion(props: ByteSuggestionProps) {
     }
 
     const executeSuggestion = (suggestion: string, codeSection: string) => {
-        console.log("suggestion is: ", suggestion);
-        console.log("code section: ", codeSection);
     
         const improvementRegex = /<<CODE IMPROVEMENT>>([\s\S]*?)(?=(\n<<CODE IMPROVEMENT>>|$))/g;
 
@@ -110,23 +108,18 @@ export default function ByteSuggestion(props: ByteSuggestionProps) {
     
         // Match using the updated regex
         while ((match = improvementRegex.exec(suggestion)) !== null) {
-            console.log("match is: ", match[1])
 
             matches.push(match[1].trim());
         }
 
-        console.log("matches are: ", matches)
     
         //switch this to the commented one if you ever want matches to have multiple values
         // const matchString = matches.join('\n');
         const matchString = matches;
 
-        console.log("code props: ", props.code)
 
         let newCode = (() => {
             const prevCode = props.code; // Assuming props.code is accessible here
-            console.log("prevCode: ", prevCode);
-            console.log("code section: ", codeSection);
         
             // Function to create a normalized version for comparison, but maintain indexes for replacement
             const findIndexesAfterNormalization = (source: string, search: string): { start: number, end: number } => {
@@ -146,9 +139,6 @@ export default function ByteSuggestion(props: ByteSuggestionProps) {
                 // Replace using the original indexes in prevCode to maintain formatting
                 const before = prevCode.substring(0, start);
                 const after = prevCode.substring(end);
-                console.log("before: ", before);
-                console.log("matchString: ", matchString); // Assuming matchString is defined and accessible
-                console.log("after: ", after);
                 return before + matchString + after;
             } else {
                 return prevCode; // Return prevCode if the section is not found or no replacement is made
@@ -205,7 +195,6 @@ export default function ByteSuggestion(props: ByteSuggestionProps) {
                         Dismiss
                     </Button>
                     <Button onClick={() => {
-                        console.log("start line inline: ", startLine)
                         //@ts-ignore
                         let newCode = executeSuggestion(suggestion, codeSection)
                         props.closeCallback(startLine, endLine, newCode)
@@ -246,30 +235,12 @@ export default function ByteSuggestion(props: ByteSuggestionProps) {
                 return true
             }
             const p: CtByteSuggestionResponse = msg.payload as unknown as CtByteSuggestionResponse;
-            console.log("code section: ", p.code_section)
-            console.log("code suggestion: ", p.suggestion)
-            console.log("code is: ", props.code)
             const codeSection = p.code_section;
 
-
-            // const startIndex = code.indexOf(codeSection);
-            // console.log("code is: ", code)
-            // console.log("start index: ", startIndex)
-            // const endIndex = startIndex + codeSection.length;
-
-            // const lines = code.split("\n");
-            // let startLine = lines.slice(0, startIndex).length;
-            // let endLine = lines.slice(0, endIndex).length;
-            // console.log("start line: ", startLine)
-            // console.log("end line: ", endLine)
-            // setStartSuggestionLine(startLine)
-            // setEndSuggestionLine(endLine)
 
             let startLine = findSubstringStartEndLines(codeSection).startLine
             let endLine = findSubstringStartEndLines(codeSection).endLine
 
-            console.log("start line is: ", startLine)
-            console.log("end line is: ", endLine)
 
 
             //@ts-ignore

@@ -994,8 +994,8 @@ function Byte() {
         deleteTypingTimer();
         setOutputPopup(true)
         //this is here for testing the suggetion popup
-        setSuggestionPopup(true)
-        // sendSuggestionRequest();
+        // setSuggestionPopup(true)
+
         sendExecRequest();
     };
 
@@ -1232,8 +1232,6 @@ function Byte() {
 
     //this is used for clearing out the suggestion ui and information
     const suggestionCallback = (startLine: number, endLine: number, newCode: string | null) => {
-        console.log("suggestion callback close")
-        console.log("code is: ", newCode)
 
         if (newCode !== null){
             setCode(newCode)
@@ -1251,7 +1249,6 @@ function Byte() {
     // and then runs the code again without executing or dismissing, it double highlights it
     //this gets called when the suggestion websocket is used so we can check in the execute code if the necessary ui for suggestions has been closed or not
     const suggestionApiCallback = (startLine: number, endLine: number) => {
-        console.log("here in apic allback")
         setStartSuggestionLine(startLine)
         setEndSuggestionLine(endLine)
     }
