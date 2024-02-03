@@ -1647,7 +1647,8 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
 
     const renderSocials = () => {
         return (
-            <div style={{ display: "flex", flexDirection: "row" }}>
+            <div style={{display: "flex", flexDirection:"column", alignItems: "center"}}>
+                <div style={{ display: "flex", flexDirection: "row" }}>
                 <SocialIcon
                     network="github"
                     url="https://github.com/Gage-Technologies/gigo.dev"
@@ -1698,6 +1699,10 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                         width: "32px",
                     }}
                 />
+            </div>
+            <Button size={"small"} href={"/privacyPolicy"}>
+            Privacy Policy
+            </Button>
             </div>
         )
     }

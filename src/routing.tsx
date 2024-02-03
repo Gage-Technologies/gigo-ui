@@ -43,6 +43,7 @@ const StripeCancel = React.lazy(() => import("./pages/stripe/StripeCancel"));
 const AllBytesScroll = React.lazy(() => import("./pages/allBytesScroll"));
 const AboutBytes = React.lazy(() => import("./pages/aboutPageBytes"));
 const Byte = React.lazy(() => import("./pages/bytes"));
+const PrivacyPolicy = React.lazy(() => import("./pages/PrivacyPolicy"))
 
 export default function Routing() {
     // initialize redux dispatcher
@@ -129,6 +130,7 @@ export default function Routing() {
                     <Route path={"/aboutExclusive"} element={<ExclusiveContent />} />
                     <Route path="/byte/:id" element={<Byte />} />
                     <Route path={"/aboutBytes"} element={<AboutBytes />} />
+                    <Route path={"/privacyPolicy"} element={<PrivacyPolicy/>} />
                     <Route element={<PrivateRoute />}>
                         {/*<Route path={"/journey"} element={<Journey />}/>*/}
                         {/*<Route path={"/journey/form"} element={<JourneyForm />}/>*/}
