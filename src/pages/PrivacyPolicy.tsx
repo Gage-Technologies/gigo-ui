@@ -1,11 +1,12 @@
 import * as React from "react";
 import {
+    Box,
     createTheme,
     CssBaseline,
     PaletteMode,
     ThemeProvider,
 } from "@mui/material";
-import {getAllTokens} from "../theme";
+import { getAllTokens } from "../theme";
 import config from "../config";
 
 
@@ -21,12 +22,20 @@ function PrivacyPolicy() {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
-            <object data={config.rootPath + "/static/ui/PRIVACY_POLICY.pdf"} 
-                width="800"
-                height="800"> 
-        </object> 
-            </CssBaseline>
-        </ThemeProvider>
+                <Box
+                    display={"flex"}
+                    alignItems={"center"}
+                    justifyContent={"center"}
+                    sx={{width: "100%", height: "100%", paddingTop: "20px"}}
+                >
+                    <object
+                        data={config.rootPath + "/static/ui/PRIVACY_POLICY.pdf"}
+                        width={window.innerWidth  - 400}
+                        height={window.innerHeight - 92}
+                    />
+                </Box>
+        </CssBaseline>
+        </ThemeProvider >
     );
 }
 
