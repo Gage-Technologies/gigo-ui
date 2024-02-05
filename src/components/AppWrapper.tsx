@@ -1,5 +1,3 @@
-
-
 import * as React from 'react';
 import LoginIcon from '@mui/icons-material/Login';
 import MuiAppBar from '@mui/material/AppBar';
@@ -137,6 +135,9 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         }
     });
     const location = useLocation();
+
+    // Check if the current page is ByteMobile
+    const isByteMobilePage = location.pathname.startsWith('/byteMobile/');
 
     const [mode, setMode] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const colorMode = React.useMemo(
@@ -788,6 +789,8 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
 
 
     const renderAppBar = () => {
+        console.log('Is ByteMobile Page:', isByteMobilePage);
+        if (isByteMobilePage) return null;
         return (
             <AppBar
                 position="fixed"
