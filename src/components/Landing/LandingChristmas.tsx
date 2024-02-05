@@ -102,7 +102,7 @@ const GIGOLandingPageChristmas: React.FC = () => {
                                 borderColor: theme.palette.error.main,
                             }
                         }}
-                        href="/signup"
+                        href="/byte/1750943457427324928"
                         // onClick={() => {
                         //     if (endRef.current) {
                         //         endRef.current.scrollIntoView({ block: 'start', behavior: 'smooth' });
