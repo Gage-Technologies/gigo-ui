@@ -759,7 +759,7 @@ export const getAllTokens = (mode: PaletteMode) => {
         return getChristmasTokens(mode);
     }
 
-    if (today.getMonth() === 1) {
+    if (today.getMonth() === 1 && today.getDate() < 14) {
         // Valentines
         holiday = "Valentines"
         return getValentinesTokens(mode);

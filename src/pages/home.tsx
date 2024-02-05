@@ -1462,7 +1462,7 @@ function Home() {
                                 <></>
                             }
 
-                            {header}
+                            {(window.innerWidth > 1000) ? header : TopRecommendations()}
                             {/*{TopRecommendations()}*/}
                         </Box>
                         <Box

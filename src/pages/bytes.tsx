@@ -232,7 +232,6 @@ function Byte() {
 
     const [output, setOutput] = useState<OutputState | null>(null);
 
-    const [workspaceCreated, setWorkspaceCreated] = useState(false);
     const [containerStyle, setContainerSyle] = useState<React.CSSProperties>(containerStyleDefault)
     const [cursorPosition, setCursorPosition] = useState<{ row: number, column: number } | null>(null)
     const [codeBeforeCursor, setCodeBeforeCursor] = useState("");
@@ -453,7 +452,7 @@ function Byte() {
                 const { stdout, stderr, done } = payload;
 
                 // skip the processing if this is the first response
-                if (stdout.length === 0 && stderr.length === 0) {
+                if (stdout.length === 0 && stderr.length === 0 && !done) {
                     return false;
                 }
 
@@ -562,7 +561,6 @@ function Byte() {
                 setHardCode(res["rec_bytes"]["outline_content_hard"])
 
                 setByteData(res["rec_bytes"])
-                setWorkspaceCreated(false);
             } else {
                 swal("Byte Not Found", "The requested byte could not be found.");
             }
@@ -630,7 +628,6 @@ function Byte() {
 
             if (res["message"] === "Workspace Created Successfully") {
                 // TODO implement what needs to be done if successful
-                setWorkspaceCreated(true)
                 return true
             }
         } catch (error) {
@@ -747,9 +744,8 @@ function Byte() {
             updateCode(newCode);
 
             // // Call createWorkspace only if it hasn't been called before
-            // if (!workspaceCreated && id) {
+            // if (id) {
             //     createWorkspace(id)
-            //         .then(() => setWorkspaceCreated(true)) // Set the flag to true once the workspace is created
             //         .catch(console.error);
             // }
         } else {
@@ -806,7 +802,7 @@ function Byte() {
         if (outputPopup) {
             return;
         }
-        if (!workspaceCreated && byteData) {
+        if (byteData) {
             for (let i = 0; i < 5; i++) {
                 let created = await createWorkspace(byteData._id);
                 if (created) {
