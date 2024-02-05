@@ -14,7 +14,7 @@ import {getAllTokens, getDesignTokens, isHoliday} from "../theme";
 import { AwesomeButton } from "react-awesome-button";
 import 'react-awesome-button/dist/styles.css';
 
-import AboutBytesIcon from "../components/Icons/bytes/aboutPage";
+import AboutBytesIcon from "../components/Icons/bytes/AboutPage";
 //@ts-ignore
 import chatDemo from "../components/Icons/bytes/demo-chat.mp4"
 //@ts-ignore

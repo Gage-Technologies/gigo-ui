@@ -65,7 +65,7 @@ import GIGOLandingPageNewYearsMobile from "../components/Landing/LandingNewYears
 import GIGOLandingPageNewYears from "../components/Landing/LandingNewYears";
 import BytesCard from "../components/BytesCard";
 import { programmingLanguages } from "../services/vars";
-import AboutBytesIcon from "../components/Icons/bytes/aboutPage";
+import AboutBytesIcon from "../components/Icons/bytes/AboutPage";
 import GIGOLandingPageValentines from "../components/Landing/LandingValentines";
 import GIGOLandingPageValentinesMobile from "../components/Landing/LandingValentinesMobile";
 import { AwesomeButton } from "react-awesome-button";
@@ -744,6 +744,7 @@ function Home() {
                                 width: "20px",
                                 marginRight: "5px"
                             }}
+                            miniIcon={userPref === 'light'}
                         />
                         Bytes
                     </Typography>
