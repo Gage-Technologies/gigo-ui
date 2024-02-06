@@ -1,6 +1,7 @@
 // BSD-3 License
 // Copied and modified from: https://github.com/FurqanSoftware/codemirror-languageserver/blob/c0f036fd0add6989f634664f3245cbb5eb8cdeca/src/index.ts
 
+import WS from "isomorphic-ws";
 import type {Completion, CompletionContext, CompletionResult} from '@codemirror/autocomplete';
 import {autocompletion} from '@codemirror/autocomplete';
 import {setDiagnostics, Diagnostic} from '@codemirror/lint';
@@ -16,6 +17,7 @@ import {Transport} from '@open-rpc/client-js/build/transports/Transport';
 import "./styles/lsp.css"
 import ReactDOM from 'react-dom';
 import { Rect, tooltips } from '@uiw/react-codemirror';
+import { sleep } from '../../../services/utils';
 
 const timeout = 10000;
 const changesDelay = 300;
@@ -54,6 +56,104 @@ type Notification = {
         jsonrpc: '2.0'; id?: null | undefined; method: key; params: LSPEventMap[key];
     };
 }[keyof LSPEventMap];
+
+
+class ReconnectingWebSocketTransport extends WebSocketTransport {
+    private _initialReconnectDelay: number = 500;
+    private _maxReconnectDelay: number = 3000;
+    private _reconnectDelay: number;
+    private _shouldReconnect: boolean = true;
+    private messageQueue: any[] = []; // Add a message queue
+
+    constructor(url: string) {
+        super(url);
+        this._reconnectDelay = this._initialReconnectDelay;
+        this.setupEventListeners();
+    }
+
+    private setupEventListeners(): void {
+        this.connection.addEventListener('open', () => {
+            console.log("established lsp ws connection")
+            this._reconnectDelay = this._initialReconnectDelay; // Reset reconnect delay
+            this.flushMessageQueue(); // Send queued messages
+        });
+
+        this.connection.addEventListener('close', () => {
+            console.log("lsp ws connection closed")
+            if (this._shouldReconnect) {
+                this.attemptReconnect();
+            }
+        });
+
+        this.connection.addEventListener('error', (error) => {
+            console.log("lsp ws connection error: ", error)
+            if (this._shouldReconnect) {
+                this.attemptReconnect();
+            }
+        });
+    }
+
+    private attemptReconnect(): void {
+        setTimeout(() => {
+            console.log(`reconnecting to lsp ws with delay: ${this._reconnectDelay}ms`);
+            this._reconnectDelay = Math.min(this._reconnectDelay * 2, this._maxReconnectDelay);
+            this.connect().then((x) => {
+                if (x === null) {
+                    this.attemptReconnect()
+                }
+            });
+        }, this._reconnectDelay);
+    }
+
+    public async connect(): Promise<any> {
+        console.log("creating new ws")
+        let connection = new WS(this.uri);
+        while (connection.readyState === WebSocket.CONNECTING) {
+            await sleep(100)
+        }
+        console.log("checking new websocket: ", connection.readyState)
+        if (connection.readyState === WebSocket.CLOSED || connection.readyState === WebSocket.CLOSING) {
+            return null
+        }
+        console.log("connecting to the new websocket: ", connection.readyState)
+        if (this.connection) {
+            this.connection.close()
+        }
+        this.connection = connection
+        let res = await super.connect();
+        console.log("connected to the websocket", res)
+        this.setupEventListeners();
+        return res
+    }
+
+    public async sendData(data: any, timeout?: number): Promise<any> {
+        console.log("send data: ", data)
+        if (this.connection.readyState === WebSocket.OPEN) {
+            return super.sendData(data, timeout);
+        } else {
+            // console.log('WebSocket is not open. Queuing message.');
+            // this.messageQueue.push({ data, timeout }); // Queue the message
+        }
+        return null
+    }
+
+    private flushMessageQueue(): void {
+        let flushed = 0;
+        while (this.messageQueue.length > 0) {
+            const { data, timeout } = this.messageQueue.shift(); // Remove the first message from the queue
+            super.sendData(data, timeout); // Send it
+            flushed++
+        }
+        console.log("flushed messages on lsp ws connect: ", flushed)
+    }
+
+    public close(): void {
+        this._shouldReconnect = false;
+        super.close();
+    }
+}
+
+
 
 export class LanguageServerClient {
     private rootUri: string;
@@ -105,45 +205,58 @@ export class LanguageServerClient {
     }
 
     async initialize() {
-        const {capabilities} = await this.request('initialize', {
-            capabilities: {
-                textDocument: {
-                    hover: {
-                        dynamicRegistration: true, contentFormat: ['plaintext', 'markdown'],
-                    }, moniker: {}, synchronization: {
-                        dynamicRegistration: true, willSave: false, didSave: false, willSaveWaitUntil: false,
-                    }, completion: {
-                        dynamicRegistration: true, completionItem: {
-                            snippetSupport: false,
-                            commitCharactersSupport: true,
-                            documentationFormat: ['plaintext', 'markdown'],
-                            deprecatedSupport: false,
-                            preselectSupport: false,
-                        }, contextSupport: false,
-                    }, signatureHelp: {
-                        dynamicRegistration: true, signatureInformation: {
-                            documentationFormat: ['plaintext', 'markdown'],
+        let init: LSP.InitializeResult<any> | null
+        console.log("initializing lsp")
+        while(true) {
+            console.log("request lsp init")
+            init = await this.request('initialize', {
+                capabilities: {
+                    textDocument: {
+                        hover: {
+                            dynamicRegistration: true, contentFormat: ['markdown', 'plaintext'],
+                        }, moniker: {}, synchronization: {
+                            dynamicRegistration: true, willSave: false, didSave: false, willSaveWaitUntil: false,
+                        }, completion: {
+                            dynamicRegistration: true, completionItem: {
+                                snippetSupport: false,
+                                commitCharactersSupport: true,
+                                documentationFormat: ['markdown', 'plaintext'],
+                                deprecatedSupport: false,
+                                preselectSupport: false,
+                            }, contextSupport: false,
+                        }, signatureHelp: {
+                            dynamicRegistration: true, signatureInformation: {
+                                documentationFormat: ['markdown', 'plaintext'],
+                            },
+                        }, declaration: {
+                            dynamicRegistration: true, linkSupport: true,
+                        }, definition: {
+                            dynamicRegistration: true, linkSupport: true,
+                        }, typeDefinition: {
+                            dynamicRegistration: true, linkSupport: true,
+                        }, implementation: {
+                            dynamicRegistration: true, linkSupport: true,
                         },
-                    }, declaration: {
-                        dynamicRegistration: true, linkSupport: true,
-                    }, definition: {
-                        dynamicRegistration: true, linkSupport: true,
-                    }, typeDefinition: {
-                        dynamicRegistration: true, linkSupport: true,
-                    }, implementation: {
-                        dynamicRegistration: true, linkSupport: true,
-                    },
-                }, workspace: {
-                    didChangeConfiguration: {
-                        dynamicRegistration: true,
+                    }, workspace: {
+                        didChangeConfiguration: {
+                            dynamicRegistration: true,
+                        },
                     },
                 },
-            },
-            initializationOptions: null,
-            processId: null,
-            rootUri: this.rootUri,
-            workspaceFolders: this.workspaceFolders,
-        }, timeout * 3);
+                initializationOptions: null,
+                processId: null,
+                rootUri: this.rootUri,
+                workspaceFolders: this.workspaceFolders,
+            }, timeout * 3);
+            console.log("lsp init req: ", init)
+            if (init === null) {
+                await sleep(300)
+                continue
+            }
+            break
+        }
+
+        const {capabilities} = init;
         this.capabilities = capabilities;
         this.notify('initialized', {});
         this.ready = true;

@@ -266,12 +266,10 @@ const WorkspacePage = () => {
         try {
             jsonMessage = message.payload;
         } catch (e) {
-            ;
             return
         }
 
         if (jsonMessage === null) {
-
             return
         }
 

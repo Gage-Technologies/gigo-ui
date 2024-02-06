@@ -29,7 +29,9 @@ export enum WsMessageType {
     CancelExecRequest,
     CancelExecResponse,
     StdinExecRequest,
-    StdinExecResponse
+    StdinExecResponse,
+    LaunchLspRequest,
+    LaunchLspResponse,
 }
 
 export enum WsResponseCode {
@@ -83,6 +85,8 @@ export const wsMessageTypeToString = (t: WsMessageType) => {
         "MessageTypeCancelExecRequest",
         "MessageTypeCancelExecResponse",
         "MessageTypeStdinExecRequest",
-        "MessageTypeStdinExecResponse"
+        "MessageTypeStdinExecResponse",
+        "MessageTypeLaunchLspRequest",
+        "MessageTypeLaunchAgentRequest",
     ][t];
 }

@@ -42,6 +42,9 @@ import { selectAuthState } from "../reducers/auth/auth";
 import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../reducers/bytes/bytes";
 import ByteTerminal from "../components/Terminal";
 import { debounce } from "lodash";
+import {LaunchLspRequest} from "../models/launch_lsp";
+import {Workspace} from "../models/workspace";
+import CodeSource from "../models/codeSource";
 
 
 interface MergedOutputRow {
@@ -75,6 +78,12 @@ interface BytesData {
     description_hard: string;
     outline_content_hard: string;
     dev_steps_hard: string;
+}
+
+interface InitialStatusMessage {
+    workspace: Workspace;
+    code_source: CodeSource;
+    workspace_url: string
 }
 
 interface ByteAttempt {
@@ -255,6 +264,11 @@ function Byte() {
     const editorRef = React.useRef<ReactCodeMirrorRef>(null);
 
     const [activeSidebarTab, setActiveSidebarTab] = React.useState<string | null>(null);
+
+    const [userHasModified, setUserHasModified] = React.useState(false)
+    const [lspActive, setLspActive] = React.useState(false)
+    const [workspaceState, setWorkspaceState] = useState<null | number>(null);
+    const [workspaceId, setWorkspaceId] = useState<string>('')
 
 
     let { id } = useParams();
@@ -631,6 +645,11 @@ function Byte() {
 
             if (res["message"] === "Workspace Created Successfully") {
                 // TODO implement what needs to be done if successful
+                let workspace = res["workspace"]
+                if (workspace["_id"] !== workspaceId) {
+                    setWorkspaceId(workspace["_id"])
+                    setWorkspaceState(workspace["state"])
+                }
                 return true
             }
         } catch (error) {
@@ -679,6 +698,10 @@ function Byte() {
         setOutput(null)
         setExecutingCode(false)
         setTerminalVisible(false)
+        setUserHasModified(false)
+        setWorkspaceId("")
+        setWorkspaceState(null)
+        setLspActive(false)
         setLoading(true);
         getRecommendedBytes()
         getByte(id).then(() => {
@@ -724,9 +747,106 @@ function Byte() {
         }
     }, [bytesState.byteDifficulty])
 
+    useEffect(() => {
+        if (workspaceId === "") {
+            return
+        }
+
+        globalWs.registerCallback(WsMessageType.WorkspaceStatusUpdate, `workspace:status:${workspaceId}`,
+            (msg: WsMessage<any>) => {
+                if (msg.type !== WsMessageType.WorkspaceStatusUpdate) {
+                    return
+                }
+
+                // attempt to parse json message
+                let jsonMessage: Object | null = null
+                try {
+                    jsonMessage = msg.payload;
+                } catch (e) {
+                    return
+                }
+
+                if (jsonMessage === null) {
+                    return
+                }
+
+                // handle initial state message
+                let payload = jsonMessage as InitialStatusMessage;
+                let workspace = payload.workspace as Workspace
+
+                if (workspaceId !== workspace._id) {
+                    setWorkspaceId(workspace._id)
+                }
+                setWorkspaceState(workspace.state)
+            },
+        );
+
+        // generate a random alphanumeric id
+        let seqId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        globalWs.sendWebsocketMessage({
+            sequence_id: seqId,
+            type: WsMessageType.SubscribeWorkspace,
+            payload: {
+                workspace_id: workspaceId,
+            }
+        }, null)
+
+        return () => {
+            globalWs.sendWebsocketMessage({
+                sequence_id: seqId,
+                type: WsMessageType.UnsubscribeWorkspace,
+                payload: {
+                    workspace_id: workspaceId,
+                }
+            }, null)
+        }
+    }, [workspaceId])
+
+    useEffect(() => {
+        if (workspaceState !== 1) {
+            return
+        }
+
+        if (byteData) {
+            launchLsp()
+        }
+    }, [workspaceState])
+
+    const launchLsp = async () => {
+        if (!byteData) {
+            return
+        }
+
+        globalWs.sendWebsocketMessage(
+            {
+                sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                type: WsMessageType.LaunchLspRequest,
+                payload: {
+                    byte_attempt_id: byteAttemptId,
+                    payload: {
+                        lang: byteData.lang
+                    } satisfies LaunchLspRequest
+                }
+            }, (msg: WsMessage<any>): boolean => {
+                if (msg.type !== WsMessageType.LaunchLspResponse) {
+                    console.log("failed to start lsp: ", msg)
+                    setTimeout(() => {
+                        launchLsp()
+                    }, 1000);
+                    return true
+                }
+                // wait 3s to link the lsp to ensure the startup completes
+                setTimeout(() => {
+                    setLspActive(true)
+                }, 3000);
+                return true
+            }
+        )
+    }
+
 
     // Handle changes in the editor and activate the button
-    const handleEditorChange = (newCode: string) => {
+    const handleEditorChange = async (newCode: string) => {
         // Update the code state with the new content
         setCode(newCode);
         switch (bytesState.byteDifficulty) {
@@ -741,18 +861,24 @@ function Byte() {
                 break
         }
         startTypingTimer();
-        if (newCode && newCode !== "// Write your code here..." && newCode !== initialCode) {
+        debouncedUpdateCode(newCode);
+
+
+        if (!userHasModified) {
+            setUserHasModified(true)
             setIsButtonActive(true);
+            if (byteData) {
+                for (let i = 0; i < 5; i++) {
+                    let created = await createWorkspace(byteData._id);
+                    if (created) {
+                        break
+                    }
 
-            debouncedUpdateCode(newCode);
-
-            // // Call createWorkspace only if it hasn't been called before
-            // if (id) {
-            //     createWorkspace(id)
-            //         .catch(console.error);
-            // }
-        } else {
-            setIsButtonActive(false);
+                    if (i === 4) {
+                        break
+                    }
+                }
+            }
         }
     };
 
@@ -1135,8 +1261,22 @@ function Byte() {
                                     readonly={!authState.authenticated}
                                     onChange={(val, view) => handleEditorChange(val)}
                                     onCursorChange={(bytePosition, line, column) => setCursorPosition({ row: line, column: column })}
-                                    lspUrl={byteData && byteData.lang === 5 ? "ws://localhost:42081" : "ws://localhost:42083"}
+                                    // lspUrl={byteData ? (byteData.lang === 5 ? "ws://localhost:42081" : "ws://localhost:42083") : undefined}
+                                    lspUrl={byteData && lspActive ? `wss://${byteData._id}-lsp.${config.coderPath.replace("https://", "")}` : undefined}
                                     diagnosticLevel={selectDiagnosticLevel()}
+                                    wrapperStyles={{
+                                        width: '100%',
+                                        height: '100%',
+                                        borderRadius: "10px",
+                                        ...(
+                                            // default
+                                            workspaceState === null ? {} :
+                                            // starting or active
+                                            workspaceState === 1 && lspActive ?
+                                                {border: `1px solid ${theme.palette.primary.main}`} :
+                                                {border: `1px solid grey`}
+                                        )
+                                    }}
                                 />
                                 {terminalVisible && output && (
                                     <ByteTerminal

@@ -18,6 +18,7 @@ export type EditorProps = {
     wrapperStyles?: React.CSSProperties;
     editorStyles?: React.CSSProperties;
     gutterStyles?: React.CSSProperties;
+    scrollerStyles?: React.CSSProperties;
     code: string;
     theme?: string;
     readonly: boolean;
@@ -34,6 +35,7 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
         wrapperStyles: React.CSSProperties;
         editorStyles: React.CSSProperties;
         gutterStyles: React.CSSProperties;
+        scrollerStyles: React.CSSProperties;
         theme: string;
     } = {
         parentStyles: {},
@@ -41,19 +43,23 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
             width: '100%',
             height: '100%',
             borderRadius: "10px",
-            // border: "1px solid #fff"
         },
         editorStyles: {
             borderRadius: '10px',
+            outline: "none !important"
         },
         gutterStyles: {
             borderRadius: '10px',
+        },
+        scrollerStyles: {
+            borderRadius: '10px'
         },
         theme: "dark"
     };
 
     useDynamicStyles('custom-cm-editor-style', ".cm-editor", props.editorStyles ? props.editorStyles : defaultProps.editorStyles);
     useDynamicStyles('custom-cm-gutters-style', ".cm-gutters", props.gutterStyles ? props.gutterStyles : defaultProps.gutterStyles);
+    useDynamicStyles('custom-cm-gutters-style', ".cm-scroller", props.scrollerStyles ? props.scrollerStyles : defaultProps.scrollerStyles);
 
     const [wsLanguageServer, setWsLanguageServer] = useState<Extension[] | null>(null);
 
@@ -162,22 +168,5 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
         </Box>
     )
 });
-
-Editor.defaultProps = {
-    parentStyles: {},
-    wrapperStyles: {
-        width: '100%',
-        height: '100%',
-        borderRadius: "10px",
-        // border: "1px solid #fff"
-    },
-    editorStyles: {
-        borderRadius: '10px',
-    },
-    gutterStyles: {
-        borderRadius: '10px',
-    },
-    theme: "dark"
-};
 
 export default Editor;
