@@ -753,17 +753,6 @@ function Byte() {
         }
     };
 
-    // const handleEditorUpdate = (viewUpdate: ViewUpdate) => {
-    //     // Check if the update is due to cursor movement
-    //     if ((viewUpdate.docChanged || viewUpdate.selectionSet)) {
-    //         // retrieve the cursor position
-    //         const cursorPosition = viewUpdate.state.selection.main.head;
-    //         // get the line and column position
-    //         const lineInfo = viewUpdate.state.doc.lineAt(cursorPosition);
-    //         props.onCursorChange(cursorPosition, lineInfo.number-1, cursorPosition - lineInfo.from)
-    //     }
-    // };
-
     const byteImages = [
         "/static/posts/t/1688617436791701504",
         "/static/posts/t/1688570643030736896",
@@ -863,54 +852,6 @@ function Byte() {
         setCodeBeforeCursor(preffix)
         setCodeAfterCursor(suffix)
     }, [code, cursorPosition])
-
-    // interface TerminalOutputProps {
-    //     output: OutputState | null;
-    //     style?: React.CSSProperties;
-    //     executeCode: () => void; // Function to execute code
-    //     cancelCodeExec: (commandId: string) => void; // Function to cancel code execution
-    //     isRunning: boolean; // Whether code is currently executing
-    //     commandId: string; // Command ID for execution
-    // }
-    //
-    // const TerminalOutput: React.FC<TerminalOutputProps> = ({ output, style, executeCode, cancelCodeExec, isRunning, commandId }) => {
-    //     const { setBufferedContent } = useContext(TerminalContext);
-    //     // Define terminal commands
-    //     const terminalCommands = {
-    //         cancel: {
-    //             description: "Cancel the running code",
-    //             fn: () => {
-    //                 if (isRunning) {
-    //                     cancelCodeExec(commandId);
-    //                     return "Cancelling code execution...";
-    //                 }
-    //                 return "No code is running";
-    //             }
-    //         },
-    //         // Add more commands as needed
-    //     };
-    //
-    //
-    //     const formattedOutput = useMemo(() => {
-    //         if (!output) return "";
-    //         return output.mergedLines.map(line => `${line.error ? "Error: " : ""}${line.content}`).join("\n");
-    //     }, [output]);
-    //
-    //     return (
-    //         <Box style={{ ...style }}>
-    //             <ReactTerminal
-    //                 commands={terminalCommands}
-    //                 welcomeMessage="Welcome to Byte terminal"
-    //                 prompt=">>"
-    //                 theme="material-dark"
-    //                 errorMessage="Command not found"
-    //                 outputRender={() => (
-    //                     <pre>{formattedOutput}</pre>
-    //                 )}
-    //             />
-    //         </Box>
-    //     );
-    // };
 
     useEffect(() => {
         if (byteData === null) {

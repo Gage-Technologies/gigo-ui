@@ -45,6 +45,8 @@ import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../
 import ByteTerminal from "../components/Terminal";
 import {AppBar, Tabs} from "@material-ui/core";
 import './byteMobile.css';
+import ByteNextOutputMessageMobile from "../components/CodeTeacher/ByteNextOutputMessageMobile";
+import ByteNextStepMobile from "../components/CodeTeacher/ByteNextStepMobile";
 
 interface MergedOutputRow {
     error: boolean;
@@ -126,14 +128,22 @@ function ByteMobile() {
     const editorAndTerminalStyle: React.CSSProperties = {
         display: 'flex',
         flexDirection: 'column',
-        flex: 1, // This allows the container to fill the available space in its parent
-        height: '92%', // Ensure the container tries to fill the height
-        minHeight: '90%',
+        flex: 1,
+        height: '70vh',
+        minHeight: '85vh',
+        width: "100%",
+        minWidth: `100%`,
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflowX: 'auto',
+        position: 'relative',
     };
 
     const editorStyle: React.CSSProperties = {
         height: '100%',
         width: '100%',
+        overflowX: 'auto',
+        maxWidth: '100%',
     };
 
     const titleStyle: React.CSSProperties = {
@@ -146,12 +156,14 @@ function ByteMobile() {
 
     const topContainerStyle: React.CSSProperties = {
         display: 'flex',
+        overflowY: "hidden",
         flexDirection: 'row',
         justifyContent: 'center',
         width: '100%',
         marginTop: '10px',
-        gap: '10px', // Keeps the existing gap if needed
-        marginBottom: '-6%', // Adjust accordingly if the previous marginBottom was serving a specific purpose
+        gap: '10px',
+        height: "100%",
+        marginBottom: '-6%',
     };
 
     const titlePlaceholderContainerStyle: React.CSSProperties = {
@@ -160,15 +172,7 @@ function ByteMobile() {
         marginTop: "14px",
         marginBottom: "2px",
         alignItems: 'center',
-        width: "calc(80vw - 164px)",
-    };
-
-    const containerStyleAdjusted: React.CSSProperties = {
-
-        height: 'calc(100vh - 64px)',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
+        width: "100%",
     };
 
     const titlePlaceholderStyle: React.CSSProperties = {
@@ -218,6 +222,9 @@ function ByteMobile() {
 
     const [activeSidebarTab, setActiveSidebarTab] = React.useState<string | null>(null);
 
+    const [editorStyles, setEditorStyles] = useState({
+        fontSize: '14px',
+    });
 
     let { id } = useParams();
 
@@ -655,6 +662,28 @@ function ByteMobile() {
     }, [id]);
 
     useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 1000) {
+                setEditorStyles({
+                    fontSize: '12px',
+                });
+            } else {
+                // This is not a mobile device
+                setEditorStyles({
+                    fontSize: '14px',
+                });
+            }
+        };
+
+        // Call handleResize on mount and add event listener for resize
+        handleResize();
+        window.addEventListener('resize', handleResize);
+
+        // Cleanup event listener on unmount
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    useEffect(() => {
         return () => {
             if (typingTimerRef.current !== null) {
                 clearTimeout(typingTimerRef.current);
@@ -877,55 +906,71 @@ function ByteMobile() {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
-                <Container maxWidth="xl" style={containerStyleAdjusted}>
-                    <AppBar position="fixed" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Box style={{ display: 'flex', flex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Tabs value={tabValue} onChange={handleTabChange} aria-label="simple tabs example" centered>
-                                <Tab label="Editor" {...a11yProps(0)} />
-                                <Tab label="Byte Chat" {...a11yProps(1)} />
-                            </Tabs>
-                            <Box style={{
-                                width: 'auto',
-                                margin: 0,
-                                padding: 0,
-                                display: 'flex',
-                                alignItems: 'center',
-                                transform: 'scale(0.75)'
-                            }}>
-                                <DifficultyAdjuster
-                                    difficulty={determineDifficulty()}
-                                    onChange={updateDifficulty}
-                                />
-                            </Box>
+                <AppBar position="fixed"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            width: '100%',
+                            backgroundColor: theme.palette.primary.main,
+                            color: theme.palette.text.primary
+                        }}>
+                    <Box style={{ display: 'flex', flex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Tabs value={tabValue} onChange={handleTabChange} aria-label="simple tabs example" centered>
+                            <Tab label="Editor" {...a11yProps(0)} />
+                            <Tab label="Byte Chat" {...a11yProps(1)} />
+                        </Tabs>
+                        <Box style={{
+                            width: 'auto',
+                            margin: 0,
+                            padding: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            transform: 'scale(0.75)'
+                        }}>
+                            <DifficultyAdjuster
+                                difficulty={determineDifficulty()}
+                                onChange={updateDifficulty}
+                            />
                         </Box>
-                    </AppBar>
-                    <Box sx={{ ...topContainerStyle, flexDirection: 'row', justifyContent: 'center', width: '100%' }}>
-                        {tabValue === 0 && (
-                            <>
-                                {(activeSidebarTab === null || activeSidebarTab === "debugOutput") && (
-                                    <ByteNextOutputMessage
-                                        trigger={outputPopup}
-                                        acceptedCallback={() => { setOutputPopup(false) }}
-                                        onExpand={() => setActiveSidebarTab("debugOutput")}
-                                        onHide={() => setActiveSidebarTab(null)}
-                                        onSuccess={() => {
-                                            markComplete()
-                                        }}
-                                        lang={programmingLanguages[byteData ? byteData.lang : 5]}
-                                        code={code}
-                                        byteId={id || ""}
-                                        // @ts-ignore
-                                        description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
-                                        // @ts-ignore
-                                        questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
-                                        // @ts-ignore
-                                        dev_steps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
-                                        maxWidth={"20vw"}
-                                        codeOutput={output?.merged || ""}
-                                        nextByte={getNextByte()}
-                                    />
-                                )}
-                                {byteData ? (
+                    </Box>
+                </AppBar>
+                <Box sx={{ ...topContainerStyle, flexDirection: 'row', justifyContent: 'center', width: '100%' }}>
+                    {tabValue === 0 && (
+                        <>
+                            {activeSidebarTab !== "nextSteps" && (
+                                <ByteNextOutputMessageMobile
+                                    trigger={outputPopup}
+                                    acceptedCallback={() => { setOutputPopup(false) }}
+                                    onExpand={() => setActiveSidebarTab("debugOutput")}
+                                    onHide={() => setActiveSidebarTab(null)}
+                                    onSuccess={() => {
+                                        markComplete()
+                                    }}
+                                    lang={programmingLanguages[byteData ? byteData.lang : 5]}
+                                    code={code}
+                                    byteId={id || ""}
+                                    //@ts-ignore
+                                    description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
+                                    //@ts-ignore
+                                    questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
+                                    //@ts-ignore
+                                    dev_steps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
+                                    maxWidth={"80%"}
+                                    codeOutput={output?.merged || ""}
+                                    nextByte={getNextByte()}
+                                    style={{
+                                        position: 'relative',
+                                        top: 0,
+                                        left: 0,
+                                        zIndex: 1050,
+                                        width: '100%',
+                                        height: '100%',
+                                    }}
+                                />
+                            )}
+                            {activeSidebarTab === null && (
+                                byteData ? (
                                     <Typography variant="h4" component="h1" style={titleStyle}>
                                         {byteData.name}
                                     </Typography>
@@ -935,100 +980,104 @@ function ByteMobile() {
                                             <SheenPlaceholder width="400px" height={"45px"} />
                                         </Box>
                                     </Box>
+                                )
+                            )}
+                            {activeSidebarTab !== "debugOutput" && (
+                                <ByteNextStepMobile
+                                    trigger={nextStepsPopup}
+                                    acceptedCallback={() => { setNextStepsPopup(false) }}
+                                    onExpand={() => setActiveSidebarTab("nextSteps")}
+                                    onHide={() => setActiveSidebarTab(null)}
+                                    currentCode={code}
+                                    maxWidth="100%"
+                                    bytesID={id || ""}
+                                    //@ts-ignore
+                                    bytesDescription={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
+                                    //@ts-ignore
+                                    bytesDevSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
+                                    bytesLang={programmingLanguages[byteData ? byteData.lang : 5]}
+                                    codePrefix={codeBeforeCursor}
+                                    codeSuffix={codeAfterCursor}
+                                />
+                            )}
+                        </>
+                    )}
+                </Box>
+                <TabPanel value={tabValue} index={0}>
+                    <Box style={editorAndTerminalStyle} ref={editorContainerRef}>
+                        {/* Render the editor and related components only if neither ByteNextOutputMessageMobile nor ByteNextStep is expanded */}
+                        {activeSidebarTab === null && (
+                            <>
+                                {code.length > 0 && (
+                                    <Tooltip title="Run Code">
+                                        <LoadingButton
+                                            loading={executingCode}
+                                            variant="text"
+                                            color={"success"}
+                                            style={{
+                                                position: 'absolute',
+                                                right: '8px',
+                                                top: '8px',
+                                                zIndex: 3,
+                                                borderRadius: "50%",
+                                                minWidth: 0,
+                                            }}
+                                            onClick={() => {
+                                                setOutputPopup(false);
+                                                buttonClickedRef.current = true;
+                                                if (!authState.authenticated) {
+                                                    navigate("/signup")
+                                                    return;
+                                                }
+                                                executeCode(); // Trigger code execution
+                                            }}
+                                        >
+                                            <PlayArrow />
+                                        </LoadingButton>
+                                    </Tooltip>
                                 )}
-                                {(activeSidebarTab === null || activeSidebarTab === "nextSteps") && (
-                                    <ByteNextStep
-                                        trigger={nextStepsPopup}
-                                        acceptedCallback={() => {
-                                            setNextStepsPopup(false)
-                                        }}
-                                        onExpand={() => setActiveSidebarTab("nextSteps")}
-                                        onHide={() => setActiveSidebarTab(null)}
-                                        currentCode={code}
-                                        maxWidth="20vw"
-                                        bytesID={id || ""}
-                                        // @ts-ignore
-                                        bytesDescription={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
-                                        // @ts-ignore
-                                        bytesDevSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
-                                        bytesLang={programmingLanguages[byteData ? byteData.lang : 5]}
-                                        codePrefix={codeBeforeCursor}
-                                        codeSuffix={codeAfterCursor}
+                                <Editor
+                                    ref={editorRef}
+                                    parentStyles={editorStyle}
+                                    language={programmingLanguages[byteData ? byteData.lang : 5]}
+                                    code={code}
+                                    theme={mode}
+                                    readonly={!authState.authenticated}
+                                    onChange={(val, view) => handleEditorChange(val)}
+                                    onCursorChange={(bytePosition, line, column) => setCursorPosition({ row: line, column: column })}
+                                    editorStyles={editorStyles}
+                                />
+                                {terminalVisible && output && (
+                                    <ByteTerminal
+                                        output={output}
+                                        onClose={handleCloseTerminal}
+                                        onStop={() => cancelCodeExec(commandId)}
+                                        onInputSubmit={(input: string) => stdInExecRequest(commandId, input)}
+                                        isRunning={executingCode}
                                     />
                                 )}
                             </>
                         )}
                     </Box>
-                    <TabPanel value={tabValue} index={0}>
-                        <Box style={editorAndTerminalStyle} ref={editorContainerRef}>
-                            {code.length > 0 && (
-                                <Tooltip title="Run Code">
-                                    <LoadingButton
-                                        loading={executingCode}
-                                        variant="text"
-                                        color={"success"}
-                                        style={{
-                                            position: 'absolute',
-                                            right: '8px',
-                                            top: '8px',
-                                            zIndex: 3,
-                                            borderRadius: "50%",
-                                            minWidth: 0,
-                                        }}
-                                        onClick={() => {
-                                            setOutputPopup(false);
-                                            buttonClickedRef.current = true;
-                                            if (!authState.authenticated) {
-                                                navigate("/signup")
-                                                return
-                                            }
-                                            executeCode(); // Indicate button click
-                                        }}
-                                    >
-                                        <PlayArrow />
-                                    </LoadingButton>
-                                </Tooltip>
-                            )}
-                            <Editor
-                                ref={editorRef}
-                                parentStyles={editorStyle}
-                                language={programmingLanguages[byteData ? byteData.lang : 5]}
-                                code={code}
-                                theme={mode}
-                                readonly={!authState.authenticated}
-                                onChange={(val, view) => handleEditorChange(val)}
-                                onCursorChange={(bytePosition, line, column) => setCursorPosition({ row: line, column: column })}
-                            />
-                            {terminalVisible && output && (
-                                <ByteTerminal
-                                    output={output}
-                                    onClose={handleCloseTerminal}
-                                    onStop={() => cancelCodeExec(commandId)}
-                                    onInputSubmit={(input: string) => stdInExecRequest(commandId, input)}
-                                    isRunning={executingCode}
-                                />
-                            )}
-                        </Box>
-                    </TabPanel>
-                    <TabPanel value={tabValue} index={1}>
-                        {byteData && id !== undefined && (
-                            <ByteChat
-                                byteID={id}
-                                // @ts-ignore
-                                description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
-                                // @ts-ignore
-                                devSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
-                                difficulty={difficultyToString(determineDifficulty())}
-                                // @ts-ignore
-                                questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
-                                codePrefix={codeBeforeCursor}
-                                codeSuffix={codeAfterCursor}
-                                codeLanguage={programmingLanguages[byteData ? byteData.lang : 5]}
-                            />
-                        )}
-                    </TabPanel>
-                    {/*{renderEditorSideBar()}*/}
-                </Container>
+                </TabPanel>
+                <TabPanel value={tabValue} index={1}>
+                    {byteData && id !== undefined && (
+                        <ByteChat
+                            byteID={id}
+                            // @ts-ignore
+                            description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
+                            // @ts-ignore
+                            devSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
+                            difficulty={difficultyToString(determineDifficulty())}
+                            // @ts-ignore
+                            questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
+                            codePrefix={codeBeforeCursor}
+                            codeSuffix={codeAfterCursor}
+                            codeLanguage={programmingLanguages[byteData ? byteData.lang : 5]}
+                        />
+                    )}
+                </TabPanel>
+                {/*{renderEditorSideBar()}*/}
                 {xpPopup && (
                     <XpPopup
                         // @ts-ignore

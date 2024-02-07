@@ -28,6 +28,7 @@ const ByteTerminal = ({ output, onClose, onStop, isRunning, onInputSubmit }: { o
 
     // Determine if the theme mode is light or dark
     const isLightMode = theme.palette.mode === 'light';
+    const isMobile = window.innerWidth < 1000
 
     // Adjust terminal styles based on the theme mode
     const terminalStyle: CSSProperties = {
@@ -36,13 +37,14 @@ const ByteTerminal = ({ output, onClose, onStop, isRunning, onInputSubmit }: { o
         fontFamily: "monospace",
         fontSize: "0.9rem",
         padding: "10px",
-        marginTop: "20px",
+        marginTop: isMobile ? "0" : "20px",
         borderRadius: "5px",
         whiteSpace: "pre-wrap",
         height: "200px",
         overflowY: 'auto',
         wordWrap: 'break-word',
-        position: "relative"
+        position: "relative",
+        minWidth: '100%',
     };
 
     const inputStyle: CSSProperties = {
