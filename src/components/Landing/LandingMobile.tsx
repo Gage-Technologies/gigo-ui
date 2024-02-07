@@ -141,7 +141,7 @@ const GIGOLandingPageMobile: React.FC = () => {
                                 backgroundColor: theme.palette.primary.main + "99",
                             }
                         }}
-                        href="/byte/1750943457427324928"
+                        href="/signup"
                         // onClick={() => {
                         //     if (endRef.current) {
                         //         endRef.current.scrollIntoView({ block: 'start', behavior: 'smooth' });

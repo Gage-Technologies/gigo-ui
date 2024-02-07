@@ -78,7 +78,7 @@ const GIGOLandingPageNewYearsMobile: React.FC = () => {
                                 borderColor: theme.palette.primary.main,
                             }
                         }}
-                        href="/byte/1750943457427324928"
+                        href="/signup"
                         // onClick={() => {
                         //     if (endRef.current) {
                         //         endRef.current.scrollIntoView({ block: 'start', behavior: 'smooth' });
