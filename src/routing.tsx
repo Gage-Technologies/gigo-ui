@@ -9,6 +9,7 @@ import PublicConfigs from "./pages/PublicConfigs";
 import Unsubscribe from "./pages/unsubscribe";
 import config from './config';
 import ByteMobile from "./pages/byteMobile";
+import AllBytesScrollMobile from './pages/allBytesScrollMobile';
 const CurateAdminPage = React.lazy(() => import("./pages/curateAdmin"));
 const Home = React.lazy(() => import("./pages/home"));
 const Challenge = React.lazy(() => import("./pages/Challenge"));
@@ -116,6 +117,7 @@ export default function Routing() {
                     <Route path={"/resetPassword/:token/:id"} element={<ResetForgotPassword />} />
                     <Route path={"/home"} element={<Home />} />
                     <Route path={"/bytes"} element={<AllBytesScroll />} />
+                    <Route path={"/bytesMobile"} element={<AllBytesScrollMobile />} />
                     <Route path="/search" element={<Search />} />
                     <Route path={"/"} element={<Home />} />
                     <Route path={"/signup"} element={<CreateNewAccount />} />

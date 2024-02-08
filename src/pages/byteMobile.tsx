@@ -667,11 +667,6 @@ function ByteMobile() {
                 setEditorStyles({
                     fontSize: '12px',
                 });
-            } else {
-                // This is not a mobile device
-                setEditorStyles({
-                    fontSize: '14px',
-                });
             }
         };
 
