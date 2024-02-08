@@ -1617,28 +1617,80 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     paddingX: '0px',
                                 }}
                             >
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', height: '60px', overflow: 'hidden' }}>
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    width: '100px',
+                                    height: '60px',
+                                    overflow: 'hidden'
+                                }}>
                                     <IconButton color="inherit" href={"/about"} onClick={() => {
                                         let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
                                         appWrapperState.chatOpen = false
                                         dispatch(updateAppWrapper(appWrapperState));
                                     }}>
-                                        <InfoOutlined style={{ color: theme.palette.text.primary, fontSize: 25 }} />
+                                        <InfoOutlined style={{color: theme.palette.text.primary, fontSize: 25}}/>
                                     </IconButton>
-                                    <Typography variant="caption" noWrap sx={{ marginTop: '-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px' }}>
+                                    <Typography variant="caption" noWrap sx={{
+                                        marginTop: '-10px',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        fontSize: '10px'
+                                    }}>
                                         About
                                     </Typography>
                                 </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', height: '60px', overflow: 'hidden' }}>
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    width: '100px',
+                                    height: '60px',
+                                    overflow: 'hidden'
+                                }}>
                                     <IconButton color="inherit" href={"/home"} onClick={() => {
                                         let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
                                         appWrapperState.chatOpen = false
                                         dispatch(updateAppWrapper(appWrapperState));
                                     }}>
-                                        <HomeOutlined style={{ color: theme.palette.text.primary, fontSize: 25 }} />
+                                        <HomeOutlined style={{color: theme.palette.text.primary, fontSize: 25}}/>
                                     </IconButton>
-                                    <Typography variant="caption" noWrap sx={{ marginTop: '-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px' }}>
+                                    <Typography variant="caption" noWrap sx={{
+                                        marginTop: '-10px',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        fontSize: '10px'
+                                    }}>
                                         Home
+                                    </Typography>
+                                </div>
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    width: '100px',
+                                    height: '60px',
+                                    overflow: 'hidden'
+                                }}>
+                                    <IconButton color="inherit" href={"/bytesMobile"} onClick={() => {
+                                        let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
+                                        appWrapperState.chatOpen = false
+                                        dispatch(updateAppWrapper(appWrapperState));
+                                    }}>
+                                        {/*<BookmarkBorderOutlined style={{ color: theme.palette.text.primary, fontSize: 25 }} />*/}
+                                        🍌
+                                    </IconButton>
+                                    <Typography variant="caption" noWrap sx={{
+                                        marginTop: '-10px',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        fontSize: '10px'
+                                    }}>
+                                        Bytes
                                     </Typography>
                                 </div>
                             </Toolbar>
@@ -1651,28 +1703,28 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
 
     const renderSocials = () => {
         return (
-            <div style={{display: "flex", flexDirection:"column", alignItems: "center"}}>
-                <div style={{ display: "flex", flexDirection: "row" }}>
-                <SocialIcon
-                    network="github"
-                    url="https://github.com/Gage-Technologies/gigo.dev"
-                    bgColor={"transparent"}
-                    fgColor={mode === 'dark' ? "white" : "black"}
-                    style={{
-                        height: "32px",
-                        width: "32px",
-                    }}
-                />
-                <SocialIcon
-                    network="discord"
-                    url="https://discord.gg/279hECYrfX"
-                    bgColor={"transparent"}
-                    fgColor={mode === 'dark' ? "white" : "black"}
-                    style={{
-                        height: "32px",
-                        width: "32px",
-                    }}
-                />
+            <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+                <div style={{display: "flex", flexDirection: "row"}}>
+                    <SocialIcon
+                        network="github"
+                        url="https://github.com/Gage-Technologies/gigo.dev"
+                        bgColor={"transparent"}
+                        fgColor={mode === 'dark' ? "white" : "black"}
+                        style={{
+                            height: "32px",
+                            width: "32px",
+                        }}
+                    />
+                    <SocialIcon
+                        network="discord"
+                        url="https://discord.gg/279hECYrfX"
+                        bgColor={"transparent"}
+                        fgColor={mode === 'dark' ? "white" : "black"}
+                        style={{
+                            height: "32px",
+                            width: "32px",
+                        }}
+                    />
                 <SocialIcon
                     network="x"
                     url="https://twitter.com/gigo_dev"
