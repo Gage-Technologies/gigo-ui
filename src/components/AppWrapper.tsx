@@ -1541,15 +1541,16 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     </Typography>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', height: '60px', overflow: 'hidden' }}>
-                                    <IconButton color="inherit" href={"/following"} onClick={() => {
+                                    <IconButton color="inherit" href={"/bytesMobile"} onClick={() => {
                                         let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
                                         appWrapperState.chatOpen = false
                                         dispatch(updateAppWrapper(appWrapperState));
                                     }}>
-                                        <BookmarkBorderOutlined style={{ color: theme.palette.text.primary, fontSize: 25 }} />
+                                        {/*<BookmarkBorderOutlined style={{ color: theme.palette.text.primary, fontSize: 25 }} />*/}
+                                        🍌
                                     </IconButton>
                                     <Typography variant="caption" noWrap sx={{ marginTop: '-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px' }}>
-                                        Following
+                                        Bytes
                                     </Typography>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', height: '60px', overflow: 'hidden' }}>
