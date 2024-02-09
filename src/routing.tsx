@@ -10,6 +10,7 @@ import Unsubscribe from "./pages/unsubscribe";
 import config from './config';
 import ByteMobile from "./pages/byteMobile";
 import AllBytesScrollMobile from './pages/allBytesScrollMobile';
+import ByteMobileConcept from './pages/byteMobileConcept';
 const CurateAdminPage = React.lazy(() => import("./pages/curateAdmin"));
 const Home = React.lazy(() => import("./pages/home"));
 const Challenge = React.lazy(() => import("./pages/Challenge"));
@@ -133,6 +134,7 @@ export default function Routing() {
                     <Route path={"/aboutExclusive"} element={<ExclusiveContent />} />
                     <Route path="/byte/:id" element={<Byte />} />
                     <Route path={"/byteMobile/:id"} element={<ByteMobile />} />
+                    <Route path={"/byteMobileConcept/:id"} element={<ByteMobileConcept />} />
                     <Route path={"/aboutBytes"} element={<AboutBytes />} />
                     <Route path={"/privacyPolicy"} element={<PrivacyPolicy/>} />
                     <Route element={<PrivateRoute />}>

@@ -138,6 +138,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
 
     // Check if the current page is ByteMobile
     const isByteMobilePage = location.pathname.startsWith('/byteMobile/');
+    const isByteMobileConceptPage = location.pathname.startsWith("/byteMobileConcept");
 
     const [mode, setMode] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const colorMode = React.useMemo(
@@ -383,7 +384,15 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         <ContentContainer
             leftOpen={leftOpen || homePageLockedDrawer}
             rightOpen={rightOpen}
-            style={{ marginTop: window.location.pathname.startsWith("/launchpad/") && query.get("editor") === "true" ? "28px" : window.innerWidth > 1000 ? "65px" : "56px" }}
+            style={{
+                marginTop: window.location.pathname.startsWith("/byteMobileConcept/")
+                    ? "0px"
+                    : window.location.pathname.startsWith("/launchpad/") && query.get("editor") === "true"
+                        ? "28px"
+                        : window.innerWidth > 1000
+                            ? "65px"
+                            : "56px"
+            }}
             id={"contentContainer"}
         >
             {props.children}
@@ -1284,6 +1293,9 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     }
 
     const mobileAppBar = () => {
+        // Do not render AppBar if it's the byteMobileConcept page
+        if (isByteMobileConceptPage) return null;
+
         return (
             <>
                 <AppBar
@@ -1402,7 +1414,6 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                         )}
                     </Toolbar>
                 </AppBar>
-                {/* Welcome box */}
                 {!loggedIn ? (
                     <Snackbar
                         open={!mobileWelcomeBannerClosed && window.location.pathname !== "" && window.location.pathname !== "/" && window.location.pathname !== "/home"}
@@ -2157,6 +2168,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     }
 
     let appBarRenderer = renderAppBar
+
     if (window.location.pathname.startsWith("/launchpad/") && query.get("editor") === "true") {
         appBarRenderer = renderWorkspaceAppBar
     } else if (window.innerWidth < 1000) {
@@ -2211,7 +2223,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     mb: "0px",
                     // height: "64px",
                 }}>
-                    {appBarRenderer()}
+                    { !isByteMobileConceptPage ? appBarRenderer() : null}
                     {loggedIn ? renderSidebar() : renderLoggedOutSidebar()}
                     {renderChatSideBar()}
                     {
