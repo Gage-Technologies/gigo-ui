@@ -1,19 +1,17 @@
 .cm-tooltip {
     display: block;
     margin-left: 0px;
-    white-space: pre;
-    border-radius: 4px;
+    border-radius: 6px;
     max-width: 40vw;
     overflow: auto;
-    font-family: monospace;
+    font-family: monospace !important;
 
-    /*border: 1px solid rgba(255,255,255,0.18);*/
+    border: 1px solid rgba(255,255,255,0.18);
 }
 
 .cm-tooltip-section {
-    padding: 3px 6px 3px 8px;
-    border: 1px solid rgba(255,255,255,0.18);
-    width: fit-content;
+    /*border: 1px solid rgba(255,255,255,0.18);*/
+    border-radius: 6px;
 }
 
 .documentation.cm-tooltip-section {
@@ -21,22 +19,6 @@
 }
 
 .lint.cm-tooltip-section {
-}
-
-.cm-diagnostic-warning {
-    background-color: #ffa50030;
-}
-
-.cm-diagnostic-error {
-    background-color: #ff000030;
-}
-
-.cm-diagnostic-info {
-    background-color: #0000ff30;
-}
-
-.cm-diagnostic-hint {
-    background-color: #00800030;
 }
 
 .bytes-hover-info-header {
@@ -56,4 +38,8 @@
     font-family: monospace;
     border-radius: 4px;
     margin: 4px;
+}
+
+.cm-tooltip-lint {
+    display: none;
 }

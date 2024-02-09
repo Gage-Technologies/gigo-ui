@@ -6,7 +6,7 @@ import {
     PaletteMode,
     ThemeProvider,
     Typography,
-    Box, Tooltip
+    Box, Tooltip, CircularProgress, alpha
 } from "@mui/material";
 import XpPopup from "../components/XpPopup";
 import { getAllTokens } from "../theme";
@@ -45,6 +45,8 @@ import { debounce } from "lodash";
 import {LaunchLspRequest} from "../models/launch_lsp";
 import {Workspace} from "../models/workspace";
 import CodeSource from "../models/codeSource";
+import LinkIcon from '@mui/icons-material/Link';
+import LinkOffIcon from '@mui/icons-material/LinkOff';
 
 
 interface MergedOutputRow {
@@ -824,7 +826,8 @@ function Byte() {
                 payload: {
                     byte_attempt_id: byteAttemptId,
                     payload: {
-                        lang: byteData.lang
+                        lang: byteData.lang,
+                        content: code,
                     } satisfies LaunchLspRequest
                 }
             }, (msg: WsMessage<any>): boolean => {
@@ -1099,11 +1102,24 @@ function Byte() {
     }
 
     const renderEditorSideBar = () => {
+        let stateTooltipTitle = "Disconnected From DevSpace"
+        let stateIcon = (<LinkOffIcon sx={{color: alpha(theme.palette.text.primary, 0.6)}}/>)
+        if (workspaceState !== null) {
+            if (workspaceState === 1 && lspActive) {
+                stateTooltipTitle = "Connected To DevSpace"
+                stateIcon = (<LinkIcon sx={{color: theme.palette.success.main}} />)
+            } else {
+                stateTooltipTitle = "Connecting To DevSpace"
+                stateIcon = (<CircularProgress size={24} sx={{color: alpha(theme.palette.text.primary, 0.6)}} />)
+            }
+        }
+
         return (
             <Box
                 display={"flex"}
                 flexDirection={"column"}
                 sx={{
+                    position: "relative",
                     width: "fit-content",
                     padding: "0px",
                     gap: "10px",
@@ -1154,6 +1170,22 @@ function Byte() {
                         codeOutput={output?.merged || ""}
                         nextByte={getNextByte()}
                     />
+                )}
+                {activeSidebarTab === null && (
+                    <Tooltip title={stateTooltipTitle}>
+                        <Box
+                            sx={{
+                                position: "absolute",
+                                bottom: "10px",
+                                height: "30px",
+                                width: "30px",
+                                marginLeft: "10px",
+                                padding: "3px"
+                            }}
+                        >
+                            {stateIcon}
+                        </Box>
+                    </Tooltip>
                 )}
             </Box>
         )

@@ -10,7 +10,8 @@ import { Box } from "@mui/material";
 import { indentUnit } from '@codemirror/language';
 import { autocompleteExtension } from "./Extensions/ACTesting";
 import { ctTextHighlightExtension, ctTextHighlightTheme, highlightTesterKeymap } from "./Extensions/CtHighlightExtension";
-import { languageServer } from './Extensions/Lsp';
+import { languageServer } from './Extensions/Lsp/Lsp';
+import "./editor.css"
 
 export type EditorProps = {
     language: string;
@@ -63,6 +64,8 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
 
     const [wsLanguageServer, setWsLanguageServer] = useState<Extension[] | null>(null);
 
+    const [PopupPortal, setPopupPortal] = useState<React.ReactPortal | null>(null);
+
     const selectLang = () => {
         switch (props.language.toLowerCase()) {
             case "go":
@@ -103,6 +106,7 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
 
             allowHTMLContent: true,
             level: props.diagnosticLevel !== undefined ? props.diagnosticLevel : "error",
+            portalCallback: setPopupPortal,
         });
 
         // update the lsp
@@ -165,6 +169,7 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
                 onUpdate={onUpdate}
                 readOnly={props.readonly}
             />
+            {PopupPortal}
         </Box>
     )
 });

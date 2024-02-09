@@ -1,10 +1,11 @@
 // BSD-3 License
 // Copied and modified from: https://github.com/FurqanSoftware/codemirror-languageserver/blob/c0f036fd0add6989f634664f3245cbb5eb8cdeca/src/index.ts
 
+import * as React from "react";
 import WS from "isomorphic-ws";
 import type {Completion, CompletionContext, CompletionResult} from '@codemirror/autocomplete';
 import {autocompletion} from '@codemirror/autocomplete';
-import {setDiagnostics, Diagnostic} from '@codemirror/lint';
+import {setDiagnostics, Diagnostic, linter} from '@codemirror/lint';
 import type {Text} from '@codemirror/state';
 import {Facet} from '@codemirror/state';
 import type {PluginValue, ViewUpdate} from '@codemirror/view';
@@ -14,10 +15,11 @@ import type * as LSP from 'vscode-languageserver-protocol';
 import type {PublishDiagnosticsParams} from 'vscode-languageserver-protocol';
 import {CompletionItemKind, CompletionTriggerKind, DiagnosticSeverity,} from 'vscode-languageserver-protocol';
 import {Transport} from '@open-rpc/client-js/build/transports/Transport';
-import "./styles/lsp.css"
+import "../styles/lsp.css"
 import ReactDOM from 'react-dom';
 import { Rect, tooltips } from '@uiw/react-codemirror';
-import { sleep } from '../../../services/utils';
+import { sleep } from '../../../../services/utils';
+import {createPortal} from "./LspRenderer";
 
 const timeout = 10000;
 const changesDelay = 300;
@@ -316,7 +318,12 @@ class LanguageServerPlugin implements PluginValue {
 
     private changesTimeout: NodeJS.Timeout | null;
 
-    constructor(private view: EditorView, private allowHTMLContent: boolean, private level: "hint" | "info" | "warning" | "error") {
+    constructor(
+        private view: EditorView,
+        private allowHTMLContent: boolean,
+        private level: "hint" | "info" | "warning" | "error",
+        private portalCallback: (portal: React.ReactPortal) => void
+    ) {
         this.client = this.view.state.facet(client);
         this.documentUri = this.view.state.facet(documentUri);
         this.languageId = this.view.state.facet(languageId);
@@ -332,7 +339,9 @@ class LanguageServerPlugin implements PluginValue {
     }
 
     update({docChanged}: ViewUpdate) {
-        if (!docChanged) return;
+        if (!docChanged) {
+            return;
+        }
         if (this.changesTimeout) clearTimeout(this.changesTimeout);
         this.changesTimeout = setTimeout(() => {
             this.sendChange({
@@ -371,6 +380,7 @@ class LanguageServerPlugin implements PluginValue {
 
     requestDiagnostics(view: EditorView) {
         this.sendChange({documentText: view.state.doc.toString()});
+        return this.diagnostics;
     }
 
     combineHoverAndDiagnostics(hoverResult: LSP.Hover | null, diagnostics: Diagnostic[]): string | null {
@@ -424,11 +434,11 @@ class LanguageServerPlugin implements PluginValue {
     
         if (!hoverResult && diagnostics.length === 0) return null;
     
-        // Combine diagnostics and hover information
-        const combinedContent = this.combineHoverAndDiagnostics(hoverResult, diagnostics);
-        if (combinedContent === null) {
-            return null
-        }
+        // // Combine diagnostics and hover information
+        // const combinedContent = this.combineHoverAndDiagnostics(hoverResult, diagnostics);
+        // if (combinedContent === null) {
+        //     return null
+        // }
     
         // Create and return the tooltip
         let end: number = 0;
@@ -436,9 +446,15 @@ class LanguageServerPlugin implements PluginValue {
             pos = posToOffset(view.state.doc, hoverResult.range.start)!;
             end = posToOffset(view.state.doc, hoverResult.range.end)!;
         }
-        const dom = document.createElement('div');
-        dom.classList.add('documentation');
-        dom.innerHTML = combinedContent;
+
+        // if we have a hover result we need to pre-format the contents before sending
+        // it to the portal renderer
+        if (hoverResult) {
+            hoverResult.contents = formatContents(hoverResult.contents)
+        }
+
+        const {portal, dom} = createPortal(hoverResult, diagnostics)
+        this.portalCallback(portal)
         return {pos, end, create: (view) => ({dom}), above: true};
     }
 
@@ -566,6 +582,7 @@ class LanguageServerPlugin implements PluginValue {
                 }
                 return 0;
             });
+        this.diagnostics = diagnostics
         this.view.dispatch(setDiagnostics(this.view.state, diagnostics));
     }
 }
@@ -577,6 +594,7 @@ interface LanguageServerBaseOptions {
     languageId: string;
     allowHTMLContent?: boolean;
     level?: "hint" | "info" | "warning" | "error";
+    portalCallback: (portal: React.ReactPortal) => void;
 }
 
 interface LanguageServerClientOptions extends LanguageServerBaseOptions {
@@ -612,7 +630,8 @@ export function languageServerWithTransport(options: LanguageServerOptions) {
         documentUri.of(options.documentUri),
         languageId.of(options.languageId),
         // @ts-ignore
-        ViewPlugin.define((view) => (plugin = new LanguageServerPlugin(view, options.allowHTMLContent, options.level ? options.level : "error"))),
+        ViewPlugin.define((view) => (plugin = new LanguageServerPlugin(view, options.allowHTMLContent, options.level ? options.level : "error", options.portalCallback))),
+        linter((view) => plugin ? plugin.requestDiagnostics(view) : []),
         hoverTooltip((view, pos) => plugin?.requestHoverTooltip(view, offsetToPos(view.state.doc, pos)) ?? null, {
             hideOn: (tr, tt) => {
                 return false
@@ -621,10 +640,10 @@ export function languageServerWithTransport(options: LanguageServerOptions) {
         }),
         tooltips({
             tooltipSpace: (view) => ({
-                top: 64,
-                bottom: window.innerHeight,
-                left: 0,
-                right: window.innerWidth,
+                top: 80,
+                bottom: window.innerHeight - 16,
+                left: 16,
+                right: window.innerWidth - 16,
             })
         }),
         autocompletion({
