@@ -1,5 +1,5 @@
-import React from "react";
-import CodeMirror, { ViewUpdate, Text, ReactCodeMirrorRef } from '@uiw/react-codemirror';
+import React, { useEffect, useState } from "react";
+import CodeMirror, { ViewUpdate, Text, ReactCodeMirrorRef, Extension } from '@uiw/react-codemirror';
 import { StreamLanguage } from '@codemirror/language';
 import { python } from '@codemirror/lang-python';
 import { go } from '@codemirror/legacy-modes/mode/go';
@@ -10,6 +10,8 @@ import { Box } from "@mui/material";
 import { indentUnit } from '@codemirror/language';
 import { autocompleteExtension } from "./Extensions/ACTesting";
 import { ctTextHighlightExtension, ctTextHighlightTheme, highlightTesterKeymap } from "./Extensions/CtHighlightExtension";
+import { languageServer } from './Extensions/Lsp/Lsp';
+import "./editor.css"
 
 export type EditorProps = {
     language: string;
@@ -17,9 +19,12 @@ export type EditorProps = {
     wrapperStyles?: React.CSSProperties;
     editorStyles?: React.CSSProperties;
     gutterStyles?: React.CSSProperties;
+    scrollerStyles?: React.CSSProperties;
     code: string;
     theme?: string;
     readonly: boolean;
+    lspUrl?: string;
+    diagnosticLevel?: "hint" | "info" | "warning" | "error",
     onChange?: (val: string, viewUpdate: ViewUpdate) => void;
     onUpdate?: (viewUpdate: ViewUpdate) => void;
     onCursorChange?: (bytePosition: number, lineNumber: number, columnNumber: number) => void;
@@ -31,6 +36,7 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
         wrapperStyles: React.CSSProperties;
         editorStyles: React.CSSProperties;
         gutterStyles: React.CSSProperties;
+        scrollerStyles: React.CSSProperties;
         theme: string;
     } = {
         parentStyles: {},
@@ -38,19 +44,27 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
             width: '100%',
             height: '100%',
             borderRadius: "10px",
-            // border: "1px solid #fff"
         },
         editorStyles: {
             borderRadius: '10px',
+            outline: "none !important"
         },
         gutterStyles: {
             borderRadius: '10px',
+        },
+        scrollerStyles: {
+            borderRadius: '10px'
         },
         theme: "dark"
     };
 
     useDynamicStyles('custom-cm-editor-style', ".cm-editor", props.editorStyles ? props.editorStyles : defaultProps.editorStyles);
     useDynamicStyles('custom-cm-gutters-style', ".cm-gutters", props.gutterStyles ? props.gutterStyles : defaultProps.gutterStyles);
+    useDynamicStyles('custom-cm-gutters-style', ".cm-scroller", props.scrollerStyles ? props.scrollerStyles : defaultProps.scrollerStyles);
+
+    const [wsLanguageServer, setWsLanguageServer] = useState<Extension[] | null>(null);
+
+    const [PopupPortal, setPopupPortal] = useState<React.ReactPortal | null>(null);
 
     const selectLang = () => {
         switch (props.language.toLowerCase()) {
@@ -65,6 +79,40 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
         }
     }
 
+    useEffect(() => {
+        if (!props.lspUrl) {
+            return
+        }
+
+        // get fp for the language
+        let fp = "/tmp/pyrun/main.py"
+        let root = "/tmp/pyrun"
+        let lspLangCode = "python"
+        if (props.language.toLowerCase() === "go" || props.language.toLowerCase() === "golang") {
+            root = "/tmp/gorun"
+            fp = "/tmp/gorun/main.go"
+            lspLangCode = "go"
+        }
+
+        console.log("creating lsp")
+        const lsp = languageServer({
+            // WebSocket server uri and other client options.
+            // @ts-ignore
+            serverUri: props.lspUrl,
+            rootUri: `file://${root}`,
+
+            documentUri: `file://${fp}`,
+            languageId: lspLangCode, // As defined at https://microsoft.github.io/language-server-protocol/specification#textDocumentItem.
+
+            allowHTMLContent: true,
+            level: props.diagnosticLevel !== undefined ? props.diagnosticLevel : "error",
+            portalCallback: setPopupPortal,
+        });
+
+        // update the lsp
+        setWsLanguageServer(lsp)
+    }, [props.language, props.lspUrl])
+
     const getExtensions = () => {
         let exts = [
             // this indents with 4 spaces
@@ -72,12 +120,16 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
             // autocompleteExtension,
             ctTextHighlightExtension,
             ctTextHighlightTheme,
-            highlightTesterKeymap
+            highlightTesterKeymap,
         ];
         let lang = selectLang();
         if (lang) {
             exts.push(lang)
         }
+        if (wsLanguageServer) {
+            exts = exts.concat(wsLanguageServer)
+        }
+
         return exts
     }
 
@@ -117,25 +169,9 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
                 onUpdate={onUpdate}
                 readOnly={props.readonly}
             />
+            {PopupPortal}
         </Box>
     )
 });
-
-Editor.defaultProps = {
-    parentStyles: {},
-    wrapperStyles: {
-        width: '100%',
-        height: '100%',
-        borderRadius: "10px",
-        // border: "1px solid #fff"
-    },
-    editorStyles: {
-        borderRadius: '10px',
-    },
-    gutterStyles: {
-        borderRadius: '10px',
-    },
-    theme: "dark"
-};
 
 export default Editor;

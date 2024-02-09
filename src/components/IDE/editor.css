@@ -1,0 +1,35 @@
+.ͼ16.cm-focused .cm-selectionBackground, .ͼ16 .cm-line::selection, .ͼ16 .cm-selectionLayer .cm-selectionBackground, .ͼ16 .cm-content ::selection {
+    border-radius: 6px;
+}
+
+.ͼ1t.cm-focused .cm-selectionBackground, .ͼ1t .cm-line::selection, .ͼ1t .cm-selectionLayer .cm-selectionBackground, .ͼ1t .cm-content ::selection {
+    border-radius: 6px;
+}
+
+.cm-selectionMatch {
+    border-radius: 6px;
+    padding: 2px;
+}
+
+.cm-textfield {
+    border-radius: 6px;
+}
+
+.cm-button {
+    background: none !important;
+    background-image: none !important;
+    border-radius: 6px !important;
+}
+
+.cm-panel.cm-search input[type=checkbox] {
+    border-radius: 6px !important;
+}
+
+.cm-panels {
+    border-radius: 6px;
+}
+
+.cm-searchMatch {
+    border-radius: 6px;
+    padding: 2px;
+}

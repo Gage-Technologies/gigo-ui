@@ -1,0 +1,45 @@
+.cm-tooltip {
+    display: block;
+    margin-left: 0px;
+    border-radius: 6px;
+    max-width: 40vw;
+    overflow: auto;
+    font-family: monospace !important;
+
+    border: 1px solid rgba(255,255,255,0.18);
+}
+
+.cm-tooltip-section {
+    /*border: 1px solid rgba(255,255,255,0.18);*/
+    border-radius: 6px;
+}
+
+.documentation.cm-tooltip-section {
+    border-left: 4px solid #999;
+}
+
+.lint.cm-tooltip-section {
+}
+
+.bytes-hover-info-header {
+    margin: 0px !important;
+    padding: 0px !important;
+}
+
+.cm-tooltip-autocomplete {
+    border: 1px solid rgba(255,255,255,0.18);
+}
+
+.cm-tooltip.cm-tooltip-autocomplete > ul {
+    padding: 4px;
+}
+
+.cm-tooltip.cm-tooltip-autocomplete > ul > li {
+    font-family: monospace;
+    border-radius: 4px;
+    margin: 4px;
+}
+
+.cm-tooltip-lint {
+    display: none;
+}
