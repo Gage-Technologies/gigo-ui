@@ -1,17 +1,25 @@
-import React, { useEffect, useState } from "react";
-import CodeMirror, { ViewUpdate, Text, ReactCodeMirrorRef, Extension } from '@uiw/react-codemirror';
-import { StreamLanguage } from '@codemirror/language';
-import { python } from '@codemirror/lang-python';
-import { go } from '@codemirror/legacy-modes/mode/go';
-import { copilot } from '@uiw/codemirror-theme-copilot';
-import { quietlight } from '@uiw/codemirror-theme-quietlight';
+import React, {useEffect, useState} from "react";
+import CodeMirror, {Extension, ReactCodeMirrorRef, ViewUpdate} from '@uiw/react-codemirror';
+import {indentUnit, StreamLanguage} from '@codemirror/language';
+import {python} from '@codemirror/lang-python';
+import {go} from '@codemirror/legacy-modes/mode/go';
+import {copilot} from '@uiw/codemirror-theme-copilot';
+import {quietlight} from '@uiw/codemirror-theme-quietlight';
 import useDynamicStyles from "../../hooks/dynamicStyles";
-import { Box } from "@mui/material";
-import { indentUnit } from '@codemirror/language';
-import { autocompleteExtension } from "./Extensions/ACTesting";
-import { ctTextHighlightExtension, ctTextHighlightTheme, highlightTesterKeymap } from "./Extensions/CtHighlightExtension";
-import { languageServer } from './Extensions/Lsp/Lsp';
+import {Box} from "@mui/material";
+import {ctTextHighlightExtension, ctTextHighlightTheme, highlightTesterKeymap} from "./Extensions/CtHighlightExtension";
+import {languageServer} from './Extensions/Lsp/Lsp';
 import "./editor.css"
+import {useGlobalCtWebSocket} from "../../services/ct_websocket";
+import {
+    CtGenericErrorPayload,
+    CtMessage,
+    CtMessageOrigin,
+    CtMessageType,
+    CtSemanticRankRequest,
+    CtSemanticRankResponse,
+    CtValidationErrorPayload
+} from "../../models/ct_websocket";
 
 export type EditorProps = {
     language: string;
@@ -62,6 +70,8 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
     useDynamicStyles('custom-cm-gutters-style', ".cm-gutters", props.gutterStyles ? props.gutterStyles : defaultProps.gutterStyles);
     useDynamicStyles('custom-cm-gutters-style', ".cm-scroller", props.scrollerStyles ? props.scrollerStyles : defaultProps.scrollerStyles);
 
+    let ctWs = useGlobalCtWebSocket();
+
     const [wsLanguageServer, setWsLanguageServer] = useState<Extension[] | null>(null);
 
     const [PopupPortal, setPopupPortal] = useState<React.ReactPortal | null>(null);
@@ -78,6 +88,49 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
                 return undefined
         }
     }
+
+    const rankCompletions = React.useCallback(async (preText: string, completions: string[]): Promise<CtSemanticRankResponse | undefined> => {
+        // create a promise that will be resolved when the response is received
+        let resolver: (value: CtSemanticRankResponse | undefined) => void;
+        const promise: Promise<CtSemanticRankResponse | undefined> = new Promise((resolve) => {
+            resolver = resolve;
+        });
+
+        // Define a timeout duration in milliseconds
+        const timeoutDuration = 1000;
+
+        // Create a timeout promise
+        const timeoutPromise = new Promise<CtSemanticRankResponse | undefined>((resolve) => {
+            setTimeout(() => {
+                resolve(undefined);
+            }, timeoutDuration);
+        });
+
+        ctWs.sendWebsocketMessage(
+            {
+                sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                type: CtMessageType.WebSocketMessageTypeSemanticRankRequest,
+                origin: CtMessageOrigin.WebSocketMessageOriginClient,
+                created_at: Date.now(),
+                payload: {
+                    query: preText,
+                    content: completions,
+                }
+            } satisfies CtMessage<CtSemanticRankRequest>,
+            (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtSemanticRankResponse>): boolean => {
+                if (msg.type !== CtMessageType.WebSocketMessageTypeSemanticRankResponse) {
+                    console.log("failed to semantically rank completions: ", msg)
+                    resolver(undefined)
+                    return true
+                }
+                resolver(msg.payload as CtSemanticRankResponse)
+                return true
+            }
+        )
+
+        // Use Promise.race to handle the timeout
+        return Promise.race([promise, timeoutPromise]);
+    }, [ctWs]);
 
     useEffect(() => {
         if (!props.lspUrl) {
@@ -107,6 +160,7 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
             allowHTMLContent: true,
             level: props.diagnosticLevel !== undefined ? props.diagnosticLevel : "error",
             portalCallback: setPopupPortal,
+            rankCompletions: rankCompletions
         });
 
         // update the lsp

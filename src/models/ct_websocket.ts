@@ -21,8 +21,8 @@ export enum CtMessageType {
     WebSocketMessageTypeByteAssistantMessage = 51,
     WebSocketMessageTypeCloseByteChatThreadRequest = 52,
     WebSocketMessageTypeCloseByteChatThreadResponse = 53,
-
-
+    WebSocketMessageTypeSemanticRankRequest = 54,
+    WebSocketMessageTypeSemanticRankResponse = 55,
 }
 
 export enum CtResponseCode {
@@ -213,7 +213,19 @@ export interface CtCloseByteChatThreadResponse {
     success: boolean;
 }
 
+export interface CtSemanticRankRequest {
+    query: string;
+    content: string[];
+}
 
+export interface CtSemanticScores {
+    [key: string]: number;
+}
+
+export interface CtSemanticRankResponse {
+    scores: CtSemanticScores,
+    ranks: string[]
+}
 
 export enum SymbolType {
     SymbolTypeUnknown,

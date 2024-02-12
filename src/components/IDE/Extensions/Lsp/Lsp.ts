@@ -5,7 +5,7 @@ import * as React from "react";
 import WS from "isomorphic-ws";
 import type {Completion, CompletionContext, CompletionResult} from '@codemirror/autocomplete';
 import {autocompletion} from '@codemirror/autocomplete';
-import {setDiagnostics, Diagnostic, linter} from '@codemirror/lint';
+import {Diagnostic, linter, setDiagnostics} from '@codemirror/lint';
 import type {Text} from '@codemirror/state';
 import {Facet} from '@codemirror/state';
 import type {PluginValue, ViewUpdate} from '@codemirror/view';
@@ -16,10 +16,10 @@ import type {PublishDiagnosticsParams} from 'vscode-languageserver-protocol';
 import {CompletionItemKind, CompletionTriggerKind, DiagnosticSeverity,} from 'vscode-languageserver-protocol';
 import {Transport} from '@open-rpc/client-js/build/transports/Transport';
 import "../styles/lsp.css"
-import ReactDOM from 'react-dom';
-import { Rect, tooltips } from '@uiw/react-codemirror';
-import { sleep } from '../../../../services/utils';
+import {tooltips} from '@uiw/react-codemirror';
+import {sleep} from '../../../../services/utils';
 import {createPortal} from "./LspRenderer";
+import {CtSemanticRankResponse} from "../../../../models/ct_websocket";
 
 const timeout = 10000;
 const changesDelay = 300;
@@ -322,7 +322,8 @@ class LanguageServerPlugin implements PluginValue {
         private view: EditorView,
         private allowHTMLContent: boolean,
         private level: "hint" | "info" | "warning" | "error",
-        private portalCallback: (portal: React.ReactPortal) => void
+        private portalCallback: (portal: React.ReactPortal) => void,
+        private rankCompletions?: (preText: string, completions: string[]) => Promise<CtSemanticRankResponse | undefined>
     ) {
         this.client = this.view.state.facet(client);
         this.documentUri = this.view.state.facet(documentUri);
@@ -487,7 +488,7 @@ class LanguageServerPlugin implements PluginValue {
             } = {
                 label,
                 detail,
-                apply: textEdit?.newText ?? label,
+                apply: (textEdit?.newText ?? label).replace(/(\w+)\([^)]*\)/g, '$1()'),
                 type: kind && CompletionItemKindMap[kind].toLowerCase(),
                 sortText: sortText ?? label,
                 filterText: filterText ?? label,
@@ -498,6 +499,23 @@ class LanguageServerPlugin implements PluginValue {
             return completion;
         });
 
+        if (this.rankCompletions && options.length > 0) {
+            const preText = context.state.doc.toString().slice(
+                context.pos - 100 > 0 ? context.pos - 100: 0,
+                context.pos
+            )
+
+            const contents = options.map(x => x.label)
+
+            const rankRes = await this.rankCompletions(preText, contents)
+            if (rankRes) {
+                for (let i = 0; i < options.length; i++) {
+                    try {
+                        options[i].boost = rankRes.scores[options[i].label] * 10
+                    } catch (e) {}
+                }
+            }
+        }
 
         const [span, match] = prefixMatch(options);
         const token = context.matchBefore(match);
@@ -509,17 +527,9 @@ class LanguageServerPlugin implements PluginValue {
             if (/^\w+$/.test(word)) {
                 options = options
                     .filter(({filterText}) => filterText.toLowerCase().startsWith(word))
-                    .sort(({apply: a}, {apply: b}) => {
-                        switch (true) {
-                            case a.startsWith(token.text) && !b.startsWith(token.text):
-                                return -1;
-                            case !a.startsWith(token.text) && b.startsWith(token.text):
-                                return 1;
-                        }
-                        return 0;
-                    });
             }
         }
+
         return {
             from: pos, options,
         };
@@ -595,6 +605,7 @@ interface LanguageServerBaseOptions {
     allowHTMLContent?: boolean;
     level?: "hint" | "info" | "warning" | "error";
     portalCallback: (portal: React.ReactPortal) => void;
+    rankCompletions?: (preText: string, completions: string[]) => Promise<CtSemanticRankResponse | undefined>;
 }
 
 interface LanguageServerClientOptions extends LanguageServerBaseOptions {
@@ -630,7 +641,7 @@ export function languageServerWithTransport(options: LanguageServerOptions) {
         documentUri.of(options.documentUri),
         languageId.of(options.languageId),
         // @ts-ignore
-        ViewPlugin.define((view) => (plugin = new LanguageServerPlugin(view, options.allowHTMLContent, options.level ? options.level : "error", options.portalCallback))),
+        ViewPlugin.define((view) => (plugin = new LanguageServerPlugin(view, options.allowHTMLContent, options.level ? options.level : "error", options.portalCallback, options.rankCompletions))),
         linter((view) => plugin ? plugin.requestDiagnostics(view) : []),
         hoverTooltip((view, pos) => plugin?.requestHoverTooltip(view, offsetToPos(view.state.doc, pos)) ?? null, {
             hideOn: (tr, tt) => {
