@@ -6,7 +6,7 @@ import {
     PaletteMode,
     ThemeProvider,
     Typography,
-    Box, Tooltip, CircularProgress, alpha
+    Box, Tooltip, CircularProgress, alpha, Button
 } from "@mui/material";
 import XpPopup from "../components/XpPopup";
 import { getAllTokens } from "../theme";
@@ -271,6 +271,8 @@ function Byte() {
     const [lspActive, setLspActive] = React.useState(false)
     const [workspaceState, setWorkspaceState] = useState<null | number>(null);
     const [workspaceId, setWorkspaceId] = useState<string>('')
+
+    const [connectButtonLoading, setConnectButtonLoading] = useState<boolean>(false)
 
 
     let { id } = useParams();
@@ -1102,7 +1104,38 @@ function Byte() {
     }
 
     const renderEditorSideBar = () => {
-        let stateTooltipTitle = "Disconnected From DevSpace"
+        let stateTooltipTitle: string | React.ReactElement = (
+            <Box>
+                <Typography variant='caption'>Disconnected From DevSpace</Typography>
+                <LoadingButton
+                    loading={connectButtonLoading}
+                    variant={"outlined"}
+                    sx={{
+                        fontSize: "10px",
+                        height: "18px",
+                        m: 0.5
+                    }}
+                    onClick={async () => {
+                        if (byteData) {
+                            setConnectButtonLoading(true)
+                            for (let i = 0; i < 5; i++) {
+                                let created = await createWorkspace(byteData._id);
+                                if (created) {
+                                    break
+                                }
+
+                                if (i === 4) {
+                                    break
+                                }
+                            }
+                            setConnectButtonLoading(false)
+                        }
+                    }}
+                >
+                    Connect
+                </LoadingButton>
+            </Box>
+        )
         let stateIcon = (<LinkOffIcon sx={{color: alpha(theme.palette.text.primary, 0.6)}}/>)
         if (workspaceState !== null) {
             if (workspaceState === 1 && lspActive) {
