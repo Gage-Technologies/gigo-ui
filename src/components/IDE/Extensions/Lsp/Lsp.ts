@@ -499,6 +499,19 @@ class LanguageServerPlugin implements PluginValue {
             return completion;
         });
 
+        const [span, match] = prefixMatch(options);
+        const token = context.matchBefore(match);
+        let {pos} = context;
+
+        if (token) {
+            pos = token.from;
+            const word = token.text.toLowerCase();
+            if (/^\w+$/.test(word)) {
+                options = options
+                    .filter(({filterText}) => filterText.toLowerCase().startsWith(word))
+            }
+        }
+
         if (this.rankCompletions && options.length > 0) {
             const preText = context.state.doc.toString().slice(
                 context.pos - 100 > 0 ? context.pos - 100: 0,
@@ -514,19 +527,6 @@ class LanguageServerPlugin implements PluginValue {
                         options[i].boost = rankRes.scores[options[i].label] * 10
                     } catch (e) {}
                 }
-            }
-        }
-
-        const [span, match] = prefixMatch(options);
-        const token = context.matchBefore(match);
-        let {pos} = context;
-
-        if (token) {
-            pos = token.from;
-            const word = token.text.toLowerCase();
-            if (/^\w+$/.test(word)) {
-                options = options
-                    .filter(({filterText}) => filterText.toLowerCase().startsWith(word))
             }
         }
 
