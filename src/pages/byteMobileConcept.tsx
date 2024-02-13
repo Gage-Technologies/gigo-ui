@@ -9,7 +9,7 @@ import {
     Box, Tooltip, Button, Tab, SpeedDial, SpeedDialIcon, SpeedDialAction
 } from "@mui/material";
 import XpPopup from "../components/XpPopup";
-import { getAllTokens } from "../theme";
+import {getAllTokens, themeHelpers} from "../theme";
 import { Close, KeyboardArrowUp, PlayArrow } from "@material-ui/icons";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { useNavigate } from "react-router-dom";
@@ -895,43 +895,63 @@ function ByteMobileConcept() {
 
     const DraggableBottomBox: React.FC<{ getNextByte: typeof getNextByte }> = ({ getNextByte }) => {
         const navigate = useNavigate();
-        const [isDragging, setIsDragging] = useState(false);
+        // Define spring animation for drag and opacity
+        const [{ y, opacity }, set] = useSpring(() => ({
+            y: 0,
+            opacity: 0,
+        }));
 
-        // React spring animation for the moving effect
-        const [{ y }, set] = useSpring(() => ({ y: 0 }));
-
-        // Gesture binding
+        // Handle drag gesture
         const bind = useDrag(({ down, movement: [, my], distance, cancel }) => {
-            if (down && distance > window.innerHeight / 2) { // Check if dragged halfway up
+            if (down && distance > window.innerHeight / 1.5) {
                 const nextByte = getNextByte();
                 if (nextByte) {
-                    navigate(`/byteMobileConcept/${nextByte._id}`); // Assuming nextByte contains an _id property
+                    navigate(`/byteMobileConcept/${nextByte._id}`);
                     cancel();
                 }
             }
-            set({ y: down ? my : 0, immediate: down });
-            setIsDragging(down);
+            // Make the fading effect more dramatic by adjusting the opacity calculation
+            // Example: Use a cubic function for a quicker transition to full opacity
+            const newOpacity = Math.min(1, (distance / (window.innerHeight / 2)) ** 3);
+            set({
+                y: down ? my : 0,
+                opacity: down ? newOpacity : 0,
+            });
         }, { axis: 'y' });
 
         return (
-            <animated.div
-                {...bind()}
-                style={{
-                    transform: y.interpolate(y => `translateY(${y}px)`),
-                    touchAction: 'none',
-                    position: 'fixed',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundColor: '#232a2f',
-                }}
-            >
-                <KeyboardArrowUp style={{ fontSize: '2rem' }} />
-                {isDragging && <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(255,255,255,0.5)' }}></div>}
-            </animated.div>
+            <>
+                <animated.div
+                    {...bind()}
+                    style={{
+                        transform: y.to(y => `translateY(${y}px)`),
+                        position: 'fixed',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: '#232a2f',
+                        zIndex: 10,
+                    }}
+                >
+                    <KeyboardArrowUp style={{ fontSize: '2rem' }} />
+                </animated.div>
+                {/* Fullscreen overlay that fades more dramatically */}
+                <animated.div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)', // You might want to adjust the color and base opacity
+                        opacity: opacity,
+                        zIndex: 9, // Ensure this is below the draggable element
+                    }}
+                />
+            </>
         );
     };
 
@@ -950,6 +970,11 @@ function ByteMobileConcept() {
             icon: <DeveloperModeIcon />,
             name: 'Editor',
             action: () => setActiveView('editor')
+        },
+        {
+            icon: <span role="img" aria-label="banana">🍌</span>,
+            name: 'All Bytes',
+            action: () => navigate('/bytesMobile')
         },
     ];
 
