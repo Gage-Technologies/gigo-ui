@@ -50,6 +50,8 @@ import HomeIcon from "@mui/icons-material/Home";
 import { ReactComponent as CTIcon } from '../components/Icons/code-teacher-bytes-mobile.svg';
 import DeveloperModeIcon from '@mui/icons-material/DeveloperMode';
 import ByteChatMobile from "../components/CodeTeacher/ByteChatMobile";
+import {animated, useSpring} from "react-spring";
+import { useDrag } from 'react-use-gesture';
 
 interface MergedOutputRow {
     error: boolean;
@@ -890,6 +892,49 @@ function ByteMobileConcept() {
         return recommendedBytes[0]
     }
 
+
+    const DraggableBottomBox: React.FC<{ getNextByte: typeof getNextByte }> = ({ getNextByte }) => {
+        const navigate = useNavigate();
+        const [isDragging, setIsDragging] = useState(false);
+
+        // React spring animation for the moving effect
+        const [{ y }, set] = useSpring(() => ({ y: 0 }));
+
+        // Gesture binding
+        const bind = useDrag(({ down, movement: [, my], distance, cancel }) => {
+            if (down && distance > window.innerHeight / 2) { // Check if dragged halfway up
+                const nextByte = getNextByte();
+                if (nextByte) {
+                    navigate(`/byteMobileConcept/${nextByte._id}`); // Assuming nextByte contains an _id property
+                    cancel();
+                }
+            }
+            set({ y: down ? my : 0, immediate: down });
+            setIsDragging(down);
+        }, { axis: 'y' });
+
+        return (
+            <animated.div
+                {...bind()}
+                style={{
+                    transform: y.interpolate(y => `translateY(${y}px)`),
+                    touchAction: 'none',
+                    position: 'fixed',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: '#232a2f',
+                }}
+            >
+                <KeyboardArrowUp style={{ fontSize: '2rem' }} />
+                {isDragging && <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(255,255,255,0.5)' }}></div>}
+            </animated.div>
+        );
+    };
+
     const actions = [
         {
             icon: <HomeIcon />,
@@ -1069,20 +1114,7 @@ function ByteMobileConcept() {
                         </SpeedDial>
                     </Box>
                 )}
-                <Box
-                    sx={{
-                        position: 'fixed',
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        backgroundColor: '#232a2f',
-                    }}
-                >
-                    <KeyboardArrowUp style={{ fontSize: '2rem' }} />
-                </Box>
+                <DraggableBottomBox getNextByte={getNextByte} />
             </CssBaseline>
         </ThemeProvider>
     );
