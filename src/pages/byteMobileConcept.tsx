@@ -49,6 +49,7 @@ import ByteNextStepMobile from "../components/CodeTeacher/ByteNextStepMobile";
 import HomeIcon from "@mui/icons-material/Home";
 import { ReactComponent as CTIcon } from '../components/Icons/code-teacher-bytes-mobile.svg';
 import DeveloperModeIcon from '@mui/icons-material/DeveloperMode';
+import ByteChatMobile from "../components/CodeTeacher/ByteChatMobile";
 
 interface MergedOutputRow {
     error: boolean;
@@ -132,7 +133,7 @@ function ByteMobileConcept() {
         flexDirection: 'row',
         justifyContent: 'center',
         width: '100%',
-        height: "35px",
+        height: "100%",
         marginTop: '5px'
     };
 
@@ -214,7 +215,7 @@ function ByteMobileConcept() {
     const editorContainerRef = React.useRef<HTMLDivElement>(null);
     const editorRef = React.useRef<ReactCodeMirrorRef>(null);
     const [tabValue, setTabValue] = useState(0);
-
+    const [activeView, setActiveView] = useState("editor");
     const [activeSidebarTab, setActiveSidebarTab] = React.useState<string | null>(null);
     const [speedDialOpen, setSpeedDialOpen] = useState(false);
     const handleSpeedDialOpen = () => setSpeedDialOpen(true);
@@ -896,14 +897,14 @@ function ByteMobileConcept() {
             action: () => navigate('/home/')
         },
         {
-            icon: (<CTIcon/>),
+            icon: <CTIcon />,
             name: 'Byte Chat',
-            action: () => console.log("Ct Clicked")
+            action: () => setActiveView('byteChat')
         },
         {
             icon: <DeveloperModeIcon />,
             name: 'Editor',
-            action: () => console.log("Editor selected")
+            action: () => setActiveView('editor')
         },
     ];
 
@@ -926,11 +927,11 @@ function ByteMobileConcept() {
                                     lang={programmingLanguages[byteData ? byteData.lang : 5]}
                                     code={code}
                                     byteId={id || ""}
-                                    // @ts-ignore
+                                    //@ts-ignore
                                     description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
-                                    // @ts-ignore
+                                    //@ts-ignore
                                     questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
-                                    // @ts-ignore
+                                    //@ts-ignore
                                     dev_steps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
                                     maxWidth={"80%"}
                                     codeOutput={output?.merged || ""}
@@ -967,10 +968,10 @@ function ByteMobileConcept() {
                                     currentCode={code}
                                     maxWidth="100%"
                                     bytesID={id || ""}
-                                    // @ts-ignore
-                                    description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
-                                    // @ts-ignore
-                                    dev_steps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
+                                    //@ts-ignore
+                                    bytesDescription={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
+                                    //@ts-ignore
+                                    bytesDevSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
                                     bytesLang={programmingLanguages[byteData ? byteData.lang : 5]}
                                     codePrefix={codeBeforeCursor}
                                     codeSuffix={codeAfterCursor}
@@ -979,56 +980,76 @@ function ByteMobileConcept() {
                         </>
                     )}
                 </Box>
-                {/* Only render the editor and related components if no sidebar tab is active */}
                 {activeSidebarTab === null && (
                     <Box style={editorAndTerminalStyle} ref={editorContainerRef}>
-                        {code.length > 0 && (
-                            <Tooltip title="Run Code">
-                                <LoadingButton
-                                    loading={executingCode}
-                                    variant="text"
-                                    color={"success"}
-                                    style={{
-                                        position: 'absolute',
-                                        right: '8px',
-                                        top: '8px',
-                                        zIndex: 3,
-                                        borderRadius: "50%",
-                                        minWidth: 0,
-                                    }}
-                                    onClick={() => {
-                                        setOutputPopup(false);
-                                        buttonClickedRef.current = true;
-                                        if (!authState.authenticated) {
-                                            navigate("/signup")
-                                            return;
-                                        }
-                                        executeCode();
-                                    }}
-                                >
-                                    <PlayArrow />
-                                </LoadingButton>
-                            </Tooltip>
+                        {activeView === 'editor' && (
+                            <>
+                                {code.length > 0 && (
+                                    <Tooltip title="Run Code">
+                                        <LoadingButton
+                                            loading={executingCode}
+                                            variant="text"
+                                            color={"success"}
+                                            style={{
+                                                position: 'absolute',
+                                                right: '8px',
+                                                top: '8px',
+                                                zIndex: 3,
+                                                borderRadius: "50%",
+                                                minWidth: 0,
+                                            }}
+                                            onClick={() => {
+                                                setOutputPopup(false);
+                                                buttonClickedRef.current = true;
+                                                if (!authState.authenticated) {
+                                                    navigate("/signup")
+                                                    return;
+                                                }
+                                                executeCode();
+                                            }}
+                                        >
+                                            <PlayArrow />
+                                        </LoadingButton>
+                                    </Tooltip>
+                                )}
+                                <Editor
+                                    ref={editorRef}
+                                    parentStyles={editorStyle}
+                                    language={programmingLanguages[byteData ? byteData.lang : 5]}
+                                    code={code}
+                                    theme={mode}
+                                    readonly={!authState.authenticated}
+                                    onChange={(val, view) => handleEditorChange(val)}
+                                    onCursorChange={(bytePosition, line, column) => setCursorPosition({ row: line, column: column })}
+                                    editorStyles={editorStyles}
+                                />
+                                {terminalVisible && output && (
+                                    <ByteTerminal
+                                        output={output}
+                                        onClose={handleCloseTerminal}
+                                        onStop={() => cancelCodeExec(commandId)}
+                                        onInputSubmit={(input: string) => stdInExecRequest(commandId, input)}
+                                        isRunning={executingCode}
+                                    />
+                                )}
+                            </>
                         )}
-                        <Editor
-                            ref={editorRef}
-                            parentStyles={editorStyle}
-                            language={programmingLanguages[byteData ? byteData.lang : 5]}
-                            code={code}
-                            theme={mode}
-                            readonly={!authState.authenticated}
-                            onChange={(val, view) => handleEditorChange(val)}
-                            onCursorChange={(bytePosition, line, column) => setCursorPosition({ row: line, column: column })}
-                            editorStyles={editorStyles}
-                        />
-                        {terminalVisible && output && (
-                            <ByteTerminal
-                                output={output}
-                                onClose={handleCloseTerminal}
-                                onStop={() => cancelCodeExec(commandId)}
-                                onInputSubmit={(input: string) => stdInExecRequest(commandId, input)}
-                                isRunning={executingCode}
-                            />
+                        {activeView === 'byteChat' && byteData && id !== undefined && (
+                            <div style={{ marginBottom: "5%", marginLeft:"1%", marginRight:"1%" }}>
+                                <ByteChatMobile
+                                    byteID={id}
+                                    // @ts-ignore
+                                    description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
+                                    // @ts-ignore
+                                    devSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
+                                    difficulty={difficultyToString(determineDifficulty())}
+                                    // @ts-ignore
+                                    questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
+                                    codePrefix={codeBeforeCursor}
+                                    codeSuffix={codeAfterCursor}
+                                    codeLanguage={programmingLanguages[byteData ? byteData.lang : 5]}
+                                />
+                            </div>
                         )}
                         <SpeedDial
                             ariaLabel="SpeedDial"

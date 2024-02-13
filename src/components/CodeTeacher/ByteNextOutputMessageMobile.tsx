@@ -254,7 +254,7 @@ export default function ByteNextOutputMessageMobile(props: ByteNextOutputMessage
                     backgroundColor: "transparent",
                     border: "none",
                     boxShadow: "none",
-                    width: "100%"
+                    width: "100%",
                 }}
             >
                 <Box
