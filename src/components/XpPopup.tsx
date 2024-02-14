@@ -7,6 +7,7 @@ import {
     Box,
     Modal,
     IconButton,
+    Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import {getAllTokens, themeHelpers} from "../theme";
@@ -95,6 +96,8 @@ const XpPopup = (props: IProps) => {
 
     useEffect(() => {
         let premium = authState.role.toString()
+        // //remove
+        // premium = "0"
         if (premium === "0") {
             retrieveProUrls()
         }
@@ -133,6 +136,8 @@ const XpPopup = (props: IProps) => {
 
     const confirmButton = () => {
         let premium = authState.role.toString()
+        // //remove
+        // premium = "0"
         if (premium === "0") {
             setShowPro(true)
         } else if (lootBox) {
@@ -195,51 +200,6 @@ const XpPopup = (props: IProps) => {
             return (
                 <>
                     <style>
-                        {`
-                            /* Your existing animation styles */
-                            .card {
-                                border-radius: 10px;
-                                padding: 20px;
-                                margin: 10px;
-                                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-                                text-align: center;
-                                width: 200px;
-                            }
-                            .plan-header {
-                                font-size: 20px;
-                                margin-bottom: 10px;
-                            }
-                            .plan-price {
-                                font-size: 24px;
-                                margin-bottom: 10px;
-                            }
-                            .plan-button {
-                                border: none;
-                                padding: 15px 32px;
-                                text-align: center;
-                                text-decoration: none;
-                                display: inline-block;
-                                font-size: 16px;
-                                margin: 4px 2px;
-                                cursor: pointer;
-                            }
-                            .promo-image {
-                                width: 30%; /* Make the image full width of the container */
-                                margin-bottom: 20px; /* Add space below the image */
-                            }
-                            .fireworks {
-                                width: 30%
-                            }
-                            .title {
-                                font-size: 34px; /* Larger font size for the title */
-                                margin-bottom: 10px; /* Space below the title */
-                                font-weight: bold;
-                            }
-                            .subtitle {
-                                font-size: 18px; /* Smaller font size for the subtitle */
-                                margin-bottom: 20px; /* Space below the subtitle */
-                            }
-                        `}
                     </style>
                     <div style={{
                         borderRadius: "10px",
@@ -277,27 +237,40 @@ const XpPopup = (props: IProps) => {
                             >
                             <Close />
                         </IconButton>
-                        <img src={premiumGorilla} className="promo-image"/>
-                        <div className="title">GIGO Pro</div>
-                        <div className="subtitle">Get access to more resources and become a better developer today</div>
+                        <img src={premiumGorilla} style={{width: "30%", marginBottom: "20px"}}/>
+                        <Typography style={{marginBottom: "10px", fontWeight: "bold", fontSize: "34px"}} align={"center"}>GIGO Pro</Typography>
+                        <Typography style={{marginBottom: "20px", fontSize: "18px"}} align={"center"}>Get access to more resources and become a better developer today</Typography>
                         <div style={{
                             display: "flex",
                             justifyContent: "center"
                         }}>
-                            <div className="card" style={{
+                            <div style={{
                                 backgroundColor:
                                 //@ts-ignore
-                                "#070D0D"}}>
-                                <div className="plan-header">1 Month</div>
-                                <div className="plan-price">$15 / MO</div>
+                                "#070D0D",
+                                borderRadius: "10px",
+                                padding: "20px",
+                                margin: "10px",
+                                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                                textAlign: "center",
+                                width: "200px"
+                            }}>
+                                <Typography style={{marginBottom: "10px", fontSize: "20px"}} align={"center"}>1 Month</Typography>
+                                <Typography style={{marginBottom: "10px", fontSize: "24px"}} align={"center"}>$15 / MO</Typography>
                                 <Button variant="contained" onClick={() => window.open(proMonthlyLink, "_blank")} style={{backgroundColor: theme.palette.secondary.dark}}>Select</Button>
                             </div>
-                            <div className="card" style={{
+                            <div style={{
                                 backgroundColor:
                                 //@ts-ignore
-                                "#070D0D"}}>
-                                <div className="plan-header">12 Months</div>
-                                <div className="plan-price">$11.25 / MO</div>
+                                    "#070D0D",
+                                borderRadius: "10px",
+                                padding: "20px",
+                                margin: "10px",
+                                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                                textAlign: "center",
+                                width: "200px"}}>
+                                <Typography style={{marginBottom: "10px", fontSize: "20px"}} align={"center"}>12 Months</Typography>
+                                <Typography style={{marginBottom: "10px", fontSize: "24px"}} align={"center"}>$11.25 / MO</Typography>
                                 <Button variant="contained" onClick={() => window.open(proYearlyLink, "_blank")} style={{backgroundColor: theme.palette.secondary.dark}}>Select</Button>
                             </div>
                         </div>
