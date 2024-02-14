@@ -238,8 +238,8 @@ const XpPopup = (props: IProps) => {
                             <Close />
                         </IconButton>
                         <img src={premiumGorilla} style={{width: "30%", marginBottom: "20px"}}/>
-                        <Typography style={{marginBottom: "10px", fontWeight: "bold", fontSize: "34px"}} align={"center"}>GIGO Pro</Typography>
-                        <Typography style={{marginBottom: "20px", fontSize: "18px"}} align={"center"}>Get access to more resources and become a better developer today</Typography>
+                        <Typography variant={"h4"} style={{marginBottom: "10px"}} align={"center"}>GIGO Pro</Typography>
+                        <Typography variant={"body1"} style={{marginBottom: "20px"}} align={"center"}>Get access to more resources and become a better developer today</Typography>
                         <div style={{
                             display: "flex",
                             justifyContent: "center"
@@ -255,8 +255,8 @@ const XpPopup = (props: IProps) => {
                                 textAlign: "center",
                                 width: "200px"
                             }}>
-                                <Typography style={{marginBottom: "10px", fontSize: "20px"}} align={"center"}>1 Month</Typography>
-                                <Typography style={{marginBottom: "10px", fontSize: "24px"}} align={"center"}>$15 / MO</Typography>
+                                <Typography variant={"subtitle1"} style={{marginBottom: "10px"}} align={"center"}>1 Month</Typography>
+                                <Typography variant={"h5"} style={{marginBottom: "10px"}} align={"center"}>$15 / MO</Typography>
                                 <Button variant="contained" onClick={() => window.open(proMonthlyLink, "_blank")} style={{backgroundColor: theme.palette.secondary.dark}}>Select</Button>
                             </div>
                             <div style={{
@@ -269,8 +269,8 @@ const XpPopup = (props: IProps) => {
                                 boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
                                 textAlign: "center",
                                 width: "200px"}}>
-                                <Typography style={{marginBottom: "10px", fontSize: "20px"}} align={"center"}>12 Months</Typography>
-                                <Typography style={{marginBottom: "10px", fontSize: "24px"}} align={"center"}>$11.25 / MO</Typography>
+                                <Typography variant={"subtitle1"} style={{marginBottom: "10px"}} align={"center"}>12 Months</Typography>
+                                <Typography variant={"h5"} style={{marginBottom: "10px"}} align={"center"}>$11.25 / MO</Typography>
                                 <Button variant="contained" onClick={() => window.open(proYearlyLink, "_blank")} style={{backgroundColor: theme.palette.secondary.dark}}>Select</Button>
                             </div>
                         </div>
@@ -350,7 +350,7 @@ const XpPopup = (props: IProps) => {
                     <Box
                         sx={showPro ? {
                             width: window.innerWidth < 1000 ? "90vw" : "28vw",
-                            height: window.innerWidth < 1000 ? "70vh": "62vh",
+                            height: window.innerWidth < 1000 ? "78vh": "65vh",
                             minHeight: "420px",
                             // justifyContent: "center",
                             // marginLeft: "25vw",
