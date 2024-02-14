@@ -77,18 +77,18 @@ export default function Routing() {
 
         // route to login for an unauthenticated user
         if (!authState.authenticated) {
-            return <Navigate to="/login" replace={true} />
+            return <Navigate to="/signup" replace={true} />
         }
 
         // clear expired authentication and route to login
         if (authState.expiration * 1000 < new Date().getTime()) {
             dispatch(updateAuthState(initialAuthState))
-            return <Navigate to="/login" replace={true} />
+            return <Navigate to="/signup" replace={true} />
         }
 
         // route to route for out-of-role url
         if (role !== null && role !== authState.role) {
-            return <Navigate to="/login" replace={true} />
+            return <Navigate to="/signup" replace={true} />
         }
 
         return <Outlet />

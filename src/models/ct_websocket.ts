@@ -96,7 +96,10 @@ export interface CtByteNextOutputResponse {
 export interface CtByteSuggestionRequest {
     byte_id: string;
     byte_description: string;
+    byte_development_steps: string;
+    code_prefix: string;
     code: string;
+    code_suffix: string;
     assistant_id: string;
     code_language: string;
 }

@@ -46,7 +46,17 @@ import {LaunchLspRequest} from "../models/launch_lsp";
 import {Workspace} from "../models/workspace";
 import CodeSource from "../models/codeSource";
 import StopIcon from "@mui/icons-material/Stop";
-import { CtByteSuggestionRequest, CtByteSuggestionResponse, CtGenericErrorPayload, CtMessage, CtMessageOrigin, CtMessageType, CtValidationErrorPayload } from "../models/ct_websocket";
+import {
+    CtByteSuggestionRequest,
+    CtByteSuggestionResponse,
+    CtGenericErrorPayload,
+    CtMessage,
+    CtMessageOrigin,
+    CtMessageType, CtParseFileRequest,
+    CtParseFileResponse,
+    CtValidationErrorPayload,
+    Node as CtParseNode
+} from "../models/ct_websocket";
 import LinkIcon from '@mui/icons-material/Link';
 import LinkOffIcon from '@mui/icons-material/LinkOff';
 import { ctHighlightCodeRangeFullLines, removeCtHighlightCodeRange } from "../components/IDE/Extensions/CtHighlightExtension";
@@ -54,6 +64,8 @@ import { CtPopupExtensionEngine, createCtPopupExtension } from "../components/ID
 import ReactDOM from "react-dom";
 import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
 import ByteSuggestion from "../components/CodeTeacher/ByteSuggestions";
+import {ctCreateCodeActions} from "../components/IDE/Extensions/CtCodeActionExtension";
+import ByteSuggestions2, {splitStringByLines} from "../components/CodeTeacher/ByteSuggestions2";
 
 
 interface MergedOutputRow {
@@ -280,11 +292,22 @@ function Byte() {
     const [lspActive, setLspActive] = React.useState(false)
     const [workspaceState, setWorkspaceState] = useState<null | number>(null);
     const [workspaceId, setWorkspaceId] = useState<string>('')
-    const [SuggestionPortal, setSuggestionPortal] = React.useState<React.ReactPortal | null>(null)
 
     const [connectButtonLoading, setConnectButtonLoading] = useState<boolean>(false)
     const [startSuggestionLine, setStartSuggestionLine] = React.useState<number | null>(null)
     const [endSuggestionLine, setEndSuggestionLine] = React.useState<number | null>(null)
+
+    const [editorExtensions, setEditorExtensions] = useState<Extension[]>([])
+
+    const [lastParse, setLastParse] = useState("")
+    const [parsedSymbols, setParsedSymbols] = useState<CtParseFileResponse | null>(null)
+    const [codeActionPortals, setCodeActionPortals] = useState<{id: string, portal: React.ReactPortal}[]>([])
+
+    const [codingTimeout, setCodingTimeout] = useState<NodeJS.Timeout | null>(null)
+
+    const [loadingCodeCleanup, setLoadingCodeCleanup] = React.useState<string | null>(null);
+
+    const [suggestionRange, setSuggestionRange] = useState<{start_line: number, end_line: number} | null>(null);
 
 
     let { id } = useParams();
@@ -326,7 +349,7 @@ function Byte() {
     }, [])
 
     const updateCode = React.useCallback((newCode: string) => {
-        const message = {
+        globalWs.sendWebsocketMessage({
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
             type: WsMessageType.ByteUpdateCode,
             payload: {
@@ -334,14 +357,44 @@ function Byte() {
                 content: newCode,
                 content_difficulty: bytesState ? bytesState.byteDifficulty : 0
             }
-        };
-
-        globalWs.sendWebsocketMessage(message, null);
+        }, null);
     }, [globalWs, byteAttemptId, bytesState]);
 
     const debouncedUpdateCode = React.useCallback(debounce(updateCode, 1000, {
         trailing: true
     }), [updateCode]);
+
+    const parseSymbols = React.useCallback((newCode: string) => {
+        if (byteData === null) {
+            return
+        }
+
+        ctWs.sendWebsocketMessage(
+            {
+                sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                type: CtMessageType.WebSocketMessageTypeParseFileRequest,
+                origin: CtMessageOrigin.WebSocketMessageOriginClient,
+                created_at: Date.now(),
+                payload: {
+                    relative_path: "main." + (byteData.lang === 5 ? "py" : "go"),
+                    content: newCode,
+                }
+            } satisfies CtMessage<CtParseFileRequest>,
+            (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtParseFileResponse>): boolean => {
+                if (msg.type !== CtMessageType.WebSocketMessageTypeParseFileResponse) {
+                    console.log("failed to parse file: ", msg)
+                    return true
+                }
+                setParsedSymbols(msg.payload as CtParseFileResponse)
+                setLastParse(newCode);
+                return true
+            }
+        )
+    }, [byteData])
+
+    const debouncedParseSymbols = React.useCallback(debounce(parseSymbols, 3000, {
+        trailing: true
+    }), [parseSymbols]);
 
     const cancelCodeExec = (commandId: string) => {
 
@@ -728,6 +781,7 @@ function Byte() {
         setWorkspaceState(null)
         setLspActive(false)
         setLoading(true);
+        setSuggestionRange(null)
         getRecommendedBytes()
         getByte(id).then(() => {
             if (authState.authenticated && id) {
@@ -869,6 +923,46 @@ function Byte() {
         )
     }
 
+    const triggerCodeCleanup = React.useCallback((node: CtParseNode) => {
+        if (!editorRef.current?.view) {
+            return
+        }
+        setLoadingCodeCleanup(node.id)
+        // ctHighlightCodeRangeFullLines(editorRef.current.view, node.position.start_line, node.position.end_line+1);
+
+
+        // set range here
+        setSuggestionRange({start_line: node.position.start_line, end_line: node.position.end_line})
+    }, [editorRef.current])
+
+    useEffect(() => {
+        console.log("called useEffect")
+        if (parsedSymbols !== null && parsedSymbols.nodes.length > 0 && workspaceState === 1 && lspActive) {
+            console.log("updating extensions")
+            setEditorExtensions([ctCreateCodeActions(
+                alpha(theme.palette.text.primary, 0.6),
+                parsedSymbols,
+                loadingCodeCleanup,
+                (id: string, portal: React.ReactPortal) => {
+                    setCodeActionPortals((prevState) => {
+                        // update the portal if it has a prior state or add it if new
+                        return prevState.some((x) => x.id === id) ?
+                            prevState.map((item) => item.id === id ? { ...item, portal } : item) :
+                            [...prevState, { id, portal }];
+                    })
+                },
+                (node: CtParseNode) => triggerCodeCleanup(node)
+            )])
+        }
+
+        // filter any code symbols from the portals that no longer exist
+        if (parsedSymbols !== null) {
+            setCodeActionPortals((prevState) => {
+                return prevState.filter(({id}) =>
+                    parsedSymbols.nodes.some((node) => node.id === id));
+            });
+        }
+    }, [parsedSymbols, loadingCodeCleanup, workspaceState, lspActive]);
 
     // Handle changes in the editor and activate the button
     const handleEditorChange = async (newCode: string) => {
@@ -886,6 +980,7 @@ function Byte() {
                 break
         }
         startTypingTimer();
+
         debouncedUpdateCode(newCode);
 
 
@@ -992,9 +1087,6 @@ function Byte() {
             }
         }
         deleteTypingTimer();
-        setOutputPopup(true)
-        //this is here for testing the suggetion popup
-        // setSuggestionPopup(true)
 
         sendExecRequest();
     };
@@ -1033,6 +1125,12 @@ function Byte() {
         setCodeBeforeCursor(preffix)
         setCodeAfterCursor(suffix)
     }, [code, cursorPosition])
+
+
+    useEffect(() => {
+        setParsedSymbols(null)
+        debouncedParseSymbols(code)
+    }, [code]);
 
 
     useEffect(() => {
@@ -1194,6 +1292,30 @@ function Byte() {
                         nextByte={getNextByte()}
                     />
                 )}
+                {(activeSidebarTab === null || activeSidebarTab === "codeSuggestion") && (
+                    <ByteSuggestions2
+                        range={suggestionRange}
+                        editorRef={editorRef}
+                        onExpand={() => setActiveSidebarTab("codeSuggestion")}
+                        onHide={() => setActiveSidebarTab(null)}
+                        lang={programmingLanguages[byteData ? byteData.lang : 5]}
+                        code={code}
+                        byteId={id || ""}
+                        // @ts-ignore
+                        description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
+                        // @ts-ignore
+                        dev_steps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
+                        maxWidth={"20vw"}
+                        acceptedCallback={(c) => {
+                            setCode(c)
+                            setLoadingCodeCleanup(null)
+                        }}
+                        rejectedCallback={() => {
+                            setSuggestionRange(null)
+                            setLoadingCodeCleanup(null)
+                        }}
+                    />
+                )}
                 {activeSidebarTab === null && (
                     <Tooltip title={stateTooltipTitle}>
                         <Box
@@ -1342,7 +1464,7 @@ function Byte() {
                                     // lspUrl={byteData ? (byteData.lang === 5 ? "ws://localhost:42081" : "ws://localhost:42083") : undefined}
                                     lspUrl={byteData && lspActive ? `wss://${byteData._id}-lsp.${config.coderPath.replace("https://", "")}` : undefined}
                                     diagnosticLevel={selectDiagnosticLevel()}
-                                    extensions={popupExtRef.current ? [popupExtRef.current] : undefined}
+                                    extensions={popupExtRef.current ? editorExtensions.concat(popupExtRef.current) : editorExtensions}
                                     wrapperStyles={{
                                         width: '100%',
                                         height: '100%',
@@ -1386,6 +1508,7 @@ function Byte() {
                         // @ts-ignore
                         description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
                 />
+                {parsedSymbols !== null ? codeActionPortals.map(x => x.portal) : null}
                 {xpPopup ? (<XpPopup oldXP={
                     //@ts-ignore
                     (xpData["xp_update"]["old_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]} levelUp={
