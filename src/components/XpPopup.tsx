@@ -265,7 +265,11 @@ const XpPopup = (props: IProps) => {
                                 window.sessionStorage.setItem("attemptXP", "undefined");
                                 }
                             }}
-                            sx={{
+                            sx={window.innerWidth < 1000 ? {
+                                position: "absolute",
+                                top: '20vh',
+                                right: '15vw'
+                            } :{
                                 position: "absolute",
                                 top: '20vh',
                                 right: '38vw'
@@ -372,8 +376,8 @@ const XpPopup = (props: IProps) => {
                 <Modal open={open} style={{display: 'flex', justifyContent: "center", alignItems: "center"}}>
                     <Box
                         sx={showPro ? {
-                            width: "28vw",
-                            height: "62vh",
+                            width: window.innerWidth < 1000 ? "90vw" : "28vw",
+                            height: window.innerWidth < 1000 ? "70vh": "62vh",
                             minHeight: "420px",
                             // justifyContent: "center",
                             // marginLeft: "25vw",
