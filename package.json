@@ -127,6 +127,7 @@
     "react-spinners": "^0.13.8",
     "react-spring": "^9.7.3",
     "react-stripe-elements": "^6.1.2",
+    "react-swipeable": "^7.0.1",
     "react-syntax-highlighter": "^15.5.0",
     "react-tagsinput": "^3.20.0",
     "react-tenor": "^2.2.0",

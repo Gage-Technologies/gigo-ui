@@ -2,11 +2,25 @@ import * as React from "react";
 import {useEffect, useMemo, useRef, useState} from "react";
 import {
     Container,
-    createTheme, CssBaseline,
+    createTheme,
+    CssBaseline,
     PaletteMode,
     ThemeProvider,
     Typography,
-    Box, Tooltip, Button, Tab, SpeedDial, SpeedDialIcon, SpeedDialAction
+    Box,
+    Tooltip,
+    Button,
+    Tab,
+    SpeedDial,
+    SpeedDialIcon,
+    SpeedDialAction,
+    Dialog,
+    DialogTitle,
+    List,
+    ListItem,
+    ListItemText,
+    SwipeableDrawer,
+    Drawer
 } from "@mui/material";
 import XpPopup from "../components/XpPopup";
 import {getAllTokens, themeHelpers} from "../theme";
@@ -27,19 +41,13 @@ import {
     OutputRow
 } from "../models/bytes";
 import { programmingLanguages } from "../services/vars";
-import { useGlobalCtWebSocket } from "../services/ct_websocket";
-import ByteNextStep from "../components/CodeTeacher/ByteNextStep";
-import ace from "ace-builds/src-noconflict/ace";
 import "./bytes.css";
-import ByteChat from "../components/CodeTeacher/ByteChat";
 import { LoadingButton } from "@mui/lab";
-import ByteNextOutputMessage from "../components/CodeTeacher/ByteNextOutputMessage";
 import Editor from "../components/IDE/Editor";
 import chroma from 'chroma-js';
 import SheenPlaceholder from "../components/Loading/SheenPlaceholder";
 import { sleep } from "../services/utils";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
-import DifficultyAdjuster from "../components/ByteDifficulty";
 import { selectAuthState } from "../reducers/auth/auth";
 import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../reducers/bytes/bytes";
 import ByteTerminal from "../components/Terminal";
@@ -50,8 +58,9 @@ import HomeIcon from "@mui/icons-material/Home";
 import { ReactComponent as CTIcon } from '../components/Icons/code-teacher-bytes-mobile.svg';
 import DeveloperModeIcon from '@mui/icons-material/DeveloperMode';
 import ByteChatMobile from "../components/CodeTeacher/ByteChatMobile";
-import {animated, useSpring} from "react-spring";
-import { useDrag } from 'react-use-gesture';
+import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
+import { useSwipeable } from 'react-swipeable';
+import NextByteDrawerMobile from "../components/NextByteDrawerMobile";
 
 interface MergedOutputRow {
     error: boolean;
@@ -91,23 +100,6 @@ function a11yProps(index: any) {
         id: `simple-tab-${index}`,
         'aria-controls': `simple-tabpanel-${index}`,
     };
-}
-
-function TabPanel(props: { children: any; value: any; index: any; style?: React.CSSProperties }) {
-    const { children, value, index, style } = props;
-    return (
-        <div
-            role="tabpanel"
-            hidden={value !== index}
-            style={{ height: '100%', ...style }}
-        >
-            {value === index && (
-                <Box sx={{ p: 3, height: '100%' }}>
-                    {children}
-                </Box>
-            )}
-        </div>
-    );
 }
 
 function ByteMobileConcept() {
@@ -169,6 +161,7 @@ function ByteMobileConcept() {
         justifyContent: 'center',
         overflowX: 'auto',
         position: 'relative',
+        overflowY: 'hidden',
     };
 
     const editorStyle: React.CSSProperties = {
@@ -209,7 +202,7 @@ function ByteMobileConcept() {
     const [suggestionPopup, setSuggestionPopup] = useState(false);
     const [nextStepsPopup, setNextStepsPopup] = useState(false);
     const [commandId, setCommandId] = useState("");
-
+    const [isDifficultyPopupOpen, setIsDifficultyPopupOpen] = useState(false);
     const [executingCode, setExecutingCode] = useState<boolean>(false)
 
     const pingInterval = React.useRef<NodeJS.Timer | null>(null)
@@ -220,8 +213,8 @@ function ByteMobileConcept() {
     const [activeView, setActiveView] = useState("editor");
     const [activeSidebarTab, setActiveSidebarTab] = React.useState<string | null>(null);
     const [speedDialOpen, setSpeedDialOpen] = useState(false);
-    const handleSpeedDialOpen = () => setSpeedDialOpen(true);
-    const handleSpeedDialClose = () => setSpeedDialOpen(false);
+    const [nextByteDrawerOpen, setNextByteDrawerOpen] = useState(false);
+
     const [editorStyles, setEditorStyles] = useState({
         fontSize: '14px',
     });
@@ -229,10 +222,6 @@ function ByteMobileConcept() {
     let { id } = useParams();
 
     let globalWs = useGlobalWebSocket();
-
-    const handleTabChange = (event: any, newValue: React.SetStateAction<number>) => {
-        setTabValue(newValue);
-    };
 
     const determineDifficulty = React.useCallback(() => {
         if (bytesState.initialized) {
@@ -893,65 +882,118 @@ function ByteMobileConcept() {
     }
 
 
-    const DraggableBottomBox: React.FC<{ getNextByte: typeof getNextByte }> = ({ getNextByte }) => {
-        const navigate = useNavigate();
-        // Define spring animation for drag and opacity
-        const [{ y, opacity }, set] = useSpring(() => ({
-            y: 0,
-            opacity: 0,
-        }));
+    // const DraggableBottomBox: React.FC<{ getNextByte: typeof getNextByte }> = ({ getNextByte }) => {
+    //     const navigate = useNavigate();
+    //     const [isDragging, setIsDragging] = useState(false); // State to track if dragging
+    //
+    //     // Define spring animation for drag and opacity
+    //     const [{ y, opacity, backdropFilter }, set] = useSpring(() => ({
+    //         y: 0,
+    //         opacity: 0,
+    //         backdropFilter: "blur(0px)",
+    //     }));
+    //
+    //     // Handle drag gesture
+    //     const bind = useDrag(({ down, movement: [, my], distance, cancel }) => {
+    //         setIsDragging(down); // Update dragging state
+    //         if (down && distance > window.innerHeight / 1.5) {
+    //             const nextByte = getNextByte();
+    //             if (nextByte) {
+    //                 navigate(`/byteMobileConcept/${nextByte._id}`);
+    //                 cancel();
+    //             }
+    //         }
+    //         const newOpacity = Math.min(1, (distance / (window.innerHeight / 2)) ** 3);
+    //         const newBlur = Math.min(1, (distance / (window.innerHeight / 2)) ** 3);
+    //         set({
+    //             y: down ? my : 0,
+    //             opacity: down ? newOpacity : 0,
+    //             backdropFilter: down ? `blur(${newBlur}px)` : "blur(0px)",
+    //         });
+    //     }, { axis: 'y' });
+    //
+    //     return (
+    //         <>
+    //             <animated.div
+    //                 {...bind()}
+    //                 style={{
+    //                     transform: y.to(y => `translateY(${y}px)`),
+    //                     position: 'fixed',
+    //                     bottom: 0,
+    //                     left: 0,
+    //                     right: 0,
+    //                     display: 'flex',
+    //                     justifyContent: 'center',
+    //                     alignItems: 'center',
+    //                     backgroundColor: '#232a2f',
+    //                     zIndex: isDragging ? 10 : -1,
+    //                 }}
+    //             >
+    //                 <KeyboardArrowUp style={{ fontSize: '2rem' }} />
+    //             </animated.div>
+    //             {/* Conditional rendering of fullscreen overlay */}
+    //             {isDragging && (
+    //                 <animated.div
+    //                     style={{
+    //                         position: 'fixed',
+    //                         top: 0,
+    //                         left: 0,
+    //                         width: '100%',
+    //                         height: '100%',
+    //                         backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    //                         opacity: opacity,
+    //                         backdropFilter: backdropFilter,
+    //                         zIndex: 9,
+    //                     }}
+    //                 />
+    //             )}
+    //         </>
+    //     );
+    // };
 
-        // Handle drag gesture
-        const bind = useDrag(({ down, movement: [, my], distance, cancel }) => {
-            if (down && distance > window.innerHeight / 1.5) {
-                const nextByte = getNextByte();
-                if (nextByte) {
-                    navigate(`/byteMobileConcept/${nextByte._id}`);
-                    cancel();
-                }
-            }
-            // Make the fading effect more dramatic by adjusting the opacity calculation
-            // Example: Use a cubic function for a quicker transition to full opacity
-            const newOpacity = Math.min(1, (distance / (window.innerHeight / 2)) ** 3);
-            set({
-                y: down ? my : 0,
-                opacity: down ? newOpacity : 0,
-            });
-        }, { axis: 'y' });
+    const handleNextByte = () => {
+        const nextByte = getNextByte();
+        if (nextByte) {
+            navigate(`/byteMobileConcept/${nextByte._id}`);
+            setNextByteDrawerOpen(false);
+        }
+    };
+
+    const currentDifficulty = determineDifficulty();
+
+    interface DifficultyPopupProps {
+        open: boolean;
+        onClose: () => void;
+        onSelectDifficulty: (difficulty: number) => void;
+        currentDifficulty: number;
+    }
+
+    const DifficultyPopup: React.FC<DifficultyPopupProps> = ({ open, onClose, onSelectDifficulty, currentDifficulty }) => {
+        const difficulties = ['Easy', 'Medium', 'Hard'];
 
         return (
-            <>
-                <animated.div
-                    {...bind()}
-                    style={{
-                        transform: y.to(y => `translateY(${y}px)`),
-                        position: 'fixed',
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        backgroundColor: '#232a2f',
-                        zIndex: 10,
-                    }}
-                >
-                    <KeyboardArrowUp style={{ fontSize: '2rem' }} />
-                </animated.div>
-                {/* Fullscreen overlay that fades more dramatically */}
-                <animated.div
-                    style={{
-                        position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)', // You might want to adjust the color and base opacity
-                        opacity: opacity,
-                        zIndex: 9, // Ensure this is below the draggable element
-                    }}
-                />
-            </>
+            <Dialog onClose={onClose} open={open}>
+                <DialogTitle>Select Difficulty</DialogTitle>
+                <List>
+                    {difficulties.map((difficulty, index) => (
+                        <ListItem
+                            button
+                            onClick={() => onSelectDifficulty(index)}
+                            key={difficulty}
+                            selected={index === currentDifficulty}
+                            sx={{backgroundColor: index === currentDifficulty ? 'action.selected' : null}}
+                        >
+                            <ListItemText
+                                primary={
+                                    <Typography variant="body1" style={{ textAlign: 'center' }}>
+                                        {difficulty}
+                                    </Typography>
+                                }
+                            />
+                        </ListItem>
+                    ))}
+                </List>
+            </Dialog>
         );
     };
 
@@ -975,6 +1017,11 @@ function ByteMobileConcept() {
             icon: <span role="img" aria-label="banana">🍌</span>,
             name: 'All Bytes',
             action: () => navigate('/bytesMobile')
+        },
+        {
+            icon: <SettingsApplicationsIcon />,
+            name: 'Difficulty',
+            action: () => setIsDifficultyPopupOpen(true),
         },
     ];
 
@@ -1052,6 +1099,15 @@ function ByteMobileConcept() {
                 </Box>
                 {activeSidebarTab === null && (
                     <Box style={editorAndTerminalStyle} ref={editorContainerRef}>
+                        <DifficultyPopup
+                            open={isDifficultyPopupOpen}
+                            onClose={() => setIsDifficultyPopupOpen(false)}
+                            onSelectDifficulty={(difficulty: number) => {
+                                updateDifficulty(difficulty); // Call your existing updateDifficulty function with the new difficulty
+                                setIsDifficultyPopupOpen(false);
+                            }}
+                            currentDifficulty={currentDifficulty}
+                        />
                         {activeView === 'editor' && (
                             <>
                                 {code.length > 0 && (
@@ -1102,6 +1158,21 @@ function ByteMobileConcept() {
                                         isRunning={executingCode}
                                     />
                                 )}
+                                <Box
+                                    sx={{
+                                        width: '100%',
+                                        maxWidth: "100%",
+                                        height: '35px',
+                                        backgroundColor: '#232a2f',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                    onClick={() => setNextByteDrawerOpen(true)}
+                                >
+                                    <KeyboardArrowUp />
+                                </Box>
                             </>
                         )}
                         {activeView === 'byteChat' && byteData && id !== undefined && (
@@ -1139,7 +1210,12 @@ function ByteMobileConcept() {
                         </SpeedDial>
                     </Box>
                 )}
-                <DraggableBottomBox getNextByte={getNextByte} />
+                <NextByteDrawerMobile
+                    open={nextByteDrawerOpen}
+                    onClose={() => setNextByteDrawerOpen(false)}
+                    onNextByte={handleNextByte}
+                />
+                {/*<DraggableBottomBox getNextByte={getNextByte} />*/}
             </CssBaseline>
         </ThemeProvider>
     );

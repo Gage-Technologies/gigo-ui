@@ -3,7 +3,8 @@ import {
     Box,
     Button, ButtonBase,
     Card,
-    CircularProgress, createTheme, Divider, Grid, IconButton, InputAdornment, PaletteMode,
+    CircularProgress, createTheme, Dialog, DialogActions,
+    DialogContent, DialogTitle, Divider, Grid, IconButton, InputAdornment, PaletteMode,
     PopperPlacementType, Stack,
     styled,
     TextField,
@@ -41,6 +42,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import {grey} from "@mui/material/colors";
 import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../../reducers/bytes/bytes";
+import CloseIcon from "@material-ui/icons/Close";
 
 const InitialSuggestionButton = styled(Button)`
     animation: initSuggestionButtonAuraEffect 2s infinite alternate;
@@ -108,6 +110,9 @@ export default function ByteChatMobile(props: ByteChatProps) {
     const [response, setResponse] = useState("")
     const [state, setState] = useState<State>(State.WAITING)
     const [userMessage, setUserMessage] = useState('');
+    const [openPopup, setOpenPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState('');
+
     const [messages, setMessages] = useState<CtByteChatMessage[]>([
         {
             _id: "init2",
@@ -562,7 +567,8 @@ export default function ByteChatMobile(props: ByteChatProps) {
                     flexDirection: "row",
                     justifyContent: "flex-end",
                     alignItems: "flex-start",
-                    paddingBottom: '10px'
+                    paddingBottom: '10px',
+                    maxWidth: "100%",
                 }}
             >
                 <Card
@@ -579,7 +585,8 @@ export default function ByteChatMobile(props: ByteChatProps) {
                         width: "auto",
                         height: "auto",
                         display: "block",
-                        maxWidth: "82%"
+                        maxWidth: "82%",
+                        wordWrap: 'break-word'
                     }}
                 >
                     <MarkdownRenderer
@@ -588,6 +595,7 @@ export default function ByteChatMobile(props: ByteChatProps) {
                             overflowWrap: 'break-word',
                             borderRadius: '10px',
                             padding: '0px',
+                            maxWidth: "100%"
                         }}
                     />
                 </Card>
@@ -636,9 +644,10 @@ export default function ByteChatMobile(props: ByteChatProps) {
                 style={{
                     display: "flex",
                     flexDirection: "row",
-                    justifyContent: "flex-end",
+                    justifyContent: "flex-start",
                     alignItems: "flex-start",
-                    paddingBottom: '10px'
+                    paddingBottom: '10px',
+                    maxWidth: "100%",
                 }}
             >
 
@@ -663,7 +672,7 @@ export default function ByteChatMobile(props: ByteChatProps) {
 
                 <Card
                     style={{
-                        fontSize: ".75rem",
+                        fontSize: ".12px",
                         marginLeft: "2.5px",
                         marginRight: "auto",
                         marginBottom: "0px",
@@ -675,7 +684,8 @@ export default function ByteChatMobile(props: ByteChatProps) {
                         width: "auto",
                         height: "auto",
                         display: "block",
-                        maxWidth: "82%"
+                        maxWidth: "82%",
+                        wordWrap: 'break-word',
                     }}
                 >
                     {renderContent(content, loading)}
@@ -726,30 +736,76 @@ export default function ByteChatMobile(props: ByteChatProps) {
         }
     }, []);
 
-    const textInputMemo = React.useMemo(() => (
-        <TextField
-            disabled={disableChat || !authState.authenticated}
-            fullWidth
-            label={authState.authenticated ? "Ask Code Teacher!" : "Signup To Chat With Code Teacher"}
-            variant="outlined"
-            value={userMessage}
-            multiline={true}
-            maxRows={5}
-            onChange={(e) => setUserMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            InputProps={{
-                endAdornment: (
-                    <InputAdornment position="end">
-                        <Tooltip title={"Start New Conversation Thread"}>
-                            <IconButton onClick={() => closeThread()} disabled={disableChat || !authState.authenticated}>
-                                <ForumIcon/>
-                            </IconButton>
-                        </Tooltip>
-                    </InputAdornment>
-                ),
+    // Function to handle the popup open action
+    const handleOpenPopup = () => {
+        setOpenPopup(true);
+    };
+
+    // Function to handle the popup close action
+    const handleClosePopup = () => {
+        setOpenPopup(false);
+    };
+
+    // Function to handle sending the message from the popup
+    const handleSendMessage = () => {
+        sendUserCTChat(popupMessage);
+        setPopupMessage(''); // Reset the message input
+        handleClosePopup(); // Close the popup after sending the message
+    };
+
+    // Function to handle starting a new thread from the popup
+    const handleNewThread = () => {
+        closeThread(); // Your existing function to close the current thread and start a new one
+        handleClosePopup(); // Close the popup
+    };
+
+    const askCodeTeacherButton = (
+        <Box
+            sx={{
+                position: 'fixed',
+                bottom: 20,
+                left: 0,
+                right: 0,
+                display: 'flex',
+                justifyContent: 'center',
+                zIndex: 1000,
             }}
-        />
-    ), [userMessage, disableChat, chatId])
+        >
+            <Button variant="contained" color="primary" onClick={handleOpenPopup}>
+                Ask Code Teacher
+            </Button>
+        </Box>
+    );
+
+    const askCodeTeacherPopup = (
+        <Dialog open={openPopup} onClose={handleClosePopup}>
+            <DialogTitle>
+                Ask Code Teacher
+                <IconButton onClick={handleClosePopup} sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}>
+                    <CloseIcon />
+                </IconButton>
+            </DialogTitle>
+            <DialogContent>
+                <TextField
+                    autoFocus
+                    margin="dense"
+                    id="message"
+                    label="Your Question"
+                    type="text"
+                    fullWidth
+                    variant="outlined"
+                    multiline={true}
+                    maxRows={5}
+                    value={popupMessage}
+                    onChange={(e) => setPopupMessage(e.target.value)}
+                />
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={handleSendMessage}>Submit</Button>
+                <Button onClick={handleNewThread}>New Thread</Button>
+            </DialogActions>
+        </Dialog>
+    );
 
     // Group messages by thread number
     const groupedMessages = messages.reduce((acc, message) => {
@@ -925,40 +981,42 @@ export default function ByteChatMobile(props: ByteChatProps) {
                 flexDirection={"column"}
                 sx={{
                     scrollBehavior: 'smooth',
-                    height: "68vh",
+                    height: "88vh",
+                    maxWidth: "95vw",
                     overflowY: "auto",
                     overflowX: "hidden",
-                    pt: 2,
-                    pb: 2,
-                    marginBottom: 1,
+                    pb: 4,
                 }}
             >
                 {messagesMemo}
                 {state === State.LOADING && renderBotMessage(response, true, "", false, false, "")}
             </Box>
-            {renderSuggestions()}
-            {!isAtBottom && (
+            <Box
+                sx={{
+                    position: 'fixed',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    pb: 2,
+                    pt: 1,
+                    background: theme.palette.background.default,
+                    zIndex: 1000,
+                }}
+            >
+                {/* Render suggestions just above the button */}
+                {renderSuggestions()}
                 <Box
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                    sx={{mb: 1}}
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                    }}
                 >
-                    <IconButton
-                        onClick={scrollToBottom}
-                        size="small"
-                        sx={{
-                            border: `1px solid ${theme.palette.primary.dark}`,
-                            '&:hover': {
-                                backgroundColor: 'rgba(255, 255, 255, 0.04)',
-                            }
-                        }}
-                    >
-                        <ArrowDownwardIcon/>
-                    </IconButton>
+                    <Button variant="contained" color="primary" onClick={handleOpenPopup}>
+                        Ask Code Teacher
+                    </Button>
                 </Box>
-            )}
-            {textInputMemo}
+            </Box>
+            {askCodeTeacherPopup}
         </>
     );
 }

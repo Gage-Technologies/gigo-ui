@@ -109,7 +109,7 @@ function AllBytesScrollMobile() {
                                     bytesTitle={byte["name"]}
                                     bytesDesc={byte["description_medium"]}
                                     bytesThumb={config.rootPath + "/static/bytes/t/" + byte["_id"]}
-                                    onClick={() => navigate("/byteMobile/" + byte["_id"])}
+                                    onClick={() => navigate("/byteMobileConcept/" + byte["_id"])}
                                     role={authState.role}
                                     language={programmingLanguages[byte["lang"]]}
                                 />
