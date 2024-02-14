@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="213.10368mm"
+   height="173.45651mm"
+   viewBox="0 0 213.10368 173.45651"
+   version="1.1"
+   id="svg97117"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg">
+  <defs
+     id="defs97114">
+    <linearGradient
+       id="linearGradient99348">
+      <stop
+         style="stop-color:#00a9ff;stop-opacity:1;"
+         offset="0"
+         id="stop99344" />
+      <stop
+         style="stop-color:#00a9ff;stop-opacity:0;"
+         offset="1"
+         id="stop99346" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient97342">
+      <stop
+         style="stop-color:#1c8762;stop-opacity:1;"
+         offset="0"
+         id="stop97338" />
+      <stop
+         style="stop-color:#1c8762;stop-opacity:0;"
+         offset="1"
+         id="stop97340" />
+    </linearGradient>
+    <radialGradient
+       xlink:href="#linearGradient97342"
+       id="radialGradient97344"
+       cx="-66.116333"
+       cy="73.196518"
+       fx="-66.116333"
+       fy="73.196518"
+       r="106.55184"
+       gradientTransform="matrix(1.464938,1.5684075,-1.5348955,1.4336372,148.99453,-6.4100148)"
+       gradientUnits="userSpaceOnUse"
+       spreadMethod="pad" />
+    <radialGradient
+       xlink:href="#linearGradient99348"
+       id="radialGradient99350"
+       cx="269.24554"
+       cy="104.99979"
+       fx="269.24554"
+       fy="104.99979"
+       r="106.55184"
+       gradientTransform="matrix(-1.5178705,0.80977629,-0.84987756,-1.5929597,817.45958,-276.96793)"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <g
+     id="layer1"
+     transform="translate(-6.3718705,-58.408821)">
+    <rect
+       style="fill:#1c1c1a;fill-opacity:1;stroke:#999999;stroke-width:0"
+       id="rect97143"
+       width="213.10368"
+       height="173.4565"
+       x="6.371871"
+       y="58.408821"
+       ry="24.071514" />
+    <rect
+       style="fill:url(#radialGradient99350);fill-opacity:1;stroke:#999999;stroke-width:0"
+       id="rect97143-9"
+       width="213.10368"
+       height="173.4565"
+       x="6.3718719"
+       y="-231.86533"
+       ry="24.071514"
+       transform="scale(1,-1)" />
+    <rect
+       style="fill:url(#radialGradient97344);fill-opacity:1;stroke:#999999;stroke-width:0"
+       id="rect97143-2"
+       width="213.10368"
+       height="173.4565"
+       x="6.371871"
+       y="58.408821"
+       ry="24.071514" />
+  </g>
+</svg>
