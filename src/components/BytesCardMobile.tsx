@@ -42,6 +42,7 @@ interface IProps {
     completedMedium?: boolean;
     completedHard?: boolean;
     language?: string;
+    isHome?: boolean;
 }
 
 export default function BytesCardMobile(props: IProps) {
@@ -131,34 +132,36 @@ export default function BytesCardMobile(props: IProps) {
                     <div style={{ position: 'relative' }}>
                         {/* @ts-ignore */}
                         <img style={styles.image} src={props.bytesThumb} loading="lazy" />
-                        <Box
-                            display={"flex"}
-                            flexDirection={"column"}
-                            style={{
-                                position: 'absolute',
-                                top: '0px',
-                                left: '0px',
-                                height: "100%",
-                                width: "fit-content",
-                                gap: '10px',
-                            }}
-                        >
-                            <BytesHardBadge
-                                finished={props.completedHard === undefined ? false : props.completedHard}
-                                inByte={props.inByte}
-                                sizeMultiplier={7}
-                            />
-                            <BytesMediumBadge
-                                finished={props.completedMedium === undefined ? false : props.completedMedium}
-                                inByte={props.inByte}
-                                sizeMultiplier={7}
-                            />
-                            <BytesEasyBadge
-                                finished={props.completedEasy === undefined ? false : props.completedEasy}
-                                inByte={props.inByte}
-                                sizeMultiplier={7}
-                            />
-                        </Box>
+                        {!props.isHome && (
+                            <Box
+                                display={"flex"}
+                                flexDirection={"column"}
+                                style={{
+                                    position: 'absolute',
+                                    top: '0px',
+                                    left: '0px',
+                                    height: "100%",
+                                    width: "fit-content",
+                                    gap: '10px',
+                                }}
+                            >
+                                <BytesHardBadge
+                                    finished={props.completedHard === undefined ? false : props.completedHard}
+                                    inByte={props.inByte}
+                                    sizeMultiplier={7}
+                                />
+                                <BytesMediumBadge
+                                    finished={props.completedMedium === undefined ? false : props.completedMedium}
+                                    inByte={props.inByte}
+                                    sizeMultiplier={7}
+                                />
+                                <BytesEasyBadge
+                                    finished={props.completedEasy === undefined ? false : props.completedEasy}
+                                    inByte={props.inByte}
+                                    sizeMultiplier={7}
+                                />
+                            </Box>
+                        )}
                         <Box
                             display={"flex"}
                             flexDirection={"column"}
@@ -195,4 +198,5 @@ BytesCardMobile.defaultProps = {
     bytesDesc: "",
     bytesThumb: "",
     animate: false,
+    isHome: false,
 }

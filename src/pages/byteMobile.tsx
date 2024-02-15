@@ -53,6 +53,8 @@ import DeveloperModeIcon from '@mui/icons-material/DeveloperMode';
 import ByteChatMobile from "../components/CodeTeacher/ByteChatMobile";
 import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
 import NextByteDrawerMobile from "../components/NextByteDrawerMobile";
+import MenuIcon from '@mui/icons-material/Menu';
+import PinIcon from '@mui/icons-material/Pin';
 
 interface MergedOutputRow {
     error: boolean;
@@ -933,7 +935,7 @@ function ByteMobile() {
                 action: () => navigate('/bytesMobile')
             },
             {
-                icon: <SettingsApplicationsIcon />,
+                icon: <PinIcon />,
                 name: 'Difficulty',
                 action: () => setIsDifficultyPopupOpen(true),
             },
@@ -1119,7 +1121,7 @@ function ByteMobile() {
                             <SpeedDial
                                 ariaLabel="SpeedDial"
                                 sx={{ position: 'fixed', bottom: 24, right: 16 }}
-                                icon={<SpeedDialIcon />}
+                                icon={<MenuIcon />}
                             >
                                 {getFilteredActions().map((action) => (
                                     <SpeedDialAction
