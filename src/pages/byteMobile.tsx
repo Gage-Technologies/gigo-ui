@@ -1,23 +1,30 @@
 import * as React from "react";
-import {useEffect, useMemo, useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {
-    Container,
-    createTheme, CssBaseline,
+    createTheme,
+    CssBaseline,
     PaletteMode,
     ThemeProvider,
     Typography,
-    Box, Tooltip, Button, Tab
+    Box,
+    Tooltip,
+    SpeedDial,
+    SpeedDialIcon,
+    SpeedDialAction,
+    Dialog,
+    DialogTitle,
+    List,
+    ListItem,
+    ListItemText,
 } from "@mui/material";
-import XpPopup from "../components/XpPopup";
-import { getAllTokens } from "../theme";
-import { Close, PlayArrow } from "@material-ui/icons";
+import {getAllTokens, themeHelpers} from "../theme";
+import { Close, KeyboardArrowUp, PlayArrow } from "@material-ui/icons";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import { useNavigate } from "react-router-dom";
 import swal from "sweetalert";
 import call from "../services/api-call";
 import 'ace-builds';
 import 'ace-builds/webpack-resolver';
-import ByteSelectionMenu from "../components/ByteSelectionMenu";
 import config from "../config";
 import { useParams } from "react-router";
 import { useGlobalWebSocket } from "../services/websocket";
@@ -27,26 +34,25 @@ import {
     OutputRow
 } from "../models/bytes";
 import { programmingLanguages } from "../services/vars";
-import { useGlobalCtWebSocket } from "../services/ct_websocket";
-import ByteNextStep from "../components/CodeTeacher/ByteNextStep";
-import ace from "ace-builds/src-noconflict/ace";
 import "./bytes.css";
-import ByteChat from "../components/CodeTeacher/ByteChat";
 import { LoadingButton } from "@mui/lab";
-import ByteNextOutputMessage from "../components/CodeTeacher/ByteNextOutputMessage";
 import Editor from "../components/IDE/Editor";
 import chroma from 'chroma-js';
 import SheenPlaceholder from "../components/Loading/SheenPlaceholder";
 import { sleep } from "../services/utils";
 import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
-import DifficultyAdjuster from "../components/ByteDifficulty";
 import { selectAuthState } from "../reducers/auth/auth";
 import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../reducers/bytes/bytes";
 import ByteTerminal from "../components/Terminal";
-import {AppBar, Tabs} from "@material-ui/core";
 import './byteMobile.css';
 import ByteNextOutputMessageMobile from "../components/CodeTeacher/ByteNextOutputMessageMobile";
 import ByteNextStepMobile from "../components/CodeTeacher/ByteNextStepMobile";
+import HomeIcon from "@mui/icons-material/Home";
+import { ReactComponent as CTIcon } from '../components/Icons/code-teacher-bytes-mobile.svg';
+import DeveloperModeIcon from '@mui/icons-material/DeveloperMode';
+import ByteChatMobile from "../components/CodeTeacher/ByteChatMobile";
+import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
+import NextByteDrawerMobile from "../components/NextByteDrawerMobile";
 
 interface MergedOutputRow {
     error: boolean;
@@ -81,30 +87,6 @@ interface BytesData {
     dev_steps_hard: string;
 }
 
-function a11yProps(index: any) {
-    return {
-        id: `simple-tab-${index}`,
-        'aria-controls': `simple-tabpanel-${index}`,
-    };
-}
-
-function TabPanel(props: { children: any; value: any; index: any; style?: React.CSSProperties }) {
-    const { children, value, index, style } = props;
-    return (
-        <div
-            role="tabpanel"
-            hidden={value !== index}
-            style={{ height: '100%', ...style }}
-        >
-            {value === index && (
-                <Box sx={{ p: 3, height: '100%' }}>
-                    {children}
-                </Box>
-            )}
-        </div>
-    );
-}
-
 function ByteMobile() {
     let userPref = localStorage.getItem('theme');
     const [mode, _] = useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
@@ -119,24 +101,54 @@ function ByteMobile() {
 
     const containerStyleDefault: React.CSSProperties = {
         width: '100%',
-        padding: theme.spacing(0),
         margin: '0',
         maxWidth: 'none',
         overflowY: "hidden"
     };
 
+    const topContainerStyle: React.CSSProperties = {
+        display: 'flex',
+        overflowY: "hidden",
+        flexDirection: 'row',
+        justifyContent: 'center',
+        width: '100%',
+        height: "100%",
+        marginTop: '5px'
+    };
+
+    const titlePlaceholderContainerStyle: React.CSSProperties = {
+        display: "flex",
+        padding: theme.spacing(1),
+        alignItems: 'center',
+        width: "100%",
+    };
+
+    const titleStyle: React.CSSProperties = {
+        textAlign: 'center',
+        width: "100%",
+        fontSize: '1.0rem',
+        marginTop: "-3%",
+    };
+
+    const titlePlaceholderStyle: React.CSSProperties = {
+        margin: "auto"
+    }
+
+    const fixedElementsHeight = 120;
+
     const editorAndTerminalStyle: React.CSSProperties = {
         display: 'flex',
         flexDirection: 'column',
         flex: 1,
-        height: '70vh',
-        minHeight: '85vh',
+        height: `calc(100vh - ${fixedElementsHeight}px)`,
+        minHeight: '93vh',
         width: "100%",
         minWidth: `100%`,
         alignItems: 'center',
         justifyContent: 'center',
         overflowX: 'auto',
         position: 'relative',
+        overflowY: 'hidden',
     };
 
     const editorStyle: React.CSSProperties = {
@@ -146,38 +158,6 @@ function ByteMobile() {
         maxWidth: '100%',
     };
 
-    const titleStyle: React.CSSProperties = {
-        textAlign: 'center',
-        marginBottom: "-2%",
-        width: "100%",
-        fontSize: '1.0rem',
-        marginTop: "-2%",
-    };
-
-    const topContainerStyle: React.CSSProperties = {
-        display: 'flex',
-        overflowY: "hidden",
-        flexDirection: 'row',
-        justifyContent: 'center',
-        width: '100%',
-        marginTop: '10px',
-        gap: '10px',
-        height: "100%",
-        marginBottom: '-6%',
-    };
-
-    const titlePlaceholderContainerStyle: React.CSSProperties = {
-        display: "flex",
-        padding: theme.spacing(1),
-        marginTop: "14px",
-        marginBottom: "2px",
-        alignItems: 'center',
-        width: "100%",
-    };
-
-    const titlePlaceholderStyle: React.CSSProperties = {
-        margin: "auto"
-    }
 
     // Define the state and dispatch hook
     const dispatch = useAppDispatch();
@@ -201,7 +181,6 @@ function ByteMobile() {
     const [codeBeforeCursor, setCodeBeforeCursor] = useState("");
     const [codeAfterCursor, setCodeAfterCursor] = useState("");
     const [outputPopup, setOutputPopup] = useState(false);
-    const [outputMessage, setOutputMessage] = useState("");
     const [byteAttemptId, setByteAttemptId] = useState("");
     const [easyCode, setEasyCode] = useState("");
     const [mediumCode, setMediumCode] = useState("");
@@ -210,8 +189,7 @@ function ByteMobile() {
     const [suggestionPopup, setSuggestionPopup] = useState(false);
     const [nextStepsPopup, setNextStepsPopup] = useState(false);
     const [commandId, setCommandId] = useState("");
-
-    const [executingOutputMessage, setExecutingOutputMessage] = useState<boolean>(false)
+    const [isDifficultyPopupOpen, setIsDifficultyPopupOpen] = useState(false);
     const [executingCode, setExecutingCode] = useState<boolean>(false)
 
     const pingInterval = React.useRef<NodeJS.Timer | null>(null)
@@ -219,8 +197,10 @@ function ByteMobile() {
     const editorContainerRef = React.useRef<HTMLDivElement>(null);
     const editorRef = React.useRef<ReactCodeMirrorRef>(null);
     const [tabValue, setTabValue] = useState(0);
-
+    const [activeView, setActiveView] = useState("editor");
     const [activeSidebarTab, setActiveSidebarTab] = React.useState<string | null>(null);
+    const [nextByteDrawerOpen, setNextByteDrawerOpen] = useState(false);
+    const [isSpeedDialVisible, setSpeedDialVisibility] = useState(true);
 
     const [editorStyles, setEditorStyles] = useState({
         fontSize: '14px',
@@ -228,13 +208,7 @@ function ByteMobile() {
 
     let { id } = useParams();
 
-    let ctWs = useGlobalCtWebSocket();
-
     let globalWs = useGlobalWebSocket();
-
-    const handleTabChange = (event: any, newValue: React.SetStateAction<number>) => {
-        setTabValue(newValue);
-    };
 
     const determineDifficulty = React.useCallback(() => {
         if (bytesState.initialized) {
@@ -663,14 +637,11 @@ function ByteMobile() {
 
     useEffect(() => {
         const handleResize = () => {
-            if (window.innerWidth < 1000) {
-                setEditorStyles({
-                    fontSize: '12px',
-                });
-            }
+            setEditorStyles({
+                fontSize: '12px',
+            });
         };
 
-        // Call handleResize on mount and add event listener for resize
         handleResize();
         window.addEventListener('resize', handleResize);
 
@@ -747,10 +718,6 @@ function ByteMobile() {
         "/static/posts/t/1688940677359992832",
         "/static/posts/t/1693725878338453504"
     ];
-
-    const handleSelectByte = (byteId: string) => {
-        navigate(`/byte/${byteId}`);
-    };
 
     // Add a function to handle closing the terminal
     const handleCloseTerminal = () => {
@@ -897,39 +864,93 @@ function ByteMobile() {
         return recommendedBytes[0]
     }
 
+    const handleNextByte = () => {
+        const nextByte = getNextByte();
+        if (nextByte) {
+            navigate(`/byteMobile/${nextByte._id}`);
+            setNextByteDrawerOpen(false);
+        }
+    };
+
+    const currentDifficulty = determineDifficulty();
+
+    interface DifficultyPopupProps {
+        open: boolean;
+        onClose: () => void;
+        onSelectDifficulty: (difficulty: number) => void;
+        currentDifficulty: number;
+    }
+
+    const DifficultyPopup: React.FC<DifficultyPopupProps> = ({ open, onClose, onSelectDifficulty, currentDifficulty }) => {
+        const difficulties = ['Easy', 'Medium', 'Hard'];
+
+        return (
+            <Dialog onClose={onClose} open={open}>
+                <DialogTitle>Select Difficulty</DialogTitle>
+                <List>
+                    {difficulties.map((difficulty, index) => (
+                        <ListItem
+                            button
+                            onClick={() => onSelectDifficulty(index)}
+                            key={difficulty}
+                            selected={index === currentDifficulty}
+                            sx={{backgroundColor: index === currentDifficulty ? 'action.selected' : null}}
+                        >
+                            <ListItemText
+                                primary={
+                                    <Typography variant="body1" style={{ textAlign: 'center' }}>
+                                        {difficulty}
+                                    </Typography>
+                                }
+                            />
+                        </ListItem>
+                    ))}
+                </List>
+            </Dialog>
+        );
+    };
+
+    const getFilteredActions = () => {
+        const allActions = [
+            {
+                icon: <HomeIcon />,
+                name: 'Home',
+                action: () => navigate('/home/')
+            },
+            {
+                icon: <CTIcon />,
+                name: 'Byte Chat',
+                action: () => setActiveView('byteChat')
+            },
+            {
+                icon: <DeveloperModeIcon />,
+                name: 'Editor',
+                action: () => setActiveView('editor')
+            },
+            {
+                icon: <span role="img" aria-label="banana">🍌</span>,
+                name: 'All Bytes',
+                action: () => navigate('/bytesMobile')
+            },
+            {
+                icon: <SettingsApplicationsIcon />,
+                name: 'Difficulty',
+                action: () => setIsDifficultyPopupOpen(true),
+            },
+        ];
+
+        // Filter actions based on the current view
+        return allActions.filter(action => {
+            if (activeView === 'editor' && action.name === 'Editor') return false;
+            if (activeView === 'byteChat' && action.name === 'Byte Chat') return false;
+            return true;
+        });
+    };
+
     // @ts-ignore
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
-                <AppBar position="fixed"
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '100%',
-                            backgroundColor: theme.palette.primary.main,
-                            color: theme.palette.text.primary
-                        }}>
-                    <Box style={{ display: 'flex', flex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Tabs value={tabValue} onChange={handleTabChange} aria-label="simple tabs example" centered>
-                            <Tab label="Editor" {...a11yProps(0)} />
-                            <Tab label="Byte Chat" {...a11yProps(1)} />
-                        </Tabs>
-                        <Box style={{
-                            width: 'auto',
-                            margin: 0,
-                            padding: 0,
-                            display: 'flex',
-                            alignItems: 'center',
-                            transform: 'scale(0.75)'
-                        }}>
-                            <DifficultyAdjuster
-                                difficulty={determineDifficulty()}
-                                onChange={updateDifficulty}
-                            />
-                        </Box>
-                    </Box>
-                </AppBar>
                 <Box sx={{ ...topContainerStyle, flexDirection: 'row', justifyContent: 'center', width: '100%' }}>
                     {tabValue === 0 && (
                         <>
@@ -998,10 +1019,18 @@ function ByteMobile() {
                         </>
                     )}
                 </Box>
-                <TabPanel value={tabValue} index={0}>
+                {activeSidebarTab === null && (
                     <Box style={editorAndTerminalStyle} ref={editorContainerRef}>
-                        {/* Render the editor and related components only if neither ByteNextOutputMessageMobile nor ByteNextStep is expanded */}
-                        {activeSidebarTab === null && (
+                        <DifficultyPopup
+                            open={isDifficultyPopupOpen}
+                            onClose={() => setIsDifficultyPopupOpen(false)}
+                            onSelectDifficulty={(difficulty: number) => {
+                                updateDifficulty(difficulty); // Call your existing updateDifficulty function with the new difficulty
+                                setIsDifficultyPopupOpen(false);
+                            }}
+                            currentDifficulty={currentDifficulty}
+                        />
+                        {activeView === 'editor' && (
                             <>
                                 {code.length > 0 && (
                                     <Tooltip title="Run Code">
@@ -1024,7 +1053,7 @@ function ByteMobile() {
                                                     navigate("/signup")
                                                     return;
                                                 }
-                                                executeCode(); // Trigger code execution
+                                                executeCode();
                                             }}
                                         >
                                             <PlayArrow />
@@ -1051,53 +1080,69 @@ function ByteMobile() {
                                         isRunning={executingCode}
                                     />
                                 )}
+                                <Box
+                                    sx={{
+                                        width: '100%',
+                                        maxWidth: "100%",
+                                        height: '35px',
+                                        backgroundColor: '#232a2f',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                    onClick={() => setNextByteDrawerOpen(true)}
+                                >
+                                    <KeyboardArrowUp />
+                                </Box>
                             </>
                         )}
+                        {activeView === 'byteChat' && byteData && id !== undefined && (
+                            <div style={{ marginBottom: "5%", marginLeft:"1%", marginRight:"1%" }}>
+                                <ByteChatMobile
+                                    byteID={id}
+                                    // @ts-ignore
+                                    description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
+                                    // @ts-ignore
+                                    devSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
+                                    difficulty={difficultyToString(determineDifficulty())}
+                                    // @ts-ignore
+                                    questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
+                                    codePrefix={codeBeforeCursor}
+                                    codeSuffix={codeAfterCursor}
+                                    codeLanguage={programmingLanguages[byteData ? byteData.lang : 5]}
+                                    setSpeedDialVisibility={setSpeedDialVisibility}
+                                />
+                            </div>
+                        )}
+                        {isSpeedDialVisible && (
+                            <SpeedDial
+                                ariaLabel="SpeedDial"
+                                sx={{ position: 'fixed', bottom: 24, right: 16 }}
+                                icon={<SpeedDialIcon />}
+                            >
+                                {getFilteredActions().map((action) => (
+                                    <SpeedDialAction
+                                        key={action.name}
+                                        icon={action.icon}
+                                        tooltipTitle={action.name}
+                                        onClick={() => {
+                                            action.action();
+                                        }}
+                                    />
+                                ))}
+                            </SpeedDial>
+                        )}
                     </Box>
-                </TabPanel>
-                <TabPanel value={tabValue} index={1}>
-                    {byteData && id !== undefined && (
-                        <ByteChat
-                            byteID={id}
-                            // @ts-ignore
-                            description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
-                            // @ts-ignore
-                            devSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
-                            difficulty={difficultyToString(determineDifficulty())}
-                            // @ts-ignore
-                            questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
-                            codePrefix={codeBeforeCursor}
-                            codeSuffix={codeAfterCursor}
-                            codeLanguage={programmingLanguages[byteData ? byteData.lang : 5]}
-                        />
-                    )}
-                </TabPanel>
-                {/*{renderEditorSideBar()}*/}
-                {xpPopup && (
-                    <XpPopup
-                        // @ts-ignore
-                        oldXP={(xpData["xp_update"]["old_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]}
-                        // @ts-ignore
-                        levelUp={xpData["level_up_reward"] !== null}
-                        maxXP={100}
-                        // @ts-ignore
-                        newXP={(xpData["xp_update"]["new_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]}
-                        // @ts-ignore
-                        nextLevel={xpData["xp_update"]["old_level"] !== undefined ? xpData["xp_update"]["new_level"] : xpData["xp_update"]["next_level"]}
-                        // @ts-ignore
-                        gainedXP={xpData["xp_update"]["new_xp"] - xpData["xp_update"]["old_xp"]}
-                        // @ts-ignore
-                        reward={xpData["level_up_reward"]}
-                        // @ts-ignore
-                        renown={xpData["xp_update"]["current_renown"]}
-                        // @ts-ignore
-                        popupClose={null}
-                        homePage={true}
-                    />
                 )}
+                <NextByteDrawerMobile
+                    open={nextByteDrawerOpen}
+                    onClose={() => setNextByteDrawerOpen(false)}
+                    onNextByte={handleNextByte}
+                />
             </CssBaseline>
         </ThemeProvider>
     );
-}
+};
 
 export default ByteMobile;

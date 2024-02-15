@@ -138,7 +138,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
 
     // Check if the current page is ByteMobile
     const isByteMobilePage = location.pathname.startsWith('/byteMobile/');
-    const isByteMobileConceptPage = location.pathname.startsWith("/byteMobileConcept");
+    const isByteMobileConceptPage = location.pathname.startsWith("/byteMobile");
 
     const [mode, setMode] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const colorMode = React.useMemo(
@@ -385,7 +385,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
             leftOpen={leftOpen || homePageLockedDrawer}
             rightOpen={rightOpen}
             style={{
-                marginTop: window.location.pathname.startsWith("/byteMobileConcept/")
+                marginTop: window.location.pathname.startsWith("/byteMobile/")
                     ? "0px"
                     : window.location.pathname.startsWith("/launchpad/") && query.get("editor") === "true"
                         ? "28px"
@@ -1293,7 +1293,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     }
 
     const mobileAppBar = () => {
-        // Do not render AppBar if it's the byteMobileConcept page
+        // Do not render AppBar if it's the byteMobile page
         if (isByteMobileConceptPage) return null;
 
         return (
