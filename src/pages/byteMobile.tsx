@@ -972,7 +972,7 @@ function ByteMobile() {
                                     questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
                                     //@ts-ignore
                                     dev_steps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
-                                    maxWidth={"80%"}
+                                    maxWidth={"100%"}
                                     codeOutput={output?.merged || ""}
                                     nextByte={getNextByte()}
                                     style={{
