@@ -239,7 +239,12 @@ const XpPopup = (props: IProps) => {
                         </IconButton>
                         <img src={premiumGorilla} style={{width: "30%", marginBottom: "20px"}}/>
                         <Typography variant={"h4"} style={{marginBottom: "10px"}} align={"center"}>GIGO Pro</Typography>
-                        <Typography variant={"body1"} style={{marginBottom: "20px"}} align={"center"}>Get access to more resources and become a better developer today</Typography>
+                        <Typography variant={"body1"} style={{marginLeft: "20px", marginRight: "20px"}} align={"center"}>
+                            Learn faster with a smarter Code Teacher!
+                        </Typography>
+                        <Typography variant={"body1"} style={{marginBottom: "20px", marginLeft: "20px", marginRight: "20px"}} align={"center"}>
+                            Do more with larger DevSpaces!
+                        </Typography>
                         <div style={{
                             display: "flex",
                             justifyContent: "center"
