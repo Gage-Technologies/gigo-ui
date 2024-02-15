@@ -223,24 +223,26 @@ const XpPopup = (props: IProps) => {
                                 window.sessionStorage.setItem("attemptXP", "undefined");
                                 }
                             }}
+
                             sx={window.innerWidth < 1000 ? {
                                 position: "absolute",
                                 top: '20vh',
-                                right: '15vw'
+                                right: '15vw',
+                                color: "white"
                             } :{
                                 position: "absolute",
                                 top: '20vh',
-                                right: '38vw'
+                                right: '38vw', color: "white"
                             }}
                             >
                             <Close />
                         </IconButton>
                         <img src={premiumGorilla} style={{width: "30%", marginBottom: "20px"}}/>
-                        <Typography variant={"h4"} style={{marginBottom: "10px"}} align={"center"}>GIGO Pro</Typography>
-                        <Typography variant={"body1"} style={{marginLeft: "20px", marginRight: "20px"}} align={"center"}>
+                        <Typography variant={"h4"} style={{marginBottom: "10px", color: "white"}} align={"center"}>GIGO Pro</Typography>
+                        <Typography variant={"body1"} style={{marginLeft: "20px", marginRight: "20px", color: "white"}} align={"center"}>
                             Learn faster with a smarter Code Teacher!
                         </Typography>
-                        <Typography variant={"body1"} style={{marginBottom: "20px", marginLeft: "20px", marginRight: "20px"}} align={"center"}>
+                        <Typography variant={"body1"} style={{marginBottom: "20px", marginLeft: "20px", marginRight: "20px", color: "white"}} align={"center"}>
                             Do more with larger DevSpaces!
                         </Typography>
                         <div style={{
@@ -256,8 +258,8 @@ const XpPopup = (props: IProps) => {
                                 textAlign: "center",
                                 width: "200px"
                             }}>
-                                <Typography variant={"subtitle1"} style={{marginBottom: "10px"}} align={"center"}>1 Month</Typography>
-                                <Typography variant={"h5"} style={{marginBottom: "10px"}} align={"center"}>$15 / MO</Typography>
+                                <Typography variant={"subtitle1"} style={{marginBottom: "10px", color: "white"}} align={"center"}>1 Month</Typography>
+                                <Typography variant={"h5"} style={{marginBottom: "10px", color: "white"}} align={"center"}>$15 / MO</Typography>
                                 <LoadingButton
                                     loading={proUrlsLoading}
                                     variant="contained"
@@ -275,8 +277,8 @@ const XpPopup = (props: IProps) => {
                                 boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
                                 textAlign: "center",
                                 width: "200px"}}>
-                                <Typography variant={"subtitle1"} style={{marginBottom: "10px"}} align={"center"}>12 Months</Typography>
-                                <Typography variant={"h5"} style={{marginBottom: "10px"}} align={"center"}>$11.25 / MO</Typography>
+                                <Typography variant={"subtitle1"} style={{marginBottom: "10px", color: "white"}} align={"center"}>12 Months</Typography>
+                                <Typography variant={"h5"} style={{marginBottom: "10px", color: "white"}} align={"center"}>$11.25 / MO</Typography>
                                 <LoadingButton
                                     loading={proUrlsLoading}
                                     variant="contained"
