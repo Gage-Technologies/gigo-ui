@@ -32,6 +32,8 @@ import { Player } from "@lottiefiles/react-lottie-player";
 import config from "../../config";
 import BytesCard from "../BytesCard";
 import { useNavigate } from "react-router-dom";
+import BytesCardMobile from "../BytesCardMobile";
+import BytesCardSuccessPageMobile from "../ByteCardSuccessPageMobile";
 
 export type ByteNextOutputMessageMobileProps = {
     trigger: boolean;
@@ -312,65 +314,80 @@ export default function ByteNextOutputMessageMobile(props: ByteNextOutputMessage
         )
     }
 
-
     const renderSuccesPage = () => {
         return (
             <Box
-                display={"flex"}
-                flexDirection={"column"}
+                display="flex"
+                flexDirection="column"
+                alignItems='center'
+                justifyContent="space-between"
                 sx={{
-                    alignItems: 'center',
-                    maxWidth: props.maxWidth,
                     height: "100%",
-                    width: "100%"
+                    width: "100%",
+                    p: 2
                 }}
             >
-                <Typography component={Box} variant="h4">
-                    Byte Completed!
-                </Typography>
-                <Player
-                    src={byteSuccess}
-                    loop={false}
-                    keepLastFrame={true}
-                    autoplay={true}
-                    renderer="svg"
-                />
-                {props.nextByte && (
-                    <>
-                        <Typography component={Box} variant="h6" sx={{mb: 2}}>
-                            Next Up
-                        </Typography>
-                        <BytesCard
-                            bytesId={props.nextByte._id}
-                            bytesTitle={props.nextByte.name}
-                            bytesThumb={config.rootPath + "/static/bytes/t/" + props.nextByte._id}
-                            onClick={() => navigate(`/byte/${props.nextByte._id}`)}
-                            style={{ cursor: 'pointer', transition: 'transform 0.3s ease' }}
-                            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                            width="10vw"
-                            height="20vh"
-                            imageWidth="10vw"
-                            imageHeight="15vh"
-                        />
-                    </>
-                )}
                 <Box
-                    display={"flex"}
-                    flexDirection={"row"}
-                    justifyContent={"space-between"}
+                    display="flex"
+                    flexDirection="column"
+                    alignItems="center"
                     sx={{
                         width: "100%",
-                        marginTop: "auto",
+                    }}
+                >
+                    <Typography variant="h4" style={{ marginBottom: 2 }}>
+                        Byte Completed!
+                    </Typography>
+                    <Player
+                        src={byteSuccess}
+                        loop={false}
+                        keepLastFrame={true}
+                        autoplay={true}
+                        renderer="svg"
+                    />
+                    {props.nextByte && (
+                        <>
+                            <Typography variant="h6" style={{ paddingBottom: "10%" }}>
+                                Next Up
+                            </Typography>
+                            <Box
+                                display="flex"
+                                justifyContent="center"
+                                alignItems="center"
+                                style={{ width: "100%", marginTop: "-5%" }}
+                            >
+                                <BytesCardSuccessPageMobile
+                                    bytesId={props.nextByte._id}
+                                    bytesTitle={props.nextByte.name}
+                                    bytesThumb={config.rootPath + "/static/bytes/t/" + props.nextByte._id}
+                                    onClick={() => navigate(`/byteMobile/${props.nextByte._id}`)}
+                                    style={{
+                                        cursor: 'pointer',
+                                        transition: 'transform 0.3s ease',
+                                        margin: "0 auto",
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                    width={"100%"}
+                                    height={'fit-content'}
+                                />
+                            </Box>
+                        </>
+                    )}
+                </Box>
+                <Box
+                    display="flex"
+                    flexDirection="row"
+                    justifyContent="space-around"
+                    sx={{
+                        width: "100%",
+                        mt: "auto",
                         mb: 2
                     }}
                 >
                     <Button
                         variant="outlined"
                         color="primary"
-                        sx={{
-                            ml: "20px",
-                        }}
                         onClick={() => {
                             hide()
                         }}
@@ -381,7 +398,6 @@ export default function ByteNextOutputMessageMobile(props: ByteNextOutputMessage
                         variant="outlined"
                         color="success"
                         sx={{
-                            mr: "10px",
                             color: "#15cf91",
                             border: "1px solid #15cf9160",
                             "&:hover": {
@@ -395,15 +411,15 @@ export default function ByteNextOutputMessageMobile(props: ByteNextOutputMessage
                             setResponse("")
                             setState(State.LOADING)
                             hide()
-                            navigate(`/byte/${props.nextByte._id}`)
+                            navigate(`/byteMobile/${props.nextByte._id}`)
                         }}
                     >
                         Continue
                     </Button>
                 </Box>
             </Box>
-        )
-    }
+        );
+    };
 
     const renderContent = () => {
         if (hidden && (response.length > 0 || success)) {
