@@ -3,7 +3,7 @@ import {
     Box,
     Button, ButtonBase,
     Card,
-    CircularProgress, createTheme, Divider, Grid, IconButton, InputAdornment, PaletteMode,
+    CircularProgress, createTheme, Divider, Grid, IconButton, InputAdornment, PaletteMode, Popper,
     PopperPlacementType, Stack,
     styled,
     TextField,
@@ -41,6 +41,11 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import {grey} from "@mui/material/colors";
 import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../../reducers/bytes/bytes";
+import {Close} from "@material-ui/icons";
+import premiumGorilla from "../../img/pro-pop-up-icon-plain.svg";
+import {LoadingButton} from "@mui/lab";
+import call from "../../services/api-call";
+import proBackground from "../../img/popu-up-backgraound-plain.svg";
 
 const InitialSuggestionButton = styled(Button)`
     animation: initSuggestionButtonAuraEffect 2s infinite alternate;
@@ -83,6 +88,7 @@ export type ByteChatProps = {
     codeSuffix: string;
     codeLanguage: string;
     questions: [];
+    containerRef: React.MutableRefObject<null>
 };
 
 export default function ByteChat(props: ByteChatProps) {
@@ -90,10 +96,16 @@ export default function ByteChat(props: ByteChatProps) {
     const [mode, _] = useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
 
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
     let ctWs = useGlobalCtWebSocket();
     let authState = useAppSelector(selectAuthState);
     const bytesState = useAppSelector(selectBytesState)
     const thumbnail = useAppSelector(selectAuthStateThumbnail);
+
+    const [proMonthlyLink, setProMonthlyLink] = React.useState("");
+    const [proYearlyLink, setProYearlyLink] = React.useState("");
+    const [proUrlsLoading, setProUrlsLoading] = React.useState(false);
 
     const dispatch = useAppDispatch();
 
@@ -108,6 +120,7 @@ export default function ByteChat(props: ByteChatProps) {
     const [response, setResponse] = useState("")
     const [state, setState] = useState<State>(State.WAITING)
     const [userMessage, setUserMessage] = useState('');
+    const [goProPopup, setGoProPopup] = useState(false)
     const [messages, setMessages] = useState<CtByteChatMessage[]>([
         {
             _id: "init2",
@@ -529,29 +542,48 @@ export default function ByteChat(props: ByteChatProps) {
         )
     }
 
+    let premium = authState.role.toString()
+
     const renderCompleted = (
         content: string,
+        _id: string | null = null,
     ) => {
+        console.log("final id is: ", _id)
         return (
-            <MarkdownRenderer
-                markdown={content}
-                style={{
-                    overflowWrap: 'break-word',
-                    borderRadius: '10px',
-                    padding: '0px',
-                }}
-            />
+            <div style={{display: 'flex', flexDirection: 'column'}}>
+                <MarkdownRenderer
+                    markdown={content}
+                    style={{
+                        overflowWrap: 'break-word',
+                        borderRadius: '10px',
+                        padding: '0px',
+                    }}
+                />
+                <div style={{display: 'flex', justifyContent: 'flex-end', marginTop: '10px'}}>
+                    {(_id == null || !_id.includes("init")) && premium === "0" && (
+                        <Tooltip title={"Get Access to more coding help and resources by going pro"}>
+                            <Button onClick={(event) => {
+                                setGoProPopup(true)
+                                setAnchorEl(event.currentTarget)
+                            }} variant={"outlined"}>
+                                Go Pro
+                            </Button>
+                        </Tooltip>
+                    )}
+                </div>
+            </div>
         )
     }
 
     const renderContent = (
         content: string,
-        loading: boolean
+        loading: boolean,
+        _id: string | null = null,
     ) => {
         if (loading) {
             return renderLoading(content);
         }
-        return renderCompleted(content);
+        return renderCompleted(content, _id);
     }
 
     const renderUserMessage = (content: string) => {
@@ -631,6 +663,7 @@ export default function ByteChat(props: ByteChatProps) {
         freeCreditUse: boolean = false,
         msgId: string
     ) => {
+        console.log("id is: ", _id)
         return (
             <div
                 style={{
@@ -678,7 +711,7 @@ export default function ByteChat(props: ByteChatProps) {
                         maxWidth: "82%"
                     }}
                 >
-                    {renderContent(content, loading)}
+                    {renderContent(content, loading, _id)}
                 </Card>
             </div>
         );
@@ -917,6 +950,42 @@ export default function ByteChat(props: ByteChatProps) {
         )
     }
 
+    const retrieveProUrls = async (): Promise<{ monthly: string, yearly: string } | null> => {
+        setProUrlsLoading(true)
+        let res = await call(
+            "/api/stripe/premiumMembershipSession",
+            "post",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {},
+            null,
+            config.rootPath
+        )
+
+        setProUrlsLoading(false)
+
+        if (res !== undefined && res["return url"] !== undefined && res["return year"] !== undefined) {
+            setProMonthlyLink(res["return url"])
+            setProYearlyLink(res["return year"])
+            return {
+                "monthly": res["return url"],
+                "yearly": res["return year"],
+            }
+        }
+
+        return null
+    }
+
+    useEffect(() => {
+        if (premium === "0") {
+            retrieveProUrls()
+        }
+    }, [])
+
+    console.log("pro yearly link: ", proYearlyLink)
+
     return (
         <>
             <Box
@@ -937,6 +1006,122 @@ export default function ByteChat(props: ByteChatProps) {
                 {state === State.LOADING && renderBotMessage(response, true, "", false, false, "")}
             </Box>
             {renderSuggestions()}
+            <Popper open={goProPopup} anchorEl={props.containerRef.current}>
+                <Box style={{
+                    width: window.innerWidth < 1000 ? "90vw" : "28vw",
+                    height: window.innerWidth < 1000 ? "78vh": "65vh",
+                    minHeight: "420px",
+                    // justifyContent: "center",
+                    // marginLeft: "25vw",
+                    // marginTop: "5vh",
+                    outlineColor: "black",
+                    borderRadius: "7%",
+                    boxShadow:
+                        "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px  0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
+                    // backgroundColor: theme.palette.background.default,
+                    backgroundImage: `url(${proBackground})`,
+                    backgroundSize: "cover",
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "center center"
+                    // ...themeHelpers.frostedGlass
+                }}>
+                    <div style={{
+                        borderRadius: "10px",
+                        padding: "20px",
+                        textAlign: "center"
+                    }}>
+                        <IconButton
+                            edge="end"
+                            color="inherit"
+                            size="small"
+                            onClick={() => {
+                                setGoProPopup(false)
+                            }}
+
+                            sx={window.innerWidth < 1000 ? {
+                                position: "absolute",
+                                top: '2vh',
+                                right: '2vw',
+                                color: "white"
+                            } : {
+                                position: "absolute",
+                                top: '2vh',
+                                right: '2vw', color: "white"
+                            }}
+                        >
+                            <Close/>
+                        </IconButton>
+                        <img src={premiumGorilla} style={{width: "30%", marginBottom: "20px"}}/>
+                        <Typography variant={"h4"} style={{marginBottom: "10px", color: "white"}} align={"center"}>GIGO
+                            Pro</Typography>
+                        <Typography variant={"body1"} style={{marginLeft: "20px", marginRight: "20px", color: "white"}}
+                                    align={"center"}>
+                            Learn faster with a smarter Code Teacher!
+                        </Typography>
+                        <Typography variant={"body1"}
+                                    style={{
+                                        marginBottom: "20px",
+                                        marginLeft: "20px",
+                                        marginRight: "20px",
+                                        color: "white"
+                                    }}
+                                    align={"center"}>
+                            Do more with larger DevSpaces!
+                        </Typography>
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "center"
+                        }}>
+                            <div style={{
+                                backgroundColor: "#070D0D",
+                                borderRadius: "10px",
+                                padding: "20px",
+                                margin: "10px",
+                                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                                textAlign: "center",
+                                width: "200px"
+                            }}>
+                                <Typography variant={"subtitle1"} style={{marginBottom: "10px", color: "white"}}
+                                            align={"center"}>1 Month</Typography>
+                                <Typography variant={"h5"} style={{marginBottom: "10px", color: "white"}}
+                                            align={"center"}>$15
+                                    / MO</Typography>
+                                <LoadingButton
+                                    loading={proUrlsLoading}
+                                    variant="contained"
+                                    onClick={() => window.open(proMonthlyLink, "_blank")}
+                                    style={{backgroundColor: theme.palette.secondary.dark}}
+                                >
+                                    Select
+                                </LoadingButton>
+                            </div>
+                            <div style={{
+                                backgroundColor: "#070D0D",
+                                borderRadius: "10px",
+                                padding: "20px",
+                                margin: "10px",
+                                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                                textAlign: "center",
+                                width: "200px"
+                            }}>
+                                <Typography variant={"subtitle1"} style={{marginBottom: "10px", color: "white"}}
+                                            align={"center"}>12 Months</Typography>
+                                <Typography variant={"h5"} style={{marginBottom: "10px", color: "white"}}
+                                            align={"center"}>$11.25
+                                    / MO</Typography>
+                                <LoadingButton
+                                    loading={proUrlsLoading}
+                                    variant="contained"
+                                    onClick={() => window.open(proYearlyLink, "_blank")}
+                                    style={{backgroundColor: theme.palette.secondary.dark}}
+                                >
+                                    Select
+                                </LoadingButton>
+                            </div>
+                        </div>
+                    </div>
+                </Box>
+            </Popper>
             {!isAtBottom && (
                 <Box
                     display="flex"

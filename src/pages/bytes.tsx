@@ -1177,6 +1177,7 @@ function Byte() {
                         bytesLang={programmingLanguages[byteData ? byteData.lang : 5]}
                         codePrefix={codeBeforeCursor}
                         codeSuffix={codeAfterCursor}
+                        containerRef={containerRef}
                     />
                 )}
                 {(activeSidebarTab === null || activeSidebarTab === "debugOutput") && (
@@ -1202,6 +1203,7 @@ function Byte() {
                         maxWidth={"20vw"}
                         codeOutput={output?.merged || ""}
                         nextByte={getNextByte()}
+                        containerRef={containerRef}
                     />
                 )}
                 {activeSidebarTab === null && (
@@ -1240,11 +1242,13 @@ function Byte() {
         navigate("/")
     }
 
+    const containerRef = useRef(null)
+
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
                 <Container maxWidth="xl" style={containerStyle}>
-                    <Box sx={topContainerStyle}>
+                    <Box sx={topContainerStyle} ref={containerRef}>
                         <Box sx={difficultyAdjusterStyle}>
                             <DifficultyAdjuster
                                 difficulty={determineDifficulty()}
@@ -1281,6 +1285,7 @@ function Byte() {
                                         codePrefix={codeBeforeCursor}
                                         codeSuffix={codeAfterCursor}
                                         codeLanguage={programmingLanguages[byteData ? byteData.lang : 5]}
+                                        containerRef={containerRef}
                                     />
                                 )}
                             </div>
