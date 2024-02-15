@@ -1432,6 +1432,7 @@ function Home() {
                                     completedMedium={project["completed_medium"]}
                                     completedHard={project["completed_hard"]}
                                     language={programmingLanguages[project["lang"]]}
+                                    isHome={true}
                                 />
                             </LazyLoad>
                         </Box>
