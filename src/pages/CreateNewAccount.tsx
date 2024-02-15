@@ -280,7 +280,7 @@ function CreateNewAccount() {
             const emailIsValid = await verifyEmail(email);
             if (!emailIsValid) {
                 setLoading(false);
-                setMissingEmail(true);
+                // setMissingEmail(true);
                 return false;
             }
         }
