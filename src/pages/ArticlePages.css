@@ -1,0 +1,8 @@
+.article-content img {
+    max-width: 400px; /* Limits the width to 400px */
+    max-height: 400px; /* Optional: Use if you also want to limit the height */
+    height: auto; /* Ensures the aspect ratio is maintained */
+    display: block; /* Renders the image as a block element */
+    margin-left: auto; /* Together with margin-right: auto, centers the image */
+    margin-right: auto;
+}

@@ -30,6 +30,7 @@ import codeTeacher from "../img/premiumPageIcons/graduation-cap.svg"
 import resources from "../img/premiumPageIcons/technology.svg"
 import privateWorkspace from "../img/premiumPageIcons/padlock.svg"
 import proGorilla from "../img/icons/proPopupFace.svg"
+import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import {
     Button, Card, CardContent, Container,
     createTheme,
@@ -1891,6 +1892,22 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 sx={{ fontSize: "0.8em" }}
                             >
                                 Create
+                            </Typography>
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton color={"primary"} sx={{
+                            borderRadius: 2,
+                        }} href={"/articles"}>
+                            <ListItemIcon>
+                                <AutoStoriesIcon style={{ color: theme.palette.text.primary }} />
+                            </ListItemIcon>
+                            <Typography
+                                component={"div"}
+                                variant={"body1"}
+                                sx={{ fontSize: "0.8em" }}
+                            >
+                                Articles
                             </Typography>
                         </ListItemButton>
                     </ListItem>

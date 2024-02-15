@@ -8,6 +8,7 @@ import TrackedOutlet from './components/OutletTracking';
 import PublicConfigs from "./pages/PublicConfigs";
 import Unsubscribe from "./pages/unsubscribe";
 import config from './config';
+
 const CurateAdminPage = React.lazy(() => import("./pages/curateAdmin"));
 const Home = React.lazy(() => import("./pages/home"));
 const Challenge = React.lazy(() => import("./pages/Challenge"));
@@ -44,6 +45,8 @@ const AllBytesScroll = React.lazy(() => import("./pages/allBytesScroll"));
 const AboutBytes = React.lazy(() => import("./pages/aboutPageBytes"));
 const Byte = React.lazy(() => import("./pages/bytes"));
 const PrivacyPolicy = React.lazy(() => import("./pages/PrivacyPolicy"))
+const ArticlesPage = React.lazy(() => import("./pages/articles"))
+const ArticlePage = React.lazy(() => import("./pages/article"))
 
 export default function Routing() {
     // initialize redux dispatcher
@@ -114,6 +117,8 @@ export default function Routing() {
                     <Route path={"/resetPassword"} element={<ResetForgotPassword />} />
                     <Route path={"/resetPassword/:token/:id"} element={<ResetForgotPassword />} />
                     <Route path={"/home"} element={<Home />} />
+                    <Route path={"/articles"} element={<ArticlesPage />} />
+                    <Route path={"/articles/:articleName"} element={<ArticlePage />} />
                     <Route path={"/bytes"} element={<AllBytesScroll />} />
                     <Route path="/search" element={<Search />} />
                     <Route path={"/"} element={<Home />} />
