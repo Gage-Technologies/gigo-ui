@@ -10,27 +10,22 @@ import {
     Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import {getAllTokens, themeHelpers} from "../theme";
+import {getAllTokens} from "../theme";
 import { keyframes } from "@emotion/react";
 import LinearProgress from "@mui/material/LinearProgress";
 import * as levelUp from "../img/levelUp.json"
-import * as XPBoost from "../img/doubleXP.json";
-import Lottie from "react-lottie";
 import {useEffect} from "react";
 import { Button } from "@mui/material"
 import {Fade} from "react-awesome-reveal"
 import LootPopup from "./LootPopup";
-import Joyride from "react-joyride";
-import {bottom} from "@popperjs/core";
 import { selectAuthState } from "../reducers/auth/auth";
 import { useAppSelector } from "../app/hooks";
 import premiumGorilla from "../img/pro-pop-up-icon-plain.svg"
 import proBackground from "../img/popu-up-backgraound-plain.svg"
-import fireworks from "../img/fireworks.svg"
-import croppedPremium from "../img/croppedPremium.png"
 import call from "../services/api-call";
 import config from "../config";
 import { Close } from "@material-ui/icons";
+import { LoadingButton } from "@mui/lab";
 
 interface IProps {
     oldXP: number;
@@ -71,6 +66,7 @@ const XpPopup = (props: IProps) => {
     const [showPro, setShowPro] = React.useState(false);
     const [proMonthlyLink, setProMonthlyLink] = React.useState("");
     const [proYearlyLink, setProYearlyLink] = React.useState("");
+    const [proUrlsLoading, setProUrlsLoading] = React.useState(false);
 
     const [steps, setSteps] = React.useState([{
         content: <h2>Let's begin our journey!</h2>,
@@ -139,7 +135,7 @@ const XpPopup = (props: IProps) => {
         // //remove
         // premium = "0"
         if (premium === "0") {
-            setShowPro(true)
+            setShowPro(proMonthlyLink !== "" || proUrlsLoading)
         } else if (lootBox) {
             setShowLoot(true);
         } else {
@@ -153,6 +149,7 @@ const XpPopup = (props: IProps) => {
     }
 
     const retrieveProUrls = async (): Promise<{ monthly: string, yearly: string } | null> => {
+        setProUrlsLoading(true)
         let res = await call(
             "/api/stripe/premiumMembershipSession",
             "post",
@@ -164,6 +161,8 @@ const XpPopup = (props: IProps) => {
             null,
             config.rootPath
         )
+
+        setProUrlsLoading(false)
 
         if (res !== undefined && res["return url"] !== undefined && res["return year"] !== undefined) {
             setProMonthlyLink(res["return url"])
@@ -196,7 +195,6 @@ const XpPopup = (props: IProps) => {
                  </div>
             )
         } else if (showPro) {
-            // @ts-ignore
             return (
                 <>
                     <style>
@@ -215,7 +213,7 @@ const XpPopup = (props: IProps) => {
                                 if (lootBox) {
                                     console.log("here")
                                     setShowLoot(true);
-                                setShowPro(false);
+                                    setShowPro(false);
                                 } else {
                                 setOpen(false);
                                 if (props.popupClose !== null) {
@@ -250,9 +248,7 @@ const XpPopup = (props: IProps) => {
                             justifyContent: "center"
                         }}>
                             <div style={{
-                                backgroundColor:
-                                //@ts-ignore
-                                "#070D0D",
+                                backgroundColor: "#070D0D",
                                 borderRadius: "10px",
                                 padding: "20px",
                                 margin: "10px",
@@ -262,12 +258,17 @@ const XpPopup = (props: IProps) => {
                             }}>
                                 <Typography variant={"subtitle1"} style={{marginBottom: "10px"}} align={"center"}>1 Month</Typography>
                                 <Typography variant={"h5"} style={{marginBottom: "10px"}} align={"center"}>$15 / MO</Typography>
-                                <Button variant="contained" onClick={() => window.open(proMonthlyLink, "_blank")} style={{backgroundColor: theme.palette.secondary.dark}}>Select</Button>
+                                <LoadingButton
+                                    loading={proUrlsLoading}
+                                    variant="contained"
+                                    onClick={() => window.open(proMonthlyLink, "_blank")}
+                                    style={{backgroundColor: theme.palette.secondary.dark}}
+                                >
+                                    Select
+                                </LoadingButton>
                             </div>
                             <div style={{
-                                backgroundColor:
-                                //@ts-ignore
-                                    "#070D0D",
+                                backgroundColor: "#070D0D",
                                 borderRadius: "10px",
                                 padding: "20px",
                                 margin: "10px",
@@ -276,7 +277,14 @@ const XpPopup = (props: IProps) => {
                                 width: "200px"}}>
                                 <Typography variant={"subtitle1"} style={{marginBottom: "10px"}} align={"center"}>12 Months</Typography>
                                 <Typography variant={"h5"} style={{marginBottom: "10px"}} align={"center"}>$11.25 / MO</Typography>
-                                <Button variant="contained" onClick={() => window.open(proYearlyLink, "_blank")} style={{backgroundColor: theme.palette.secondary.dark}}>Select</Button>
+                                <LoadingButton
+                                    loading={proUrlsLoading}
+                                    variant="contained"
+                                    onClick={() => window.open(proYearlyLink, "_blank")}
+                                    style={{backgroundColor: theme.palette.secondary.dark}}
+                                >
+                                    Select
+                                </LoadingButton>
                             </div>
                         </div>
                     </div>
