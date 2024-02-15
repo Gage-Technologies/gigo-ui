@@ -1,7 +1,6 @@
 import * as React from "react";
-import {useEffect, useMemo, useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {
-    Container,
     createTheme,
     CssBaseline,
     PaletteMode,
@@ -9,8 +8,6 @@ import {
     Typography,
     Box,
     Tooltip,
-    Button,
-    Tab,
     SpeedDial,
     SpeedDialIcon,
     SpeedDialAction,
@@ -19,10 +16,7 @@ import {
     List,
     ListItem,
     ListItemText,
-    SwipeableDrawer,
-    Drawer
 } from "@mui/material";
-import XpPopup from "../components/XpPopup";
 import {getAllTokens, themeHelpers} from "../theme";
 import { Close, KeyboardArrowUp, PlayArrow } from "@material-ui/icons";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
@@ -31,7 +25,6 @@ import swal from "sweetalert";
 import call from "../services/api-call";
 import 'ace-builds';
 import 'ace-builds/webpack-resolver';
-import ByteSelectionMenu from "../components/ByteSelectionMenu";
 import config from "../config";
 import { useParams } from "react-router";
 import { useGlobalWebSocket } from "../services/websocket";
@@ -59,7 +52,6 @@ import { ReactComponent as CTIcon } from '../components/Icons/code-teacher-bytes
 import DeveloperModeIcon from '@mui/icons-material/DeveloperMode';
 import ByteChatMobile from "../components/CodeTeacher/ByteChatMobile";
 import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
-import { useSwipeable } from 'react-swipeable';
 import NextByteDrawerMobile from "../components/NextByteDrawerMobile";
 
 interface MergedOutputRow {
@@ -93,13 +85,6 @@ interface BytesData {
     description_hard: string;
     outline_content_hard: string;
     dev_steps_hard: string;
-}
-
-function a11yProps(index: any) {
-    return {
-        id: `simple-tab-${index}`,
-        'aria-controls': `simple-tabpanel-${index}`,
-    };
 }
 
 function ByteMobileConcept() {
@@ -149,11 +134,13 @@ function ByteMobileConcept() {
         margin: "auto"
     }
 
+    const fixedElementsHeight = 120;
+
     const editorAndTerminalStyle: React.CSSProperties = {
         display: 'flex',
         flexDirection: 'column',
         flex: 1,
-        height: '93vh',
+        height: `calc(100vh - ${fixedElementsHeight}px)`,
         minHeight: '93vh',
         width: "100%",
         minWidth: `100%`,
@@ -212,8 +199,8 @@ function ByteMobileConcept() {
     const [tabValue, setTabValue] = useState(0);
     const [activeView, setActiveView] = useState("editor");
     const [activeSidebarTab, setActiveSidebarTab] = React.useState<string | null>(null);
-    const [speedDialOpen, setSpeedDialOpen] = useState(false);
     const [nextByteDrawerOpen, setNextByteDrawerOpen] = useState(false);
+    const [isSpeedDialVisible, setSpeedDialVisibility] = useState(true);
 
     const [editorStyles, setEditorStyles] = useState({
         fontSize: '14px',
@@ -732,10 +719,6 @@ function ByteMobileConcept() {
         "/static/posts/t/1693725878338453504"
     ];
 
-    const handleSelectByte = (byteId: string) => {
-        navigate(`/byte/${byteId}`);
-    };
-
     // Add a function to handle closing the terminal
     const handleCloseTerminal = () => {
         setTerminalVisible(false);
@@ -881,76 +864,6 @@ function ByteMobileConcept() {
         return recommendedBytes[0]
     }
 
-
-    // const DraggableBottomBox: React.FC<{ getNextByte: typeof getNextByte }> = ({ getNextByte }) => {
-    //     const navigate = useNavigate();
-    //     const [isDragging, setIsDragging] = useState(false); // State to track if dragging
-    //
-    //     // Define spring animation for drag and opacity
-    //     const [{ y, opacity, backdropFilter }, set] = useSpring(() => ({
-    //         y: 0,
-    //         opacity: 0,
-    //         backdropFilter: "blur(0px)",
-    //     }));
-    //
-    //     // Handle drag gesture
-    //     const bind = useDrag(({ down, movement: [, my], distance, cancel }) => {
-    //         setIsDragging(down); // Update dragging state
-    //         if (down && distance > window.innerHeight / 1.5) {
-    //             const nextByte = getNextByte();
-    //             if (nextByte) {
-    //                 navigate(`/byteMobileConcept/${nextByte._id}`);
-    //                 cancel();
-    //             }
-    //         }
-    //         const newOpacity = Math.min(1, (distance / (window.innerHeight / 2)) ** 3);
-    //         const newBlur = Math.min(1, (distance / (window.innerHeight / 2)) ** 3);
-    //         set({
-    //             y: down ? my : 0,
-    //             opacity: down ? newOpacity : 0,
-    //             backdropFilter: down ? `blur(${newBlur}px)` : "blur(0px)",
-    //         });
-    //     }, { axis: 'y' });
-    //
-    //     return (
-    //         <>
-    //             <animated.div
-    //                 {...bind()}
-    //                 style={{
-    //                     transform: y.to(y => `translateY(${y}px)`),
-    //                     position: 'fixed',
-    //                     bottom: 0,
-    //                     left: 0,
-    //                     right: 0,
-    //                     display: 'flex',
-    //                     justifyContent: 'center',
-    //                     alignItems: 'center',
-    //                     backgroundColor: '#232a2f',
-    //                     zIndex: isDragging ? 10 : -1,
-    //                 }}
-    //             >
-    //                 <KeyboardArrowUp style={{ fontSize: '2rem' }} />
-    //             </animated.div>
-    //             {/* Conditional rendering of fullscreen overlay */}
-    //             {isDragging && (
-    //                 <animated.div
-    //                     style={{
-    //                         position: 'fixed',
-    //                         top: 0,
-    //                         left: 0,
-    //                         width: '100%',
-    //                         height: '100%',
-    //                         backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    //                         opacity: opacity,
-    //                         backdropFilter: backdropFilter,
-    //                         zIndex: 9,
-    //                     }}
-    //                 />
-    //             )}
-    //         </>
-    //     );
-    // };
-
     const handleNextByte = () => {
         const nextByte = getNextByte();
         if (nextByte) {
@@ -997,33 +910,42 @@ function ByteMobileConcept() {
         );
     };
 
-    const actions = [
-        {
-            icon: <HomeIcon />,
-            name: 'Home',
-            action: () => navigate('/home/')
-        },
-        {
-            icon: <CTIcon />,
-            name: 'Byte Chat',
-            action: () => setActiveView('byteChat')
-        },
-        {
-            icon: <DeveloperModeIcon />,
-            name: 'Editor',
-            action: () => setActiveView('editor')
-        },
-        {
-            icon: <span role="img" aria-label="banana">🍌</span>,
-            name: 'All Bytes',
-            action: () => navigate('/bytesMobile')
-        },
-        {
-            icon: <SettingsApplicationsIcon />,
-            name: 'Difficulty',
-            action: () => setIsDifficultyPopupOpen(true),
-        },
-    ];
+    const getFilteredActions = () => {
+        const allActions = [
+            {
+                icon: <HomeIcon />,
+                name: 'Home',
+                action: () => navigate('/home/')
+            },
+            {
+                icon: <CTIcon />,
+                name: 'Byte Chat',
+                action: () => setActiveView('byteChat')
+            },
+            {
+                icon: <DeveloperModeIcon />,
+                name: 'Editor',
+                action: () => setActiveView('editor')
+            },
+            {
+                icon: <span role="img" aria-label="banana">🍌</span>,
+                name: 'All Bytes',
+                action: () => navigate('/bytesMobile')
+            },
+            {
+                icon: <SettingsApplicationsIcon />,
+                name: 'Difficulty',
+                action: () => setIsDifficultyPopupOpen(true),
+            },
+        ];
+
+        // Filter actions based on the current view
+        return allActions.filter(action => {
+            if (activeView === 'editor' && action.name === 'Editor') return false;
+            if (activeView === 'byteChat' && action.name === 'Byte Chat') return false;
+            return true;
+        });
+    };
 
     // @ts-ignore
     return (
@@ -1189,25 +1111,28 @@ function ByteMobileConcept() {
                                     codePrefix={codeBeforeCursor}
                                     codeSuffix={codeAfterCursor}
                                     codeLanguage={programmingLanguages[byteData ? byteData.lang : 5]}
+                                    setSpeedDialVisibility={setSpeedDialVisibility}
                                 />
                             </div>
                         )}
-                        <SpeedDial
-                            ariaLabel="SpeedDial"
-                            sx={{ position: 'fixed', bottom: 24, right: 16 }}
-                            icon={<SpeedDialIcon />}
-                        >
-                            {actions.map((action) => (
-                                <SpeedDialAction
-                                    key={action.name}
-                                    icon={action.icon}
-                                    tooltipTitle={action.name}
-                                    onClick={() => {
-                                        action.action();
-                                    }}
-                                />
-                            ))}
-                        </SpeedDial>
+                        {isSpeedDialVisible && (
+                            <SpeedDial
+                                ariaLabel="SpeedDial"
+                                sx={{ position: 'fixed', bottom: 24, right: 16 }}
+                                icon={<SpeedDialIcon />}
+                            >
+                                {getFilteredActions().map((action) => (
+                                    <SpeedDialAction
+                                        key={action.name}
+                                        icon={action.icon}
+                                        tooltipTitle={action.name}
+                                        onClick={() => {
+                                            action.action();
+                                        }}
+                                    />
+                                ))}
+                            </SpeedDial>
+                        )}
                     </Box>
                 )}
                 <NextByteDrawerMobile
@@ -1215,7 +1140,6 @@ function ByteMobileConcept() {
                     onClose={() => setNextByteDrawerOpen(false)}
                     onNextByte={handleNextByte}
                 />
-                {/*<DraggableBottomBox getNextByte={getNextByte} />*/}
             </CssBaseline>
         </ThemeProvider>
     );

@@ -11,7 +11,7 @@ import {
     Tooltip,
     Typography
 } from "@mui/material";
-import React, {useEffect, useLayoutEffect, useRef, useState} from "react";
+import React, {useContext, useEffect, useLayoutEffect, useRef, useState} from "react";
 import MarkdownRenderer from "../Markdown/MarkdownRenderer";
 import {useGlobalCtWebSocket} from "../../services/ct_websocket";
 import {
@@ -87,7 +87,7 @@ export type ByteChatProps = {
     questions: [];
 };
 
-export default function ByteChatMobile(props: ByteChatProps) {
+export default function ByteChatMobile(props: ByteChatProps & { setSpeedDialVisibility: (isVisible: boolean) => void }) {
     let userPref = localStorage.getItem('theme');
     const [mode, _] = useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
@@ -370,6 +370,7 @@ export default function ByteChatMobile(props: ByteChatProps) {
         })
         setMessages(m)
         setUserMessage('')
+        props.setSpeedDialVisibility(true);
         ctWs.sendWebsocketMessage({
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
             type: CtMessageType.WebSocketMessageTypeByteUserMessage,
@@ -934,7 +935,8 @@ export default function ByteChatMobile(props: ByteChatProps) {
 
         return (
             <Grid container sx={{
-                marginBottom: '10px'
+                marginBottom: '15px',
+                padding: '0 20px',
             }} spacing={1}>
                 {questions.map((q, index) => {
                     let QuestionButton: any = Button
@@ -973,6 +975,33 @@ export default function ByteChatMobile(props: ByteChatProps) {
         )
     }
 
+    const textInputMemo = React.useMemo(() => (
+        <TextField
+            onFocus={() => props.setSpeedDialVisibility(false)}
+            onBlur={() => props.setSpeedDialVisibility(true)}
+            disabled={disableChat || !authState.authenticated}
+            fullWidth
+            label={authState.authenticated ? "Ask Code Teacher!" : "Signup To Chat With Code Teacher"}
+            variant="outlined"
+            value={userMessage}
+            multiline={true}
+            maxRows={5}
+            onChange={(e) => setUserMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            InputProps={{
+                endAdornment: (
+                    <InputAdornment position="end">
+                        <Tooltip title={"Start New Conversation Thread"}>
+                            <IconButton onClick={() => closeThread()} disabled={disableChat || !authState.authenticated}>
+                                <ForumIcon/>
+                            </IconButton>
+                        </Tooltip>
+                    </InputAdornment>
+                ),
+            }}
+        />
+    ), [userMessage, disableChat, chatId])
+
     return (
         <>
             <Box
@@ -1003,20 +1032,34 @@ export default function ByteChatMobile(props: ByteChatProps) {
                     zIndex: 1000,
                 }}
             >
-                {/* Render suggestions just above the button */}
                 {renderSuggestions()}
+                {!isAtBottom && (
+                    <Box
+                        display="flex"
+                        justifyContent="center"
+                        alignItems="center"
+                        sx={{mb: 1}}
+                    >
+                        <IconButton
+                            onClick={scrollToBottom}
+                            size="small"
+                            sx={{
+                                border: `1px solid ${theme.palette.primary.dark}`,
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                                }
+                            }}
+                        >
+                            <ArrowDownwardIcon/>
+                        </IconButton>
+                    </Box>
+                )}
                 <Box
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                    }}
+                sx={{ paddingLeft: 1, paddingRight: 1 }}
                 >
-                    <Button variant="contained" color="primary" onClick={handleOpenPopup}>
-                        Ask Code Teacher
-                    </Button>
+                    {textInputMemo}
                 </Box>
             </Box>
-            {askCodeTeacherPopup}
         </>
     );
 }
