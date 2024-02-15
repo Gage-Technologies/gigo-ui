@@ -381,7 +381,7 @@ export default function ByteNextOutputMessageMobile(props: ByteNextOutputMessage
                     justifyContent="space-around"
                     sx={{
                         width: "100%",
-                        mt: "auto",
+                        mt: 2,
                         mb: 2
                     }}
                 >
