@@ -358,22 +358,22 @@ function Streak() {
     let renderXPBoost = () => {
         const children = (
             <>
-                            <Button
+                <Button
                     style={{backgroundColor: "transparent", width: "100%", display: "flex", alignItems: "center"}}
                     onClick={() => setPopupShow(true)} disabled={xpActive !== null ||
                     //@ts-ignore
                     xpData["Count"] === 0 || xpData["Count"] === undefined}>
                     <Box display={"flex"} flexDirection={"column"}>
-                            <LottieAnimation 
+                            <LottieAnimation
                                 animationData={XPBoost}
                                 autoplay={true}
                                 loop={true}
                                 style={{
-                                    width: "75%",
-                                    height: "75%",
-                                    zIndex: 4, 
-                                    display: "flex", 
-                                    // height: "100%", 
+                                    width: "50%",
+                                    height: "50%",
+                                    zIndex: 4,
+                                    display: "flex",
+                                    // height: "100%",
                                     alignItems: "center"
                                 }}
                             />
@@ -776,7 +776,7 @@ function Streak() {
                                     {renderFlame()}
                                 </Grid>
                                 <Grid item xs={4}
-                                      sx={{display: "flex", justifyContent: "center", alignItems: "center"}}
+                                      sx={{display: "flex", justifyContent: "center", alignItems: "center", justifySelf: "start"}}
                                 >
                                     {renderXPBoost()}
                                 </Grid>
