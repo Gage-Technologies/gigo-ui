@@ -122,7 +122,7 @@ export default function BytesCardMobile(props: IProps) {
             }
             `}
             </style>
-            <ButtonBase href={`/byteMobile/${props.bytesId}`} onClick={props.onClick}>
+            <ButtonBase href={`/byte/${props.bytesId}`} onClick={props.onClick}>
                 <Card
                     sx={styles.card}
                     style={props.style}

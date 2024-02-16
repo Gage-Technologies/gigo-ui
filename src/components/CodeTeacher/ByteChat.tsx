@@ -848,7 +848,6 @@ export default function ByteChat(props: ByteChatProps) {
     const messagesMemo = React.useMemo(() => (
         <>
             {renderGroupedMessages()}
-            <div ref={messagesEndRef}/>
         </>
     ), [(state === State.LOADING) ? null : messages, threadVisibility, currentThreadCount])
 
@@ -925,39 +924,41 @@ export default function ByteChat(props: ByteChatProps) {
                 flexDirection={"column"}
                 sx={{
                     scrollBehavior: 'smooth',
-                    height: "68vh",
+                    height: "calc(100% - 72px)",
                     overflowY: "auto",
                     overflowX: "hidden",
                     pt: 2,
                     pb: 2,
                     marginBottom: 1,
+                    position: "relative"
                 }}
             >
                 {messagesMemo}
                 {state === State.LOADING && renderBotMessage(response, true, "", false, false, "")}
+                <div ref={messagesEndRef}/>
+                {!isAtBottom && (
+                    <Tooltip title={"Scroll To Bottom"}>
+                        <IconButton
+                            onClick={scrollToBottom}
+                            size="small"
+                            sx={{
+                                position: "fixed",
+                                bottom: `17vh`,
+                                left: window.innerWidth * .2 < 450 ? "440px" : `calc(20vw - 10px)`,
+                                border: `1px solid ${theme.palette.primary.dark}`,
+                                backdropFilter: "blur(10px)",
+                                zIndex: 10000,
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                                }
+                            }}
+                        >
+                            <ArrowDownwardIcon/>
+                        </IconButton>
+                    </Tooltip>
+                )}
             </Box>
             {renderSuggestions()}
-            {!isAtBottom && (
-                <Box
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                    sx={{mb: 1}}
-                >
-                    <IconButton
-                        onClick={scrollToBottom}
-                        size="small"
-                        sx={{
-                            border: `1px solid ${theme.palette.primary.dark}`,
-                            '&:hover': {
-                                backgroundColor: 'rgba(255, 255, 255, 0.04)',
-                            }
-                        }}
-                    >
-                        <ArrowDownwardIcon/>
-                    </IconButton>
-                </Box>
-            )}
             {textInputMemo}
         </>
     );

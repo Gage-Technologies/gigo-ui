@@ -695,7 +695,7 @@ function Home() {
                                             bytesTitle={project["name"]}
                                             bytesDesc={project["description_medium"]}
                                             bytesThumb={config.rootPath + "/static/bytes/t/" + project["_id"]}
-                                            onClick={() => navigate("/byteMobile/" + project["_id"])}
+                                            onClick={() => navigate("/byte/" + project["_id"])}
                                             role={authState.role}
                                             completedEasy={project["completed_easy"]}
                                             completedMedium={project["completed_medium"]}
@@ -1426,7 +1426,7 @@ function Home() {
                                     bytesTitle={project["name"]}
                                     bytesDesc={project["description_medium"]}
                                     bytesThumb={config.rootPath + "/static/bytes/t/" + project["_id"]}
-                                    onClick={() => navigate("/byteMobile/" + project["_id"])}
+                                    onClick={() => navigate("/byte/" + project["_id"])}
                                     role={authState.role}
                                     completedEasy={project["completed_easy"]}
                                     completedMedium={project["completed_medium"]}
@@ -1443,7 +1443,7 @@ function Home() {
                                 '--button-primary-color-light': "white",
                                 '--button-primary-color-hover': theme.palette.primary.main,
                                 fontSize: "18px",
-                            }} type="primary" href={`/byteMobile/${project["_id"]}`}>
+                            }} type="primary" href={`/byte/${project["_id"]}`}>
                                 Take a Byte
                             </AwesomeButton>
                         </Box>

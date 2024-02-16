@@ -1,57 +1,52 @@
 import * as React from "react";
 import {useEffect, useRef, useState} from "react";
 import {
+    Box,
     createTheme,
     CssBaseline,
-    PaletteMode,
-    ThemeProvider,
-    Typography,
-    Box,
-    Tooltip,
-    SpeedDial,
-    SpeedDialIcon,
-    SpeedDialAction,
     Dialog,
     DialogTitle,
     List,
     ListItem,
     ListItemText,
+    PaletteMode,
+    SpeedDial,
+    SpeedDialAction,
+    ThemeProvider,
+    Tooltip,
+    Typography,
 } from "@mui/material";
-import {getAllTokens, themeHelpers} from "../theme";
-import { Close, KeyboardArrowUp, PlayArrow } from "@material-ui/icons";
-import { useAppDispatch, useAppSelector } from "../app/hooks";
-import { useNavigate } from "react-router-dom";
+import {getAllTokens} from "../theme";
+import {KeyboardArrowUp, PlayArrow} from "@material-ui/icons";
+import {useAppDispatch, useAppSelector} from "../app/hooks";
+import {useNavigate} from "react-router-dom";
 import swal from "sweetalert";
 import call from "../services/api-call";
 import 'ace-builds';
 import 'ace-builds/webpack-resolver';
 import config from "../config";
-import { useParams } from "react-router";
-import { useGlobalWebSocket } from "../services/websocket";
-import { WsGenericErrorPayload, WsMessage, WsMessageType } from "../models/websocket";
-import {
-    ExecResponsePayload,
-    OutputRow
-} from "../models/bytes";
-import { programmingLanguages } from "../services/vars";
+import {useParams} from "react-router";
+import {useGlobalWebSocket} from "../services/websocket";
+import {WsGenericErrorPayload, WsMessage, WsMessageType} from "../models/websocket";
+import {ExecResponsePayload, OutputRow} from "../models/bytes";
+import {programmingLanguages} from "../services/vars";
 import "./bytes.css";
-import { LoadingButton } from "@mui/lab";
+import {LoadingButton} from "@mui/lab";
 import Editor from "../components/IDE/Editor";
 import chroma from 'chroma-js';
 import SheenPlaceholder from "../components/Loading/SheenPlaceholder";
-import { sleep } from "../services/utils";
-import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
-import { selectAuthState } from "../reducers/auth/auth";
-import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../reducers/bytes/bytes";
+import {sleep} from "../services/utils";
+import {ReactCodeMirrorRef} from "@uiw/react-codemirror";
+import {selectAuthState} from "../reducers/auth/auth";
+import {initialBytesStateUpdate, selectBytesState, updateBytesState} from "../reducers/bytes/bytes";
 import ByteTerminal from "../components/Terminal";
 import './byteMobile.css';
 import ByteNextOutputMessageMobile from "../components/CodeTeacher/ByteNextOutputMessageMobile";
 import ByteNextStepMobile from "../components/CodeTeacher/ByteNextStepMobile";
 import HomeIcon from "@mui/icons-material/Home";
-import { ReactComponent as CTIcon } from '../components/Icons/code-teacher-bytes-mobile.svg';
+import CTIcon from '../img/codeTeacher/CT-icon-simple.svg';
 import DeveloperModeIcon from '@mui/icons-material/DeveloperMode';
 import ByteChatMobile from "../components/CodeTeacher/ByteChatMobile";
-import SettingsApplicationsIcon from '@mui/icons-material/SettingsApplications';
 import NextByteDrawerMobile from "../components/NextByteDrawerMobile";
 import MenuIcon from '@mui/icons-material/Menu';
 import PinIcon from '@mui/icons-material/Pin';
@@ -136,18 +131,17 @@ function ByteMobile() {
         margin: "auto"
     }
 
-    const fixedElementsHeight = 120;
+    const fixedElementsHeight = 48;
 
     const editorAndTerminalStyle: React.CSSProperties = {
         display: 'flex',
         flexDirection: 'column',
         flex: 1,
         height: `calc(100vh - ${fixedElementsHeight}px)`,
-        minHeight: '93vh',
         width: "100%",
         minWidth: `100%`,
         alignItems: 'center',
-        justifyContent: 'center',
+        // justifyContent: 'center',
         overflowX: 'auto',
         position: 'relative',
         overflowY: 'hidden',
@@ -203,12 +197,13 @@ function ByteMobile() {
     const [activeSidebarTab, setActiveSidebarTab] = React.useState<string | null>(null);
     const [nextByteDrawerOpen, setNextByteDrawerOpen] = useState(false);
     const [isSpeedDialVisible, setSpeedDialVisibility] = useState(true);
+    const [speedDialOpen, setSpeedDialOpen] = useState(false);
 
     const [editorStyles, setEditorStyles] = useState({
         fontSize: '14px',
     });
 
-    let { id } = useParams();
+    let {id} = useParams();
 
     let globalWs = useGlobalWebSocket();
 
@@ -349,10 +344,10 @@ function ByteMobile() {
         setIsReceivingData(true);
         setTerminalVisible(true)
         setOutput({
-            stdout: [{ timestamp: Date.now() * 1000, content: "Running..." }],
+            stdout: [{timestamp: Date.now() * 1000, content: "Running..."}],
             stderr: [],
             merged: "Running...",
-            mergedLines: [{ timestamp: Date.now() * 1000, content: "Running...", error: false }],
+            mergedLines: [{timestamp: Date.now() * 1000, content: "Running...", error: false}],
         });
         setExecutingCode(true)
         setCommandId("");
@@ -397,7 +392,7 @@ function ByteMobile() {
                 if (payload.command_id_string) {
                     setCommandId(payload.command_id_string);
                 }
-                const { stdout, stderr, done } = payload;
+                const {stdout, stderr, done} = payload;
 
                 // skip the processing if this is the first response
                 if (stdout.length === 0 && stderr.length === 0) {
@@ -492,7 +487,7 @@ function ByteMobile() {
                 null,
                 null,
                 // @ts-ignore
-                { byte_id: byteId },
+                {byte_id: byteId},
                 null,
                 config.rootPath);
             const [res] = await Promise.all([response]);
@@ -527,7 +522,7 @@ function ByteMobile() {
                 null,
                 null,
                 // @ts-ignore
-                { byte_id: byteId },
+                {byte_id: byteId},
                 null,
                 config.rootPath
             );
@@ -563,7 +558,7 @@ function ByteMobile() {
                 null,
                 null,
                 // @ts-ignore
-                { byte_id: byteId },
+                {byte_id: byteId},
                 null,
                 config.rootPath
             );
@@ -595,7 +590,7 @@ function ByteMobile() {
             null,
             // @ts-ignore
             {
-                byte_id: byteAttemptId ,
+                byte_id: byteAttemptId,
                 difficulty: difficultyToString(determineDifficulty()),
             },
             null,
@@ -869,7 +864,7 @@ function ByteMobile() {
     const handleNextByte = () => {
         const nextByte = getNextByte();
         if (nextByte) {
-            navigate(`/byteMobile/${nextByte._id}`);
+            navigate(`/byte/${nextByte._id}`);
             setNextByteDrawerOpen(false);
         }
     };
@@ -883,7 +878,12 @@ function ByteMobile() {
         currentDifficulty: number;
     }
 
-    const DifficultyPopup: React.FC<DifficultyPopupProps> = ({ open, onClose, onSelectDifficulty, currentDifficulty }) => {
+    const DifficultyPopup: React.FC<DifficultyPopupProps> = ({
+                                                                 open,
+                                                                 onClose,
+                                                                 onSelectDifficulty,
+                                                                 currentDifficulty
+                                                             }) => {
         const difficulties = ['Easy', 'Medium', 'Hard'];
 
         return (
@@ -900,7 +900,7 @@ function ByteMobile() {
                         >
                             <ListItemText
                                 primary={
-                                    <Typography variant="body1" style={{ textAlign: 'center' }}>
+                                    <Typography variant="body1" style={{textAlign: 'center'}}>
                                         {difficulty}
                                     </Typography>
                                 }
@@ -915,17 +915,17 @@ function ByteMobile() {
     const getFilteredActions = () => {
         const allActions = [
             {
-                icon: <HomeIcon />,
+                icon: <HomeIcon/>,
                 name: 'Home',
                 action: () => navigate('/home/')
             },
             {
-                icon: <CTIcon />,
+                icon: <img alt="CT" src={CTIcon} style={{width: 18, height: 18}}/>,
                 name: 'Byte Chat',
                 action: () => setActiveView('byteChat')
             },
             {
-                icon: <DeveloperModeIcon />,
+                icon: <DeveloperModeIcon/>,
                 name: 'Editor',
                 action: () => setActiveView('editor')
             },
@@ -935,7 +935,7 @@ function ByteMobile() {
                 action: () => navigate('/bytesMobile')
             },
             {
-                icon: <PinIcon />,
+                icon: <PinIcon/>,
                 name: 'Difficulty',
                 action: () => setIsDifficultyPopupOpen(true),
             },
@@ -953,13 +953,15 @@ function ByteMobile() {
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
-                <Box sx={{ ...topContainerStyle, flexDirection: 'row', justifyContent: 'center', width: '100%' }}>
+                <Box sx={{...topContainerStyle, flexDirection: 'row', justifyContent: 'center', width: '100%'}}>
                     {tabValue === 0 && (
                         <>
                             {activeSidebarTab !== "nextSteps" && (
                                 <ByteNextOutputMessageMobile
                                     trigger={outputPopup}
-                                    acceptedCallback={() => { setOutputPopup(false) }}
+                                    acceptedCallback={() => {
+                                        setOutputPopup(false)
+                                    }}
                                     onExpand={() => setActiveSidebarTab("debugOutput")}
                                     onHide={() => setActiveSidebarTab(null)}
                                     onSuccess={() => {
@@ -995,7 +997,7 @@ function ByteMobile() {
                                 ) : (
                                     <Box sx={titlePlaceholderContainerStyle}>
                                         <Box sx={titlePlaceholderStyle}>
-                                            <SheenPlaceholder width="400px" height={"45px"} />
+                                            <SheenPlaceholder width="400px" height={"45px"}/>
                                         </Box>
                                     </Box>
                                 )
@@ -1003,7 +1005,9 @@ function ByteMobile() {
                             {activeSidebarTab !== "debugOutput" && (
                                 <ByteNextStepMobile
                                     trigger={nextStepsPopup}
-                                    acceptedCallback={() => { setNextStepsPopup(false) }}
+                                    acceptedCallback={() => {
+                                        setNextStepsPopup(false)
+                                    }}
                                     onExpand={() => setActiveSidebarTab("nextSteps")}
                                     onHide={() => setActiveSidebarTab(null)}
                                     currentCode={code}
@@ -1058,7 +1062,7 @@ function ByteMobile() {
                                                 executeCode();
                                             }}
                                         >
-                                            <PlayArrow />
+                                            <PlayArrow/>
                                         </LoadingButton>
                                     </Tooltip>
                                 )}
@@ -1070,7 +1074,10 @@ function ByteMobile() {
                                     theme={mode}
                                     readonly={!authState.authenticated}
                                     onChange={(val, view) => handleEditorChange(val)}
-                                    onCursorChange={(bytePosition, line, column) => setCursorPosition({ row: line, column: column })}
+                                    onCursorChange={(bytePosition, line, column) => setCursorPosition({
+                                        row: line,
+                                        column: column
+                                    })}
                                     editorStyles={editorStyles}
                                 />
                                 {terminalVisible && output && (
@@ -1095,33 +1102,34 @@ function ByteMobile() {
                                     }}
                                     onClick={() => setNextByteDrawerOpen(true)}
                                 >
-                                    <KeyboardArrowUp />
+                                    <KeyboardArrowUp/>
                                 </Box>
                             </>
                         )}
                         {activeView === 'byteChat' && byteData && id !== undefined && (
-                            <div style={{ marginBottom: "5%", marginLeft:"1%", marginRight:"1%" }}>
-                                <ByteChatMobile
-                                    byteID={id}
-                                    // @ts-ignore
-                                    description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
-                                    // @ts-ignore
-                                    devSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
-                                    difficulty={difficultyToString(determineDifficulty())}
-                                    // @ts-ignore
-                                    questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
-                                    codePrefix={codeBeforeCursor}
-                                    codeSuffix={codeAfterCursor}
-                                    codeLanguage={programmingLanguages[byteData ? byteData.lang : 5]}
-                                    setSpeedDialVisibility={setSpeedDialVisibility}
-                                />
-                            </div>
+                            <ByteChatMobile
+                                byteID={id}
+                                // @ts-ignore
+                                description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
+                                // @ts-ignore
+                                devSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
+                                difficulty={difficultyToString(determineDifficulty())}
+                                // @ts-ignore
+                                questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
+                                codePrefix={codeBeforeCursor}
+                                codeSuffix={codeAfterCursor}
+                                codeLanguage={programmingLanguages[byteData ? byteData.lang : 5]}
+                                setSpeedDialVisibility={setSpeedDialVisibility}
+                            />
                         )}
                         {isSpeedDialVisible && (
                             <SpeedDial
                                 ariaLabel="SpeedDial"
-                                sx={{ position: 'fixed', bottom: 24, right: 16 }}
-                                icon={<MenuIcon />}
+                                sx={{position: 'fixed', bottom: 24, right: 16}}
+                                icon={<MenuIcon/>}
+                                open={speedDialOpen}
+                                onOpen={() => setSpeedDialOpen(true)}
+                                onClose={() => setSpeedDialOpen(false)}
                             >
                                 {getFilteredActions().map((action) => (
                                     <SpeedDialAction
@@ -1129,6 +1137,7 @@ function ByteMobile() {
                                         icon={action.icon}
                                         tooltipTitle={action.name}
                                         onClick={() => {
+                                            setSpeedDialOpen(false)
                                             action.action();
                                         }}
                                     />

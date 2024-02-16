@@ -905,7 +905,6 @@ export default function ByteChatMobile(props: ByteChatProps & { setSpeedDialVisi
     const messagesMemo = React.useMemo(() => (
         <>
             {renderGroupedMessages()}
-            <div ref={messagesEndRef}/>
         </>
     ), [(state === State.LOADING) ? null : messages, threadVisibility, currentThreadCount])
 
@@ -1010,15 +1009,38 @@ export default function ByteChatMobile(props: ByteChatProps & { setSpeedDialVisi
                 flexDirection={"column"}
                 sx={{
                     scrollBehavior: 'smooth',
-                    height: "88vh",
+                    height: "calc(100vh - 132px)",
                     maxWidth: "95vw",
+                    minHeight: "none",
                     overflowY: "auto",
                     overflowX: "hidden",
                     pb: 4,
+                    position: "relative"
                 }}
             >
                 {messagesMemo}
                 {state === State.LOADING && renderBotMessage(response, true, "", false, false, "")}
+                <div ref={messagesEndRef}/>
+                {!isAtBottom && (
+                    <Tooltip title={"Scroll To Bottom"}>
+                        <IconButton
+                            onClick={scrollToBottom}
+                            size="small"
+                            sx={{
+                                position: "fixed",
+                                bottom: "100px",
+                                right: "20px",
+                                border: `1px solid ${theme.palette.primary.dark}`,
+                                backdropFilter: "blur(10px)",
+                                '&:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                                }
+                            }}
+                        >
+                            <ArrowDownwardIcon/>
+                        </IconButton>
+                    </Tooltip>
+                )}
             </Box>
             <Box
                 sx={{
@@ -1033,27 +1055,6 @@ export default function ByteChatMobile(props: ByteChatProps & { setSpeedDialVisi
                 }}
             >
                 {renderSuggestions()}
-                {!isAtBottom && (
-                    <Box
-                        display="flex"
-                        justifyContent="center"
-                        alignItems="center"
-                        sx={{mb: 1}}
-                    >
-                        <IconButton
-                            onClick={scrollToBottom}
-                            size="small"
-                            sx={{
-                                border: `1px solid ${theme.palette.primary.dark}`,
-                                '&:hover': {
-                                    backgroundColor: 'rgba(255, 255, 255, 0.04)',
-                                }
-                            }}
-                        >
-                            <ArrowDownwardIcon/>
-                        </IconButton>
-                    </Box>
-                )}
                 <Box
                 sx={{ paddingLeft: 1, paddingRight: 1 }}
                 >

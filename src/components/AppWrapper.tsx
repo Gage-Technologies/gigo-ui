@@ -137,8 +137,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     const location = useLocation();
 
     // Check if the current page is ByteMobile
-    const isByteMobilePage = location.pathname.startsWith('/byteMobile/');
-    const isByteMobileConceptPage = location.pathname.startsWith("/byteMobile");
+    const isByteMobilePage = location.pathname.startsWith('/byte/') && window.innerWidth < 1000;
 
     const [mode, setMode] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const colorMode = React.useMemo(
@@ -385,7 +384,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
             leftOpen={leftOpen || homePageLockedDrawer}
             rightOpen={rightOpen}
             style={{
-                marginTop: window.location.pathname.startsWith("/byteMobile/")
+                marginTop: isByteMobilePage
                     ? "0px"
                     : window.location.pathname.startsWith("/launchpad/") && query.get("editor") === "true"
                         ? "28px"
@@ -1294,7 +1293,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
 
     const mobileAppBar = () => {
         // Do not render AppBar if it's the byteMobile page
-        if (isByteMobileConceptPage) return null;
+        if (isByteMobilePage) return null;
 
         return (
             <>
@@ -2223,7 +2222,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     mb: "0px",
                     // height: "64px",
                 }}>
-                    { !isByteMobileConceptPage ? appBarRenderer() : null}
+                    { !isByteMobilePage ? appBarRenderer() : null}
                     {loggedIn ? renderSidebar() : renderLoggedOutSidebar()}
                     {renderChatSideBar()}
                     {

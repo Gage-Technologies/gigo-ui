@@ -360,7 +360,7 @@ export default function ByteNextOutputMessageMobile(props: ByteNextOutputMessage
                                     bytesId={props.nextByte._id}
                                     bytesTitle={props.nextByte.name}
                                     bytesThumb={config.rootPath + "/static/bytes/t/" + props.nextByte._id}
-                                    onClick={() => navigate(`/byteMobile/${props.nextByte._id}`)}
+                                    onClick={() => navigate(`/byte/${props.nextByte._id}`)}
                                     style={{
                                         cursor: 'pointer',
                                         transition: 'transform 0.3s ease',
@@ -411,7 +411,7 @@ export default function ByteNextOutputMessageMobile(props: ByteNextOutputMessage
                             setResponse("")
                             setState(State.LOADING)
                             hide()
-                            navigate(`/byteMobile/${props.nextByte._id}`)
+                            navigate(`/byte/${props.nextByte._id}`)
                         }}
                     >
                         Continue
