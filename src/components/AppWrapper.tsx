@@ -1449,8 +1449,17 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                             <h3 style={{ margin: "0 0 10px" }}>Refer a Friend.</h3>
                                             <h4 style={{ margin: "0 0 20px" }}>Give a Month, Get a Month.</h4>
                                             <div style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", gap: "10px" }}>
-                                                <h5 style={{ outline: "solid gray", borderRadius: "5px", padding: "8px", maxWidth: "75%", textAlign: "center" }}>
-                                                    {referralLink.length > 50 ? referralLink.slice(0, 50) + "..." : referralLink}
+                                                <h5 style={{
+                                                    outline: "solid gray",
+                                                    borderRadius: "5px",
+                                                    padding: "8px",
+                                                    maxWidth: "75%",
+                                                    textAlign: "center",
+                                                    whiteSpace: "nowrap",
+                                                    overflow: "hidden",
+                                                    textOverflow: "ellipsis",
+                                                }}>
+                                                    {referralLink}
                                                 </h5>
                                                 <Button onClick={copyToClipboard} sx={{ minWidth: "auto" }}>
                                                     <ContentCopyIcon />
