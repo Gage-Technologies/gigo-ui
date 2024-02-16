@@ -331,6 +331,7 @@ export default function ByteSuggestions2(props: ByteSuggestions2Props) {
                                     removeCtHighlightCodeRange(props.editorRef.current.view, props.range.start_line, props.range.end_line+1);
 
                                     const {prefix, middle, suffix} = splitStringByLines(props.code, props.range.start_line, props.range.end_line+1)
+                                    hide()
                                     props.acceptedCallback(prefix+"\n"+newCode+suffix)
                                     setAccepted(true)
                                 }}

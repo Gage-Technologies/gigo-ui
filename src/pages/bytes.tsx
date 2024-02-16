@@ -45,10 +45,7 @@ import { debounce } from "lodash";
 import {LaunchLspRequest} from "../models/launch_lsp";
 import {Workspace} from "../models/workspace";
 import CodeSource from "../models/codeSource";
-import StopIcon from "@mui/icons-material/Stop";
 import {
-    CtByteSuggestionRequest,
-    CtByteSuggestionResponse,
     CtGenericErrorPayload,
     CtMessage,
     CtMessageOrigin,
@@ -59,11 +56,7 @@ import {
 } from "../models/ct_websocket";
 import LinkIcon from '@mui/icons-material/Link';
 import LinkOffIcon from '@mui/icons-material/LinkOff';
-import { ctHighlightCodeRangeFullLines, removeCtHighlightCodeRange } from "../components/IDE/Extensions/CtHighlightExtension";
 import { CtPopupExtensionEngine, createCtPopupExtension } from "../components/IDE/Extensions/CtPopupExtension";
-import ReactDOM from "react-dom";
-import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
-import ByteSuggestion from "../components/CodeTeacher/ByteSuggestions";
 import {ctCreateCodeActions} from "../components/IDE/Extensions/CtCodeActionExtension";
 import ByteSuggestions2, {splitStringByLines} from "../components/CodeTeacher/ByteSuggestions2";
 
@@ -928,7 +921,6 @@ function Byte() {
             return
         }
         setLoadingCodeCleanup(node.id)
-        // ctHighlightCodeRangeFullLines(editorRef.current.view, node.position.start_line, node.position.end_line+1);
 
 
         // set range here
@@ -1030,16 +1022,6 @@ function Byte() {
     const buttonClickedRef = useRef(false);
 
     const executeCode = async () => {
-
-        if (startSuggestionLine !== null || endSuggestionLine !== null){
-            //@ts-ignore
-            removeCtHighlightCodeRange(editorRef.current.view, startSuggestionLine, endSuggestionLine);
-            //@ts-ignore
-            popupEngineRef.current?.removePopupRange(endSuggestionLine, startSuggestionLine)
-            setStartSuggestionLine(null)
-            setEndSuggestionLine(null)
-        }
-
         if (suggestionPopup) {
             setSuggestionPopup(false)
             if (activeSidebarTab === null || activeSidebarTab !== "nextSteps") {
@@ -1298,6 +1280,7 @@ function Byte() {
                         maxWidth={"20vw"}
                         acceptedCallback={(c) => {
                             setCode(c)
+                            setSuggestionRange(null)
                             setLoadingCodeCleanup(null)
                         }}
                         rejectedCallback={() => {
