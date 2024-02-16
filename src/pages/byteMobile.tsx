@@ -122,7 +122,7 @@ function ByteMobile() {
     const titleStyle: React.CSSProperties = {
         textAlign: 'center',
         width: "100%",
-        fontSize: '1.0rem',
+        fontSize: '0.8rem',
         marginTop: "-3%",
     };
 
