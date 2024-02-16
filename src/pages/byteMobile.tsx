@@ -30,7 +30,6 @@ import {useGlobalWebSocket} from "../services/websocket";
 import {WsGenericErrorPayload, WsMessage, WsMessageType} from "../models/websocket";
 import {ExecResponsePayload, OutputRow} from "../models/bytes";
 import {programmingLanguages} from "../services/vars";
-import "./bytes.css";
 import {LoadingButton} from "@mui/lab";
 import Editor from "../components/IDE/Editor";
 import chroma from 'chroma-js';
