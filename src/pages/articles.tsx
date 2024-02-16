@@ -98,17 +98,33 @@ const ArticlesPage: React.FC = () => {
                         <Card>
                             <CardActionArea href={`/articles/${article.name.replaceAll(" ", "-").replace('.md', '')}`}>
                                 {article.imageUrl && (
-                                    <CardMedia
-                                        component="img"
-                                        height="140"
-                                        image={article.imageUrl}
-                                        alt="Article Image"
-                                    />
+                                    <Box
+                                        sx={{
+                                            height: 258, // Fixed height for the container
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            overflow: 'hidden',
+                                            pl: 1,
+                                            pr: 1
+                                        }}
+                                    >
+                                        <img
+                                            src={article.imageUrl}
+                                            style={{
+                                                maxHeight: 242, // Max height for the image
+                                                maxWidth: '100%',
+                                                // objectFit: 'contain', // Keeps aspect ratio and adds padding as needed,
+                                                borderRadius: "8px",
+                                                margin: "8px",
+                                            }}
+                                            alt="Article Image"
+                                        />
+                                    </Box>
                                 )}
-                                <CardContent style={{height: "17vh"}}>
-                                    <Typography gutterBottom variant="h5" component="div" sx={{fontSize: "100%"}}>
-                                        {article.name.replace('.md', '')} {/* Optionally remove file extension */}
-
+                                <CardContent style={{ height: "100px" }}>
+                                    <Typography gutterBottom variant="h5" component="div" sx={{ fontSize: "100%" }}>
+                                        {article.name.replace('.md', '')}
                                     </Typography>
                                     <Typography gutterBottom variant="body1" component="div">
                                         {article.date}
