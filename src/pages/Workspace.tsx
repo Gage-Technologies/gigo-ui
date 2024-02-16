@@ -1524,8 +1524,39 @@ const WorkspacePage = () => {
     }, [])
 
     let premium = authState.role.toString()
-    //remove after testing
-    premium = "0"
+    // //remove after testing
+    // premium = "0"
+
+    const calculateTopStyle = (workspace: Workspace | null, workspaceUrl: string | null, iframeUrl: string | null): React.CSSProperties => {
+        const proBanner = document.getElementById("pro-banner");
+
+        // Define a default style object
+        let style: React.CSSProperties = {
+            position: "absolute",
+            width: "35vw",
+            height: "77vh",
+            left: "55%",
+            backgroundColor: "transparent",
+            backgroundImage: "none",
+            boxShadow: "none",
+        };
+
+        if (proBanner !== null) {
+            const shouldAdjustTop = workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null || iframeUrl === null;
+            const topValue = shouldAdjustTop ? `${proBanner.offsetHeight + 75}px` : "45%";
+
+            // Update the `top` property in the style object
+            style = { ...style, top: topValue };
+        } else {
+            // Default case if pro-banner is not present
+            style = { ...style, top: "45%" };
+        }
+
+        return style;
+    };
+
+    // Inline style calculation
+    const topStyle = calculateTopStyle(workspace, workspaceUrl, iframeUrl);
 
     const renderBody = () => {
         let ports = []
@@ -1689,7 +1720,7 @@ const WorkspacePage = () => {
                     </Grid>
                     {/*<Grid item xs={"auto"}>*/}
                     <Grid item xs={"auto"}>
-                        {premium === "0" && (
+                        {premium === "0" && (workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null || iframeUrl === null) && (
                             <div style={{
                                 position: "absolute",
                                 top: 100,
@@ -1753,7 +1784,7 @@ const WorkspacePage = () => {
                             backgroundImage: "none",
                             boxShadow: "none",
                             //@ts-ignore
-                            top: document.getElementById("pro-banner") === null ? "45%" : document.getElementById("pro-banner").offsetHeight + 75 + "px"
+                            top: document.getElementById("pro-banner") === null ? "17.5%" : document.getElementById("pro-banner").offsetHeight + 75 + "px"
                         } :{
                             position: "absolute",
                             width: "35vw",
@@ -1973,6 +2004,67 @@ const WorkspacePage = () => {
                                         }
                                     </List>
                                 </Card>
+                            </Grid>
+                        )}
+                        {premium === "0" && (
+                            <Grid item xs={12}>
+                                <div style={{
+                                    position: "fixed",
+                                    top: "auto",
+                                    bottom: 10,
+                                    right: 0,
+                                    left: 3,
+                                    width: "98vw",
+                                    backgroundColor: theme.palette.background.default,
+                                    borderRadius: "10px",
+                                    boxShadow: "0 4px 8px rgba(0,0,0,0.2), 0 6px 20px rgba(0,0,0,0.19)",
+                                    padding: "20px",
+                                    display: "flex",
+                                    flexDirection: "column", // Stack items vertically
+                                    alignItems: "flex-start", // Align items to the left
+                                    justifyContent: "space-between", // Even spacing
+                                    height: "auto",
+                                    border: `1px solid ${theme.palette.primary.main}`,
+                                }} id={"pro-banner"}>
+                                    <div style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "flex-start", // Left align the title and subtitle
+                                        width: "calc(100% - 120px)", // Adjust width to prevent overlap with image, assuming image width + some padding
+                                    }}>
+                                        <h2 style={{margin: "0 0 10px 0", textAlign: "left"}}>Want to learn faster?</h2>
+                                        <p style={{
+                                            textAlign: "left",
+                                            margin: "0",
+                                            fontSize: "14px",
+                                            maxWidth: "100%", // Prevents subtitle from overlapping with the image
+                                        }}>
+                                            Go Pro and get access to more code teacher and more resources to expedite your
+                                            learning
+                                        </p>
+                                    </div>
+                                    <div style={{
+                                        width: "100%", // Full width for centering the button
+                                        display: "flex",
+                                        justifyContent: "center", // Center the button
+                                        marginTop: "20px", // Add space above the button
+                                    }}>
+                                        <Button style={{
+                                            padding: "10px 20px",
+                                            fontSize: "16px",
+                                        }} variant={"outlined"} onClick={() => setGoProPopup(true)}>Go Pro</Button>
+                                    </div>
+                                    <div style={{
+                                        position: "absolute",
+                                        top: "20px", // Adjust as needed
+                                        right: "20px", // Ensure it's aligned to the right
+                                        height: "100px", // Image size
+                                        width: "100px", // Image size
+                                    }}>
+                                        <img src={proGorillaCrown} alt={"GIGO Pro"}
+                                             style={{width: "100%", height: "auto"}}/>
+                                    </div>
+                                </div>
                             </Grid>
                         )}
                     </Grid>
@@ -2725,6 +2817,133 @@ const WorkspacePage = () => {
                         <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
                             {renderBodyMobile()}
                         </div>
+                        <Popper open={goProPopup} placement="bottom"
+                                style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 5 }}
+                                modifiers={[
+                                    {
+                                        name: 'flip',
+                                        enabled: false,
+                                    },
+                                    {
+                                        name: 'preventOverflow',
+                                        enabled: false,
+                                    },
+                                ]}>
+                            <Box style={{
+                                width: window.innerWidth < 1000 ? "90vw" : "28vw",
+                                height: window.innerWidth < 1000 ? "78vh": "65vh",
+                                minHeight: "420px",
+                                // justifyContent: "center",
+                                // marginLeft: "25vw",
+                                // marginTop: "5vh",
+                                outlineColor: "black",
+                                borderRadius: "7%",
+                                boxShadow:
+                                    "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px  0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
+                                // backgroundColor: theme.palette.background.default,
+                                backgroundImage: `url(${proBackground})`,
+                                backgroundSize: "cover",
+                                backgroundRepeat: "no-repeat",
+                                backgroundPosition: "center center"
+                                // ...themeHelpers.frostedGlass
+                            }}>
+                                <div style={{
+                                    borderRadius: "10px",
+                                    padding: "20px",
+                                    textAlign: "center"
+                                }}>
+                                    <IconButton
+                                        edge="end"
+                                        color="inherit"
+                                        size="small"
+                                        onClick={() => {
+                                            setGoProPopup(false)
+                                        }}
+
+                                        sx={window.innerWidth < 1000 ? {
+                                            position: "absolute",
+                                            top: '2vh',
+                                            right: '2vw',
+                                            color: "white"
+                                        } : {
+                                            position: "absolute",
+                                            top: '2vh',
+                                            right: '2vw', color: "white"
+                                        }}
+                                    >
+                                        <Close/>
+                                    </IconButton>
+                                    <img src={premiumGorilla} style={{width: "30%", marginBottom: "20px"}}/>
+                                    <Typography variant={"h4"} style={{marginBottom: "10px", color: "white"}} align={"center"}>GIGO
+                                        Pro</Typography>
+                                    <Typography variant={"body1"} style={{marginLeft: "20px", marginRight: "20px", color: "white"}}
+                                                align={"center"}>
+                                        Learn faster with a smarter Code Teacher!
+                                    </Typography>
+                                    <Typography variant={"body1"}
+                                                style={{
+                                                    marginBottom: "20px",
+                                                    marginLeft: "20px",
+                                                    marginRight: "20px",
+                                                    color: "white"
+                                                }}
+                                                align={"center"}>
+                                        Do more with larger DevSpaces!
+                                    </Typography>
+                                    <div style={{
+                                        display: "flex",
+                                        justifyContent: "center"
+                                    }}>
+                                        <div style={{
+                                            backgroundColor: "#070D0D",
+                                            borderRadius: "10px",
+                                            padding: "20px",
+                                            margin: "10px",
+                                            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                                            textAlign: "center",
+                                            width: "200px"
+                                        }}>
+                                            <Typography variant={"subtitle1"} style={{marginBottom: "10px", color: "white"}}
+                                                        align={"center"}>1 Month</Typography>
+                                            <Typography variant={"h5"} style={{marginBottom: "10px", color: "white"}}
+                                                        align={"center"}>$15
+                                                / MO</Typography>
+                                            <LoadingButton
+                                                loading={proUrlsLoading}
+                                                variant="contained"
+                                                onClick={() => window.open(proMonthlyLink, "_blank")}
+                                                style={{backgroundColor: theme.palette.secondary.dark}}
+                                            >
+                                                Select
+                                            </LoadingButton>
+                                        </div>
+                                        <div style={{
+                                            backgroundColor: "#070D0D",
+                                            borderRadius: "10px",
+                                            padding: "20px",
+                                            margin: "10px",
+                                            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                                            textAlign: "center",
+                                            width: "200px"
+                                        }}>
+                                            <Typography variant={"subtitle1"} style={{marginBottom: "10px", color: "white"}}
+                                                        align={"center"}>12 Months</Typography>
+                                            <Typography variant={"h5"} style={{marginBottom: "10px", color: "white"}}
+                                                        align={"center"}>$11.25
+                                                / MO</Typography>
+                                            <LoadingButton
+                                                loading={proUrlsLoading}
+                                                variant="contained"
+                                                onClick={() => window.open(proYearlyLink, "_blank")}
+                                                style={{backgroundColor: theme.palette.secondary.dark}}
+                                            >
+                                                Select
+                                            </LoadingButton>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Box>
+                        </Popper>
                     </div>
                 )}
                 {xpPopup && window.innerWidth > 1000 ? (xpPopupMemo) : null}
