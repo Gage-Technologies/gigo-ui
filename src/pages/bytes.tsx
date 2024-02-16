@@ -1465,18 +1465,6 @@ function Byte() {
                         </div>
                     </div>
                 </Container>
-                <ByteSuggestion
-                        lang={programmingLanguages[byteData ? byteData.lang : 5]}
-                        closeCallback={suggestionCallback}
-                        apiCallback={suggestionApiCallback}
-                        code={code}
-                        byteId={id || ""}
-                        open={suggestionPopup}
-                        codeMirrorRef={editorRef}
-                        popupRef={popupEngineRef}
-                        // @ts-ignore
-                        description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
-                />
                 {parsedSymbols !== null ? codeActionPortals.map(x => x.portal) : null}
                 {xpPopup ? (<XpPopup oldXP={
                     //@ts-ignore
