@@ -679,17 +679,17 @@ function Home() {
                     display: "flex",
                     justifyContent: "start",
                     overflowX: "auto",
-                    paddingLeft: "5%",
+                    paddingLeft: "0%"
                 }}>
                     <Carousel show={1}>
                         {
                             byteContent.map((project, index) => (
-                                <div key={index} style={{ width: "100%", padding: "0 5%" }}>
+                                <div key={index} style={{ width: "100%" }}>
                                     <LazyLoad once scroll unmountIfInvisible>
                                         <BytesCardMobile
                                             height="auto"
                                             imageHeight="40vh"
-                                            width="100%"
+                                            width="95%"
                                             imageWidth="100%"
                                             bytesId={project["_id"]}
                                             bytesTitle={project["name"]}
