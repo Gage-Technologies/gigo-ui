@@ -8,13 +8,13 @@ import {
     createTheme,
     CssBaseline,
     Divider, FormControlLabel,
-    Grid,
+    Grid, IconButton,
     LinearProgress,
     Link,
     List,
     ListItem,
     ListItemText,
-    PaletteMode, Switch,
+    PaletteMode, Popper, Switch,
     ThemeProvider,
     Typography
 } from "@mui/material";
@@ -26,7 +26,7 @@ import config from "../config";
 import TwentyFortyEight from "../components/Games/TwentyFortyEight";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import {
-    initialAuthStateUpdate, selectAuthStateTutorialState,
+    initialAuthStateUpdate, selectAuthState, selectAuthStateTutorialState,
     selectAuthStateUserName,
     updateAuthState
 } from "../reducers/auth/auth";
@@ -60,6 +60,10 @@ import { useSelector } from "react-redux";
 import { selectAppWrapperChatOpen, selectAppWrapperSidebarOpen } from "../reducers/appWrapper/appWrapper";
 import * as wsModels from "../models/websocket";
 import IframeRenderer from "../components/IframeRenderer";
+import proGorillaCrown from "../img/pro-pop-up-icon-plain.svg"
+import proBackground from "../img/popu-up-backgraound-plain.svg";
+import {Close} from "@material-ui/icons";
+import premiumGorilla from "../img/pro-pop-up-icon-plain.svg";
 
 
 interface InitialStatusMessage {
@@ -125,6 +129,10 @@ const WorkspacePage = () => {
 
     let [expiration, setExpiration] = React.useState<number | null>(null);
     const [highestScore, setHighestScore] = React.useState<number | null>(0);
+    const [proMonthlyLink, setProMonthlyLink] = React.useState("");
+    const [proYearlyLink, setProYearlyLink] = React.useState("");
+    const [proUrlsLoading, setProUrlsLoading] = React.useState(false);
+    const [goProPopup, setGoProPopup] = useState(false)
 
     const [xpPopup, setXpPopup] = React.useState(false)
     const [xpData, setXpData] = React.useState(null)
@@ -1479,6 +1487,46 @@ const WorkspacePage = () => {
         )
     }, [iframeUrl])
 
+    const authState = useAppSelector(selectAuthState);
+
+    const retrieveProUrls = async (): Promise<{ monthly: string, yearly: string } | null> => {
+        setProUrlsLoading(true)
+        let res = await call(
+            "/api/stripe/premiumMembershipSession",
+            "post",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {},
+            null,
+            config.rootPath
+        )
+
+        setProUrlsLoading(false)
+
+        if (res !== undefined && res["return url"] !== undefined && res["return year"] !== undefined) {
+            setProMonthlyLink(res["return url"])
+            setProYearlyLink(res["return year"])
+            return {
+                "monthly": res["return url"],
+                "yearly": res["return year"],
+            }
+        }
+
+        return null
+    }
+
+    useEffect(() => {
+        if (premium === "0") {
+            retrieveProUrls()
+        }
+    }, [])
+
+    let premium = authState.role.toString()
+    //remove after testing
+    premium = "0"
+
     const renderBody = () => {
         let ports = []
 
@@ -1641,7 +1689,72 @@ const WorkspacePage = () => {
                     </Grid>
                     {/*<Grid item xs={"auto"}>*/}
                     <Grid item xs={"auto"}>
-                        <Card sx={{
+                        {premium === "0" && (
+                            <div style={{
+                                position: "absolute",
+                                top: 100,
+                                right: "5vw",
+                                width: "45vw",
+                                backgroundColor: theme.palette.background.default,
+                                borderRadius: "10px",
+                                boxShadow: "0 4px 8px rgba(0,0,0,0.2), 0 6px 20px rgba(0,0,0,0.19)",
+                                padding: "20px",
+                                display: "flex",
+                                flexDirection: "column", // Stack items vertically
+                                alignItems: "flex-start", // Align items to the left
+                                justifyContent: "space-between", // Even spacing
+                                height: "auto",
+                                border: `1px solid ${theme.palette.primary.main}`,
+                            }} id={"pro-banner"}>
+                                <div style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "flex-start", // Left align the title and subtitle
+                                    width: "calc(100% - 120px)", // Adjust width to prevent overlap with image, assuming image width + some padding
+                                }}>
+                                    <h2 style={{ margin: "0 0 10px 0", textAlign: "left" }}>Want to learn faster?</h2>
+                                    <p style={{
+                                        textAlign: "left",
+                                        margin: "0",
+                                        fontSize: "14px",
+                                        maxWidth: "100%", // Prevents subtitle from overlapping with the image
+                                    }}>
+                                        Go Pro and get access to more code teacher and more resources to expedite your learning
+                                    </p>
+                                </div>
+                                <div style={{
+                                    width: "100%", // Full width for centering the button
+                                    display: "flex",
+                                    justifyContent: "center", // Center the button
+                                    marginTop: "20px", // Add space above the button
+                                }}>
+                                    <Button style={{
+                                        padding: "10px 20px",
+                                        fontSize: "16px",
+                                    }} variant={"outlined"} onClick={() => setGoProPopup(true)}>Go Pro</Button>
+                                </div>
+                                <div style={{
+                                    position: "absolute",
+                                    top: "20px", // Adjust as needed
+                                    right: "20px", // Ensure it's aligned to the right
+                                    height: "100px", // Image size
+                                    width: "100px", // Image size
+                                }}>
+                                    <img src={proGorillaCrown} alt={"GIGO Pro"} style={{ width: "100%", height: "auto" }}/>
+                                </div>
+                            </div>
+                        )}
+                        <Card sx={premium === "0" ? {
+                            position: "absolute",
+                            width: "35vw",
+                            height: "77vh",
+                            left: "55%",
+                            backgroundColor: "transparent",
+                            backgroundImage: "none",
+                            boxShadow: "none",
+                            //@ts-ignore
+                            top: document.getElementById("pro-banner") === null ? "45%" : document.getElementById("pro-banner").offsetHeight + 75 + "px"
+                        } :{
                             position: "absolute",
                             width: "35vw",
                             height: "77vh",
@@ -1650,7 +1763,7 @@ const WorkspacePage = () => {
                             backgroundColor: "transparent",
                             backgroundImage: "none",
                             boxShadow: "none"
-                        }}>
+                        }} id={"2048"}>
                             <div
                                 style={stepIndex === 5 ? { position: "absolute", width: "43%", display: "flex", justifyContent: "center", zIndex: "600000", top: "15%", left: "30%" } : { position: "absolute", width: "43%", display: "flex", justifyContent: "center", top: "8%", left: "30%" }}
                                 className={"game"}>
@@ -2212,12 +2325,143 @@ const WorkspacePage = () => {
                             </Typography>
                         </div>
 
+                        {/*<div style={{display: "flex", justifyContent: "right"}}>*/}
+                        {/*    hello*/}
+                        {/*</div>*/}
+
                         {/*<div style={{display: "flex", width: "100%"}}>*/}
                         {/*    {renderStatusBar()}*/}
                         {/*</div>*/}
                         <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
                             {renderBody()}
                         </div>
+                        <Popper open={goProPopup} placement="bottom"
+                                style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 5 }}
+                                modifiers={[
+                                    {
+                                        name: 'flip',
+                                        enabled: false,
+                                    },
+                                    {
+                                        name: 'preventOverflow',
+                                        enabled: false,
+                                    },
+                                ]}>
+                            <Box style={{
+                                width: window.innerWidth < 1000 ? "90vw" : "28vw",
+                                height: window.innerWidth < 1000 ? "78vh": "65vh",
+                                minHeight: "420px",
+                                // justifyContent: "center",
+                                // marginLeft: "25vw",
+                                // marginTop: "5vh",
+                                outlineColor: "black",
+                                borderRadius: "7%",
+                                boxShadow:
+                                    "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px  0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
+                                // backgroundColor: theme.palette.background.default,
+                                backgroundImage: `url(${proBackground})`,
+                                backgroundSize: "cover",
+                                backgroundRepeat: "no-repeat",
+                                backgroundPosition: "center center"
+                                // ...themeHelpers.frostedGlass
+                            }}>
+                                <div style={{
+                                    borderRadius: "10px",
+                                    padding: "20px",
+                                    textAlign: "center"
+                                }}>
+                                    <IconButton
+                                        edge="end"
+                                        color="inherit"
+                                        size="small"
+                                        onClick={() => {
+                                            setGoProPopup(false)
+                                        }}
+
+                                        sx={window.innerWidth < 1000 ? {
+                                            position: "absolute",
+                                            top: '2vh',
+                                            right: '2vw',
+                                            color: "white"
+                                        } : {
+                                            position: "absolute",
+                                            top: '2vh',
+                                            right: '2vw', color: "white"
+                                        }}
+                                    >
+                                        <Close/>
+                                    </IconButton>
+                                    <img src={premiumGorilla} style={{width: "30%", marginBottom: "20px"}}/>
+                                    <Typography variant={"h4"} style={{marginBottom: "10px", color: "white"}} align={"center"}>GIGO
+                                        Pro</Typography>
+                                    <Typography variant={"body1"} style={{marginLeft: "20px", marginRight: "20px", color: "white"}}
+                                                align={"center"}>
+                                        Learn faster with a smarter Code Teacher!
+                                    </Typography>
+                                    <Typography variant={"body1"}
+                                                style={{
+                                                    marginBottom: "20px",
+                                                    marginLeft: "20px",
+                                                    marginRight: "20px",
+                                                    color: "white"
+                                                }}
+                                                align={"center"}>
+                                        Do more with larger DevSpaces!
+                                    </Typography>
+                                    <div style={{
+                                        display: "flex",
+                                        justifyContent: "center"
+                                    }}>
+                                        <div style={{
+                                            backgroundColor: "#070D0D",
+                                            borderRadius: "10px",
+                                            padding: "20px",
+                                            margin: "10px",
+                                            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                                            textAlign: "center",
+                                            width: "200px"
+                                        }}>
+                                            <Typography variant={"subtitle1"} style={{marginBottom: "10px", color: "white"}}
+                                                        align={"center"}>1 Month</Typography>
+                                            <Typography variant={"h5"} style={{marginBottom: "10px", color: "white"}}
+                                                        align={"center"}>$15
+                                                / MO</Typography>
+                                            <LoadingButton
+                                                loading={proUrlsLoading}
+                                                variant="contained"
+                                                onClick={() => window.open(proMonthlyLink, "_blank")}
+                                                style={{backgroundColor: theme.palette.secondary.dark}}
+                                            >
+                                                Select
+                                            </LoadingButton>
+                                        </div>
+                                        <div style={{
+                                            backgroundColor: "#070D0D",
+                                            borderRadius: "10px",
+                                            padding: "20px",
+                                            margin: "10px",
+                                            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                                            textAlign: "center",
+                                            width: "200px"
+                                        }}>
+                                            <Typography variant={"subtitle1"} style={{marginBottom: "10px", color: "white"}}
+                                                        align={"center"}>12 Months</Typography>
+                                            <Typography variant={"h5"} style={{marginBottom: "10px", color: "white"}}
+                                                        align={"center"}>$11.25
+                                                / MO</Typography>
+                                            <LoadingButton
+                                                loading={proUrlsLoading}
+                                                variant="contained"
+                                                onClick={() => window.open(proYearlyLink, "_blank")}
+                                                style={{backgroundColor: theme.palette.secondary.dark}}
+                                            >
+                                                Select
+                                            </LoadingButton>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Box>
+                        </Popper>
                     </>
                 )}
                 {xpPopup ? (xpPopupMemo) : null}
