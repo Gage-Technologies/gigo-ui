@@ -2,7 +2,18 @@ import * as React from 'react';
 import { useGlobalWebSocket } from '../services/websocket';
 import { WsMessage, WsMessageType } from '../models/websocket';
 import LinearProgress from '@mui/material/LinearProgress';
-import { Box, Button, Grid, IconButton, PaletteMode, Paper, Tooltip, Typography, createTheme } from '@mui/material';
+import {
+    Box,
+    Button,
+    Grid,
+    IconButton,
+    PaletteMode,
+    Paper,
+    Tooltip,
+    Typography,
+    createTheme,
+    Popper
+} from '@mui/material';
 import { getAllTokens, isHoliday } from '../theme';
 
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -15,6 +26,15 @@ import call from '../services/api-call';
 import { DevSpaceCache, selectDevSpaceCacheState, setDevSpaceCache } from '../reducers/devSpace/usageCache';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { Workspace } from '../models/workspace';
+import { selectAuthState } from "../reducers/auth/auth";
+import goProGorilla from "../img/pro-pop-up-icon-plain.svg"
+import config from "../config";
+import {useEffect, useRef, useState} from "react";
+import proBackground from "../img/popu-up-backgraound-plain.svg";
+import {Close} from "@material-ui/icons";
+import premiumGorilla from "../img/pro-pop-up-icon-plain.svg";
+import {LoadingButton} from "@mui/lab";
+import GoProDisplay from "./GoProDisplay";
 
 interface IProps {
     wsId: string;
@@ -38,6 +58,10 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
 
     const [isOpen, setIsOpen] = React.useState(false);
 
+    const authState = useAppSelector(selectAuthState);
+
+    let premium = authState.role.toString()
+
     const [workspace, setWorkspace] = React.useState<Workspace | null>(cachedValues && cachedValues.workspace ? cachedValues.workspace : null);
     const [cpuUsagePercentage, setCpuUsagePercentage] = React.useState<number>(cachedValues ? cachedValues.cpuPercentage : 0);
     const [memoryUsagePercentage, setMemoryUsagePercentage] = React.useState<number>(cachedValues ? cachedValues.memoryPercentage : 0);
@@ -45,6 +69,10 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
     const [memoryLimit, setMemoryLimit] = React.useState<number>(cachedValues ? cachedValues.memoryLimit : 0);
     const [cpuUsage, setCpuUsage] = React.useState<number>(cachedValues ? cachedValues.cpuUsage : 0);
     const [memoryUsage, setMemoryUsage] = React.useState<number>(cachedValues ? cachedValues.memoryUsage : 0);
+    const [goProPopup, setGoProPopup] = useState(false)
+
+    // //remove after testing
+    // premium = "0"
 
     let globalWs = useGlobalWebSocket();
 
@@ -101,6 +129,8 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
         handleWsMessage
     );
 
+    const containerRef = useRef(null)
+
     const stopWorkspace = async () => {
         let res = await call(
             "/api/workspace/stopWorkspace",
@@ -116,6 +146,8 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
 
         window.history.replaceState({}, "", window.location.href.split("?")[0]);
     };
+
+    const toggleProPopup = () => setGoProPopup(!goProPopup)
 
     const usageMemo = React.useMemo(() => (
         <>
@@ -235,6 +267,7 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
                     sx={{
                         ...((cpuUsagePercentage >= 75 || memoryUsagePercentage >= 75) ? { animation: 'fade 1s infinite' } : { color: "black" })
                     }}
+                    ref={containerRef}
                 >
                     <SettingsApplicationsIcon />
                 </IconButton>
@@ -250,23 +283,23 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
                     top: '70%',
                     left: "50%",
                     transform: 'translate(-50%, 0)',
-                    width: '30vw',
+                    width: window.innerWidth < 1000 ? "90vw" : '30vw',
                     minWidth: "150px",
-                    maxWidth: "400px"
+                    maxWidth: window.innerWidth < 1000 ? "99vw" : "400px"
                 }}>
-                    <Box sx={{ display: "flex", width: "100%", flexDirection: "row", justifyContent: "center" }}>
+                    <Box sx={{display: "flex", width: "100%", flexDirection: "row", justifyContent: "center"}}>
                         <Tooltip title="Go Back">
                             <IconButton color="error" onClick={async () => {
                                 window.history.replaceState({}, "", window.location.href.split("?")[0]);
                                 window.location.reload();
                             }}>
-                                <ArrowBackIcon />
+                                <ArrowBackIcon/>
                             </IconButton>
                         </Tooltip>
 
                         <Tooltip title="Stop Workspace">
                             <IconButton color="warning" onClick={() => stopWorkspace()}>
-                                <StopIcon />
+                                <StopIcon/>
                             </IconButton>
                         </Tooltip>
 
@@ -279,7 +312,7 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
                                                 window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=side");
                                                 window.location.reload();
                                             }}>
-                                                <DesktopWindowsIcon />
+                                                <DesktopWindowsIcon/>
                                             </IconButton>
                                         </Tooltip>
                                         <Tooltip title="Open Desktop In New Tab">
@@ -287,7 +320,7 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
                                                 window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=popped-out");
                                                 window.location.reload();
                                             }}>
-                                                <QueuePlayNextIcon />
+                                                <QueuePlayNextIcon/>
                                             </IconButton>
                                         </Tooltip>
                                     </>
@@ -298,7 +331,7 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
                                                 window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=none");
                                                 window.location.reload();
                                             }}>
-                                                <DesktopAccessDisabledIcon />
+                                                <DesktopAccessDisabledIcon/>
                                             </IconButton>
                                         </Tooltip>
                                         <Tooltip title="Open Desktop In New Tab">
@@ -306,7 +339,7 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
                                                 window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=popped-out");
                                                 window.location.reload();
                                             }}>
-                                                <QueuePlayNextIcon />
+                                                <QueuePlayNextIcon/>
                                             </IconButton>
                                         </Tooltip>
                                     </>
@@ -317,7 +350,7 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
                                                 window.history.replaceState({}, "", window.location.href.split("?")[0] + "?editor=true&desktop=side");
                                                 window.location.reload();
                                             }}>
-                                                <DesktopWindowsIcon />
+                                                <DesktopWindowsIcon/>
                                             </IconButton>
                                         </Tooltip>
                                     </>
@@ -325,10 +358,30 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
                             ) : null
                         }
                     </Box>
+                    {premium === "0" && (
+                        <div style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            padding: "10px",
+                            backgroundColor: theme.palette.background.default,
+                            borderRadius: "10px",
+                            border: `1px solid ${theme.palette.primary.main}`
+                        }}>
+                            <div>
+                                <Typography variant={"subtitle1"}>Need More Resources?</Typography>
+                                <Button variant={"outlined"} onClick={() => {
+                                    setGoProPopup(true)
+                                    setIsOpen(false)
+                                }}>Go Pro</Button>
+                            </div>
+                            <img src={goProGorilla} alt={"Go Pro"} height={"50px"}/>
+                        </div>
+                    )}
                     {usageMemo}
 
                     {/* Ports */}
-                    <div style={{ marginTop: '8px', position: 'relative' }}>
+                    <div style={{marginTop: '8px', position: 'relative'}}>
                         <div>
                             Ports
                         </div>
@@ -336,7 +389,12 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
                             marginTop: '8px',
                             marginBottom: '8px'
                         }}>
-                            {(workspace && workspace["ports"]) ? workspace["ports"].map((port: { name: string; port: string; url: string, disabled: boolean }, index: any) => {
+                            {(workspace && workspace["ports"]) ? workspace["ports"].map((port: {
+                                name: string;
+                                port: string;
+                                url: string,
+                                disabled: boolean
+                            }, index: any) => {
                                 return (
                                     <Grid item xs={"auto"}>
                                         <Button
@@ -355,7 +413,7 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
                                     </Grid>
                                 )
                             }) : (
-                                <Typography variant="body2" sx={{ marginLeft: "8px" }}>
+                                <Typography variant="body2" sx={{marginLeft: "8px"}}>
                                     No Ports Available
                                 </Typography>
                             )}
@@ -363,6 +421,7 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
                     </div>
                 </Paper>
             )}
+            <GoProDisplay open={goProPopup} onClose={toggleProPopup}/>
         </>
     )
 };

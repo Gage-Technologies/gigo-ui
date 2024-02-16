@@ -5,12 +5,13 @@ import React, { Component } from 'react'
 import uuid from 'react-uuid'
 // import Modal from '../components/Modal'
 import './css/Game.2048.css'
-import { Button, Card, createTheme, Modal, PaletteMode } from "@mui/material";
+import {Button, Card, createTheme, Modal, PaletteMode, Tooltip} from "@mui/material";
 import swal from "sweetalert";
 import { CardHeader } from "@material-ui/core";
 import call from "../../services/api-call";
 import { getAllTokens } from "../../theme";
 import { ca } from 'date-fns/locale';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 // import Modal from "./Modal"
 
 const tileColors = ['#fffcbb', '#FFFCAB', '#ffef62', '#63a4f8', '#3D8EF7', '#2a63ac', '#84E8A2', '#29C18C', '#1c8762', '#af52bf', '#9c27b0', '#6d1b7b']
@@ -516,7 +517,7 @@ export class TwentyFortyEight extends Component {
       <Card
         sx={{
           width: (tileSize * 4 + tileMargin * 6),
-          height: "90px",
+          height: "50px",
           borderRadius: 1,
           backgroundColor: this.state.mode === "light" ? "white" : "#282826",
           marginBottom: "10px"
@@ -525,13 +526,13 @@ export class TwentyFortyEight extends Component {
         {/*{this.state.gameOver ? (*/}
         {/*  <h4 style={{width: "100%", display: "flex", justifyContent: "center"}}>Game Over</h4>*/}
         {/*) : (<div/>)}*/}
-        <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
-          <Button onClick={() => this.init()}>
-            Restart Game
-          </Button>
-        </div>
-        <div style={{ width: "100%", display: "flex", flexDirection: "row", justifyContent: "space-around", alignItems: "center", height: "50%" }}>
-          <div className="row" style={{ width: "100px", display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
+        {/*<div style={{ width: "100%", display: "flex", justifyContent: "center" }}>*/}
+        {/*  <Button onClick={() => this.init()}>*/}
+        {/*    Restart Game*/}
+        {/*  </Button>*/}
+        {/*</div>*/}
+        <div style={{ width: "100%", display: "flex", flexDirection: "row", justifyContent: "space-around", alignItems: "center", height: "100%" }}>
+          <div className="row" style={{ width: "100px", display: "flex", flexDirection: "row", justifyContent: "evenly" }}>
             <div className="col">
               <p className="text-right">Score:</p>
             </div>
@@ -548,6 +549,11 @@ export class TwentyFortyEight extends Component {
               {/*<p>{nhs ? this.state.score : this.props.highscore[this.props.gameCode]}</p>*/}
             </div>
           </div>
+          <Tooltip title={"Restart Game"}>
+            <Button onClick={() => this.init()}>
+              <RestartAltIcon/>
+            </Button>
+          </Tooltip>
         </div>
       </Card>
     )

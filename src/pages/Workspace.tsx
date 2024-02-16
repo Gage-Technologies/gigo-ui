@@ -8,13 +8,13 @@ import {
     createTheme,
     CssBaseline,
     Divider, FormControlLabel,
-    Grid,
+    Grid, IconButton,
     LinearProgress,
     Link,
     List,
     ListItem,
     ListItemText,
-    PaletteMode, Switch,
+    PaletteMode, Popper, Switch,
     ThemeProvider,
     Typography
 } from "@mui/material";
@@ -26,7 +26,7 @@ import config from "../config";
 import TwentyFortyEight from "../components/Games/TwentyFortyEight";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
 import {
-    initialAuthStateUpdate, selectAuthStateTutorialState,
+    initialAuthStateUpdate, selectAuthState, selectAuthStateTutorialState,
     selectAuthStateUserName,
     updateAuthState
 } from "../reducers/auth/auth";
@@ -60,6 +60,11 @@ import { useSelector } from "react-redux";
 import { selectAppWrapperChatOpen, selectAppWrapperSidebarOpen } from "../reducers/appWrapper/appWrapper";
 import * as wsModels from "../models/websocket";
 import IframeRenderer from "../components/IframeRenderer";
+import proGorillaCrown from "../img/pro-pop-up-icon-plain.svg"
+import proBackground from "../img/popu-up-backgraound-plain.svg";
+import {Close} from "@material-ui/icons";
+import premiumGorilla from "../img/pro-pop-up-icon-plain.svg";
+import GoProDisplay from "../components/GoProDisplay";
 
 
 interface InitialStatusMessage {
@@ -125,6 +130,7 @@ const WorkspacePage = () => {
 
     let [expiration, setExpiration] = React.useState<number | null>(null);
     const [highestScore, setHighestScore] = React.useState<number | null>(0);
+    const [goProPopup, setGoProPopup] = useState(false)
 
     const [xpPopup, setXpPopup] = React.useState(false)
     const [xpData, setXpData] = React.useState(null)
@@ -1479,6 +1485,43 @@ const WorkspacePage = () => {
         )
     }, [iframeUrl])
 
+    const authState = useAppSelector(selectAuthState);
+
+    let premium = authState.role.toString()
+    // //remove after testing
+    // premium = "0"
+
+    const calculateTopStyle = (workspace: Workspace | null, workspaceUrl: string | null, iframeUrl: string | null): React.CSSProperties => {
+        const proBanner = document.getElementById("pro-banner");
+
+        // Define a default style object
+        let style: React.CSSProperties = {
+            position: "absolute",
+            width: "35vw",
+            height: "77vh",
+            left: "55%",
+            backgroundColor: "transparent",
+            backgroundImage: "none",
+            boxShadow: "none",
+        };
+
+        if (proBanner !== null) {
+            const shouldAdjustTop = workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null || iframeUrl === null;
+            const topValue = shouldAdjustTop ? `${proBanner.offsetHeight + 75}px` : "45%";
+
+            // Update the `top` property in the style object
+            style = { ...style, top: topValue };
+        } else {
+            // Default case if pro-banner is not present
+            style = { ...style, top: "45%" };
+        }
+
+        return style;
+    };
+
+    // Inline style calculation
+    const topStyle = calculateTopStyle(workspace, workspaceUrl, iframeUrl);
+
     const renderBody = () => {
         let ports = []
 
@@ -1641,7 +1684,72 @@ const WorkspacePage = () => {
                     </Grid>
                     {/*<Grid item xs={"auto"}>*/}
                     <Grid item xs={"auto"}>
-                        <Card sx={{
+                        {premium === "0" && (workspace === null || workspace.init_state !== 13 || workspace.state !== 1 || workspaceUrl === null || iframeUrl === null) && (
+                            <div style={{
+                                position: "absolute",
+                                top: 100,
+                                right: "5vw",
+                                width: "45vw",
+                                backgroundColor: theme.palette.background.default,
+                                borderRadius: "10px",
+                                boxShadow: "0 4px 8px rgba(0,0,0,0.2), 0 6px 20px rgba(0,0,0,0.19)",
+                                padding: "20px",
+                                display: "flex",
+                                flexDirection: "column", // Stack items vertically
+                                alignItems: "flex-start", // Align items to the left
+                                justifyContent: "space-between", // Even spacing
+                                height: "auto",
+                                border: `1px solid ${theme.palette.primary.main}`,
+                            }} id={"pro-banner"}>
+                                <div style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "flex-start", // Left align the title and subtitle
+                                    width: "calc(100% - 120px)", // Adjust width to prevent overlap with image, assuming image width + some padding
+                                }}>
+                                    <h2 style={{ margin: "0 0 10px 0", textAlign: "left" }}>Want to learn faster?</h2>
+                                    <p style={{
+                                        textAlign: "left",
+                                        margin: "0",
+                                        fontSize: "14px",
+                                        maxWidth: "100%", // Prevents subtitle from overlapping with the image
+                                    }}>
+                                        Go Pro and get access to more code teacher and more resources to expedite your learning
+                                    </p>
+                                </div>
+                                <div style={{
+                                    width: "100%", // Full width for centering the button
+                                    display: "flex",
+                                    justifyContent: "center", // Center the button
+                                    marginTop: "20px", // Add space above the button
+                                }}>
+                                    <Button style={{
+                                        padding: "10px 20px",
+                                        fontSize: "16px",
+                                    }} variant={"outlined"} onClick={() => setGoProPopup(true)}>Go Pro</Button>
+                                </div>
+                                <div style={{
+                                    position: "absolute",
+                                    top: "20px", // Adjust as needed
+                                    right: "20px", // Ensure it's aligned to the right
+                                    height: "100px", // Image size
+                                    width: "100px", // Image size
+                                }}>
+                                    <img src={proGorillaCrown} alt={"GIGO Pro"} style={{ width: "100%", height: "auto" }}/>
+                                </div>
+                            </div>
+                        )}
+                        <Card sx={premium === "0" ? {
+                            position: "absolute",
+                            width: "35vw",
+                            height: "77vh",
+                            left: "55%",
+                            backgroundColor: "transparent",
+                            backgroundImage: "none",
+                            boxShadow: "none",
+                            //@ts-ignore
+                            top: document.getElementById("pro-banner") === null ? "17.5%" : document.getElementById("pro-banner").offsetHeight + 75 + "px"
+                        } :{
                             position: "absolute",
                             width: "35vw",
                             height: "77vh",
@@ -1650,7 +1758,7 @@ const WorkspacePage = () => {
                             backgroundColor: "transparent",
                             backgroundImage: "none",
                             boxShadow: "none"
-                        }}>
+                        }} id={"2048"}>
                             <div
                                 style={stepIndex === 5 ? { position: "absolute", width: "43%", display: "flex", justifyContent: "center", zIndex: "600000", top: "15%", left: "30%" } : { position: "absolute", width: "43%", display: "flex", justifyContent: "center", top: "8%", left: "30%" }}
                                 className={"game"}>
@@ -1860,6 +1968,67 @@ const WorkspacePage = () => {
                                         }
                                     </List>
                                 </Card>
+                            </Grid>
+                        )}
+                        {premium === "0" && (
+                            <Grid item xs={12}>
+                                <div style={{
+                                    position: "fixed",
+                                    top: "auto",
+                                    bottom: 50,
+                                    right: 0,
+                                    left: 3,
+                                    width: "98vw",
+                                    backgroundColor: theme.palette.background.default,
+                                    borderRadius: "10px",
+                                    boxShadow: "0 4px 8px rgba(0,0,0,0.2), 0 6px 20px rgba(0,0,0,0.19)",
+                                    padding: "20px",
+                                    display: "flex",
+                                    flexDirection: "column", // Stack items vertically
+                                    alignItems: "flex-start", // Align items to the left
+                                    justifyContent: "space-between", // Even spacing
+                                    height: "auto",
+                                    border: `1px solid ${theme.palette.primary.main}`,
+                                }} id={"pro-banner"}>
+                                    <div style={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "flex-start", // Left align the title and subtitle
+                                        width: "calc(100% - 120px)", // Adjust width to prevent overlap with image, assuming image width + some padding
+                                    }}>
+                                        <h2 style={{margin: "0 0 10px 0", textAlign: "left"}}>Want to learn faster?</h2>
+                                        <p style={{
+                                            textAlign: "left",
+                                            margin: "0",
+                                            fontSize: "14px",
+                                            maxWidth: "100%", // Prevents subtitle from overlapping with the image
+                                        }}>
+                                            Go Pro and get access to more code teacher and more resources to expedite your
+                                            learning
+                                        </p>
+                                    </div>
+                                    <div style={{
+                                        width: "100%", // Full width for centering the button
+                                        display: "flex",
+                                        justifyContent: "center", // Center the button
+                                        marginTop: "20px", // Add space above the button
+                                    }}>
+                                        <Button style={{
+                                            padding: "10px 20px",
+                                            fontSize: "16px",
+                                        }} variant={"outlined"} onClick={() => setGoProPopup(true)}>Go Pro</Button>
+                                    </div>
+                                    <div style={{
+                                        position: "absolute",
+                                        top: "20px", // Adjust as needed
+                                        right: "20px", // Ensure it's aligned to the right
+                                        height: "100px", // Image size
+                                        width: "100px", // Image size
+                                    }}>
+                                        <img src={proGorillaCrown} alt={"GIGO Pro"}
+                                             style={{width: "100%", height: "auto"}}/>
+                                    </div>
+                                </div>
                             </Grid>
                         )}
                     </Grid>
@@ -2212,12 +2381,17 @@ const WorkspacePage = () => {
                             </Typography>
                         </div>
 
+                        {/*<div style={{display: "flex", justifyContent: "right"}}>*/}
+                        {/*    hello*/}
+                        {/*</div>*/}
+
                         {/*<div style={{display: "flex", width: "100%"}}>*/}
                         {/*    {renderStatusBar()}*/}
                         {/*</div>*/}
                         <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
                             {renderBody()}
                         </div>
+                        <GoProDisplay open={goProPopup} onClose={toggleProPopup}/>
                     </>
                 )}
                 {xpPopup ? (xpPopupMemo) : null}
@@ -2360,6 +2534,8 @@ const WorkspacePage = () => {
         return button
     }
 
+    const toggleProPopup = () => setGoProPopup(!goProPopup)
+
 
     const renderMobile = () => {
         return (
@@ -2481,6 +2657,7 @@ const WorkspacePage = () => {
                         <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
                             {renderBodyMobile()}
                         </div>
+                        <GoProDisplay open={goProPopup} onClose={toggleProPopup}/>
                     </div>
                 )}
                 {xpPopup && window.innerWidth > 1000 ? (xpPopupMemo) : null}

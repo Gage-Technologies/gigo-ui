@@ -45,10 +45,7 @@ import { debounce } from "lodash";
 import {LaunchLspRequest} from "../models/launch_lsp";
 import {Workspace} from "../models/workspace";
 import CodeSource from "../models/codeSource";
-import StopIcon from "@mui/icons-material/Stop";
 import {
-    CtByteSuggestionRequest,
-    CtByteSuggestionResponse,
     CtGenericErrorPayload,
     CtMessage,
     CtMessageOrigin,
@@ -59,11 +56,7 @@ import {
 } from "../models/ct_websocket";
 import LinkIcon from '@mui/icons-material/Link';
 import LinkOffIcon from '@mui/icons-material/LinkOff';
-import { ctHighlightCodeRangeFullLines, removeCtHighlightCodeRange } from "../components/IDE/Extensions/CtHighlightExtension";
 import { CtPopupExtensionEngine, createCtPopupExtension } from "../components/IDE/Extensions/CtPopupExtension";
-import ReactDOM from "react-dom";
-import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
-import ByteSuggestion from "../components/CodeTeacher/ByteSuggestions";
 import {ctCreateCodeActions} from "../components/IDE/Extensions/CtCodeActionExtension";
 import ByteSuggestions2, {splitStringByLines} from "../components/CodeTeacher/ByteSuggestions2";
 
@@ -928,7 +921,6 @@ function Byte() {
             return
         }
         setLoadingCodeCleanup(node.id)
-        // ctHighlightCodeRangeFullLines(editorRef.current.view, node.position.start_line, node.position.end_line+1);
 
 
         // set range here
@@ -1030,16 +1022,6 @@ function Byte() {
     const buttonClickedRef = useRef(false);
 
     const executeCode = async () => {
-
-        if (startSuggestionLine !== null || endSuggestionLine !== null){
-            //@ts-ignore
-            removeCtHighlightCodeRange(editorRef.current.view, startSuggestionLine, endSuggestionLine);
-            //@ts-ignore
-            popupEngineRef.current?.removePopupRange(endSuggestionLine, startSuggestionLine)
-            setStartSuggestionLine(null)
-            setEndSuggestionLine(null)
-        }
-
         if (suggestionPopup) {
             setSuggestionPopup(false)
             if (activeSidebarTab === null || activeSidebarTab !== "nextSteps") {
@@ -1252,6 +1234,7 @@ function Byte() {
                         bytesLang={programmingLanguages[byteData ? byteData.lang : 5]}
                         codePrefix={codeBeforeCursor}
                         codeSuffix={codeAfterCursor}
+                        containerRef={containerRef}
                     />
                 )}
                 {(activeSidebarTab === null || activeSidebarTab === "debugOutput") && (
@@ -1278,6 +1261,7 @@ function Byte() {
                         maxWidth={"20vw"}
                         codeOutput={output?.merged || ""}
                         nextByte={getNextByte()}
+                        containerRef={containerRef}
                     />
                 )}
                 {(activeSidebarTab === null || activeSidebarTab === "codeSuggestion") && (
@@ -1296,6 +1280,7 @@ function Byte() {
                         maxWidth={"20vw"}
                         acceptedCallback={(c) => {
                             setCode(c)
+                            setSuggestionRange(null)
                             setLoadingCodeCleanup(null)
                         }}
                         rejectedCallback={() => {
@@ -1340,34 +1325,13 @@ function Byte() {
         navigate("/")
     }
 
-    //this is used for clearing out the suggestion ui and information
-    const suggestionCallback = (startLine: number, endLine: number, newCode: string | null) => {
-
-        if (newCode !== null){
-            setCode(newCode)
-        }
-
-        //@ts-ignore
-        removeCtHighlightCodeRange(editorRef.current.view, startLine, endLine);
-        //@ts-ignore
-        popupEngineRef.current?.removePopupRange(endLine, startLine)
-        setStartSuggestionLine(null)
-        setEndSuggestionLine(null)
-    }
-
-    //this is used for setting the start and endline  here for the sole reason of if a user runs the code, get a suggestion
-    // and then runs the code again without executing or dismissing, it double highlights it
-    //this gets called when the suggestion websocket is used so we can check in the execute code if the necessary ui for suggestions has been closed or not
-    const suggestionApiCallback = (startLine: number, endLine: number) => {
-        setStartSuggestionLine(startLine)
-        setEndSuggestionLine(endLine)
-    }
+    const containerRef = useRef(null)
 
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
                 <Container maxWidth="xl" style={containerStyle}>
-                    <Box sx={topContainerStyle}>
+                    <Box sx={topContainerStyle} ref={containerRef}>
                         <Box sx={difficultyAdjusterStyle}>
                             <DifficultyAdjuster
                                 difficulty={determineDifficulty()}
@@ -1404,6 +1368,7 @@ function Byte() {
                                         codePrefix={codeBeforeCursor}
                                         codeSuffix={codeAfterCursor}
                                         codeLanguage={programmingLanguages[byteData ? byteData.lang : 5]}
+                                        containerRef={containerRef}
                                     />
                                 )}
                             </div>
@@ -1483,18 +1448,6 @@ function Byte() {
                         </div>
                     </div>
                 </Container>
-                <ByteSuggestion
-                        lang={programmingLanguages[byteData ? byteData.lang : 5]}
-                        closeCallback={suggestionCallback}
-                        apiCallback={suggestionApiCallback}
-                        code={code}
-                        byteId={id || ""}
-                        open={suggestionPopup}
-                        codeMirrorRef={editorRef}
-                        popupRef={popupEngineRef}
-                        // @ts-ignore
-                        description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
-                />
                 {parsedSymbols !== null ? codeActionPortals.map(x => x.portal) : null}
                 {xpPopup ? (<XpPopup oldXP={
                     //@ts-ignore

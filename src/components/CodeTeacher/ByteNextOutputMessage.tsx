@@ -7,7 +7,7 @@ import {
     Popper,
     PopperPlacementType,
     styled,
-    alpha
+    alpha, IconButton, Tooltip
 } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 import { getAllTokens, themeHelpers } from "../../theme";
@@ -32,6 +32,12 @@ import { Player } from "@lottiefiles/react-lottie-player";
 import config from "../../config";
 import BytesCard from "../BytesCard";
 import { useNavigate } from "react-router-dom";
+import call from "../../services/api-call";
+import {useAppSelector} from "../../app/hooks";
+import {selectAuthState} from "../../reducers/auth/auth";
+import proBackground from "../../img/popu-up-backgraound-plain.svg";
+import premiumGorilla from "../../img/pro-pop-up-icon-plain.svg";
+import GoProDisplay from "../GoProDisplay";
 
 export type ByteNextOutputMessageProps = {
     trigger: boolean;
@@ -47,6 +53,7 @@ export type ByteNextOutputMessageProps = {
     maxWidth: string;
     codeOutput: string;
     nextByte?: any;
+    containerRef: React.MutableRefObject<null>;
 };
 
 enum State {
@@ -56,6 +63,7 @@ enum State {
 
 export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps) {
     let userPref = localStorage.getItem("theme");
+    let authState = useAppSelector(selectAuthState);
     const [mode, _] = useState<PaletteMode>(userPref === "light" ? "light" : "dark");
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
     const [response, setResponse] = useState<string>("");
@@ -63,6 +71,7 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
     const [state, setState] = useState<State>(State.LOADING);
     const [executingOutputMessage, setExecutingOutputMessage] = useState<boolean>(false)
     const [hidden, setHidden] = useState<boolean>(true);
+    const [goProPopup, setGoProPopup] = useState(false)
 
 
     const ctWs = useGlobalCtWebSocket();
@@ -219,6 +228,10 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
         })
     };
 
+    let premium = authState.role.toString()
+    // //remove after testing
+    // premium = "0"
+
     useEffect(() => {
         if (!props.trigger || executingOutputMessage)
             return
@@ -299,18 +312,33 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                         </Button>
                     ) : headerLoadingAnim}
                 </Box>
-                <MarkdownRenderer
-                    markdown={response}
-                    style={{
-                        overflowWrap: 'break-word',
-                        borderRadius: '10px',
-                        padding: '0px',
-                    }}
-                />
+                <div style={{display: 'flex', flexDirection: 'column'}}>
+                    <MarkdownRenderer
+                        markdown={response}
+                        style={{
+                            overflowWrap: 'break-word',
+                            borderRadius: '10px',
+                            padding: '0px',
+                        }}
+                    />
+                    <div style={{display: 'flex', justifyContent: 'flex-end', marginTop: '10px'}}>
+                        {premium === "0" && (
+                            <Tooltip title={"Get Access to more coding help and resources by going pro"}>
+                                <Button onClick={(event) => {
+                                    setGoProPopup(true)
+                                }} variant={"outlined"}>
+                                    Go Pro
+                                </Button>
+                            </Tooltip>
+                        )}
+                    </div>
+                </div>
                 {state === State.LOADING && response.length > 0 && loadingAnim}
             </Box>
         )
     }
+
+    const toggleProPopup = () => setGoProPopup(!goProPopup)
 
 
     const renderSuccesPage = () => {
@@ -437,6 +465,7 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                 }}
             >
                 {renderExpanded()}
+                <GoProDisplay open={goProPopup} onClose={toggleProPopup}/>
             </Box>
         )
     }
