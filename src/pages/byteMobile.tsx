@@ -916,7 +916,7 @@ function ByteMobile() {
             {
                 icon: <HomeIcon/>,
                 name: 'Home',
-                action: () => navigate('/home/')
+                action: () => window.location.assign('/home')
             },
             {
                 icon: <img alt="CT" src={CTIcon} style={{width: 18, height: 18}}/>,

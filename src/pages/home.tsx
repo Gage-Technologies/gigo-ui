@@ -1122,9 +1122,7 @@ function Home() {
                 },
                 {
                     title: "Let's Get Started!",
-                    content: window.innerWidth >= 1000 ?
-                        "Start coding now, or select either a Byte or a Challenge to initiate your journey!" :
-                        "Pick a project from the recommendations or search for one in the search bar.",
+                    content: "Start coding now, or select either a Byte or a Challenge to initiate your journey!"
                 }
             ]
 
@@ -1214,45 +1212,10 @@ function Home() {
                     )}
                     {tutorialStepIndex === steps.length - 1 ? (
                         <>
-                            <Button
-                                onClick={async () => {
-                                    setRunTutorial(false)
-                                    let authState = Object.assign({}, initialAuthStateUpdate)
-                                    // copy the existing state
-                                    let state = Object.assign({}, tutorialState)
-                                    // update the state
-                                    state.home = true
-                                    authState.tutorialState = state
-                                    // @ts-ignore
-                                    dispatch(updateAuthState(authState))
-
-                                    // send api call to backend to mark the challenge tutorial as completed
-                                    await call(
-                                        "/api/user/markTutorial",
-                                        "post",
-                                        null,
-                                        null,
-                                        null,
-                                        // @ts-ignore
-                                        {
-                                            tutorial_key: "home"
-                                        }
-                                    )
-                                }}
-                                variant="contained"
-                                color={window.innerWidth >= 1000 ? "primary" : "success"}
-                                sx={{
-                                    fontSize: "0.8rem",
-                                }}
-                            >
-                                {window.innerWidth >= 1000 ? "I want to browse" : "Finish"}
-                            </Button>
-                            {window.innerWidth >= 1000 && (
-                                <StartCodingButton
-                                    loading={startingByte}
+                            {window.innerWidth > 1000 && (
+                                <Button
                                     onClick={async () => {
-                                        setStartingByte(true)
-
+                                        setRunTutorial(false)
                                         let authState = Object.assign({}, initialAuthStateUpdate)
                                         // copy the existing state
                                         let state = Object.assign({}, tutorialState)
@@ -1274,21 +1237,56 @@ function Home() {
                                                 tutorial_key: "home"
                                             }
                                         )
-
-                                        setStartingByte(false)
-                                        setRunTutorial(false)
-
-                                        navigate("/byte/1750943457427324928")
                                     }}
                                     variant="contained"
-                                    color="success"
+                                    color={"primary"}
                                     sx={{
-                                        // fontSize: "0.8rem",
+                                        fontSize: "0.8rem",
                                     }}
                                 >
-                                    Start Coding!
-                                </StartCodingButton>
+                                    Browse
+                                </Button>
                             )}
+                            <StartCodingButton
+                                loading={startingByte}
+                                onClick={async () => {
+                                    setStartingByte(true)
+
+                                    let authState = Object.assign({}, initialAuthStateUpdate)
+                                    // copy the existing state
+                                    let state = Object.assign({}, tutorialState)
+                                    // update the state
+                                    state.home = true
+                                    authState.tutorialState = state
+                                    // @ts-ignore
+                                    dispatch(updateAuthState(authState))
+
+                                    // send api call to backend to mark the challenge tutorial as completed
+                                    await call(
+                                        "/api/user/markTutorial",
+                                        "post",
+                                        null,
+                                        null,
+                                        null,
+                                        // @ts-ignore
+                                        {
+                                            tutorial_key: "home"
+                                        }
+                                    )
+
+                                    setStartingByte(false)
+                                    setRunTutorial(false)
+
+                                    window.location.assign("/byte/1750943457427324928")
+                                }}
+                                variant="contained"
+                                color="success"
+                                sx={{
+                                    // fontSize: "0.8rem",
+                                }}
+                            >
+                                Start Coding!
+                            </StartCodingButton>
                         </>
                     ) : (
                         <Button
