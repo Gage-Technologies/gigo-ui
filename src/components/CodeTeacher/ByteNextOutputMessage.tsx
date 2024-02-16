@@ -37,6 +37,7 @@ import {useAppSelector} from "../../app/hooks";
 import {selectAuthState} from "../../reducers/auth/auth";
 import proBackground from "../../img/popu-up-backgraound-plain.svg";
 import premiumGorilla from "../../img/pro-pop-up-icon-plain.svg";
+import GoProDisplay from "../GoProDisplay";
 
 export type ByteNextOutputMessageProps = {
     trigger: boolean;
@@ -70,9 +71,6 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
     const [state, setState] = useState<State>(State.LOADING);
     const [executingOutputMessage, setExecutingOutputMessage] = useState<boolean>(false)
     const [hidden, setHidden] = useState<boolean>(true);
-    const [proMonthlyLink, setProMonthlyLink] = React.useState("");
-    const [proYearlyLink, setProYearlyLink] = React.useState("");
-    const [proUrlsLoading, setProUrlsLoading] = React.useState(false);
     const [goProPopup, setGoProPopup] = useState(false)
 
 
@@ -231,40 +229,8 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
     };
 
     let premium = authState.role.toString()
-
-    const retrieveProUrls = async (): Promise<{ monthly: string, yearly: string } | null> => {
-        setProUrlsLoading(true)
-        let res = await call(
-            "/api/stripe/premiumMembershipSession",
-            "post",
-            null,
-            null,
-            null,
-            // @ts-ignore
-            {},
-            null,
-            config.rootPath
-        )
-
-        setProUrlsLoading(false)
-
-        if (res !== undefined && res["return url"] !== undefined && res["return year"] !== undefined) {
-            setProMonthlyLink(res["return url"])
-            setProYearlyLink(res["return year"])
-            return {
-                "monthly": res["return url"],
-                "yearly": res["return year"],
-            }
-        }
-
-        return null
-    }
-
-    useEffect(() => {
-        if (premium === "0") {
-            retrieveProUrls()
-        }
-    }, [])
+    // //remove after testing
+    // premium = "0"
 
     useEffect(() => {
         if (!props.trigger || executingOutputMessage)
@@ -371,6 +337,8 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
             </Box>
         )
     }
+
+    const toggleProPopup = () => setGoProPopup(!goProPopup)
 
 
     const renderSuccesPage = () => {
@@ -497,122 +465,7 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                 }}
             >
                 {renderExpanded()}
-                <Popper open={goProPopup} anchorEl={props.containerRef.current}>
-                    <Box style={{
-                        width: window.innerWidth < 1000 ? "90vw" : "28vw",
-                        height: window.innerWidth < 1000 ? "78vh": "65vh",
-                        minHeight: "420px",
-                        // justifyContent: "center",
-                        // marginLeft: "25vw",
-                        // marginTop: "5vh",
-                        outlineColor: "black",
-                        borderRadius: "7%",
-                        boxShadow:
-                            "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px  0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
-                        // backgroundColor: theme.palette.background.default,
-                        backgroundImage: `url(${proBackground})`,
-                        backgroundSize: "cover",
-                        backgroundRepeat: "no-repeat",
-                        backgroundPosition: "center center"
-                        // ...themeHelpers.frostedGlass
-                    }}>
-                        <div style={{
-                            borderRadius: "10px",
-                            padding: "20px",
-                            textAlign: "center"
-                        }}>
-                            <IconButton
-                                edge="end"
-                                color="inherit"
-                                size="small"
-                                onClick={() => {
-                                    setGoProPopup(false)
-                                }}
-
-                                sx={window.innerWidth < 1000 ? {
-                                    position: "absolute",
-                                    top: '2vh',
-                                    right: '2vw',
-                                    color: "white"
-                                } : {
-                                    position: "absolute",
-                                    top: '2vh',
-                                    right: '2vw', color: "white"
-                                }}
-                            >
-                                <Close/>
-                            </IconButton>
-                            <img src={premiumGorilla} style={{width: "30%", marginBottom: "20px"}}/>
-                            <Typography variant={"h4"} style={{marginBottom: "10px", color: "white"}} align={"center"}>GIGO
-                                Pro</Typography>
-                            <Typography variant={"body1"} style={{marginLeft: "20px", marginRight: "20px", color: "white"}}
-                                        align={"center"}>
-                                Learn faster with a smarter Code Teacher!
-                            </Typography>
-                            <Typography variant={"body1"}
-                                        style={{
-                                            marginBottom: "20px",
-                                            marginLeft: "20px",
-                                            marginRight: "20px",
-                                            color: "white"
-                                        }}
-                                        align={"center"}>
-                                Do more with larger DevSpaces!
-                            </Typography>
-                            <div style={{
-                                display: "flex",
-                                justifyContent: "center"
-                            }}>
-                                <div style={{
-                                    backgroundColor: "#070D0D",
-                                    borderRadius: "10px",
-                                    padding: "20px",
-                                    margin: "10px",
-                                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                                    textAlign: "center",
-                                    width: "200px"
-                                }}>
-                                    <Typography variant={"subtitle1"} style={{marginBottom: "10px", color: "white"}}
-                                                align={"center"}>1 Month</Typography>
-                                    <Typography variant={"h5"} style={{marginBottom: "10px", color: "white"}}
-                                                align={"center"}>$15
-                                        / MO</Typography>
-                                    <LoadingButton
-                                        loading={proUrlsLoading}
-                                        variant="contained"
-                                        onClick={() => window.open(proMonthlyLink, "_blank")}
-                                        style={{backgroundColor: theme.palette.secondary.dark}}
-                                    >
-                                        Select
-                                    </LoadingButton>
-                                </div>
-                                <div style={{
-                                    backgroundColor: "#070D0D",
-                                    borderRadius: "10px",
-                                    padding: "20px",
-                                    margin: "10px",
-                                    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                                    textAlign: "center",
-                                    width: "200px"
-                                }}>
-                                    <Typography variant={"subtitle1"} style={{marginBottom: "10px", color: "white"}}
-                                                align={"center"}>12 Months</Typography>
-                                    <Typography variant={"h5"} style={{marginBottom: "10px", color: "white"}}
-                                                align={"center"}>$11.25
-                                        / MO</Typography>
-                                    <LoadingButton
-                                        loading={proUrlsLoading}
-                                        variant="contained"
-                                        onClick={() => window.open(proYearlyLink, "_blank")}
-                                        style={{backgroundColor: theme.palette.secondary.dark}}
-                                    >
-                                        Select
-                                    </LoadingButton>
-                                </div>
-                            </div>
-                        </div>
-                    </Box>
-                </Popper>
+                <GoProDisplay open={goProPopup} onClose={toggleProPopup}/>
             </Box>
         )
     }
