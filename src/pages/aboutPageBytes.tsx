@@ -15,24 +15,13 @@ import { AwesomeButton } from "react-awesome-button";
 import 'react-awesome-button/dist/styles.css';
 
 import AboutBytesIcon from "../components/Icons/bytes/AboutPage";
-//@ts-ignore
-import chatDemo from "../components/Icons/bytes/demo-chat.mp4"
-//@ts-ignore
-import debugDemo from "../components/Icons/bytes/demo-debug.mp4"
-//@ts-ignore
-import difficultyDemo from "../components/Icons/bytes/demo-difficulty.mp4"
-//@ts-ignore
-import nextStepsDemo from "../components/Icons/bytes/demo-nextsteps.mp4"
 import CTIcon from "../components/Icons/bytes/ct-logo.svg";
 import NSIcon from "../components/Icons/bytes/ns-icon.svg";
 import DebugIcon from "../components/Icons/Debug";
 import ByteEasySelectionIcon from "../img/bytes/difficulty/ByteEasySelection";
 import ByteMediumSelectionIcon from "../img/bytes/difficulty/ByteMediumSelection";
 import ByteHardSelectionIcon from "../img/bytes/difficulty/ByteHardSelection";
-import AboutPageLearnIcon from "../components/Icons/aboutPage/AboutPageLearn";
-import AboutPageEasyIcon from "../components/Icons/aboutPage/AboutPageEasy";
-import AboutPageConnectionIcon from "../components/Icons/aboutPage/AboutPageConnection";
-import AboutPageWorldIcon from "../components/Icons/aboutPage/AboutPageWorld";
+import config from "../config";
 function AboutBytes() {
     let userPref = localStorage.getItem('theme')
 
@@ -122,7 +111,7 @@ function AboutBytes() {
                         </Grid>
                         <Grid item xs={1} />
                         <Grid item xs={4} style={{ paddingTop: "5vh" }}>
-                            <DesktopVideo videoSrc={chatDemo} />
+                            <DesktopVideo videoSrc={config.rootPath + "/static/ui/videos/demo-chat.mp4"} />
                         </Grid>
                         <Grid item xs={1} />
                     </Grid>
@@ -132,7 +121,7 @@ function AboutBytes() {
                     <Grid container spacing={0}>
                         <Grid item xs={1}/>
                         <Grid item xs={4}>
-                            <DesktopVideo videoSrc={debugDemo}/>
+                            <DesktopVideo videoSrc={config.rootPath + "/static/ui/videos/demo-debug.mp4"}/>
                         </Grid>
                         <Grid item xs={1}/>
                         <Grid item xs={4}>
@@ -173,7 +162,7 @@ function AboutBytes() {
                         </Grid>
                         <Grid item xs={1}/>
                         <Grid item xs={4}>
-                            <DesktopVideo videoSrc={nextStepsDemo}/>
+                            <DesktopVideo videoSrc={config.rootPath + "/static/ui/videos/demo-nextsteps.mp4"}/>
                         </Grid>
                         <Grid item xs={1}/>
                     </Grid>
@@ -183,7 +172,7 @@ function AboutBytes() {
                     <Grid container spacing={0}>
                         <Grid item xs={1}/>
                         <Grid item xs={4}>
-                        <DesktopVideo videoSrc={difficultyDemo}/>
+                            <DesktopVideo videoSrc={config.rootPath + "/static/ui/videos/demo-difficulty.mp4"}/>
                         </Grid>
                         <Grid item xs={1}/>
                         <Grid item xs={4}>
@@ -249,7 +238,7 @@ function AboutBytes() {
                             a unique and personalized learning experience. Code Teacher acts as your own personal AI
                             tutor, providing tailored guidance and support throughout your coding journey.</p>
                         <Grid item xs={4} style={{paddingTop: "5vh"}}>
-                            <MobileVideo videoSrc={chatDemo}/>
+                            <MobileVideo videoSrc={config.rootPath + "/static/ui/videos/demo-chat.mp4"}/>
                         </Grid>
                     </Grid>
                 </Grid>
@@ -266,7 +255,7 @@ function AboutBytes() {
                             automatically correct them, turning
                             every mistake into a learning opportunity.</p>
                         <Grid item xs={4} style={{paddingTop: "5vh"}}>
-                            <MobileVideo videoSrc={debugDemo}/>
+                            <MobileVideo videoSrc={config.rootPath + "/static/ui/videos/demo-debug.mp4"}/>
                         </Grid>
                     </Grid>
                 </Grid>
@@ -299,7 +288,7 @@ function AboutBytes() {
                             'What To Do Next?', ensuring a smooth
                             learning curve.</p>
                         <Grid item xs={4} style={{paddingTop: "5vh"}}>
-                            <MobileVideo videoSrc={nextStepsDemo}/>
+                            <MobileVideo videoSrc={config.rootPath + "/static/ui/videos/demo-nextsteps.mp4"}/>
                         </Grid>
                     </Grid>
                 </Grid>
@@ -331,7 +320,7 @@ function AboutBytes() {
                             various experience levels. Each difficulty has it's own goal unique to that level of
                             programming.</p>
                         <Grid item xs={4} style={{paddingTop: "5vh"}}>
-                            <MobileVideo videoSrc={difficultyDemo}/>
+                            <MobileVideo videoSrc={config.rootPath + "/static/ui/videos/demo-difficulty.mp4"}/>
                         </Grid>
                     </Grid>
                 </Grid>
@@ -342,7 +331,7 @@ function AboutBytes() {
 
     return (
         <ThemeProvider theme={theme}>
-        <CssBaseline>
+            <CssBaseline>
                 <div>
                     {window.innerWidth > 1000 ? renderDesktop() : renderMobile()}
                 </div>
