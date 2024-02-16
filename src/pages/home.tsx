@@ -1510,6 +1510,22 @@ function Home() {
                         //@ts-ignore
                         renown={xpData["xp_update"]["current_renown"]} popupClose={PopupClose}
                         homePage={true} />) : null}
+                    {/*{xpPopup ? (<XpPopup oldXP={*/}
+                    {/*    //@ts-ignore*/}
+                    {/*    7} levelUp={*/}
+                    {/*    //@ts-ignore*/}
+                    {/*    true} maxXP={100}*/}
+                    {/*    //@ts-ignore*/}
+                    {/*                     newXP={8}*/}
+                    {/*    //@ts-ignore*/}
+                    {/*                     nextLevel={5}*/}
+                    {/*    //@ts-ignore*/}
+                    {/*                     gainedXP={200}*/}
+                    {/*    //@ts-ignore*/}
+                    {/*                     reward={"blue_hat"}*/}
+                    {/*    //@ts-ignore*/}
+                    {/*                     renown={9} popupClose={null}*/}
+                    {/*                     homePage={true} />) : null}*/}
                     {loading ? <Grid container sx={{
                         display: "flex",
                         justifyContent: "center",

@@ -237,19 +237,27 @@ const XpPopup = (props: IProps) => {
                             >
                             <Close />
                         </IconButton>
-                        <img src={premiumGorilla} style={{width: "30%", marginBottom: "20px"}}/>
-                        <Typography variant={"h4"} style={{marginBottom: "10px", color: "white"}} align={"center"}>GIGO Pro</Typography>
-                        <Typography variant={"body1"} style={{marginLeft: "20px", marginRight: "20px", color: "white"}} align={"center"}>
+                        <img src={premiumGorilla} style={window.innerHeight < 900 ? {width: "20%", marginBottom: "5px"} : {width: "30%", marginBottom: "20px"}}/>
+                        <Typography variant={window.innerHeight < 1000 ? "h5" : "h4"} style={{marginBottom: "10px", color: "white"}} align={"center"}>GIGO Pro</Typography>
+                        <Typography variant={window.innerHeight < 900 ? "body2" : "body1"} style={{marginLeft: "20px", marginRight: "20px", color: "white"}} align={"center"}>
                             Learn faster with a smarter Code Teacher!
                         </Typography>
-                        <Typography variant={"body1"} style={{marginBottom: "20px", marginLeft: "20px", marginRight: "20px", color: "white"}} align={"center"}>
+                        <Typography variant={window.innerHeight < 900 ? "body2" : "body1"} style={{marginBottom: "20px", marginLeft: "20px", marginRight: "20px", color: "white"}} align={"center"}>
                             Do more with larger DevSpaces!
                         </Typography>
                         <div style={{
                             display: "flex",
                             justifyContent: "center"
                         }}>
-                            <div style={{
+                            <div style={window.innerHeight < 900 ? {
+                                backgroundColor: "#070D0D",
+                                borderRadius: "10px",
+                                padding: "20px",
+                                margin: "10px",
+                                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                                textAlign: "center",
+                                height: "fit-content"
+                            } : {
                                 backgroundColor: "#070D0D",
                                 borderRadius: "10px",
                                 padding: "20px",
@@ -258,8 +266,8 @@ const XpPopup = (props: IProps) => {
                                 textAlign: "center",
                                 width: "200px"
                             }}>
-                                <Typography variant={"subtitle1"} style={{marginBottom: "10px", color: "white"}} align={"center"}>1 Month</Typography>
-                                <Typography variant={"h5"} style={{marginBottom: "10px", color: "white"}} align={"center"}>$15 / MO</Typography>
+                                <Typography variant={window.innerHeight < 900 ? "subtitle2" : "subtitle1"} style={{marginBottom: "10px", color: "white"}} align={"center"}>1 Month</Typography>
+                                <Typography variant={window.innerHeight < 900 ? "h6" : "h5"} style={{marginBottom: "10px", color: "white"}} align={"center"}>$15 / MO</Typography>
                                 <LoadingButton
                                     loading={proUrlsLoading}
                                     variant="contained"
@@ -269,7 +277,15 @@ const XpPopup = (props: IProps) => {
                                     Select
                                 </LoadingButton>
                             </div>
-                            <div style={{
+                            <div style={ window.innerHeight < 900 ? {
+                                backgroundColor: "#070D0D",
+                                borderRadius: "10px",
+                                padding: "20px",
+                                margin: "10px",
+                                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+                                textAlign: "center",
+                                height: "fit-content"
+                            } : {
                                 backgroundColor: "#070D0D",
                                 borderRadius: "10px",
                                 padding: "20px",
@@ -277,8 +293,8 @@ const XpPopup = (props: IProps) => {
                                 boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
                                 textAlign: "center",
                                 width: "200px"}}>
-                                <Typography variant={"subtitle1"} style={{marginBottom: "10px", color: "white"}} align={"center"}>12 Months</Typography>
-                                <Typography variant={"h5"} style={{marginBottom: "10px", color: "white"}} align={"center"}>$11.25 / MO</Typography>
+                                <Typography variant={window.innerHeight < 900 ? "subtitle2" : "subtitle1"} style={{marginBottom: "10px", color: "white"}} align={"center"}>12 Months</Typography>
+                                <Typography variant={window.innerHeight < 900 ? "h6" : "h5"} style={{marginBottom: "10px", color: "white"}} align={"center"}>$11.25 / MO</Typography>
                                 <LoadingButton
                                     loading={proUrlsLoading}
                                     variant="contained"
@@ -364,8 +380,8 @@ const XpPopup = (props: IProps) => {
                 <Modal open={open} style={{display: 'flex', justifyContent: "center", alignItems: "center"}}>
                     <Box
                         sx={showPro ? {
-                            width: window.innerWidth < 1000 ? "90vw" : "28vw",
-                            height: window.innerWidth < 1000 ? "78vh": "65vh",
+                            width: window.innerWidth < 1000 ? "90vw" : "35vw",
+                            height: window.innerWidth < 1000 ? "65vh": "65vh",
                             minHeight: "420px",
                             // justifyContent: "center",
                             // marginLeft: "25vw",
