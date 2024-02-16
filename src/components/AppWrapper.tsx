@@ -38,7 +38,7 @@ import {
     Link,
     ListItemButton,
     Menu, Modal,
-    PaletteMode, Paper, TextField,
+    PaletteMode, Paper, SpeedDial, SpeedDialAction, TextField,
     ThemeProvider,
     Tooltip,
 } from "@mui/material";
@@ -96,7 +96,7 @@ import {
     BookmarkBorderOutlined, ChatBubbleOutline,
     FolderOutlined,
     HomeOutlined,
-    InfoOutlined
+    InfoOutlined,
 } from "@material-ui/icons";
 import Notification from "../models/notification";
 import NotificationPopup from "./NotificationPopup";
@@ -193,7 +193,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     const hasSubscription = useAppSelector(selectAuthStateHasSubscription)
     const alreadyCancelled = useAppSelector(selectAuthStateAlreadyCancelled)
 
-
+    const [speedDialOpen, setSpeedDialOpen] = React.useState(false);
     const [reportPopup, setReportPopup] = React.useState(false)
 
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
@@ -1292,6 +1292,45 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         )
     }
 
+    const closeChat = () => {
+        let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
+        appWrapperState.chatOpen = false;
+        dispatch(updateAppWrapper(appWrapperState));
+    }
+
+    const actions = [
+        { icon: <InfoOutlined />, name: 'About', action: () => {
+            closeChat();
+            navigate('/about')
+        } },
+        { icon: <span role="img" aria-label="banana">🍌</span>, name: 'Bytes', action: () => {
+            closeChat();
+            navigate('/bytesMobile')
+        } },
+        { icon: <HomeOutlined />, name: 'Home', action: () => {
+            closeChat();
+            window.location.assign('/home')
+        } },
+        { icon: <FolderOutlined />, name: 'Active', action: () => {
+            closeChat();
+            navigate('/active')
+        } },
+        { icon: <ChatBubbleOutline />, name: 'Chat', action: () => {
+                let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
+                appWrapperState.chatOpen = !rightOpen
+                dispatch(updateAppWrapper(appWrapperState));
+            }},
+        { icon: <AutoStoriesIcon />, name: 'Articles', action: () => {
+            closeChat();
+            navigate('/articles')
+        } },
+    ];
+
+    const handleAction = (actionFunction: () => void) => {
+        setSpeedDialOpen(false);
+        actionFunction();
+    };
+
     const mobileAppBar = () => {
         // Do not render AppBar if it's the byteMobile page
         if (isByteMobilePage) return null;
@@ -1515,94 +1554,23 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                 ) : null}
                 {/*Bottom Navigation Bar*/}
                 {loggedIn ? (
-                    <AppBar
-                        position="fixed"
-                        // open={open && !homePageLockedDrawer}
-                        leftopen={false}
-                        elevation={5}
-                        sx={{
-                            height: "50px",
-                            zIndex: 1000,
-                            border: "none",
-                            boxShadow: (mode === 'dark') ? "0px 3px 5px -1px #ffffff20, 0px 5px 8px 0px #ffffff14, 0px 1px 14px 0px #ffffff12" :
-                                "0px 3px 5px -1px #00000020, 0px 5px 8px 0px #00000014, 0px 1px 14px 0px #00000012",
-                            top: 'auto',
-                            bottom: 0,
-                            backgroundImage: `conic-gradient(from 0deg at 50% 50%, #FEDC5A20 0deg, #FFFCAB20 73.13deg, #29C18C20 155.62deg, #3D8EF720 249.37deg, #84E8A220 339.37deg, #FEDC5A20 360deg)`,
-                        }}
+                    <SpeedDial
+                        ariaLabel="SpeedDial"
+                        sx={{ position: 'fixed', bottom: 16, right: 16 }}
+                        icon={<MenuIcon />}
+                        open={speedDialOpen}
+                        onOpen={() => setSpeedDialOpen(true)}
+                        onClose={() => setSpeedDialOpen(false)}
                     >
-                        <Container>
-                            <Toolbar
-                                sx={{
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    paddingX: '0px',
-                                }}
-                            >
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', height: '60px', overflow: 'hidden' }}>
-                                    <IconButton color="inherit" href={"/about"} onClick={() => {
-                                        let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
-                                        appWrapperState.chatOpen = false
-                                        dispatch(updateAppWrapper(appWrapperState));
-                                    }}>
-                                        <InfoOutlined style={{ color: theme.palette.text.primary, fontSize: 25 }} />
-                                    </IconButton>
-                                    <Typography variant="caption" noWrap sx={{ marginTop: '-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px' }}>
-                                        About
-                                    </Typography>
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', height: '60px', overflow: 'hidden' }}>
-                                    <IconButton color="inherit" href={"/bytesMobile"} onClick={() => {
-                                        let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
-                                        appWrapperState.chatOpen = false
-                                        dispatch(updateAppWrapper(appWrapperState));
-                                    }}>
-                                        {/*<BookmarkBorderOutlined style={{ color: theme.palette.text.primary, fontSize: 25 }} />*/}
-                                        🍌
-                                    </IconButton>
-                                    <Typography variant="caption" noWrap sx={{ marginTop: '-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px' }}>
-                                        Bytes
-                                    </Typography>
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', height: '60px', overflow: 'hidden' }}>
-                                    <IconButton color="inherit" href={"/home"} onClick={() => {
-                                        let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
-                                        appWrapperState.chatOpen = false
-                                        dispatch(updateAppWrapper(appWrapperState));
-                                    }}>
-                                        <HomeOutlined style={{ color: theme.palette.text.primary, fontSize: 25 }} />
-                                    </IconButton>
-                                    <Typography variant="caption" noWrap sx={{ marginTop: '-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px' }}>
-                                        Home
-                                    </Typography>
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', height: '60px', overflow: 'hidden' }}>
-                                    <IconButton color="inherit" href={"/active"} onClick={() => {
-                                        let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
-                                        appWrapperState.chatOpen = false
-                                        dispatch(updateAppWrapper(appWrapperState));
-                                    }}>
-                                        <FolderOutlined style={{ color: theme.palette.text.primary, fontSize: 25 }} />
-                                    </IconButton>
-                                    <Typography variant="caption" noWrap sx={{ marginTop: '-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px' }}>
-                                        Active
-                                    </Typography>
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', height: '60px', overflow: 'hidden' }}>
-                                    <IconButton color="inherit" onClick={() => {
-                                        let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
-                                        appWrapperState.chatOpen = !rightOpen
-                                        dispatch(updateAppWrapper(appWrapperState));
-                                    }}>
-                                        <ChatBubbleOutline style={{ color: theme.palette.text.primary, fontSize: 25 }} />
-                                    </IconButton>
-                                    <Typography variant="caption" noWrap sx={{ marginTop: '-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px' }}>
-                                        Chat
-                                    </Typography>
-                                </div>
-                            </Toolbar>
-                        </Container>
-                    </AppBar>
+                        {actions.map((action) => (
+                            <SpeedDialAction
+                                key={action.name}
+                                icon={action.icon}
+                                tooltipTitle={action.name}
+                                onClick={() => handleAction(action.action)}
+                            />
+                        ))}
+                    </SpeedDial>
                 ) : (
                     <AppBar
                         position="fixed"
