@@ -202,7 +202,7 @@ const XpPopup = (props: IProps) => {
                     <div style={{
                         borderRadius: "10px",
                         padding: "20px",
-                        textAlign: "center"
+                        textAlign: "center",
                     }}>
                         <IconButton
                             edge="end"
@@ -215,12 +215,12 @@ const XpPopup = (props: IProps) => {
                                     setShowLoot(true);
                                     setShowPro(false);
                                 } else {
-                                setOpen(false);
-                                if (props.popupClose !== null) {
-                                    props.popupClose();
-                                }
-                                window.sessionStorage.setItem("loginXP", "undefined");
-                                window.sessionStorage.setItem("attemptXP", "undefined");
+                                    setOpen(false);
+                                    if (props.popupClose !== null) {
+                                        props.popupClose();
+                                    }
+                                    window.sessionStorage.setItem("loginXP", "undefined");
+                                    window.sessionStorage.setItem("attemptXP", "undefined");
                                 }
                             }}
 
@@ -234,20 +234,37 @@ const XpPopup = (props: IProps) => {
                                 top: '20vh',
                                 right: '38vw', color: "white"
                             }}
-                            >
-                            <Close />
+                        >
+                            <Close/>
                         </IconButton>
-                        <img src={premiumGorilla} style={window.innerHeight < 900 ? {width: "20%", marginBottom: "5px"} : {width: "30%", marginBottom: "20px"}}/>
-                        <Typography variant={window.innerHeight < 1000 ? "h5" : "h4"} style={{marginBottom: "10px", color: "white"}} align={"center"}>GIGO Pro</Typography>
-                        <Typography variant={window.innerHeight < 900 ? "body2" : "body1"} style={{marginLeft: "20px", marginRight: "20px", color: "white"}} align={"center"}>
+                        <img src={premiumGorilla}
+                             style={window.innerHeight < 900 ? {width: "20%", marginBottom: "5px"} : {
+                                 width: "30%",
+                                 marginBottom: "20px"
+                             }}/>
+                        <Typography variant={window.innerHeight < 1000 ? "h5" : "h4"}
+                                    style={{marginBottom: "10px", color: "white"}} align={"center"}>GIGO
+                            Pro</Typography>
+                        <Typography variant={window.innerHeight < 900 ? "body2" : "body1"}
+                                    style={{marginLeft: "20px", marginRight: "20px", color: "white"}} align={"center"}>
                             Learn faster with a smarter Code Teacher!
                         </Typography>
-                        <Typography variant={window.innerHeight < 900 ? "body2" : "body1"} style={{marginBottom: "20px", marginLeft: "20px", marginRight: "20px", color: "white"}} align={"center"}>
+                        <Typography variant={window.innerHeight < 900 ? "body2" : "body1"}
+                                    style={{
+                                        marginBottom: "20px",
+                                        marginLeft: "20px",
+                                        marginRight: "20px",
+                                        color: "white"
+                                    }}
+                                    align={"center"}>
                             Do more with larger DevSpaces!
                         </Typography>
                         <div style={{
                             display: "flex",
-                            justifyContent: "center"
+                            justifyContent: "center",
+                            alignItems: "center",
+                            flexDirection: "row",
+                            width: "100%"
                         }}>
                             <div style={window.innerHeight < 900 ? {
                                 backgroundColor: "#070D0D",
@@ -266,8 +283,12 @@ const XpPopup = (props: IProps) => {
                                 textAlign: "center",
                                 width: "200px"
                             }}>
-                                <Typography variant={window.innerHeight < 900 ? "subtitle2" : "subtitle1"} style={{marginBottom: "10px", color: "white"}} align={"center"}>1 Month</Typography>
-                                <Typography variant={window.innerHeight < 900 ? "h6" : "h5"} style={{marginBottom: "10px", color: "white"}} align={"center"}>$15 / MO</Typography>
+                                <Typography variant={window.innerHeight < 900 ? "subtitle2" : "subtitle1"}
+                                            style={{marginBottom: "10px", color: "white"}} align={"center"}>1
+                                    Month</Typography>
+                                <Typography variant={window.innerHeight < 900 ? "h6" : "h5"}
+                                            style={{marginBottom: "10px", color: "white"}} align={"center"}>$15 /
+                                    MO</Typography>
                                 <LoadingButton
                                     loading={proUrlsLoading}
                                     variant="contained"
@@ -277,7 +298,7 @@ const XpPopup = (props: IProps) => {
                                     Select
                                 </LoadingButton>
                             </div>
-                            <div style={ window.innerHeight < 900 ? {
+                            <div style={window.innerHeight < 900 ? {
                                 backgroundColor: "#070D0D",
                                 borderRadius: "10px",
                                 padding: "20px",
@@ -292,9 +313,14 @@ const XpPopup = (props: IProps) => {
                                 margin: "10px",
                                 boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
                                 textAlign: "center",
-                                width: "200px"}}>
-                                <Typography variant={window.innerHeight < 900 ? "subtitle2" : "subtitle1"} style={{marginBottom: "10px", color: "white"}} align={"center"}>12 Months</Typography>
-                                <Typography variant={window.innerHeight < 900 ? "h6" : "h5"} style={{marginBottom: "10px", color: "white"}} align={"center"}>$11.25 / MO</Typography>
+                                width: "200px"
+                            }}>
+                                <Typography variant={window.innerHeight < 900 ? "subtitle2" : "subtitle1"}
+                                            style={{marginBottom: "10px", color: "white"}} align={"center"}>12
+                                    Months</Typography>
+                                <Typography variant={window.innerHeight < 900 ? "h6" : "h5"}
+                                            style={{marginBottom: "10px", color: "white"}} align={"center"}>$11.25 /
+                                    MO</Typography>
                                 <LoadingButton
                                     loading={proUrlsLoading}
                                     variant="contained"
@@ -305,6 +331,19 @@ const XpPopup = (props: IProps) => {
                                 </LoadingButton>
                             </div>
                         </div>
+                        <Typography
+                            variant="body1"
+                            style={{marginTop: "20px", color: "white", cursor: "pointer"}}
+                            align="center"
+                            component="a" // Render the Typography as an <a> tag
+                            href="/premium" // Specify the target URL
+                            onClick={(e) => {
+                                e.preventDefault(); // Prevent default to stop navigation (optional)
+                                window.open("/premium", "_blank"); // Open in new tab
+                            }}
+                        >
+                            Learn More About Pro
+                        </Typography>
                     </div>
                 </>
             )
@@ -322,7 +361,7 @@ const XpPopup = (props: IProps) => {
                             <h1>{"You Earned " + xpTitle + " XP"}</h1>
                         </Fade>
                     </div>
-                    <div style={{ height: "5vh" }} />
+                    <div style={{height: "5vh"}}/>
                     <div
                         style={{
                             display: "flex",
@@ -342,11 +381,11 @@ const XpPopup = (props: IProps) => {
                         }}
                     >
                         <h4>{"Lvl " + currentLevel}</h4>
-                        <div style={{ width: "20px" }} />
-                        <Box sx={{ width: "75%"}}>
+                        <div style={{width: "20px"}}/>
+                        <Box sx={{width: "75%"}}>
                             <StyledLinearProgress variant="determinate"/>
                         </Box>
-                        <div style={{ width: "20px" }} />
+                        <div style={{width: "20px"}}/>
                         <h4>{"Lvl " + nextLevel}</h4>
                     </div>
                     {/* {showConfetti && (
@@ -359,8 +398,24 @@ const XpPopup = (props: IProps) => {
                     <div style={{height: "5vh"}}/>
                     <div style={{display: "flex", alignItems: "end", justifyContent: "center"}}>
                         <Button variant={"contained"}
-                                sx={{ width: "25%", height: "60px", backgroundColor: "#29C18C", color: "white", borderRadius: "25px", boxShadow: '0 5px 0 #235d30',
-                                    '&:active':{transform: 'translateY(5px)', boxShadow: 'none'}, '&:hover':{backgroundColor: "#29C18C", cursor: 'pointer', '&:before': {transform: 'translateX(300px) skewX(-15deg)', opacity: 0.6, transition: '.7s'}}}} disableRipple={true} onClick={() => confirmButton()}
+                                sx={{
+                                    width: "25%",
+                                    height: "60px",
+                                    backgroundColor: "#29C18C",
+                                    color: "white",
+                                    borderRadius: "25px",
+                                    boxShadow: '0 5px 0 #235d30',
+                                    '&:active': {transform: 'translateY(5px)', boxShadow: 'none'},
+                                    '&:hover': {
+                                        backgroundColor: "#29C18C",
+                                        cursor: 'pointer',
+                                        '&:before': {
+                                            transform: 'translateX(300px) skewX(-15deg)',
+                                            opacity: 0.6,
+                                            transition: '.7s'
+                                        }
+                                    }
+                                }} disableRipple={true} onClick={() => confirmButton()}
                                 id={"button"} className={'button'} style={{zIndex: "600000"}}
                         >
                             Confirm
@@ -372,16 +427,14 @@ const XpPopup = (props: IProps) => {
     }
 
 
-
-
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
                 <Modal open={open} style={{display: 'flex', justifyContent: "center", alignItems: "center"}}>
                     <Box
                         sx={showPro ? {
-                            width: window.innerWidth < 1000 ? "90vw" : "35vw",
-                            height: window.innerWidth < 1000 ? "65vh": "65vh",
+                            width: window.innerWidth < 1000 ? "90vw" : "28vw",
+                            height: window.innerWidth < 1000 || window.innerHeight < 900 ? "78vh" : "70vh",
                             minHeight: "420px",
                             // justifyContent: "center",
                             // marginLeft: "25vw",
