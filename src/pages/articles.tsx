@@ -105,8 +105,8 @@ const ArticlesPage: React.FC = () => {
                                         alt="Article Image"
                                     />
                                 )}
-                                <CardContent>
-                                    <Typography gutterBottom variant="h5" component="div">
+                                <CardContent style={{height: "17vh"}}>
+                                    <Typography gutterBottom variant="h5" component="div" sx={{fontSize: "100%"}}>
                                         {article.name.replace('.md', '')} {/* Optionally remove file extension */}
 
                                     </Typography>
