@@ -205,6 +205,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     const [isOpen, setIsOpen] = React.useState(false);
     const [openSetup, setOpenSetup] = React.useState(false)
     const toggleButtonRef = React.useRef(null);
+    const isMobile = window.innerWidth < 1000;
 
     const styles = {
         regular: {
@@ -1421,25 +1422,38 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     <Box
                                         sx={{
                                             width: "90vw",
-                                            height: "40vh",
-                                            justifyContent: "center",
-                                            marginLeft: "5vw",
-                                            marginTop: "30vh",
-                                            outlineColor: "black",
-                                            borderRadius: 1,
-                                            boxShadow: "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px 6px 0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
+                                            minHeight: "30vh",
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            alignItems: "center",
+                                            justifyContent: "flex-start", // Align items to start
+                                            position: "absolute",
+                                            top: "30vh",
+                                            left: "5vw",
+                                            outline: "none",
+                                            borderRadius: "8px",
+                                            boxShadow: "0px 12px 6px -6px rgba(0,0,0,0.6), 0px 6px 6px 0px rgba(0,0,0,0.6), 0px 6px 18px 0px rgba(0,0,0,0.6)",
                                             backgroundColor: theme.palette.background.default,
+                                            padding: "20px",
+                                            paddingTop: "10px", // Reduce padding top to bring content higher
                                         }}
                                     >
-                                        <Button onClick={() => setShowReferPopup(false)}>
+                                        <Button onClick={() => setShowReferPopup(false)} sx={{
+                                            position: "absolute",
+                                            top: 8, // Adjust as needed
+                                            right: 8, // Adjust as needed
+                                            minWidth: "auto",
+                                        }}>
                                             <CloseIcon />
                                         </Button>
-                                        <div style={{ width: "100%", display: "flex", alignItems: "center", flexDirection: "column" }}>
-                                            <h3>Refer a Friend.</h3>
-                                            <h4>Give a Month, Get a Month.</h4>
-                                            <div style={{ display: "flex", width: "100%", flexDirection: "row", justifyContent: "center" }}>
-                                                <h5 style={{ outline: "solid gray", borderRadius: "5px", padding: "8px" }} id={"url-mobile"}>{referralLink.length > 50 ? referralLink.slice(0, 50) + "..." : referralLink}</h5>
-                                                <Button onClick={() => copyToClipboard()}>
+                                        <div style={{ width: "100%", paddingTop: "30px" }}> {/* Add padding top to create space for the close button */}
+                                            <h3 style={{ margin: "0 0 10px" }}>Refer a Friend.</h3> {/* Adjust margins as needed */}
+                                            <h4 style={{ margin: "0 0 20px" }}>Give a Month, Get a Month.</h4>
+                                            <div style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", gap: "10px" }}>
+                                                <h5 style={{ outline: "solid gray", borderRadius: "5px", padding: "8px", maxWidth: "75%", textAlign: "center" }}>
+                                                    {referralLink.length > 50 ? referralLink.slice(0, 50) + "..." : referralLink}
+                                                </h5>
+                                                <Button onClick={copyToClipboard} sx={{ minWidth: "auto" }}>
                                                     <ContentCopyIcon />
                                                 </Button>
                                             </div>
