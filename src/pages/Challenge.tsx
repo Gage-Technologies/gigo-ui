@@ -4000,15 +4000,17 @@ function Challenge() {
         }
 
         return (
-            <Fab
-                disabled={launchingWorkspace}
-                color="secondary"
-                aria-label="launch-mobile"
-                sx={{ position: "fixed", bottom: "80px", right: "20px", zIndex: 6000 }}
-                onClick={clickCallback}
-            >
-                {launchingWorkspace ? (<CircularProgress color="inherit" size={24} />) : (<RocketLaunchIcon />)}
-            </Fab>
+            <Tooltip title={"Launch"}>
+                <Fab
+                    disabled={launchingWorkspace}
+                    color="secondary"
+                    aria-label="launch-mobile"
+                    sx={{ position: "fixed", bottom: 16, left: 16, zIndex: 6000 }}
+                    onClick={clickCallback}
+                >
+                    {launchingWorkspace ? (<CircularProgress color="inherit" size={24} />) : (<RocketLaunchIcon />)}
+                </Fab>
+            </Tooltip>
         )
     }
 
