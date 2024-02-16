@@ -110,7 +110,7 @@ function AboutBytes() {
                             </div>
                         </Grid>
                         <Grid item xs={1} />
-                        <Grid item xs={4} style={{ paddingTop: "5vh" }}>
+                        <Grid item xs={"auto"} style={{ paddingTop: "5vh" }}>
                             <DesktopVideo videoSrc={config.rootPath + "/static/ui/videos/demo-chat.mp4"} />
                         </Grid>
                         <Grid item xs={1} />
@@ -120,7 +120,7 @@ function AboutBytes() {
 
                     <Grid container spacing={0}>
                         <Grid item xs={1}/>
-                        <Grid item xs={4}>
+                        <Grid item xs={"auto"}>
                             <DesktopVideo videoSrc={config.rootPath + "/static/ui/videos/demo-debug.mp4"}/>
                         </Grid>
                         <Grid item xs={1}/>
@@ -161,7 +161,7 @@ function AboutBytes() {
                             </div>
                         </Grid>
                         <Grid item xs={1}/>
-                        <Grid item xs={4}>
+                        <Grid item xs={"auto"}>
                             <DesktopVideo videoSrc={config.rootPath + "/static/ui/videos/demo-nextsteps.mp4"}/>
                         </Grid>
                         <Grid item xs={1}/>
@@ -171,7 +171,7 @@ function AboutBytes() {
 
                     <Grid container spacing={0}>
                         <Grid item xs={1}/>
-                        <Grid item xs={4}>
+                        <Grid item xs={"auto"}>
                             <DesktopVideo videoSrc={config.rootPath + "/static/ui/videos/demo-difficulty.mp4"}/>
                         </Grid>
                         <Grid item xs={1}/>

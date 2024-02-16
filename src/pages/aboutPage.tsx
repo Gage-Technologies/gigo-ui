@@ -19,6 +19,7 @@ import AboutPageEasyIcon from "../components/Icons/aboutPage/AboutPageEasy";
 import AboutPageConnectionIcon from "../components/Icons/aboutPage/AboutPageConnection";
 import AboutPageWorldIcon from "../components/Icons/aboutPage/AboutPageWorld";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import config from "../config";
 
 function About() {
     let userPref = localStorage.getItem('theme')
@@ -137,7 +138,7 @@ function About() {
                             zIndex: 1, // Ensure it's behind other content
                         }}
                     >
-                        <source src="https://api.gigo.dev/static/ui/videos/GIGO.mp4" type="video/mp4"/>
+                        <source src={config.rootPath + "/static/ui/videos/GIGO.webm"} type="video/webm"/>
                         Your browser does not support the video tag.
                     </video>
                 </Box>
