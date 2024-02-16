@@ -35,6 +35,8 @@ function About() {
 
     const [isHidden, setIsHidden] = React.useState(false);
 
+    const topIconRef = React.useRef<HTMLDivElement | null>(null)
+
     const handleScroll = () => {
         setIsHidden(window.pageYOffset > 0);
     };
@@ -49,17 +51,6 @@ function About() {
     }, []); // Empty dependency array means this effect runs once on mount and cleanup on unmount
 
     const aspectRatio = useAspectRatio();
-
-    const styles = {
-        scrollDowns: {
-            position: 'fixed',
-            bottom: '2vh',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            fontSize: '3em',
-            zIndex: 1000,
-        }
-    };
 
 
     const iconContainerStyles: React.CSSProperties = {
@@ -80,23 +71,23 @@ function About() {
                     ? 'calc(95vw - 15vw)'
                     : chatOpen ? 'calc(95vw - 15vw)'
                         : '95vw'
-            :
+                :
                 sidebarOpen
                     ? 'calc(75vw - 15vw)'
                     : chatOpen ? 'calc(75vw - 15vw)'
                         : '70vw',
         height: '90vh',
-        background: `radial-gradient(circle, rgba(0,0,0,0) 50%, ${hexToRGBA(theme.palette.background.default)} 70%, ${hexToRGBA(theme.palette.background.default)} 83%), linear-gradient(180deg, rgba(0,0,0,0) 51%, rgba(0,0,0,0) 52%, ${hexToRGBA(theme.palette.background.default)} 92%, ${hexToRGBA(theme.palette.background.default)}` , // Vignette gradient
+        background: `radial-gradient(circle, rgba(0,0,0,0) 50%, ${hexToRGBA(theme.palette.background.default)} 70%, ${hexToRGBA(theme.palette.background.default)} 83%), linear-gradient(180deg, rgba(0,0,0,0) 51%, rgba(0,0,0,0) 52%, ${hexToRGBA(theme.palette.background.default)} 92%, ${hexToRGBA(theme.palette.background.default)}`, // Vignette gradient
         position: 'absolute',
         left:
             aspectRatio !== '21:9' ?
                 '2%'
-            :
+                :
                 sidebarOpen ?
                     '12%'
-                : chatOpen ?
-                    '12%'
-                : '15%',
+                    : chatOpen ?
+                        '12%'
+                        : '15%',
         bottom: (aspectRatio !== '21:9') && (sidebarOpen || chatOpen) ? '-1%' : '0%',
         zIndex: 2, // Set a higher zIndex to appear above the SVG
     };
@@ -120,65 +111,73 @@ function About() {
     };
 
     const renderFullPage = () => {
-        return(
+        return (
             <>
-                <div style={iconContainerStyles}>
-                    <div style={vignetteStyles}/> {/* Vignette overlay */}
-                    <AboutPageIcon style={backgroundStyles} aspectRatio={aspectRatio.toString()} />
-                    <Typography
-                        component={"div"}
-                        variant={"h2"}
-                        color={theme.palette.text.primary}
-                        sx={{
-                            position: "absolute",
-                            top: '5vh',
-                            left: "50%",
-                            transform: "translate(-50%, -50%)",
-                            zIndex: 99,
-
+                <Box
+                    display={"flex"}
+                    justifyContent={"center"}
+                    sx={{
+                        m: 2,
+                        overflow: "hidden", // Ensure the video does not overflow the Box boundaries
+                        position: "relative"
+                    }}
+                >
+                    {/* Video element as background */}
+                    <video
+                        autoPlay
+                        loop
+                        muted
+                        style={{
+                            margin: "10px",
+                            width: "calc(100% - 40px)",
+                            maxWidth: "1800px",
+                            height: "600px",
+                            borderRadius: "12px",
+                            objectFit: "cover", // Cover the entire area without losing aspect ratio
+                            zIndex: 1, // Ensure it's behind other content
                         }}
                     >
-                        {"Welcome To GIGO"}
-                    </Typography>
-                    <Typography
-                        component={"div"}
-                        variant={"body1"}
-                        color={theme.palette.text.primary}
+                        <source src="https://api.gigo.dev/static/ui/videos/GIGO.mp4" type="video/mp4"/>
+                        Your browser does not support the video tag.
+                    </video>
+                </Box>
+                {/* Add a floating arrow down to indicate that user should scroll */}
+                {!isHidden && (
+                    <Box
+                        display={"flex"}
+                        flexDirection={"column"}
+                        justifyContent={"center"}
+                        alignItems={"center"}
                         sx={{
+                            width: "100%",
+                            zIndex: 10,
                             position: "absolute",
-                            top: '80vh',
-                            left: "50%",
-                            transform: "translate(-50%, -50%)",
-                            zIndex: 99,
-                            borderRadius: "10px",
-                            padding: 2,
-                            textAlign: "center",
+                            top: 720
                         }}
                     >
-                        <h2 style={{fontWeight: "bold", marginBottom: "7px"}}>
+                        <Typography variant={"h5"} style={{fontWeight: "bold", textAlign: "center"}}>
                             GIGO is where you learn to code.
-                        </h2>
-                        Built by self-taught developers, to streamline the learning process.
-                    </Typography>
-                    {/* Add a floating arrow down to indicate that user should scroll */}
-                    {!isHidden && (
+                        </Typography>
                         <Tooltip title={"Scroll To About"} placement={"top"}>
                             <IconButton
-                                // @ts-ignore
-                                sx={styles.scrollDowns}
+                                sx={{
+                                    fontSize: '3em',
+                                    zIndex: 1000,
+                                    width: "fit-content"
+                                }}
                                 onClick={() => {
-                                    window.scrollTo({top: window.innerHeight - 40, behavior: 'smooth'});
+                                    topIconRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
                                 }}
                             >
                                 <KeyboardArrowDownIcon fontSize={"large"}/>
                             </IconButton>
                         </Tooltip>
-                    )}
-                </div>
+                    </Box>
+                )}
                 <div>
                     <br/><br/><br/><br/><br/><br/>
 
-                    <Grid container spacing={0}>
+                    <Grid container spacing={0} ref={topIconRef}>
                         <Grid item xs={2}/>
                         <Grid item xs={3}>
                             <h2 style={{textAlign: 'left'}}>Learn by Doing</h2>
@@ -293,38 +292,44 @@ function About() {
             margin: '10px 20px'
         };
 
-        return(
+        return (
             <>
                 <br/><br/>
-                <AboutPageLearnIcon aspectRatio={'mobile'} />
+                <AboutPageLearnIcon aspectRatio={'mobile'}/>
                 <Grid container spacing={0}>
                     <Grid item xs={12}>
                         <h2 style={textStyle as React.CSSProperties}>Learn by Doing</h2>
-                        <p style={textStyle as React.CSSProperties}>GIGO offers users the opportunity to tackle and craft genuine coding challenges. Through problem-solving and project development, users gain a deeper understanding of programming</p>
+                        <p style={textStyle as React.CSSProperties}>GIGO offers users the opportunity to tackle and
+                            craft genuine coding challenges. Through problem-solving and project development, users gain
+                            a deeper understanding of programming</p>
                     </Grid>
                 </Grid>
                 <br/><br/><br/><br/>
-                <AboutPageEasyIcon aspectRatio={'mobile'} />
+                <AboutPageEasyIcon aspectRatio={'mobile'}/>
                 <Grid container spacing={0}>
                     <Grid item xs={12}>
                         <h2 style={textStyle as React.CSSProperties}>Take it Easy</h2>
-                        <p style={textStyle as React.CSSProperties}>Our preconfigured development environments, running on our robust in-house infrastructure, allow you to jump straight into writing and running code.</p>
+                        <p style={textStyle as React.CSSProperties}>Our preconfigured development environments, running
+                            on our robust in-house infrastructure, allow you to jump straight into writing and running
+                            code.</p>
                     </Grid>
                 </Grid>
                 <br/><br/><br/><br/>
-                <AboutPageConnectionIcon aspectRatio={'mobile'} />
+                <AboutPageConnectionIcon aspectRatio={'mobile'}/>
                 <Grid container spacing={0}>
                     <Grid item xs={12}>
                         <h2 style={textStyle as React.CSSProperties}>Connect</h2>
-                        <p style={textStyle as React.CSSProperties}>Engage, collaborate, and socialize with a network of programmers who share your passion for technology.</p>
+                        <p style={textStyle as React.CSSProperties}>Engage, collaborate, and socialize with a network of
+                            programmers who share your passion for technology.</p>
                     </Grid>
                 </Grid>
                 <br/><br/><br/><br/>
-                <AboutPageWorldIcon aspectRatio={'mobile'} />
+                <AboutPageWorldIcon aspectRatio={'mobile'}/>
                 <Grid container spacing={0}>
                     <Grid item xs={12}>
                         <h2 style={textStyle as React.CSSProperties}>Real World Experience</h2>
-                        <p style={textStyle as React.CSSProperties}>Our extensive library of tutorials, interactive projects, and challenges are designed to level up your skills for today's tech industry.</p>
+                        <p style={textStyle as React.CSSProperties}>Our extensive library of tutorials, interactive
+                            projects, and challenges are designed to level up your skills for today's tech industry.</p>
                     </Grid>
                 </Grid>
                 <br/><br/>
@@ -384,7 +389,6 @@ function useAspectRatio() {
 
     return aspectRatio;
 }
-
 
 
 export default About;
