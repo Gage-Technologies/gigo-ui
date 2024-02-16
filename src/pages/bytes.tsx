@@ -1449,7 +1449,6 @@ function Byte() {
                                     readonly={!authState.authenticated}
                                     onChange={(val, view) => handleEditorChange(val)}
                                     onCursorChange={(bytePosition, line, column) => setCursorPosition({ row: line, column: column })}
-                                    // lspUrl={byteData ? (byteData.lang === 5 ? "ws://localhost:42081" : "ws://localhost:42083") : undefined}
                                     lspUrl={byteData && lspActive ? `wss://${byteData._id}-lsp.${config.coderPath.replace("https://", "")}` : undefined}
                                     diagnosticLevel={selectDiagnosticLevel()}
                                     extensions={popupExtRef.current ? editorExtensions.concat(popupExtRef.current) : editorExtensions}
