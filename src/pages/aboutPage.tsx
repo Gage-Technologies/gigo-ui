@@ -75,14 +75,28 @@ function About() {
 
     const vignetteStyles: React.CSSProperties = {
         width:
-            sidebarOpen
-                ? 'calc(95vw - 15vw)'
-                : chatOpen ? 'calc(95vw - 15vw)'
-                    : '95vw',
+            aspectRatio !== '21:9' ?
+                sidebarOpen
+                    ? 'calc(95vw - 15vw)'
+                    : chatOpen ? 'calc(95vw - 15vw)'
+                        : '95vw'
+            :
+                sidebarOpen
+                    ? 'calc(75vw - 15vw)'
+                    : chatOpen ? 'calc(75vw - 15vw)'
+                        : '70vw',
         height: '90vh',
         background: `radial-gradient(circle, rgba(0,0,0,0) 50%, ${hexToRGBA(theme.palette.background.default)} 70%, ${hexToRGBA(theme.palette.background.default)} 83%), linear-gradient(180deg, rgba(0,0,0,0) 51%, rgba(0,0,0,0) 52%, ${hexToRGBA(theme.palette.background.default)} 92%, ${hexToRGBA(theme.palette.background.default)}` , // Vignette gradient
         position: 'absolute',
-        left: '3%',
+        left:
+            aspectRatio !== '21:9' ?
+                '2%'
+            :
+                sidebarOpen ?
+                    '12%'
+                : chatOpen ?
+                    '12%'
+                : '15%',
         bottom: (aspectRatio !== '21:9') && (sidebarOpen || chatOpen) ? '-1%' : '0%',
         zIndex: 2, // Set a higher zIndex to appear above the SVG
     };
