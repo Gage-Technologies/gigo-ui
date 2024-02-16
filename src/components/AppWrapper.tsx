@@ -1,5 +1,3 @@
-
-
 import * as React from 'react';
 import LoginIcon from '@mui/icons-material/Login';
 import MuiAppBar from '@mui/material/AppBar';
@@ -138,6 +136,9 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         }
     });
     const location = useLocation();
+
+    // Check if the current page is ByteMobile
+    const isByteMobilePage = location.pathname.startsWith('/byte/') && window.innerWidth < 1000;
 
     const [mode, setMode] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const colorMode = React.useMemo(
@@ -383,7 +384,15 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
         <ContentContainer
             leftOpen={leftOpen || homePageLockedDrawer}
             rightOpen={rightOpen}
-            style={{ marginTop: window.location.pathname.startsWith("/launchpad/") && query.get("editor") === "true" ? "28px" : window.innerWidth > 1000 ? "65px" : "56px" }}
+            style={{
+                marginTop: isByteMobilePage
+                    ? "0px"
+                    : window.location.pathname.startsWith("/launchpad/") && query.get("editor") === "true"
+                        ? "28px"
+                        : window.innerWidth > 1000
+                            ? "65px"
+                            : "56px"
+            }}
             id={"contentContainer"}
         >
             {props.children}
@@ -789,6 +798,8 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
 
 
     const renderAppBar = () => {
+        console.log('Is ByteMobile Page:', isByteMobilePage);
+        if (isByteMobilePage) return null;
         return (
             <AppBar
                 position="fixed"
@@ -1282,6 +1293,9 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     }
 
     const mobileAppBar = () => {
+        // Do not render AppBar if it's the byteMobile page
+        if (isByteMobilePage) return null;
+
         return (
             <>
                 <AppBar
@@ -1400,7 +1414,6 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                         )}
                     </Toolbar>
                 </AppBar>
-                {/* Welcome box */}
                 {!loggedIn ? (
                     <Snackbar
                         open={!mobileWelcomeBannerClosed && window.location.pathname !== "" && window.location.pathname !== "/" && window.location.pathname !== "/home"}
@@ -1539,15 +1552,16 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     </Typography>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', height: '60px', overflow: 'hidden' }}>
-                                    <IconButton color="inherit" href={"/following"} onClick={() => {
+                                    <IconButton color="inherit" href={"/bytesMobile"} onClick={() => {
                                         let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
                                         appWrapperState.chatOpen = false
                                         dispatch(updateAppWrapper(appWrapperState));
                                     }}>
-                                        <BookmarkBorderOutlined style={{ color: theme.palette.text.primary, fontSize: 25 }} />
+                                        {/*<BookmarkBorderOutlined style={{ color: theme.palette.text.primary, fontSize: 25 }} />*/}
+                                        🍌
                                     </IconButton>
                                     <Typography variant="caption" noWrap sx={{ marginTop: '-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px' }}>
-                                        Following
+                                        Bytes
                                     </Typography>
                                 </div>
                                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', height: '60px', overflow: 'hidden' }}>
@@ -1614,28 +1628,80 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     paddingX: '0px',
                                 }}
                             >
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', height: '60px', overflow: 'hidden' }}>
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    width: '100px',
+                                    height: '60px',
+                                    overflow: 'hidden'
+                                }}>
                                     <IconButton color="inherit" href={"/about"} onClick={() => {
                                         let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
                                         appWrapperState.chatOpen = false
                                         dispatch(updateAppWrapper(appWrapperState));
                                     }}>
-                                        <InfoOutlined style={{ color: theme.palette.text.primary, fontSize: 25 }} />
+                                        <InfoOutlined style={{color: theme.palette.text.primary, fontSize: 25}}/>
                                     </IconButton>
-                                    <Typography variant="caption" noWrap sx={{ marginTop: '-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px' }}>
+                                    <Typography variant="caption" noWrap sx={{
+                                        marginTop: '-10px',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        fontSize: '10px'
+                                    }}>
                                         About
                                     </Typography>
                                 </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100px', height: '60px', overflow: 'hidden' }}>
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    width: '100px',
+                                    height: '60px',
+                                    overflow: 'hidden'
+                                }}>
                                     <IconButton color="inherit" href={"/home"} onClick={() => {
                                         let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
                                         appWrapperState.chatOpen = false
                                         dispatch(updateAppWrapper(appWrapperState));
                                     }}>
-                                        <HomeOutlined style={{ color: theme.palette.text.primary, fontSize: 25 }} />
+                                        <HomeOutlined style={{color: theme.palette.text.primary, fontSize: 25}}/>
                                     </IconButton>
-                                    <Typography variant="caption" noWrap sx={{ marginTop: '-10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontSize: '10px' }}>
+                                    <Typography variant="caption" noWrap sx={{
+                                        marginTop: '-10px',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        fontSize: '10px'
+                                    }}>
                                         Home
+                                    </Typography>
+                                </div>
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    width: '100px',
+                                    height: '60px',
+                                    overflow: 'hidden'
+                                }}>
+                                    <IconButton color="inherit" href={"/bytesMobile"} onClick={() => {
+                                        let appWrapperState = Object.assign({}, initialAppWrapperStateUpdate);
+                                        appWrapperState.chatOpen = false
+                                        dispatch(updateAppWrapper(appWrapperState));
+                                    }}>
+                                        {/*<BookmarkBorderOutlined style={{ color: theme.palette.text.primary, fontSize: 25 }} />*/}
+                                        🍌
+                                    </IconButton>
+                                    <Typography variant="caption" noWrap sx={{
+                                        marginTop: '-10px',
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        fontSize: '10px'
+                                    }}>
+                                        Bytes
                                     </Typography>
                                 </div>
                             </Toolbar>
@@ -1648,28 +1714,28 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
 
     const renderSocials = () => {
         return (
-            <div style={{display: "flex", flexDirection:"column", alignItems: "center"}}>
-                <div style={{ display: "flex", flexDirection: "row" }}>
-                <SocialIcon
-                    network="github"
-                    url="https://github.com/Gage-Technologies/gigo.dev"
-                    bgColor={"transparent"}
-                    fgColor={mode === 'dark' ? "white" : "black"}
-                    style={{
-                        height: "32px",
-                        width: "32px",
-                    }}
-                />
-                <SocialIcon
-                    network="discord"
-                    url="https://discord.gg/279hECYrfX"
-                    bgColor={"transparent"}
-                    fgColor={mode === 'dark' ? "white" : "black"}
-                    style={{
-                        height: "32px",
-                        width: "32px",
-                    }}
-                />
+            <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+                <div style={{display: "flex", flexDirection: "row"}}>
+                    <SocialIcon
+                        network="github"
+                        url="https://github.com/Gage-Technologies/gigo.dev"
+                        bgColor={"transparent"}
+                        fgColor={mode === 'dark' ? "white" : "black"}
+                        style={{
+                            height: "32px",
+                            width: "32px",
+                        }}
+                    />
+                    <SocialIcon
+                        network="discord"
+                        url="https://discord.gg/279hECYrfX"
+                        bgColor={"transparent"}
+                        fgColor={mode === 'dark' ? "white" : "black"}
+                        style={{
+                            height: "32px",
+                            width: "32px",
+                        }}
+                    />
                 <SocialIcon
                     network="x"
                     url="https://twitter.com/gigo_dev"
@@ -2118,6 +2184,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     }
 
     let appBarRenderer = renderAppBar
+
     if (window.location.pathname.startsWith("/launchpad/") && query.get("editor") === "true") {
         appBarRenderer = renderWorkspaceAppBar
     } else if (window.innerWidth < 1000) {
@@ -2172,7 +2239,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                     mb: "0px",
                     // height: "64px",
                 }}>
-                    {appBarRenderer()}
+                    { !isByteMobilePage ? appBarRenderer() : null}
                     {loggedIn ? renderSidebar() : renderLoggedOutSidebar()}
                     {renderChatSideBar()}
                     {

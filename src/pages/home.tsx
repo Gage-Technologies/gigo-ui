@@ -69,6 +69,7 @@ import AboutBytesIcon from "../components/Icons/bytes/AboutPage";
 import GIGOLandingPageValentines from "../components/Landing/LandingValentines";
 import GIGOLandingPageValentinesMobile from "../components/Landing/LandingValentinesMobile";
 import { AwesomeButton } from "react-awesome-button";
+import BytesCardMobile from "../components/BytesCardMobile";
 
 const gradientAnimation = keyframes`
   0% { background-position: 0% 50%; }
@@ -654,9 +655,70 @@ function Home() {
         )
     }
 
+    const BytesMobile = () => {
+
+        // @ts-ignore
+        return (
+            <div style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                width: "100%",
+                paddingBottom: "10px",
+            }}>
+                <div style={{ display: "inline-flex", alignItems: 'center', padding: "10px 0" }}>
+                    <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, marginLeft: "10%" }}>
+                        <AboutBytesIcon style={{ height: "20px", width: "20px", marginRight: "5px" }} miniIcon={userPref === 'light'} />
+                        Bytes Swipe
+                    </Typography>
+                    <Button variant="text" href="/bytesMobile" sx={{ fontSize: "0.8em", fontWeight: "light", textTransform: "lowercase", marginRight: "5%" }}>
+                        (show all)
+                    </Button>
+                </div>
+                <div style={{
+                    display: "flex",
+                    justifyContent: "start",
+                    overflowX: "auto",
+                    paddingLeft: "5%",
+                }}>
+                    <Carousel show={1}>
+                        {
+                            byteContent.map((project, index) => (
+                                <div key={index} style={{ width: "100%", padding: "0 5%" }}>
+                                    <LazyLoad once scroll unmountIfInvisible>
+                                        <BytesCardMobile
+                                            height="auto"
+                                            imageHeight="40vh"
+                                            width="100%"
+                                            imageWidth="100%"
+                                            bytesId={project["_id"]}
+                                            bytesTitle={project["name"]}
+                                            bytesDesc={project["description_medium"]}
+                                            bytesThumb={config.rootPath + "/static/bytes/t/" + project["_id"]}
+                                            onClick={() => navigate("/byte/" + project["_id"])}
+                                            role={authState.role}
+                                            completedEasy={project["completed_easy"]}
+                                            completedMedium={project["completed_medium"]}
+                                            completedHard={project["completed_hard"]}
+                                            language={programmingLanguages[project["lang"]]}
+                                            isHome={false}
+                                        />
+                                    </LazyLoad>
+                                </div>
+                            ))
+                        }
+                    </Carousel>
+                </div>
+            </div>
+        )
+    }
+
     const Bytes = () => {
-        if (byteContent === null || byteContent === undefined || byteContent.length === 0 || window.innerWidth < 1000) {
+        if (byteContent === null || byteContent === undefined || byteContent.length === 0 ) {
             return (<div />)
+        }
+        if (window.innerWidth < 1000){
+            return BytesMobile()
         }
 
 
@@ -1322,6 +1384,75 @@ function Home() {
         }
     }, [byteContent])
 
+    const headerMobile = React.useMemo(() => {
+        if (byteContent.length > 0) {
+            const randomIndex = Math.floor(Math.random() * byteContent.length);
+            const project = byteContent[randomIndex];
+
+            return (
+                <Box sx={{
+                    width: "100%",
+                    height: "auto",
+                    backgroundColor: theme.palette.primary.light,
+                    zIndex: 3,
+                    m: 1,
+                    borderRadius: "12px",
+                    position: "relative",
+                    padding: "20px",
+                    marginTop: "2%"
+                }}>
+                    <Box sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        textAlign: "center",
+                    }}>
+                        <Typography variant="h4"
+                                    sx={{ color: theme.palette.background.default, textTransform: 'none' }}>
+                            Take a Byte Today
+                        </Typography>
+                        <Typography variant="subtitle2"
+                                    sx={{ color: theme.palette.text.primary, textTransform: "none", mt: 2 }}>
+                            Bite-sized coding challenges deeply integrated with Code Teacher for personalized learning.
+                        </Typography>
+                        <Box sx={{ width: "100%", mt: 3, display: 'flex', justifyContent: 'center' }}>
+                            <LazyLoad once scroll unmountIfInvisible>
+                                <BytesCardMobile
+                                    height="300px"
+                                    imageHeight="200px"
+                                    width="100%"
+                                    imageWidth="100%"
+                                    bytesId={project["_id"]}
+                                    bytesTitle={project["name"]}
+                                    bytesDesc={project["description_medium"]}
+                                    bytesThumb={config.rootPath + "/static/bytes/t/" + project["_id"]}
+                                    onClick={() => navigate("/byte/" + project["_id"])}
+                                    role={authState.role}
+                                    completedEasy={project["completed_easy"]}
+                                    completedMedium={project["completed_medium"]}
+                                    completedHard={project["completed_hard"]}
+                                    language={programmingLanguages[project["lang"]]}
+                                    isHome={true}
+                                />
+                            </LazyLoad>
+                        </Box>
+                        <Box sx={{ mt: -2 }}>
+                            <AwesomeButton style={{
+                                '--button-primary-color': theme.palette.primary.main,
+                                '--button-primary-color-dark': theme.palette.primary.dark,
+                                '--button-primary-color-light': "white",
+                                '--button-primary-color-hover': theme.palette.primary.main,
+                                fontSize: "18px",
+                            }} type="primary" href={`/byte/${project["_id"]}`}>
+                                Take a Byte
+                            </AwesomeButton>
+                        </Box>
+                    </Box>
+                </Box>
+            );
+        }
+    }, [byteContent]);
+
     const renderLanding = () => {
         if (loggedIn) {
             return null
@@ -1463,7 +1594,7 @@ function Home() {
                                 <></>
                             }
 
-                            {(window.innerWidth > 1000) ? header : TopRecommendations()}
+                            {(window.innerWidth > 1000) ? header : headerMobile}
                             {/*{TopRecommendations()}*/}
                         </Box>
                         <Box
@@ -1492,7 +1623,7 @@ function Home() {
                                 borderRadius: 1,
                             }}
                         >
-                            {ActiveProjects()}
+                            {(window.innerWidth > 1000) ? ActiveProjects() : null}
                         </Box>
 
                         <Box

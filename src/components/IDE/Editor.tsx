@@ -222,6 +222,7 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
                 onChange={onChange}
                 onUpdate={onUpdate}
                 readOnly={props.readonly}
+                
             />
             {PopupPortal}
         </Box>

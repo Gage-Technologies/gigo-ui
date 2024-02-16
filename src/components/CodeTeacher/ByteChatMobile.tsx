@@ -3,14 +3,15 @@ import {
     Box,
     Button, ButtonBase,
     Card,
-    CircularProgress, createTheme, Divider, Grid, IconButton, InputAdornment, PaletteMode,
+    CircularProgress, createTheme, Dialog, DialogActions,
+    DialogContent, DialogTitle, Divider, Grid, IconButton, InputAdornment, PaletteMode,
     PopperPlacementType, Stack,
     styled,
     TextField,
     Tooltip,
     Typography
 } from "@mui/material";
-import React, {useEffect, useLayoutEffect, useRef, useState} from "react";
+import React, {useContext, useEffect, useLayoutEffect, useRef, useState} from "react";
 import MarkdownRenderer from "../Markdown/MarkdownRenderer";
 import {useGlobalCtWebSocket} from "../../services/ct_websocket";
 import {
@@ -41,6 +42,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import {grey} from "@mui/material/colors";
 import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../../reducers/bytes/bytes";
+import CloseIcon from "@material-ui/icons/Close";
 
 const InitialSuggestionButton = styled(Button)`
     animation: initSuggestionButtonAuraEffect 2s infinite alternate;
@@ -85,7 +87,7 @@ export type ByteChatProps = {
     questions: [];
 };
 
-export default function ByteChat(props: ByteChatProps) {
+export default function ByteChatMobile(props: ByteChatProps & { setSpeedDialVisibility: (isVisible: boolean) => void }) {
     let userPref = localStorage.getItem('theme');
     const [mode, _] = useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
@@ -108,6 +110,9 @@ export default function ByteChat(props: ByteChatProps) {
     const [response, setResponse] = useState("")
     const [state, setState] = useState<State>(State.WAITING)
     const [userMessage, setUserMessage] = useState('');
+    const [openPopup, setOpenPopup] = useState(false);
+    const [popupMessage, setPopupMessage] = useState('');
+
     const [messages, setMessages] = useState<CtByteChatMessage[]>([
         {
             _id: "init2",
@@ -365,6 +370,7 @@ export default function ByteChat(props: ByteChatProps) {
         })
         setMessages(m)
         setUserMessage('')
+        props.setSpeedDialVisibility(true);
         ctWs.sendWebsocketMessage({
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
             type: CtMessageType.WebSocketMessageTypeByteUserMessage,
@@ -562,7 +568,8 @@ export default function ByteChat(props: ByteChatProps) {
                     flexDirection: "row",
                     justifyContent: "flex-end",
                     alignItems: "flex-start",
-                    paddingBottom: '10px'
+                    paddingBottom: '10px',
+                    maxWidth: "100%",
                 }}
             >
                 <Card
@@ -579,7 +586,8 @@ export default function ByteChat(props: ByteChatProps) {
                         width: "auto",
                         height: "auto",
                         display: "block",
-                        maxWidth: "82%"
+                        maxWidth: "82%",
+                        wordWrap: 'break-word'
                     }}
                 >
                     <MarkdownRenderer
@@ -588,6 +596,7 @@ export default function ByteChat(props: ByteChatProps) {
                             overflowWrap: 'break-word',
                             borderRadius: '10px',
                             padding: '0px',
+                            maxWidth: "100%"
                         }}
                     />
                 </Card>
@@ -636,14 +645,15 @@ export default function ByteChat(props: ByteChatProps) {
                 style={{
                     display: "flex",
                     flexDirection: "row",
-                    justifyContent: "flex-end",
+                    justifyContent: "flex-start",
                     alignItems: "flex-start",
-                    paddingBottom: '10px'
+                    paddingBottom: '10px',
+                    maxWidth: "100%",
                 }}
             >
 
                 {(msgId !== 'init' && msgId !== 'init3')
-                ?
+                    ?
                     <CodeTeacherChatIcon
                         style={{
                             marginRight: '10px',
@@ -651,7 +661,7 @@ export default function ByteChat(props: ByteChatProps) {
                             height: '35px',
                         }}
                     />
-                :
+                    :
                     <Box
                         sx={{
                             marginRight: '10px',
@@ -663,7 +673,7 @@ export default function ByteChat(props: ByteChatProps) {
 
                 <Card
                     style={{
-                        fontSize: ".75rem",
+                        fontSize: ".12px",
                         marginLeft: "2.5px",
                         marginRight: "auto",
                         marginBottom: "0px",
@@ -675,7 +685,8 @@ export default function ByteChat(props: ByteChatProps) {
                         width: "auto",
                         height: "auto",
                         display: "block",
-                        maxWidth: "82%"
+                        maxWidth: "82%",
+                        wordWrap: 'break-word',
                     }}
                 >
                     {renderContent(content, loading)}
@@ -726,30 +737,76 @@ export default function ByteChat(props: ByteChatProps) {
         }
     }, []);
 
-    const textInputMemo = React.useMemo(() => (
-        <TextField
-            disabled={disableChat || !authState.authenticated}
-            fullWidth
-            label={authState.authenticated ? "Ask Code Teacher!" : "Signup To Chat With Code Teacher"}
-            variant="outlined"
-            value={userMessage}
-            multiline={true}
-            maxRows={5}
-            onChange={(e) => setUserMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            InputProps={{
-                endAdornment: (
-                    <InputAdornment position="end">
-                        <Tooltip title={"Start New Conversation Thread"}>
-                            <IconButton onClick={() => closeThread()} disabled={disableChat || !authState.authenticated}>
-                                <ForumIcon/>
-                            </IconButton>
-                        </Tooltip>
-                    </InputAdornment>
-                ),
+    // Function to handle the popup open action
+    const handleOpenPopup = () => {
+        setOpenPopup(true);
+    };
+
+    // Function to handle the popup close action
+    const handleClosePopup = () => {
+        setOpenPopup(false);
+    };
+
+    // Function to handle sending the message from the popup
+    const handleSendMessage = () => {
+        sendUserCTChat(popupMessage);
+        setPopupMessage(''); // Reset the message input
+        handleClosePopup(); // Close the popup after sending the message
+    };
+
+    // Function to handle starting a new thread from the popup
+    const handleNewThread = () => {
+        closeThread(); // Your existing function to close the current thread and start a new one
+        handleClosePopup(); // Close the popup
+    };
+
+    const askCodeTeacherButton = (
+        <Box
+            sx={{
+                position: 'fixed',
+                bottom: 20,
+                left: 0,
+                right: 0,
+                display: 'flex',
+                justifyContent: 'center',
+                zIndex: 1000,
             }}
-        />
-    ), [userMessage, disableChat, chatId])
+        >
+            <Button variant="contained" color="primary" onClick={handleOpenPopup}>
+                Ask Code Teacher
+            </Button>
+        </Box>
+    );
+
+    const askCodeTeacherPopup = (
+        <Dialog open={openPopup} onClose={handleClosePopup}>
+            <DialogTitle>
+                Ask Code Teacher
+                <IconButton onClick={handleClosePopup} sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}>
+                    <CloseIcon />
+                </IconButton>
+            </DialogTitle>
+            <DialogContent>
+                <TextField
+                    autoFocus
+                    margin="dense"
+                    id="message"
+                    label="Your Question"
+                    type="text"
+                    fullWidth
+                    variant="outlined"
+                    multiline={true}
+                    maxRows={5}
+                    value={popupMessage}
+                    onChange={(e) => setPopupMessage(e.target.value)}
+                />
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={handleSendMessage}>Submit</Button>
+                <Button onClick={handleNewThread}>New Thread</Button>
+            </DialogActions>
+        </Dialog>
+    );
 
     // Group messages by thread number
     const groupedMessages = messages.reduce((acc, message) => {
@@ -823,7 +880,7 @@ export default function ByteChat(props: ByteChatProps) {
     const ThreadDivider = ({ threadNumber, onClick, isVisible, isCollapsible }: { threadNumber: number; onClick: () => void; isVisible: boolean, isCollapsible: boolean }) => {
         return (
             threadNumber !== 0
-            ?
+                ?
                 <Box display="flex" alignItems="center" justifyContent="center" width="100%">
                     <Box flexGrow={1} borderBottom={`1px solid ${theme.palette.text.primary}`}  sx={{ marginLeft: "20px" }} />
                     {isCollapsible
@@ -840,7 +897,7 @@ export default function ByteChat(props: ByteChatProps) {
                     }
                     <Box flexGrow={1} borderBottom={`1px solid ${theme.palette.text.primary}`} sx={{ marginRight: "20px" }} />
                 </Box>
-            :
+                :
                 <></>
         );
     };
@@ -877,7 +934,8 @@ export default function ByteChat(props: ByteChatProps) {
 
         return (
             <Grid container sx={{
-                marginBottom: '10px'
+                marginBottom: '15px',
+                padding: '0 20px',
             }} spacing={1}>
                 {questions.map((q, index) => {
                     let QuestionButton: any = Button
@@ -916,6 +974,33 @@ export default function ByteChat(props: ByteChatProps) {
         )
     }
 
+    const textInputMemo = React.useMemo(() => (
+        <TextField
+            onFocus={() => props.setSpeedDialVisibility(false)}
+            onBlur={() => props.setSpeedDialVisibility(true)}
+            disabled={disableChat || !authState.authenticated}
+            fullWidth
+            label={authState.authenticated ? "Ask Code Teacher!" : "Signup To Chat With Code Teacher"}
+            variant="outlined"
+            value={userMessage}
+            multiline={true}
+            maxRows={5}
+            onChange={(e) => setUserMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            InputProps={{
+                endAdornment: (
+                    <InputAdornment position="end">
+                        <Tooltip title={"Start New Conversation Thread"}>
+                            <IconButton onClick={() => closeThread()} disabled={disableChat || !authState.authenticated}>
+                                <ForumIcon/>
+                            </IconButton>
+                        </Tooltip>
+                    </InputAdornment>
+                ),
+            }}
+        />
+    ), [userMessage, disableChat, chatId])
+
     return (
         <>
             <Box
@@ -924,12 +1009,12 @@ export default function ByteChat(props: ByteChatProps) {
                 flexDirection={"column"}
                 sx={{
                     scrollBehavior: 'smooth',
-                    height: "calc(100% - 72px)",
+                    height: "calc(100vh - 132px)",
+                    maxWidth: "95vw",
+                    minHeight: "none",
                     overflowY: "auto",
                     overflowX: "hidden",
-                    pt: 2,
-                    pb: 2,
-                    marginBottom: 1,
+                    pb: 4,
                     position: "relative"
                 }}
             >
@@ -943,11 +1028,10 @@ export default function ByteChat(props: ByteChatProps) {
                             size="small"
                             sx={{
                                 position: "fixed",
-                                bottom: `17vh`,
-                                left: window.innerWidth * .2 < 450 ? "440px" : `calc(20vw - 10px)`,
+                                bottom: "100px",
+                                right: "20px",
                                 border: `1px solid ${theme.palette.primary.dark}`,
                                 backdropFilter: "blur(10px)",
-                                zIndex: 10000,
                                 '&:hover': {
                                     backgroundColor: 'rgba(255, 255, 255, 0.04)',
                                 }
@@ -958,8 +1042,25 @@ export default function ByteChat(props: ByteChatProps) {
                     </Tooltip>
                 )}
             </Box>
-            {renderSuggestions()}
-            {textInputMemo}
+            <Box
+                sx={{
+                    position: 'fixed',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    pb: 2,
+                    pt: 1,
+                    background: theme.palette.background.default,
+                    zIndex: 1000,
+                }}
+            >
+                {renderSuggestions()}
+                <Box
+                sx={{ paddingLeft: 1, paddingRight: 1 }}
+                >
+                    {textInputMemo}
+                </Box>
+            </Box>
         </>
     );
 }

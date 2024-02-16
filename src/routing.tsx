@@ -1,12 +1,10 @@
 
 
-import React from 'react';
+import * as React from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import { initialAuthState, initialAuthStateUpdate, selectAuthState, updateAuthState } from "./reducers/auth/auth";
 import TrackedOutlet from './components/OutletTracking';
-import PublicConfigs from "./pages/PublicConfigs";
-import Unsubscribe from "./pages/unsubscribe";
 import config from './config';
 
 const CurateAdminPage = React.lazy(() => import("./pages/curateAdmin"));
@@ -45,6 +43,10 @@ const AllBytesScroll = React.lazy(() => import("./pages/allBytesScroll"));
 const AboutBytes = React.lazy(() => import("./pages/aboutPageBytes"));
 const Byte = React.lazy(() => import("./pages/bytes"));
 const PrivacyPolicy = React.lazy(() => import("./pages/PrivacyPolicy"))
+const ByteMobile = React.lazy(() => import("./pages/byteMobile"))
+const AllBytesScrollMobile = React.lazy(() => import('./pages/allBytesScrollMobile'))
+const PublicConfigs = React.lazy(() => import("./pages/PublicConfigs"));
+const Unsubscribe = React.lazy(() => import("./pages/unsubscribe"));
 const ArticlesPage = React.lazy(() => import("./pages/articles"))
 const ArticlePage = React.lazy(() => import("./pages/article"))
 
@@ -106,6 +108,14 @@ export default function Routing() {
         return <Outlet />
     };
 
+    const DesktopMobileRouter = ({desktop, mobile}: { desktop: React.ReactElement, mobile: React.ReactElement }) => {
+        if (window.innerWidth < 1000) {
+            return mobile
+        }
+
+        return desktop
+    };
+
     //todo: make sure to add the id aspect to referral id
     return (
         <Routes>
@@ -120,6 +130,7 @@ export default function Routing() {
                     <Route path={"/articles"} element={<ArticlesPage />} />
                     <Route path={"/articles/:articleName"} element={<ArticlePage />} />
                     <Route path={"/bytes"} element={<AllBytesScroll />} />
+                    <Route path={"/bytesMobile"} element={<AllBytesScrollMobile />} />
                     <Route path="/search" element={<Search />} />
                     <Route path={"/"} element={<Home />} />
                     <Route path={"/signup"} element={<CreateNewAccount />} />
@@ -133,7 +144,7 @@ export default function Routing() {
                     <Route path={"/premium"} element={<PremiumDescription />} />
                     <Route path={"/buyingExclusive"} element={<BuyingExclusiveContent />} />
                     <Route path={"/aboutExclusive"} element={<ExclusiveContent />} />
-                    <Route path="/byte/:id" element={<Byte />} />
+                    <Route path="/byte/:id" element={<DesktopMobileRouter desktop={<Byte />} mobile={<ByteMobile />} />} />
                     <Route path={"/aboutBytes"} element={<AboutBytes />} />
                     <Route path={"/privacyPolicy"} element={<PrivacyPolicy/>} />
                     <Route element={<PrivateRoute />}>

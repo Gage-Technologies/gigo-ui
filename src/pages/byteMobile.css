@@ -1,0 +1,14 @@
+.title-mobile {
+    font-size: .7rem;
+}
+
+@media (max-width: 600px) {
+    .title-mobile {
+        font-size: .5rem;
+    }
+}
+
+.editorLineHighlighted{
+    background-color: #a94dff !important;
+    position: absolute;
+}

@@ -1,53 +1,55 @@
 import * as React from "react";
 import {useEffect, useRef, useState} from "react";
 import {
-    Container,
-    createTheme, CssBaseline,
+    Box,
+    createTheme,
+    CssBaseline,
+    Dialog,
+    DialogTitle,
+    List,
+    ListItem,
+    ListItemText,
     PaletteMode,
+    SpeedDial,
+    SpeedDialAction,
     ThemeProvider,
+    Tooltip,
     Typography,
-    Box, Tooltip, CircularProgress, alpha, Button
 } from "@mui/material";
-import XpPopup from "../components/XpPopup";
-import { getAllTokens } from "../theme";
-import { Close, PlayArrow } from "@material-ui/icons";
-import { useAppDispatch, useAppSelector } from "../app/hooks";
-import { useNavigate } from "react-router-dom";
+import {getAllTokens} from "../theme";
+import {KeyboardArrowUp, PlayArrow} from "@material-ui/icons";
+import {useAppDispatch, useAppSelector} from "../app/hooks";
+import {useNavigate} from "react-router-dom";
 import swal from "sweetalert";
 import call from "../services/api-call";
 import 'ace-builds';
 import 'ace-builds/webpack-resolver';
-import ByteSelectionMenu from "../components/ByteSelectionMenu";
 import config from "../config";
-import { useParams } from "react-router";
-import { useGlobalWebSocket } from "../services/websocket";
-import { WsGenericErrorPayload, WsMessage, WsMessageType } from "../models/websocket";
-import {
-    ExecResponsePayload,
-    OutputRow
-} from "../models/bytes";
-import { programmingLanguages } from "../services/vars";
-import { useGlobalCtWebSocket } from "../services/ct_websocket";
-import ByteNextStep from "../components/CodeTeacher/ByteNextStep";
-import ByteChat from "../components/CodeTeacher/ByteChat";
-import { LoadingButton } from "@mui/lab";
-import ByteNextOutputMessage from "../components/CodeTeacher/ByteNextOutputMessage";
+import {useParams} from "react-router";
+import {useGlobalWebSocket} from "../services/websocket";
+import {WsGenericErrorPayload, WsMessage, WsMessageType} from "../models/websocket";
+import {ExecResponsePayload, OutputRow} from "../models/bytes";
+import {programmingLanguages} from "../services/vars";
+import "./bytes.css";
+import {LoadingButton} from "@mui/lab";
 import Editor from "../components/IDE/Editor";
 import chroma from 'chroma-js';
 import SheenPlaceholder from "../components/Loading/SheenPlaceholder";
-import { sleep } from "../services/utils";
-import { ReactCodeMirrorRef } from "@uiw/react-codemirror";
-import DifficultyAdjuster from "../components/ByteDifficulty";
-import { selectAuthState } from "../reducers/auth/auth";
-import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../reducers/bytes/bytes";
+import {sleep} from "../services/utils";
+import {ReactCodeMirrorRef} from "@uiw/react-codemirror";
+import {selectAuthState} from "../reducers/auth/auth";
+import {initialBytesStateUpdate, selectBytesState, updateBytesState} from "../reducers/bytes/bytes";
 import ByteTerminal from "../components/Terminal";
-import { debounce } from "lodash";
-import {LaunchLspRequest} from "../models/launch_lsp";
-import {Workspace} from "../models/workspace";
-import CodeSource from "../models/codeSource";
-import LinkIcon from '@mui/icons-material/Link';
-import LinkOffIcon from '@mui/icons-material/LinkOff';
-
+import './byteMobile.css';
+import ByteNextOutputMessageMobile from "../components/CodeTeacher/ByteNextOutputMessageMobile";
+import ByteNextStepMobile from "../components/CodeTeacher/ByteNextStepMobile";
+import HomeIcon from "@mui/icons-material/Home";
+import CTIcon from '../img/codeTeacher/CT-icon-simple.svg';
+import DeveloperModeIcon from '@mui/icons-material/DeveloperMode';
+import ByteChatMobile from "../components/CodeTeacher/ByteChatMobile";
+import NextByteDrawerMobile from "../components/NextByteDrawerMobile";
+import MenuIcon from '@mui/icons-material/Menu';
+import PinIcon from '@mui/icons-material/Pin';
 
 interface MergedOutputRow {
     error: boolean;
@@ -82,24 +84,7 @@ interface BytesData {
     dev_steps_hard: string;
 }
 
-interface InitialStatusMessage {
-    workspace: Workspace;
-    code_source: CodeSource;
-    workspace_url: string
-}
-
-interface ByteAttempt {
-    _id: string;
-    byte_id: string;
-    author_id: string;
-    content_easy: string;
-    content_medium: string;
-    content_hard: string;
-    modified: boolean;
-}
-
-
-function Byte() {
+function ByteMobile() {
     let userPref = localStorage.getItem('theme');
     const [mode, _] = useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
@@ -111,120 +96,64 @@ function Byte() {
 
     const [terminalVisible, setTerminalVisible] = useState(false);
 
-    const combinedSectionStyle: React.CSSProperties = {
-        display: 'flex',
-        height: '80vh',
-        width: 'calc(100vw - 360px)',
-        marginLeft: '30px',
-        marginRight: 'auto',
-        borderRadius: theme.shape.borderRadius,
-        overflow: 'hidden',
-        boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.2)',
-        border: `1px solid ${theme.palette.grey[300]}`,
-        padding: "10px",
-        backgroundColor: theme.palette.background.default
-    };
-
-    const mainLayoutStyle: React.CSSProperties = {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        gap: '30px',
-        marginTop: '1rem',
-        maxHeight: "80vh",
-        overflow: "hidden"
-    };
-
-    // Byte selection menu style
-    const byteSelectionMenuStyle: React.CSSProperties = {
-        width: '300px',
-        maxHeight: '80vh',
-        overflow: 'hidden'
-    };
-
     const containerStyleDefault: React.CSSProperties = {
         width: '100%',
-        padding: theme.spacing(0),
         margin: '0',
         maxWidth: 'none',
         overflowY: "hidden"
     };
 
-    const markdownSectionStyle: React.CSSProperties = {
-        flex: 1,
-        minWidth: "450px",
-        maxWidth: "20vw",
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        backgroundColor: 'transparent',
-        borderRadius: theme.shape.borderRadius,
-        overflow: 'hidden',
-    };
-
-    const editorAndTerminalStyle: React.CSSProperties = {
-        display: 'flex',
-        flexDirection: 'column',
-        flex: 1,
-        height: '100%',
-        paddingLeft: "20px",
-        // width: "60vw",
-        width: 0,
-        position: "relative"
-    };
-
-    const editorStyle: React.CSSProperties = {
-        height: terminalVisible ? "calc(100% - 200px)" : "100%",
-    };
-
-    const terminalOutputStyle: React.CSSProperties = {
-        backgroundColor: "#333",
-        color: "lime",
-        fontFamily: "monospace",
-        fontSize: "0.9rem",
-        padding: "10px",
-        marginTop: "20px",
-        borderRadius: "5px",
-        whiteSpace: "pre-wrap",
-        // maxHeight: '300px',
-        // minHeight: "100px",
-        height: "200px",
-        overflowY: 'auto',
-        wordWrap: 'break-word',
-        position: "relative",
-    };
-
-    const difficultyAdjusterStyle: React.CSSProperties = {
-        width: "fit-content",
-        marginLeft: "30px"
-    };
-
-    const titleStyle: React.CSSProperties = {
-        textAlign: 'center',
-        marginTop: "14px",
-        marginBottom: "2px",
-        width: "calc(100vw - 500px)",
-    };
-
     const topContainerStyle: React.CSSProperties = {
         display: 'flex',
-        alignItems: 'center', // Align items vertically in the center
-        justifyContent: 'flex-start', // Align the DifficultyAdjuster to the left
-        gap: '0rem', // Add some space between the adjuster and the title
+        overflowY: "hidden",
+        flexDirection: 'row',
+        justifyContent: 'center',
+        width: '100%',
+        height: "100%",
+        marginTop: '5px'
     };
 
     const titlePlaceholderContainerStyle: React.CSSProperties = {
         display: "flex",
         padding: theme.spacing(1),
-        marginTop: "14px",
-        marginBottom: "2px",
         alignItems: 'center',
-        width: "calc(80vw - 164px)",
+        width: "100%",
+    };
+
+    const titleStyle: React.CSSProperties = {
+        textAlign: 'center',
+        width: "100%",
+        fontSize: '1.0rem',
+        marginTop: "-3%",
     };
 
     const titlePlaceholderStyle: React.CSSProperties = {
         margin: "auto"
     }
+
+    const fixedElementsHeight = 48;
+
+    const editorAndTerminalStyle: React.CSSProperties = {
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 1,
+        height: `calc(100vh - ${fixedElementsHeight}px)`,
+        width: "100%",
+        minWidth: `100%`,
+        alignItems: 'center',
+        // justifyContent: 'center',
+        overflowX: 'auto',
+        position: 'relative',
+        overflowY: 'hidden',
+    };
+
+    const editorStyle: React.CSSProperties = {
+        height: '100%',
+        width: '100%',
+        overflowX: 'auto',
+        maxWidth: '100%',
+    };
+
 
     // Define the state and dispatch hook
     const dispatch = useAppDispatch();
@@ -242,12 +171,12 @@ function Byte() {
 
     const [output, setOutput] = useState<OutputState | null>(null);
 
+    const [workspaceCreated, setWorkspaceCreated] = useState(false);
     const [containerStyle, setContainerSyle] = useState<React.CSSProperties>(containerStyleDefault)
     const [cursorPosition, setCursorPosition] = useState<{ row: number, column: number } | null>(null)
     const [codeBeforeCursor, setCodeBeforeCursor] = useState("");
     const [codeAfterCursor, setCodeAfterCursor] = useState("");
     const [outputPopup, setOutputPopup] = useState(false);
-    const [outputMessage, setOutputMessage] = useState("");
     const [byteAttemptId, setByteAttemptId] = useState("");
     const [easyCode, setEasyCode] = useState("");
     const [mediumCode, setMediumCode] = useState("");
@@ -256,28 +185,25 @@ function Byte() {
     const [suggestionPopup, setSuggestionPopup] = useState(false);
     const [nextStepsPopup, setNextStepsPopup] = useState(false);
     const [commandId, setCommandId] = useState("");
-
-    const [executingOutputMessage, setExecutingOutputMessage] = useState<boolean>(false)
+    const [isDifficultyPopupOpen, setIsDifficultyPopupOpen] = useState(false);
     const [executingCode, setExecutingCode] = useState<boolean>(false)
 
     const pingInterval = React.useRef<NodeJS.Timer | null>(null)
 
     const editorContainerRef = React.useRef<HTMLDivElement>(null);
     const editorRef = React.useRef<ReactCodeMirrorRef>(null);
-
+    const [tabValue, setTabValue] = useState(0);
+    const [activeView, setActiveView] = useState("editor");
     const [activeSidebarTab, setActiveSidebarTab] = React.useState<string | null>(null);
+    const [nextByteDrawerOpen, setNextByteDrawerOpen] = useState(false);
+    const [isSpeedDialVisible, setSpeedDialVisibility] = useState(true);
+    const [speedDialOpen, setSpeedDialOpen] = useState(false);
 
-    const [userHasModified, setUserHasModified] = React.useState(false)
-    const [lspActive, setLspActive] = React.useState(false)
-    const [workspaceState, setWorkspaceState] = useState<null | number>(null);
-    const [workspaceId, setWorkspaceId] = useState<string>('')
+    const [editorStyles, setEditorStyles] = useState({
+        fontSize: '14px',
+    });
 
-    const [connectButtonLoading, setConnectButtonLoading] = useState<boolean>(false)
-
-
-    let { id } = useParams();
-
-    let ctWs = useGlobalCtWebSocket();
+    let {id} = useParams();
 
     let globalWs = useGlobalWebSocket();
 
@@ -304,7 +230,7 @@ function Byte() {
         return "hard"
     }
 
-    const updateCode = React.useCallback((newCode: string) => {
+    const updateCode = (newCode: string) => {
         const message = {
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
             type: WsMessageType.ByteUpdateCode,
@@ -316,11 +242,7 @@ function Byte() {
         };
 
         globalWs.sendWebsocketMessage(message, null);
-    }, [globalWs, byteAttemptId, bytesState]);
-
-    const debouncedUpdateCode = React.useCallback(debounce(updateCode, 1000, {
-        trailing: true
-    }), [updateCode]);
+    };
 
     const cancelCodeExec = (commandId: string) => {
 
@@ -422,10 +344,10 @@ function Byte() {
         setIsReceivingData(true);
         setTerminalVisible(true)
         setOutput({
-            stdout: [{ timestamp: Date.now() * 1000, content: "Running..." }],
+            stdout: [{timestamp: Date.now() * 1000, content: "Running..."}],
             stderr: [],
             merged: "Running...",
-            mergedLines: [{ timestamp: Date.now() * 1000, content: "Running...", error: false }],
+            mergedLines: [{timestamp: Date.now() * 1000, content: "Running...", error: false}],
         });
         setExecutingCode(true)
         setCommandId("");
@@ -470,10 +392,10 @@ function Byte() {
                 if (payload.command_id_string) {
                     setCommandId(payload.command_id_string);
                 }
-                const { stdout, stderr, done } = payload;
+                const {stdout, stderr, done} = payload;
 
                 // skip the processing if this is the first response
-                if (stdout.length === 0 && stderr.length === 0 && !done) {
+                if (stdout.length === 0 && stderr.length === 0) {
                     return false;
                 }
 
@@ -565,7 +487,7 @@ function Byte() {
                 null,
                 null,
                 // @ts-ignore
-                { byte_id: byteId },
+                {byte_id: byteId},
                 null,
                 config.rootPath);
             const [res] = await Promise.all([response]);
@@ -582,6 +504,7 @@ function Byte() {
                 setHardCode(res["rec_bytes"]["outline_content_hard"])
 
                 setByteData(res["rec_bytes"])
+                setWorkspaceCreated(false);
             } else {
                 swal("Byte Not Found", "The requested byte could not be found.");
             }
@@ -599,7 +522,7 @@ function Byte() {
                 null,
                 null,
                 // @ts-ignore
-                { byte_id: byteId },
+                {byte_id: byteId},
                 null,
                 config.rootPath
             );
@@ -635,7 +558,7 @@ function Byte() {
                 null,
                 null,
                 // @ts-ignore
-                { byte_id: byteId },
+                {byte_id: byteId},
                 null,
                 config.rootPath
             );
@@ -649,11 +572,7 @@ function Byte() {
 
             if (res["message"] === "Workspace Created Successfully") {
                 // TODO implement what needs to be done if successful
-                let workspace = res["workspace"]
-                if (workspace["_id"] !== workspaceId) {
-                    setWorkspaceId(workspace["_id"])
-                    setWorkspaceState(workspace["state"])
-                }
+                setWorkspaceCreated(true)
                 return true
             }
         } catch (error) {
@@ -671,7 +590,7 @@ function Byte() {
             null,
             // @ts-ignore
             {
-                byte_id: byteAttemptId ,
+                byte_id: byteAttemptId,
                 difficulty: difficultyToString(determineDifficulty()),
             },
             null,
@@ -702,10 +621,6 @@ function Byte() {
         setOutput(null)
         setExecutingCode(false)
         setTerminalVisible(false)
-        setUserHasModified(false)
-        setWorkspaceId("")
-        setWorkspaceState(null)
-        setLspActive(false)
         setLoading(true);
         getRecommendedBytes()
         getByte(id).then(() => {
@@ -716,6 +631,20 @@ function Byte() {
             setLoading(false);
         });
     }, [id]);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setEditorStyles({
+                fontSize: '12px',
+            });
+        };
+
+        handleResize();
+        window.addEventListener('resize', handleResize);
+
+        // Cleanup event listener on unmount
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         return () => {
@@ -751,107 +680,9 @@ function Byte() {
         }
     }, [bytesState.byteDifficulty])
 
-    useEffect(() => {
-        if (workspaceId === "") {
-            return
-        }
-
-        globalWs.registerCallback(WsMessageType.WorkspaceStatusUpdate, `workspace:status:${workspaceId}`,
-            (msg: WsMessage<any>) => {
-                if (msg.type !== WsMessageType.WorkspaceStatusUpdate) {
-                    return
-                }
-
-                // attempt to parse json message
-                let jsonMessage: Object | null = null
-                try {
-                    jsonMessage = msg.payload;
-                } catch (e) {
-                    return
-                }
-
-                if (jsonMessage === null) {
-                    return
-                }
-
-                // handle initial state message
-                let payload = jsonMessage as InitialStatusMessage;
-                let workspace = payload.workspace as Workspace
-
-                if (workspaceId !== workspace._id) {
-                    setWorkspaceId(workspace._id)
-                }
-                setWorkspaceState(workspace.state)
-            },
-        );
-
-        // generate a random alphanumeric id
-        let seqId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-        globalWs.sendWebsocketMessage({
-            sequence_id: seqId,
-            type: WsMessageType.SubscribeWorkspace,
-            payload: {
-                workspace_id: workspaceId,
-            }
-        }, null)
-
-        return () => {
-            globalWs.sendWebsocketMessage({
-                sequence_id: seqId,
-                type: WsMessageType.UnsubscribeWorkspace,
-                payload: {
-                    workspace_id: workspaceId,
-                }
-            }, null)
-        }
-    }, [workspaceId])
-
-    useEffect(() => {
-        if (workspaceState !== 1) {
-            return
-        }
-
-        if (byteData) {
-            launchLsp()
-        }
-    }, [workspaceState])
-
-    const launchLsp = async () => {
-        if (!byteData) {
-            return
-        }
-
-        globalWs.sendWebsocketMessage(
-            {
-                sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-                type: WsMessageType.LaunchLspRequest,
-                payload: {
-                    byte_attempt_id: byteAttemptId,
-                    payload: {
-                        lang: byteData.lang,
-                        content: code,
-                    } satisfies LaunchLspRequest
-                }
-            }, (msg: WsMessage<any>): boolean => {
-                if (msg.type !== WsMessageType.LaunchLspResponse) {
-                    console.log("failed to start lsp: ", msg)
-                    setTimeout(() => {
-                        launchLsp()
-                    }, 1000);
-                    return true
-                }
-                // wait 3s to link the lsp to ensure the startup completes
-                setTimeout(() => {
-                    setLspActive(true)
-                }, 3000);
-                return true
-            }
-        )
-    }
-
 
     // Handle changes in the editor and activate the button
-    const handleEditorChange = async (newCode: string) => {
+    const handleEditorChange = (newCode: string) => {
         // Update the code state with the new content
         setCode(newCode);
         switch (bytesState.byteDifficulty) {
@@ -866,24 +697,14 @@ function Byte() {
                 break
         }
         startTypingTimer();
-        debouncedUpdateCode(newCode);
-
-
-        if (!userHasModified) {
-            setUserHasModified(true)
+        if (newCode && newCode !== "// Write your code here..." && newCode !== initialCode) {
             setIsButtonActive(true);
-            if (byteData) {
-                for (let i = 0; i < 5; i++) {
-                    let created = await createWorkspace(byteData._id);
-                    if (created) {
-                        break
-                    }
 
-                    if (i === 4) {
-                        break
-                    }
-                }
-            }
+            updateCode(newCode);
+
+
+        } else {
+            setIsButtonActive(false);
         }
     };
 
@@ -894,10 +715,6 @@ function Byte() {
         "/static/posts/t/1688940677359992832",
         "/static/posts/t/1693725878338453504"
     ];
-
-    const handleSelectByte = (byteId: string) => {
-        navigate(`/byte/${byteId}`);
-    };
 
     // Add a function to handle closing the terminal
     const handleCloseTerminal = () => {
@@ -925,7 +742,7 @@ function Byte() {
         if (outputPopup) {
             return;
         }
-        if (byteData) {
+        if (!workspaceCreated && byteData) {
             for (let i = 0; i < 5; i++) {
                 let created = await createWorkspace(byteData._id);
                 if (created) {
@@ -1044,191 +861,183 @@ function Byte() {
         return recommendedBytes[0]
     }
 
-    const renderEditorSideBar = () => {
-        let stateTooltipTitle: string | React.ReactElement = (
-            <Box>
-                <Typography variant='caption'>Disconnected From DevSpace</Typography>
-                <LoadingButton
-                    loading={connectButtonLoading}
-                    variant={"outlined"}
-                    sx={{
-                        fontSize: "10px",
-                        height: "18px",
-                        m: 0.5
-                    }}
-                    onClick={async () => {
-                        if (byteData) {
-                            setConnectButtonLoading(true)
-                            for (let i = 0; i < 5; i++) {
-                                let created = await createWorkspace(byteData._id);
-                                if (created) {
-                                    break
-                                }
-
-                                if (i === 4) {
-                                    break
-                                }
-                            }
-                            setConnectButtonLoading(false)
-                        }
-                    }}
-                >
-                    Connect
-                </LoadingButton>
-            </Box>
-        )
-        let stateIcon = (<LinkOffIcon sx={{color: alpha(theme.palette.text.primary, 0.6)}}/>)
-        if (workspaceState !== null) {
-            if (workspaceState === 1 && lspActive) {
-                stateTooltipTitle = "Connected To DevSpace"
-                stateIcon = (<LinkIcon sx={{color: theme.palette.success.main}} />)
-            } else {
-                stateTooltipTitle = "Connecting To DevSpace"
-                stateIcon = (<CircularProgress size={24} sx={{color: alpha(theme.palette.text.primary, 0.6)}} />)
-            }
+    const handleNextByte = () => {
+        const nextByte = getNextByte();
+        if (nextByte) {
+            navigate(`/byte/${nextByte._id}`);
+            setNextByteDrawerOpen(false);
         }
+    };
+
+    const currentDifficulty = determineDifficulty();
+
+    interface DifficultyPopupProps {
+        open: boolean;
+        onClose: () => void;
+        onSelectDifficulty: (difficulty: number) => void;
+        currentDifficulty: number;
+    }
+
+    const DifficultyPopup: React.FC<DifficultyPopupProps> = ({
+                                                                 open,
+                                                                 onClose,
+                                                                 onSelectDifficulty,
+                                                                 currentDifficulty
+                                                             }) => {
+        const difficulties = ['Easy', 'Medium', 'Hard'];
 
         return (
-            <Box
-                display={"flex"}
-                flexDirection={"column"}
-                sx={{
-                    position: "relative",
-                    width: "fit-content",
-                    padding: "0px",
-                    gap: "10px",
-                    height: "100%"
-                }}
-            >
-                {(activeSidebarTab === null || activeSidebarTab === "nextSteps") && (
-                    <ByteNextStep
-                        trigger={nextStepsPopup}
-                        acceptedCallback={() => {
-                            setNextStepsPopup(false)
-                        }}
-                        onExpand={() => setActiveSidebarTab("nextSteps")}
-                        onHide={() => setActiveSidebarTab(null)}
-                        currentCode={code}
-                        maxWidth="20vw"
-                        bytesID={id || ""}
-                        // @ts-ignore
-                        bytesDescription={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
-                        // @ts-ignore
-                        bytesDevSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
-                        bytesLang={programmingLanguages[byteData ? byteData.lang : 5]}
-                        codePrefix={codeBeforeCursor}
-                        codeSuffix={codeAfterCursor}
-                    />
-                )}
-                {(activeSidebarTab === null || activeSidebarTab === "debugOutput") && (
-                    <ByteNextOutputMessage
-                        trigger={outputPopup}
-                        acceptedCallback={() => { setOutputPopup(false) }}
-                        onExpand={() => setActiveSidebarTab("debugOutput")}
-                        onHide={() => setActiveSidebarTab(null)}
-                        onSuccess={() => {
-                            markComplete()
-
-
-                        }}
-                        lang={programmingLanguages[byteData ? byteData.lang : 5]}
-                        code={code}
-                        byteId={id || ""}
-                        // @ts-ignore
-                        description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
-                        // @ts-ignore
-                        questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
-                        // @ts-ignore
-                        dev_steps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
-                        maxWidth={"20vw"}
-                        codeOutput={output?.merged || ""}
-                        nextByte={getNextByte()}
-                    />
-                )}
-                {activeSidebarTab === null && (
-                    <Tooltip title={stateTooltipTitle}>
-                        <Box
-                            sx={{
-                                position: "absolute",
-                                bottom: "10px",
-                                height: "30px",
-                                width: "30px",
-                                marginLeft: "10px",
-                                padding: "3px"
-                            }}
+            <Dialog onClose={onClose} open={open}>
+                <DialogTitle>Select Difficulty</DialogTitle>
+                <List>
+                    {difficulties.map((difficulty, index) => (
+                        <ListItem
+                            button
+                            onClick={() => onSelectDifficulty(index)}
+                            key={difficulty}
+                            selected={index === currentDifficulty}
+                            sx={{backgroundColor: index === currentDifficulty ? 'action.selected' : null}}
                         >
-                            {stateIcon}
-                        </Box>
-                    </Tooltip>
-                )}
-            </Box>
-        )
-    }
+                            <ListItemText
+                                primary={
+                                    <Typography variant="body1" style={{textAlign: 'center'}}>
+                                        {difficulty}
+                                    </Typography>
+                                }
+                            />
+                        </ListItem>
+                    ))}
+                </List>
+            </Dialog>
+        );
+    };
 
-    const selectDiagnosticLevel = React.useCallback((): "hint" | "info" | "warning" | "error" => {
-        switch (bytesState.byteDifficulty) {
-            case 0:
-                return "error"
-            case 1:
-                return "warning"
-            case 2:
-                return "hint"
-        }
-        return "hint"
-    }, [bytesState.byteDifficulty])
+    const getFilteredActions = () => {
+        const allActions = [
+            {
+                icon: <HomeIcon/>,
+                name: 'Home',
+                action: () => navigate('/home/')
+            },
+            {
+                icon: <img alt="CT" src={CTIcon} style={{width: 18, height: 18}}/>,
+                name: 'Byte Chat',
+                action: () => setActiveView('byteChat')
+            },
+            {
+                icon: <DeveloperModeIcon/>,
+                name: 'Editor',
+                action: () => setActiveView('editor')
+            },
+            {
+                icon: <span role="img" aria-label="banana">🍌</span>,
+                name: 'All Bytes',
+                action: () => navigate('/bytesMobile')
+            },
+            {
+                icon: <PinIcon/>,
+                name: 'Difficulty',
+                action: () => setIsDifficultyPopupOpen(true),
+            },
+        ];
 
-    if (window.innerWidth < 1000) {
-        navigate("/")
-    }
+        // Filter actions based on the current view
+        return allActions.filter(action => {
+            if (activeView === 'editor' && action.name === 'Editor') return false;
+            if (activeView === 'byteChat' && action.name === 'Byte Chat') return false;
+            return true;
+        });
+    };
 
+    // @ts-ignore
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
-                <Container maxWidth="xl" style={containerStyle}>
-                    <Box sx={topContainerStyle}>
-                        <Box sx={difficultyAdjusterStyle}>
-                            <DifficultyAdjuster
-                                difficulty={determineDifficulty()}
-                                onChange={updateDifficulty}
-                            />
-                        </Box>
-
-                        {byteData ? (
-                            <Typography variant="h4" component="h1" style={titleStyle}>
-                                {byteData.name}
-                            </Typography>
-                        ) : (
-                            <Box sx={titlePlaceholderContainerStyle}>
-                                <Box sx={titlePlaceholderStyle}>
-                                    <SheenPlaceholder width="400px" height={"45px"} />
-                                </Box>
-                            </Box>
-                        )}
-                    </Box>
-                    <div style={mainLayoutStyle}>
-                        <div style={combinedSectionStyle}>
-                            <div style={markdownSectionStyle}>
-                                {byteData && id !== undefined && (
-                                    <ByteChat
-                                        byteID={id}
-                                        // @ts-ignore
-                                        description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
-                                        // @ts-ignore
-                                        devSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
-                                        // @ts-ignore
-                                        difficulty={difficultyToString(determineDifficulty())}
-                                        // @ts-ignore
-                                        questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
-                                        codePrefix={codeBeforeCursor}
-                                        codeSuffix={codeAfterCursor}
-                                        codeLanguage={programmingLanguages[byteData ? byteData.lang : 5]}
-                                    />
-                                )}
-                            </div>
-                            <Box
-                                style={editorAndTerminalStyle}
-                                ref={editorContainerRef}
-                            >
+                <Box sx={{...topContainerStyle, flexDirection: 'row', justifyContent: 'center', width: '100%'}}>
+                    {tabValue === 0 && (
+                        <>
+                            {activeSidebarTab !== "nextSteps" && (
+                                <ByteNextOutputMessageMobile
+                                    trigger={outputPopup}
+                                    acceptedCallback={() => {
+                                        setOutputPopup(false)
+                                    }}
+                                    onExpand={() => setActiveSidebarTab("debugOutput")}
+                                    onHide={() => setActiveSidebarTab(null)}
+                                    onSuccess={() => {
+                                        markComplete()
+                                    }}
+                                    lang={programmingLanguages[byteData ? byteData.lang : 5]}
+                                    code={code}
+                                    byteId={id || ""}
+                                    //@ts-ignore
+                                    description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
+                                    //@ts-ignore
+                                    questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
+                                    //@ts-ignore
+                                    dev_steps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
+                                    maxWidth={"100%"}
+                                    codeOutput={output?.merged || ""}
+                                    nextByte={getNextByte()}
+                                    style={{
+                                        position: 'relative',
+                                        top: 0,
+                                        left: 0,
+                                        zIndex: 1050,
+                                        width: '100%',
+                                        height: '100%',
+                                    }}
+                                />
+                            )}
+                            {activeSidebarTab === null && (
+                                byteData ? (
+                                    <Typography variant="h4" component="h1" style={titleStyle}>
+                                        {byteData.name}
+                                    </Typography>
+                                ) : (
+                                    <Box sx={titlePlaceholderContainerStyle}>
+                                        <Box sx={titlePlaceholderStyle}>
+                                            <SheenPlaceholder width="400px" height={"45px"}/>
+                                        </Box>
+                                    </Box>
+                                )
+                            )}
+                            {activeSidebarTab !== "debugOutput" && (
+                                <ByteNextStepMobile
+                                    trigger={nextStepsPopup}
+                                    acceptedCallback={() => {
+                                        setNextStepsPopup(false)
+                                    }}
+                                    onExpand={() => setActiveSidebarTab("nextSteps")}
+                                    onHide={() => setActiveSidebarTab(null)}
+                                    currentCode={code}
+                                    maxWidth="100%"
+                                    bytesID={id || ""}
+                                    //@ts-ignore
+                                    bytesDescription={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
+                                    //@ts-ignore
+                                    bytesDevSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
+                                    bytesLang={programmingLanguages[byteData ? byteData.lang : 5]}
+                                    codePrefix={codeBeforeCursor}
+                                    codeSuffix={codeAfterCursor}
+                                />
+                            )}
+                        </>
+                    )}
+                </Box>
+                {activeSidebarTab === null && (
+                    <Box style={editorAndTerminalStyle} ref={editorContainerRef}>
+                        <DifficultyPopup
+                            open={isDifficultyPopupOpen}
+                            onClose={() => setIsDifficultyPopupOpen(false)}
+                            onSelectDifficulty={(difficulty: number) => {
+                                updateDifficulty(difficulty); // Call your existing updateDifficulty function with the new difficulty
+                                setIsDifficultyPopupOpen(false);
+                            }}
+                            currentDifficulty={currentDifficulty}
+                        />
+                        {activeView === 'editor' && (
+                            <>
                                 {code.length > 0 && (
                                     <Tooltip title="Run Code">
                                         <LoadingButton
@@ -1248,13 +1057,12 @@ function Byte() {
                                                 buttonClickedRef.current = true;
                                                 if (!authState.authenticated) {
                                                     navigate("/signup")
-                                                    return
+                                                    return;
                                                 }
-
-                                                executeCode(); // Indicate button click
+                                                executeCode();
                                             }}
                                         >
-                                            <PlayArrow />
+                                            <PlayArrow/>
                                         </LoadingButton>
                                     </Tooltip>
                                 )}
@@ -1266,23 +1074,11 @@ function Byte() {
                                     theme={mode}
                                     readonly={!authState.authenticated}
                                     onChange={(val, view) => handleEditorChange(val)}
-                                    onCursorChange={(bytePosition, line, column) => setCursorPosition({ row: line, column: column })}
-                                    // lspUrl={byteData ? (byteData.lang === 5 ? "ws://localhost:42081" : "ws://localhost:42083") : undefined}
-                                    lspUrl={byteData && lspActive ? `wss://${byteData._id}-lsp.${config.coderPath.replace("https://", "")}` : undefined}
-                                    diagnosticLevel={selectDiagnosticLevel()}
-                                    wrapperStyles={{
-                                        width: '100%',
-                                        height: '100%',
-                                        borderRadius: "10px",
-                                        ...(
-                                            // default
-                                            workspaceState === null ? {} :
-                                            // starting or active
-                                            workspaceState === 1 && lspActive ?
-                                                {border: `1px solid ${theme.palette.primary.main}`} :
-                                                {border: `1px solid grey`}
-                                        )
-                                    }}
+                                    onCursorChange={(bytePosition, line, column) => setCursorPosition({
+                                        row: line,
+                                        column: column
+                                    })}
+                                    editorStyles={editorStyles}
                                 />
                                 {terminalVisible && output && (
                                     <ByteTerminal
@@ -1293,33 +1089,71 @@ function Byte() {
                                         isRunning={executingCode}
                                     />
                                 )}
-                            </Box>
-                            {renderEditorSideBar()}
-                        </div>
-                        <div style={byteSelectionMenuStyle}>
-                            {recommendedBytes && <ByteSelectionMenu bytes={recommendedBytes} onSelectByte={handleSelectByte}/>}
-                        </div>
-                    </div>
-                </Container>
-                {xpPopup ? (<XpPopup oldXP={
-                    //@ts-ignore
-                    (xpData["xp_update"]["old_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]} levelUp={
-                    //@ts-ignore
-                    xpData["level_up_reward"] !== null} maxXP={100}
-                    //@ts-ignore
-                                     newXP={(xpData["xp_update"]["new_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]}
-                    //@ts-ignore
-                                     nextLevel={xpData["xp_update"]["old_level"] !== undefined ? xpData["xp_update"]["new_level"] : xpData["xp_update"]["next_level"]}
-                    //@ts-ignore
-                                     gainedXP={xpData["xp_update"]["new_xp"] - xpData["xp_update"]["old_xp"]}
-                    //@ts-ignore
-                                     reward={xpData["level_up_reward"]}
-                    //@ts-ignore
-                                     renown={xpData["xp_update"]["current_renown"]} popupClose={null}
-                                     homePage={true} />) : null}
+                                <Box
+                                    sx={{
+                                        width: '100%',
+                                        maxWidth: "100%",
+                                        height: '35px',
+                                        backgroundColor: '#232a2f',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                    }}
+                                    onClick={() => setNextByteDrawerOpen(true)}
+                                >
+                                    <KeyboardArrowUp/>
+                                </Box>
+                            </>
+                        )}
+                        {activeView === 'byteChat' && byteData && id !== undefined && (
+                            <ByteChatMobile
+                                byteID={id}
+                                // @ts-ignore
+                                description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
+                                // @ts-ignore
+                                devSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
+                                difficulty={difficultyToString(determineDifficulty())}
+                                // @ts-ignore
+                                questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
+                                codePrefix={codeBeforeCursor}
+                                codeSuffix={codeAfterCursor}
+                                codeLanguage={programmingLanguages[byteData ? byteData.lang : 5]}
+                                setSpeedDialVisibility={setSpeedDialVisibility}
+                            />
+                        )}
+                        {isSpeedDialVisible && (
+                            <SpeedDial
+                                ariaLabel="SpeedDial"
+                                sx={{position: 'fixed', bottom: 24, right: 16}}
+                                icon={<MenuIcon/>}
+                                open={speedDialOpen}
+                                onOpen={() => setSpeedDialOpen(true)}
+                                onClose={() => setSpeedDialOpen(false)}
+                            >
+                                {getFilteredActions().map((action) => (
+                                    <SpeedDialAction
+                                        key={action.name}
+                                        icon={action.icon}
+                                        tooltipTitle={action.name}
+                                        onClick={() => {
+                                            setSpeedDialOpen(false)
+                                            action.action();
+                                        }}
+                                    />
+                                ))}
+                            </SpeedDial>
+                        )}
+                    </Box>
+                )}
+                <NextByteDrawerMobile
+                    open={nextByteDrawerOpen}
+                    onClose={() => setNextByteDrawerOpen(false)}
+                    onNextByte={handleNextByte}
+                />
             </CssBaseline>
-        </ThemeProvider >
+        </ThemeProvider>
     );
-}
+};
 
-export default Byte;
+export default ByteMobile;
