@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Typography, IconButton, Dialog, PaletteMode, createTheme, Box} from '@mui/material';
+import {Typography, IconButton, Dialog, PaletteMode, createTheme, Box, Button} from '@mui/material';
 import Close from '@mui/icons-material/Close'; // Assuming you're using MUI icons
 import { LoadingButton } from '@mui/lab';
 import premiumGorilla from "../img/pro-pop-up-icon-plain.svg";
@@ -61,7 +61,7 @@ const GoProDisplay: React.FC<GoProPopupProps> = ({ open, onClose }) => {
         <Dialog open={open} onClose={onClose} maxWidth="md" PaperProps={{sx: {borderRadius: 7, overflow: "hidden"}}}>
             <Box style={{
                 width: window.innerWidth < 1000 ? "80vw" : "28vw",
-                height: window.innerWidth < 1000 ? "78vh": "65vh",
+                height: window.innerWidth < 1000 || window.innerHeight < 900 ? "78vh": "70vh",
                 minHeight: "420px",
                 // justifyContent: "center",
                 // marginLeft: "25vw",
@@ -187,6 +187,19 @@ const GoProDisplay: React.FC<GoProPopupProps> = ({ open, onClose }) => {
                             </LoadingButton>
                         </div>
                     </div>
+                    <Typography
+                        variant="body1"
+                        style={{ marginTop: "20px", color: "white", cursor: "pointer" }}
+                        align="center"
+                        component="a" // Render the Typography as an <a> tag
+                        href="/premium" // Specify the target URL
+                        onClick={(e) => {
+                            e.preventDefault(); // Prevent default to stop navigation (optional)
+                            window.open("/premium", "_blank"); // Open in new tab
+                        }}
+                    >
+                        Learn More About Pro
+                    </Typography>
                 </div>
             </Box>
         </Dialog>
