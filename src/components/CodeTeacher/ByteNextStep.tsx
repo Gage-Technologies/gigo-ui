@@ -23,6 +23,14 @@ import { Checklist, Circle } from "@mui/icons-material";
 import { useGlobalCtWebSocket } from "../../services/ct_websocket";
 import { CtByteNextStepsRequest, CtByteNextStepsResponse, CtGenericErrorPayload, CtMessage, CtMessageOrigin, CtMessageType, CtValidationErrorPayload } from "../../models/ct_websocket";
 import CodeTeacherChatIcon from "./CodeTeacherChatIcon";
+import {useAppSelector} from "../../app/hooks";
+import {selectAuthState} from "../../reducers/auth/auth";
+import call from "../../services/api-call";
+import config from "../../config";
+import proBackground from "../../img/popu-up-backgraound-plain.svg";
+import premiumGorilla from "../../img/pro-pop-up-icon-plain.svg";
+import {LoadingButton} from "@mui/lab";
+import GoProDisplay from "../GoProDisplay";
 
 export type ByteNextStepProps = {
     trigger: boolean;
@@ -37,6 +45,7 @@ export type ByteNextStepProps = {
     bytesLang: string;
     codePrefix: string;
     codeSuffix: string;
+    containerRef: React.MutableRefObject<null>;
 };
 
 enum State {
@@ -47,11 +56,13 @@ enum State {
 
 export default function ByteNextStep(props: ByteNextStepProps) {
     let userPref = localStorage.getItem("theme");
+    let authState = useAppSelector(selectAuthState);
     const [mode, _] = useState<PaletteMode>(userPref === "light" ? "light" : "dark");
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
     const [response, setResponse] = useState<string>("");
     const [state, setState] = useState<State>(State.WAITING)
     const [hidden, setHidden] = useState<boolean>(true);
+    const [goProPopup, setGoProPopup] = useState(false)
 
     const ctWs = useGlobalCtWebSocket();
 
@@ -155,6 +166,10 @@ export default function ByteNextStep(props: ByteNextStepProps) {
         props.onExpand()
     }
 
+    let premium = authState.role.toString()
+    // //remove after tesdting
+    // premium = "0"
+
     const launchNextSteps = React.useCallback(() => {
         if (state === State.LOADING) {
             return
@@ -197,6 +212,8 @@ export default function ByteNextStep(props: ByteNextStepProps) {
             return false
         })
     }, [props.bytesID, props.bytesDescription, props.bytesDevSteps, props.bytesLang, props.codePrefix, props.codeSuffix])
+
+    const toggleProPopup = () => setGoProPopup(!goProPopup)
 
     const renderWaiting = React.useMemo(() => {
         return (
@@ -323,14 +340,27 @@ export default function ByteNextStep(props: ByteNextStepProps) {
                         </Button>
                     ) : headerLoadingAnim}
                 </Box>
-                <MarkdownRenderer
-                    markdown={response}
-                    style={{
-                        overflowWrap: 'break-word',
-                        borderRadius: '10px',
-                        padding: '0px',
-                    }}
-                />
+                <div style={{display: 'flex', flexDirection: 'column'}}>
+                    <MarkdownRenderer
+                        markdown={response}
+                        style={{
+                            overflowWrap: 'break-word',
+                            borderRadius: '10px',
+                            padding: '0px',
+                        }}
+                    />
+                    <div style={{display: 'flex', justifyContent: 'flex-end', marginTop: '10px', marginRight: "10px"}}>
+                        {premium === "0" && (
+                            <Tooltip title={"Get Access to more coding help and resources by going pro"}>
+                                <Button onClick={(event) => {
+                                    setGoProPopup(true)
+                                }} variant={"outlined"}>
+                                    Go Pro
+                                </Button>
+                            </Tooltip>
+                        )}
+                    </div>
+                </div>
                 {state === State.LOADING && response.length > 0 && loadingAnim}
             </Box>
         )
@@ -363,6 +393,7 @@ export default function ByteNextStep(props: ByteNextStepProps) {
             }}
         >
             {renderExpanded()}
+            <GoProDisplay open={goProPopup} onClose={toggleProPopup}/>
         </Box>
     );
 }

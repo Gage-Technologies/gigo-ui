@@ -1510,15 +1510,15 @@ function Home() {
                         homePage={true} />) : null}
                     {/*{xpPopup ? (<XpPopup oldXP={*/}
                     {/*    //@ts-ignore*/}
-                    {/*    7} levelUp={*/}
+                    {/*    8} levelUp={*/}
                     {/*    //@ts-ignore*/}
                     {/*    true} maxXP={100}*/}
                     {/*    //@ts-ignore*/}
-                    {/*                     newXP={8}*/}
+                    {/*                     newXP={9}*/}
                     {/*    //@ts-ignore*/}
-                    {/*                     nextLevel={5}*/}
+                    {/*                     nextLevel={9}*/}
                     {/*    //@ts-ignore*/}
-                    {/*                     gainedXP={200}*/}
+                    {/*                     gainedXP={7}*/}
                     {/*    //@ts-ignore*/}
                     {/*                     reward={"blue_hat"}*/}
                     {/*    //@ts-ignore*/}

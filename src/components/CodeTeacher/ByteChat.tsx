@@ -3,7 +3,7 @@ import {
     Box,
     Button, ButtonBase,
     Card,
-    CircularProgress, createTheme, Divider, Grid, IconButton, InputAdornment, PaletteMode,
+    CircularProgress, createTheme, Divider, Grid, IconButton, InputAdornment, PaletteMode, Popper,
     PopperPlacementType, Stack,
     styled,
     TextField,
@@ -41,6 +41,12 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import {grey} from "@mui/material/colors";
 import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../../reducers/bytes/bytes";
+import {Close} from "@material-ui/icons";
+import premiumGorilla from "../../img/pro-pop-up-icon-plain.svg";
+import {LoadingButton} from "@mui/lab";
+import call from "../../services/api-call";
+import proBackground from "../../img/popu-up-backgraound-plain.svg";
+import GoProDisplay from "../GoProDisplay";
 
 const InitialSuggestionButton = styled(Button)`
     animation: initSuggestionButtonAuraEffect 2s infinite alternate;
@@ -83,12 +89,15 @@ export type ByteChatProps = {
     codeSuffix: string;
     codeLanguage: string;
     questions: [];
+    containerRef: React.MutableRefObject<null>
 };
 
 export default function ByteChat(props: ByteChatProps) {
     let userPref = localStorage.getItem('theme');
     const [mode, _] = useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
+
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
     let ctWs = useGlobalCtWebSocket();
     let authState = useAppSelector(selectAuthState);
@@ -108,6 +117,7 @@ export default function ByteChat(props: ByteChatProps) {
     const [response, setResponse] = useState("")
     const [state, setState] = useState<State>(State.WAITING)
     const [userMessage, setUserMessage] = useState('');
+    const [goProPopup, setGoProPopup] = useState(false)
     const [messages, setMessages] = useState<CtByteChatMessage[]>([
         {
             _id: "init2",
@@ -529,29 +539,50 @@ export default function ByteChat(props: ByteChatProps) {
         )
     }
 
+    let premium = authState.role.toString()
+    // //remove after testing
+    // premium = "0"
+
     const renderCompleted = (
         content: string,
+        _id: string | null = null,
     ) => {
+        console.log("final id is: ", _id)
         return (
-            <MarkdownRenderer
-                markdown={content}
-                style={{
-                    overflowWrap: 'break-word',
-                    borderRadius: '10px',
-                    padding: '0px',
-                }}
-            />
+            <div style={{display: 'flex', flexDirection: 'column'}}>
+                <MarkdownRenderer
+                    markdown={content}
+                    style={{
+                        overflowWrap: 'break-word',
+                        borderRadius: '10px',
+                        padding: '0px',
+                    }}
+                />
+                <div style={{display: 'flex', justifyContent: 'flex-end', marginTop: '10px'}}>
+                    {(_id == null || !_id.includes("init")) && premium === "0" && (
+                        <Tooltip title={"Get Access to more coding help and resources by going pro"}>
+                            <Button onClick={(event) => {
+                                setGoProPopup(true)
+                                setAnchorEl(event.currentTarget)
+                            }} variant={"outlined"}>
+                                Go Pro
+                            </Button>
+                        </Tooltip>
+                    )}
+                </div>
+            </div>
         )
     }
 
     const renderContent = (
         content: string,
-        loading: boolean
+        loading: boolean,
+        _id: string | null = null,
     ) => {
         if (loading) {
             return renderLoading(content);
         }
-        return renderCompleted(content);
+        return renderCompleted(content, _id);
     }
 
     const renderUserMessage = (content: string) => {
@@ -631,6 +662,7 @@ export default function ByteChat(props: ByteChatProps) {
         freeCreditUse: boolean = false,
         msgId: string
     ) => {
+        console.log("id is: ", _id)
         return (
             <div
                 style={{
@@ -678,7 +710,7 @@ export default function ByteChat(props: ByteChatProps) {
                         maxWidth: "82%"
                     }}
                 >
-                    {renderContent(content, loading)}
+                    {renderContent(content, loading, _id)}
                 </Card>
             </div>
         );
@@ -918,6 +950,8 @@ export default function ByteChat(props: ByteChatProps) {
         )
     }
 
+    const toggleProPopup = () => setGoProPopup(!goProPopup)
+
     return (
         <>
             <Box
@@ -961,6 +995,7 @@ export default function ByteChat(props: ByteChatProps) {
                 )}
             </Box>
             {renderSuggestions()}
+            <GoProDisplay open={goProPopup} onClose={toggleProPopup}/>
             {textInputMemo}
         </>
     );
