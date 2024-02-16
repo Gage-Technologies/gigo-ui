@@ -34,6 +34,7 @@ import proBackground from "../img/popu-up-backgraound-plain.svg";
 import {Close} from "@material-ui/icons";
 import premiumGorilla from "../img/pro-pop-up-icon-plain.svg";
 import {LoadingButton} from "@mui/lab";
+import GoProDisplay from "./GoProDisplay";
 
 interface IProps {
     wsId: string;
@@ -57,6 +58,10 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
 
     const [isOpen, setIsOpen] = React.useState(false);
 
+    const authState = useAppSelector(selectAuthState);
+
+    let premium = authState.role.toString()
+
     const [workspace, setWorkspace] = React.useState<Workspace | null>(cachedValues && cachedValues.workspace ? cachedValues.workspace : null);
     const [cpuUsagePercentage, setCpuUsagePercentage] = React.useState<number>(cachedValues ? cachedValues.cpuPercentage : 0);
     const [memoryUsagePercentage, setMemoryUsagePercentage] = React.useState<number>(cachedValues ? cachedValues.memoryPercentage : 0);
@@ -64,14 +69,8 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
     const [memoryLimit, setMemoryLimit] = React.useState<number>(cachedValues ? cachedValues.memoryLimit : 0);
     const [cpuUsage, setCpuUsage] = React.useState<number>(cachedValues ? cachedValues.cpuUsage : 0);
     const [memoryUsage, setMemoryUsage] = React.useState<number>(cachedValues ? cachedValues.memoryUsage : 0);
-    const [proMonthlyLink, setProMonthlyLink] = React.useState("");
-    const [proYearlyLink, setProYearlyLink] = React.useState("");
-    const [proUrlsLoading, setProUrlsLoading] = React.useState(false);
     const [goProPopup, setGoProPopup] = useState(false)
 
-    const authState = useAppSelector(selectAuthState);
-
-    let premium = authState.role.toString()
     // //remove after testing
     // premium = "0"
 
@@ -130,40 +129,6 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
         handleWsMessage
     );
 
-    const retrieveProUrls = async (): Promise<{ monthly: string, yearly: string } | null> => {
-        setProUrlsLoading(true)
-        let res = await call(
-            "/api/stripe/premiumMembershipSession",
-            "post",
-            null,
-            null,
-            null,
-            // @ts-ignore
-            {},
-            null,
-            config.rootPath
-        )
-
-        setProUrlsLoading(false)
-
-        if (res !== undefined && res["return url"] !== undefined && res["return year"] !== undefined) {
-            setProMonthlyLink(res["return url"])
-            setProYearlyLink(res["return year"])
-            return {
-                "monthly": res["return url"],
-                "yearly": res["return year"],
-            }
-        }
-
-        return null
-    }
-
-    useEffect(() => {
-        if (premium === "0") {
-            retrieveProUrls()
-        }
-    }, [])
-
     const containerRef = useRef(null)
 
     const stopWorkspace = async () => {
@@ -181,6 +146,8 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
 
         window.history.replaceState({}, "", window.location.href.split("?")[0]);
     };
+
+    const toggleProPopup = () => setGoProPopup(!goProPopup)
 
     const usageMemo = React.useMemo(() => (
         <>
@@ -391,18 +358,26 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
                             ) : null
                         }
                     </Box>
-                    <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between", padding: "10px", backgroundColor: theme.palette.background.default,
-                        borderRadius: "10px",
-                        border: `1px solid ${theme.palette.primary.main}`}}>
-                        <div>
-                            <Typography variant={"subtitle1"}>Need More Resources?</Typography>
-                            <Button variant={"outlined"} onClick={() => {
-                                setGoProPopup(true)
-                                setIsOpen(false)
-                            }}>Go Pro</Button>
+                    {premium === "0" && (
+                        <div style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            padding: "10px",
+                            backgroundColor: theme.palette.background.default,
+                            borderRadius: "10px",
+                            border: `1px solid ${theme.palette.primary.main}`
+                        }}>
+                            <div>
+                                <Typography variant={"subtitle1"}>Need More Resources?</Typography>
+                                <Button variant={"outlined"} onClick={() => {
+                                    setGoProPopup(true)
+                                    setIsOpen(false)
+                                }}>Go Pro</Button>
+                            </div>
+                            <img src={goProGorilla} alt={"Go Pro"} height={"50px"}/>
                         </div>
-                        <img src={goProGorilla} alt={"Go Pro"} height={"50px"}/>
-                    </div>
+                    )}
                     {usageMemo}
 
                     {/* Ports */}
@@ -446,123 +421,7 @@ const DevSpaceControls = (props: React.PropsWithChildren<IProps>) => {
                     </div>
                 </Paper>
             )}
-            <Popper open={goProPopup} anchorEl={containerRef.current}>
-                <Box style={{
-                    width: window.innerWidth < 1000 ? "90vw" : "24vw",
-                    height: window.innerWidth < 1000 ? "78vh": "65vh",
-                    minHeight: "420px",
-                    // justifyContent: "center",
-                    // marginLeft: "25vw",
-                    // marginTop: "5vh",
-                    outlineColor: "black",
-                    borderRadius: "7%",
-                    boxShadow:
-                        "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px  0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
-                    // backgroundColor: theme.palette.background.default,
-                    backgroundImage: `url(${proBackground})`,
-                    backgroundSize: "cover",
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "center center",
-                    zIndex: 1000,
-                    // ...themeHelpers.frostedGlass
-                }}>
-                    <div style={{
-                        borderRadius: "10px",
-                        padding: "20px",
-                        textAlign: "center"
-                    }}>
-                        <IconButton
-                            edge="end"
-                            color="inherit"
-                            size="small"
-                            onClick={() => {
-                                setGoProPopup(false)
-                            }}
-
-                            sx={window.innerWidth < 1000 ? {
-                                position: "absolute",
-                                top: '2vh',
-                                right: '2vw',
-                                color: "white"
-                            } : {
-                                position: "absolute",
-                                top: '2vh',
-                                right: '2vw', color: "white"
-                            }}
-                        >
-                            <Close/>
-                        </IconButton>
-                        <img src={premiumGorilla} style={{width: "30%", marginBottom: "20px"}}/>
-                        <Typography variant={"h4"} style={{marginBottom: "10px", color: "white"}} align={"center"}>GIGO
-                            Pro</Typography>
-                        <Typography variant={"body1"} style={{marginLeft: "20px", marginRight: "20px", color: "white"}}
-                                    align={"center"}>
-                            Learn faster with a smarter Code Teacher!
-                        </Typography>
-                        <Typography variant={"body1"}
-                                    style={{
-                                        marginBottom: "20px",
-                                        marginLeft: "20px",
-                                        marginRight: "20px",
-                                        color: "white"
-                                    }}
-                                    align={"center"}>
-                            Do more with larger DevSpaces!
-                        </Typography>
-                        <div style={{
-                            display: "flex",
-                            justifyContent: "center"
-                        }}>
-                            <div style={{
-                                backgroundColor: "#070D0D",
-                                borderRadius: "10px",
-                                padding: "20px",
-                                margin: "10px",
-                                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                                textAlign: "center",
-                                width: "200px"
-                            }}>
-                                <Typography variant={"subtitle1"} style={{marginBottom: "10px", color: "white"}}
-                                            align={"center"}>1 Month</Typography>
-                                <Typography variant={"h5"} style={{marginBottom: "10px", color: "white"}}
-                                            align={"center"}>$15
-                                    / MO</Typography>
-                                <LoadingButton
-                                    loading={proUrlsLoading}
-                                    variant="contained"
-                                    onClick={() => window.open(proMonthlyLink, "_blank")}
-                                    style={{backgroundColor: theme.palette.secondary.dark}}
-                                >
-                                    Select
-                                </LoadingButton>
-                            </div>
-                            <div style={{
-                                backgroundColor: "#070D0D",
-                                borderRadius: "10px",
-                                padding: "20px",
-                                margin: "10px",
-                                boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
-                                textAlign: "center",
-                                width: "200px"
-                            }}>
-                                <Typography variant={"subtitle1"} style={{marginBottom: "10px", color: "white"}}
-                                            align={"center"}>12 Months</Typography>
-                                <Typography variant={"h5"} style={{marginBottom: "10px", color: "white"}}
-                                            align={"center"}>$11.25
-                                    / MO</Typography>
-                                <LoadingButton
-                                    loading={proUrlsLoading}
-                                    variant="contained"
-                                    onClick={() => window.open(proYearlyLink, "_blank")}
-                                    style={{backgroundColor: theme.palette.secondary.dark}}
-                                >
-                                    Select
-                                </LoadingButton>
-                            </div>
-                        </div>
-                    </div>
-                </Box>
-            </Popper>
+            <GoProDisplay open={goProPopup} onClose={toggleProPopup}/>
         </>
     )
 };
