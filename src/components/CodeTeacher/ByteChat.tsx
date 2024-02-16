@@ -868,12 +868,14 @@ export default function ByteChat(props: ByteChatProps) {
 
         // trim the list to the top 3 if it is longer
         let questions: string[] = props.questions;
-        if (questions.length > 3) {
+        if (questions.length > 3 && questions[0] !== "Explain the byte in greater detail.") {
             questions = props.questions.slice(0, 3)
         }
 
         // prepend the persistent question
-        questions.unshift("Explain the byte in greater detail.")
+        if (questions.length === 0 || questions[0] !== "Explain the byte in greater detail.") {
+            questions.unshift("Explain the byte in greater detail.")
+        }
 
         return (
             <Grid container sx={{
