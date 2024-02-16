@@ -3,9 +3,13 @@ import { StateField, StateEffect } from "@codemirror/state";
 import { DecorationSet, Transaction } from "@uiw/react-codemirror";
 import { keyframes } from "@emotion/react";
 import "./styles/highlights.css"
+import { CtPopupExtensionEngine } from "./CtPopupExtension";
 
 // Create a state effect for highlighting a particular line
 const ctHighlightText = StateEffect.define<{ from: number, to: number }>();
+
+//create a state effect for removing a particular line
+const ctClearHighlight = StateEffect.define<{ from: number, to: number }>();
 
 // Decoration mark for highlighting selected lines in code editor - this can be used to modify the elements that wrap lines in the editor
 const ctTextHighlightMark = Decoration.mark({ class: "cm-selection-highlight" });
@@ -37,9 +41,22 @@ export const ctTextHighlightExtension = StateField.define({
                 continue
             }
 
+            // if (e.is(ctHighlightText)) {
+            //     underlines = underlines.update({
+            //         add: [ctTextHighlightMark.range(e.value.from, e.value.to)]
+            //     });
+            // }
+
             if (e.is(ctHighlightText)) {
+                // Add highlight
                 underlines = underlines.update({
                     add: [ctTextHighlightMark.range(e.value.from, e.value.to)]
+                });
+            } else if (e.is(ctClearHighlight)) {
+                // Clear highlight
+                // Assuming ctClearHighlight effect clears highlighting within the specified range
+                underlines = underlines.update({
+                    filter: (from, to) => !(from >= e.value.from && to <= e.value.to)
                 });
             }
         }
@@ -50,29 +67,43 @@ export const ctTextHighlightExtension = StateField.define({
     provide: (f) => EditorView.decorations.from(f)
 });
 
-// Highlights the currently selected lines from the editor - 
-export function ctHighlightSelection(view: EditorView) {
-    let effects = view.state.selection.ranges
-        .filter((r) => !r.empty)
-        .map(({ from, to }) => ctHighlightText.of({ from, to }));
-    if (!effects.length) return false;
 
-    view.dispatch({ effects });
-    return true;
-}
+export function ctHighlightCodeRangeFullLines(view: EditorView, startLine: number, endLine: number) {
+    const text = view.state.doc.toString();
+    const lines = text.split("\n");
+    let startIndex = 0;
+    let endIndex = 0;
 
-// You can use this function to mark lines from normal JS/TS functions
-export function ctHighlightCodeRange(view: EditorView, startLine: number, endLine: number) {
-    let effects = [ctHighlightText.of({from: startLine, to: endLine})]
-    view.dispatch({ effects });
-    return true;
-}
-
-// This is just an example instance I made to make it easier to test
-export const highlightTesterKeymap = keymap.of([
-    {
-        key: "Mod-h",
-        preventDefault: true,
-        run: ctHighlightSelection
+    for (let i = 0; i < startLine; i++) {
+      startIndex += lines[i].length + 1;
     }
-]);
+
+    for (let i = 0; i < endLine; i++) {
+      endIndex += lines[i].length + 1;
+    }
+
+    endIndex -= 1; // Subtract 1 to exclude the newline character at the end of the last line
+
+    const effects = [ctHighlightText.of({ from: startIndex, to: endIndex })];
+    view.dispatch({ effects });
+}
+
+export function removeCtHighlightCodeRange(view: EditorView, startLine: number, endLine: number) {
+    const text = view.state.doc.toString();
+    const lines = text.split("\n");
+    let startIndex = 0;
+    let endIndex = 0;
+
+    for (let i = 0; i < startLine; i++) {
+      startIndex += lines[i].length + 1;
+    }
+
+    for (let i = 0; i < endLine; i++) {
+      endIndex += lines[i].length + 1;
+    }
+
+    endIndex -= 1; // Subtract 1 to exclude the newline character at the end of the last line
+
+    const effects = [ctClearHighlight.of({ from: startIndex, to: endIndex })];
+    view.dispatch({ effects });
+}

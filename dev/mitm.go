@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	targetBaseURL = "https://dev.api.gigo.dev"
+	targetBaseURL = "https://api.gigo.dev"
 	upgrader      = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool { return true },
 	}

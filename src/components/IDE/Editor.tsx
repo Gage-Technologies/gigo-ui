@@ -6,8 +6,8 @@ import {go} from '@codemirror/legacy-modes/mode/go';
 import {copilot} from '@uiw/codemirror-theme-copilot';
 import {quietlight} from '@uiw/codemirror-theme-quietlight';
 import useDynamicStyles from "../../hooks/dynamicStyles";
-import {Box} from "@mui/material";
-import {ctTextHighlightExtension, ctTextHighlightTheme, highlightTesterKeymap} from "./Extensions/CtHighlightExtension";
+import {alpha, Box, createTheme, PaletteMode} from "@mui/material";
+import {ctTextHighlightExtension, ctTextHighlightTheme} from "./Extensions/CtHighlightExtension";
 import {languageServer} from './Extensions/Lsp/Lsp';
 import "./editor.css"
 import {useGlobalCtWebSocket} from "../../services/ct_websocket";
@@ -15,11 +15,13 @@ import {
     CtGenericErrorPayload,
     CtMessage,
     CtMessageOrigin,
-    CtMessageType,
+    CtMessageType, CtParseFileRequest, CtParseFileResponse,
     CtSemanticRankRequest,
     CtSemanticRankResponse,
     CtValidationErrorPayload
 } from "../../models/ct_websocket";
+import {ctCreateCodeActions} from "./Extensions/CtCodeActionExtension";
+import {getAllTokens} from "../../theme";
 
 export type EditorProps = {
     language: string;
@@ -36,6 +38,7 @@ export type EditorProps = {
     onChange?: (val: string, viewUpdate: ViewUpdate) => void;
     onUpdate?: (viewUpdate: ViewUpdate) => void;
     onCursorChange?: (bytePosition: number, lineNumber: number, columnNumber: number) => void;
+    extensions?: Extension[]
 };
 
 const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorProps, ref) => {
@@ -75,6 +78,8 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
     const [wsLanguageServer, setWsLanguageServer] = useState<Extension[] | null>(null);
 
     const [PopupPortal, setPopupPortal] = useState<React.ReactPortal | null>(null);
+
+    const [extensions, setExtensions] = useState<Extension[]>([])
 
     const selectLang = () => {
         switch (props.language.toLowerCase()) {
@@ -174,7 +179,6 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
             // autocompleteExtension,
             ctTextHighlightExtension,
             ctTextHighlightTheme,
-            highlightTesterKeymap,
         ];
         let lang = selectLang();
         if (lang) {
@@ -183,15 +187,22 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
         if (wsLanguageServer) {
             exts = exts.concat(wsLanguageServer)
         }
+        if (props.extensions) {
+            exts = exts.concat(props.extensions)
+        }
 
         return exts
     }
+
+    useEffect(() => {
+        setExtensions(getExtensions())
+    }, [props.extensions, props.language, wsLanguageServer]);
 
     const onChange = React.useCallback((val: string, viewUpdate: ViewUpdate) => {
         if (props.onChange) {
             props.onChange(val, viewUpdate)
         }
-    }, [props.onChange])
+    }, [props.onChange, props.code])
 
     const onUpdate = React.useCallback((viewUpdate: ViewUpdate) => {
         if (props.onUpdate) {
@@ -218,7 +229,7 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
                 height="100%"
                 theme={(props.theme ? props.theme : defaultProps.theme).toLowerCase() === 'light' ? quietlight : copilot}
                 style={props.wrapperStyles ? props.wrapperStyles : defaultProps.wrapperStyles}
-                extensions={getExtensions()}
+                extensions={extensions}
                 onChange={onChange}
                 onUpdate={onUpdate}
                 readOnly={props.readonly}
