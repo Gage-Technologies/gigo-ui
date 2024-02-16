@@ -5,8 +5,19 @@ import {Grid, Card, CardActionArea, CardContent, Typography, CardMedia, Button, 
 type MarkdownFile = {
     name: string;
     content: string;
-    imageUrl?: string; // Optional field to store the first image URL
+    imageUrl?: string;
+    date: string; // Added date field
 };
+
+
+function parseCustomDate(dateStr: any) {
+    // Assuming dateStr is in M-D-YY format
+    const [month, day, year] = dateStr.split('-').map(Number);
+    // Adjust the year based on your century cutoff logic
+    console.log('date: ', month, day, year);
+    return new Date(year, month - 1, day);
+}
+
 
 const ArticlesPage: React.FC = () => {
     const [markdownContents, setMarkdownContents] = useState<MarkdownFile[]>([]);
@@ -29,28 +40,41 @@ const ArticlesPage: React.FC = () => {
         };
 
         listRepoContents().then(markdownFiles => {
-            // Your existing logic...
             const contentsPromises = markdownFiles.map(file =>
                 fetch(file.download_url).then(response => response.text())
             );
 
             Promise.all(contentsPromises).then(contents => {
-                const filesContent: MarkdownFile[] = markdownFiles.map((file, index) => {
+                let filesContent: MarkdownFile[] = markdownFiles.map((file, index) => {
                     const content = contents[index];
-
-                    // Regular expression to match the first image in markdown content
+                    const firstLine = content.split('\n')[0].trim();
+                    const dateMatch = firstLine.match(/^\d{1,2}-\d{1,2}-\d{4}$/);
+                    const dateStr = dateMatch ? dateMatch[0] : 'Unknown Date';
                     const imageUrlMatch = content.match(/!\[.*?\]\((.*?)\)/);
                     const imageUrl = imageUrlMatch ? imageUrlMatch[1] : undefined;
 
                     return {
-                        name: file.name.replaceAll("-", " "),
-                        content,
-                        imageUrl, // Add the first image URL to each article
+                        name: file.name.replaceAll("-", " ").replace('.md', ''),
+                        content: content.replace(firstLine + '\n', '').trim(),
+                        imageUrl,
+                        date: dateStr,
                     };
                 });
+
+                // Sort the articles by date
+                filesContent = filesContent.sort((a, b) => {
+                    let dateA = parseCustomDate(a.date);
+                    console.log("date int: ", dateA)
+                    let dateB = parseCustomDate(b.date);
+                    // @ts-ignore
+                    return dateB - dateA;
+                });
+
                 setMarkdownContents(filesContent);
             });
+
         });
+
     }, []);
 
 
@@ -84,6 +108,10 @@ const ArticlesPage: React.FC = () => {
                                 <CardContent>
                                     <Typography gutterBottom variant="h5" component="div">
                                         {article.name.replace('.md', '')} {/* Optionally remove file extension */}
+
+                                    </Typography>
+                                    <Typography gutterBottom variant="body1" component="div">
+                                        {article.date}
                                     </Typography>
                                 </CardContent>
                             </CardActionArea>
