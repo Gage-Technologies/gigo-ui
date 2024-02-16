@@ -45,7 +45,6 @@ export const ctCreateCodeActions = (
     portalCallback: (id: string, portal: React.ReactPortal) => void,
     cleanupCodeCallback: (node: Node) => void
 ) => {
-    console.log("creating code actions")
     return lineWidget({
         spec: symbols.nodes.
             filter(x => {
@@ -61,7 +60,7 @@ export const ctCreateCodeActions = (
 
                 return true
             }).
-            sort(x => x.position.start_line).
+            sort((a, b) => a.position.start_line < b.position.start_line ? -1 : 1).
             map(node => ({
                 lineNumber: node.position.start_line + 1,
                 position: LineWidgetPosition.TOP,
