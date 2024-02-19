@@ -43,6 +43,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import {grey} from "@mui/material/colors";
 import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../../reducers/bytes/bytes";
 import CloseIcon from "@material-ui/icons/Close";
+import GoProDisplay from "../GoProDisplay";
 
 const InitialSuggestionButton = styled(Button)`
     animation: initSuggestionButtonAuraEffect 2s infinite alternate;
@@ -112,6 +113,7 @@ export default function ByteChatMobile(props: ByteChatProps & { setSpeedDialVisi
     const [userMessage, setUserMessage] = useState('');
     const [openPopup, setOpenPopup] = useState(false);
     const [popupMessage, setPopupMessage] = useState('');
+    const [goProPopup, setGoProPopup] = useState(false)
 
     const [messages, setMessages] = useState<CtByteChatMessage[]>([
         {
@@ -535,29 +537,49 @@ export default function ByteChatMobile(props: ByteChatProps & { setSpeedDialVisi
         )
     }
 
+    let premium = authState.role.toString()
+    // //remove after testing
+    // premium = "0"
+
     const renderCompleted = (
         content: string,
+        _id: string | null = null,
     ) => {
         return (
-            <MarkdownRenderer
-                markdown={content}
-                style={{
-                    overflowWrap: 'break-word',
-                    borderRadius: '10px',
-                    padding: '0px',
-                }}
-            />
+            <div style={{display: 'flex', flexDirection: 'column'}}>
+                <MarkdownRenderer
+                    markdown={content}
+                    style={{
+                        overflowWrap: 'break-word',
+                        borderRadius: '10px',
+                        padding: '0px',
+                    }}
+                />
+                <div style={{display: 'flex', justifyContent: 'flex-end', marginTop: '10px'}}>
+                    {(_id == null || !_id.includes("init")) && premium === "0" && (
+                        <Tooltip title={"Get Access to more coding help and resources by going pro"}>
+                            <Button onClick={(event) => {
+                                setGoProPopup(true)
+                                // setAnchorEl(event.currentTarget)
+                            }} variant={"outlined"}>
+                                Go Pro
+                            </Button>
+                        </Tooltip>
+                    )}
+                </div>
+            </div>
         )
     }
 
     const renderContent = (
         content: string,
-        loading: boolean
+        loading: boolean,
+        _id: string | null = null,
     ) => {
         if (loading) {
             return renderLoading(content);
         }
-        return renderCompleted(content);
+        return renderCompleted(content, _id);
     }
 
     const renderUserMessage = (content: string) => {
@@ -689,7 +711,7 @@ export default function ByteChatMobile(props: ByteChatProps & { setSpeedDialVisi
                         wordWrap: 'break-word',
                     }}
                 >
-                    {renderContent(content, loading)}
+                    {renderContent(content, loading, _id)}
                 </Card>
             </div>
         );
@@ -1001,6 +1023,8 @@ export default function ByteChatMobile(props: ByteChatProps & { setSpeedDialVisi
         />
     ), [userMessage, disableChat, chatId])
 
+    const toggleProPopup = () => setGoProPopup(!goProPopup)
+
     return (
         <>
             <Box
@@ -1055,6 +1079,7 @@ export default function ByteChatMobile(props: ByteChatProps & { setSpeedDialVisi
                 }}
             >
                 {renderSuggestions()}
+                <GoProDisplay open={goProPopup} onClose={toggleProPopup}/>
                 <Box
                 sx={{ paddingLeft: 1, paddingRight: 1 }}
                 >

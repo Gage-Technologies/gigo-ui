@@ -7,7 +7,7 @@ import {
     Popper,
     PopperPlacementType,
     styled,
-    alpha
+    alpha, Tooltip
 } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 import { getAllTokens, themeHelpers } from "../../theme";
@@ -34,6 +34,9 @@ import BytesCard from "../BytesCard";
 import { useNavigate } from "react-router-dom";
 import BytesCardMobile from "../BytesCardMobile";
 import BytesCardSuccessPageMobile from "../ByteCardSuccessPageMobile";
+import GoProDisplay from "../GoProDisplay";
+import {useAppSelector} from "../../app/hooks";
+import {selectAuthState} from "../../reducers/auth/auth";
 
 export type ByteNextOutputMessageMobileProps = {
     trigger: boolean;
@@ -58,6 +61,7 @@ enum State {
 
 export default function ByteNextOutputMessageMobile(props: ByteNextOutputMessageMobileProps) {
     let userPref = localStorage.getItem("theme");
+    let authState = useAppSelector(selectAuthState);
     const [mode, _] = useState<PaletteMode>(userPref === "light" ? "light" : "dark");
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
     const [response, setResponse] = useState<string>("");
@@ -65,6 +69,7 @@ export default function ByteNextOutputMessageMobile(props: ByteNextOutputMessage
     const [state, setState] = useState<State>(State.LOADING);
     const [executingOutputMessage, setExecutingOutputMessage] = useState<boolean>(false)
     const [hidden, setHidden] = useState<boolean>(true);
+    const [goProPopup, setGoProPopup] = useState(false)
 
 
     const ctWs = useGlobalCtWebSocket();
@@ -133,6 +138,10 @@ export default function ByteNextOutputMessageMobile(props: ByteNextOutputMessage
         setHidden(false)
         props.onExpand()
     }
+
+    let premium = authState.role.toString()
+    // //remove after testing
+    // premium = "0"
 
 
     const renderHidden = React.useMemo(() => (
@@ -246,6 +255,8 @@ export default function ByteNextOutputMessageMobile(props: ByteNextOutputMessage
         <AnimCircularProgress size={24} />
     ), [])
 
+    const toggleProPopup = () => setGoProPopup(!goProPopup)
+
     const renderExpanded = () => {
         return (
             <Box
@@ -297,18 +308,31 @@ export default function ByteNextOutputMessageMobile(props: ByteNextOutputMessage
                             }}
                             onClick={() => hide()}
                         >
-                            <Close />
+                            <Close/>
                         </Button>
                     ) : headerLoadingAnim}
                 </Box>
-                <MarkdownRenderer
-                    markdown={response}
-                    style={{
-                        overflowWrap: 'break-word',
-                        borderRadius: '10px',
-                        padding: '0px',
-                    }}
-                />
+                <div style={{display: 'flex', flexDirection: 'column'}}>
+                    <MarkdownRenderer
+                        markdown={response}
+                        style={{
+                            overflowWrap: 'break-word',
+                            borderRadius: '10px',
+                            padding: '0px',
+                        }}
+                    />
+                    <div style={{display: 'flex', justifyContent: 'flex-end', marginTop: '10px'}}>
+                        {premium === "0" && (
+                            <Tooltip title={"Get Access to more coding help and resources by going pro"}>
+                                <Button onClick={(event) => {
+                                    setGoProPopup(true)
+                                }} variant={"outlined"}>
+                                    Go Pro
+                                </Button>
+                            </Tooltip>
+                        )}
+                    </div>
+                </div>
                 {state === State.LOADING && response.length > 0 && loadingAnim}
             </Box>
         )
@@ -335,7 +359,7 @@ export default function ByteNextOutputMessageMobile(props: ByteNextOutputMessage
                         width: "100%",
                     }}
                 >
-                    <Typography variant="h4" style={{ marginBottom: 2 }}>
+                    <Typography variant="h4" style={{marginBottom: 2}}>
                         Byte Completed!
                     </Typography>
                     <Player
@@ -453,6 +477,7 @@ export default function ByteNextOutputMessageMobile(props: ByteNextOutputMessage
                 }}
             >
                 {renderExpanded()}
+                <GoProDisplay open={goProPopup} onClose={toggleProPopup}/>
             </Box>
         )
     }
