@@ -12,6 +12,8 @@ import chatMessageCacheReducer from '../reducers/chat/cache'
 import chatReducer from '../reducers/chat/chat'
 import devSpaceCacheReducer from '../reducers/devSpace/usageCache';
 import bytesReducer from '../reducers/bytes/bytes'
+import journeyCreateUnitReducer from '../reducers/journeyCreate/journeyCreateUnit'
+import journeyCreateProjectReducer from '../reducers/journeyCreate/journeyCreateProject'
 
 const persistConfig = {
     key: 'root',
@@ -36,6 +38,8 @@ const reducers = combineReducers({
     chat: chatReducer,
     devSpaceCache: devSpaceCacheReducer,
     bytes: bytesReducer,
+    journeyCreateUnit: journeyCreateUnitReducer,
+    journeyCreateProject: journeyCreateProjectReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, reducers)

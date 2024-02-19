@@ -6,8 +6,8 @@ import { useAppDispatch, useAppSelector } from './app/hooks';
 import { initialAuthState, initialAuthStateUpdate, selectAuthState, updateAuthState } from "./reducers/auth/auth";
 import TrackedOutlet from './components/OutletTracking';
 import config from './config';
+import JourneyDetours from "./pages/JourneyDetours";
 import {useLocation} from "react-router";
-
 const CurateAdminPage = React.lazy(() => import("./pages/curateAdmin"));
 const Home = React.lazy(() => import("./pages/home"));
 const Challenge = React.lazy(() => import("./pages/Challenge"));
@@ -50,6 +50,11 @@ const PublicConfigs = React.lazy(() => import("./pages/PublicConfigs"));
 const Unsubscribe = React.lazy(() => import("./pages/unsubscribe"));
 const ArticlesPage = React.lazy(() => import("./pages/articles"))
 const ArticlePage = React.lazy(() => import("./pages/article"))
+const JourneyMain = React.lazy(() => import("./pages/JourneyMain"))
+const JourneyAdmin = React.lazy(() => import("./pages/JourneyAdmin"));
+const JourneyAdminCreate = React.lazy(() => import("./pages/JourneyAdminCreate"));
+const JourneyAdminUnit = React.lazy(() => import("./pages/JourneyAdminUnit"));
+const JourneyAdminProject = React.lazy(() => import("./pages/JourneyAdminProject"));
 
 export default function Routing() {
     // initialize redux dispatcher
@@ -151,7 +156,7 @@ export default function Routing() {
                     <Route path={"/aboutBytes"} element={<AboutBytes />} />
                     <Route path={"/privacyPolicy"} element={<PrivacyPolicy/>} />
                     <Route element={<PrivateRoute />}>
-                        {/*<Route path={"/journey"} element={<Journey />}/>*/}
+                        <Route path={"/journey"} element={<Journey />}/>
                         {/*<Route path={"/journey/form"} element={<JourneyForm />}/>*/}
                         {/*<Route path={"/journey/quiz"} element={<JourneyQuiz />}/>*/}
                         <Route path="/following" element={<Following />} />
@@ -170,6 +175,12 @@ export default function Routing() {
                         <Route path={"/configs"} element={<PublicConfigs />} />
                         <Route path={"/launchpad/:id"} element={<WorkspacePage />} />
                         <Route path={"/workspace/:id"} element={<WorkspaceAdvancedPage />} />
+                        <Route path={"/journey/main"} element={<JourneyMain/>} />
+                        <Route path={"/journey/detours"} element={<JourneyDetours/>} />
+                        <Route path={"/journey/admin"} element={<JourneyAdmin />}/>
+                        <Route path={"/journey/admin/create"} element={<JourneyAdminCreate />}/>
+                        <Route path={"/journey/admin/unit/:id"} element={<JourneyAdminUnit />}/>
+                        <Route path={"/journey/admin/project/:id"} element={<JourneyAdminProject />}/>
                     </Route >
                     <Route element={<PrivateRoute softBlock={true} />}>
                         <Route path="/challenge/:id" element={<Challenge />} />

@@ -1,0 +1,75 @@
+.awesome-button-wrapper {
+    position: relative;
+    display: inline-block; /* This makes the wrapper fit the content */
+}
+
+.tooltip {
+    visibility: hidden;
+    background-color: rgba(255, 255, 255, 0.9); /* semi-transparent white */
+    color: #000;
+    text-align: left;
+    border-radius: 6px;
+    padding: 10px;
+    position: absolute;
+    z-index: 900;
+    top: 50%;
+    left: 110%; /* Adjust based on actual layout */
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.3s, visibility 0.3s;
+    backdrop-filter: blur(5px);
+    display: flex;
+    flex-direction: column; /* Keep stacking children vertically */
+    justify-content: space-between; /* Ensures space distribution */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional shadow for depth */
+    width: 250px; /* Adjust width as needed */
+}
+
+.tooltip-inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+
+.tooltip-content {
+    /* Styles for the description content if necessary */
+    flex-grow: 1; /* Allows this element to expand to fill available space */
+    margin-bottom: 8px; /* Space between the content and the estimated time */
+}
+
+.tooltip-estimated-time {
+
+    padding: 4px 8px;
+    background-color: rgba(255, 255, 255, 0.3); /* semi-transparent white */
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    margin-top: auto; /* Pushes the estimated time to the bottom */
+    margin-left: auto; /* Pushes the estimated time to the right */
+    order: 3; /* Ensure that the estimated time appears at the bottom */
+}
+
+.tooltip-tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: flex-start;
+    padding: 4px;
+    margin-bottom: 8px; /* You can adjust or remove this if you want the tags closer to the estimated time */
+    order: 2; /* Ensure that the tags appear after the content */
+    width: 100%;
+}
+
+.tooltip-tag-item {
+    padding: 2px 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    font-size: 0.8em;
+}
+
+.awesome-button-wrapper:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
