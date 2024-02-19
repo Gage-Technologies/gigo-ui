@@ -1,5 +1,5 @@
 import * as React from "react";
-import { SyntheticEvent, useEffect } from "react";
+import {SyntheticEvent, useEffect, useState} from "react";
 import {
     Autocomplete,
     Box,
@@ -30,6 +30,7 @@ import {
 import { getAllTokens } from "../theme";
 import darkImageUploadIcon from "../img/dark_image_upload2.svg";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
+import LockIcon from '@mui/icons-material/Lock';
 import ReactGA from "react-ga4";
 import {
     clearProjectState,
@@ -62,7 +63,7 @@ import Post from "../models/post";
 import { useNavigate, useLocation } from "react-router-dom";
 import { DefaultWorkspaceConfig, Workspace, WorkspaceConfig } from "../models/workspace";
 import {
-    initialAuthStateUpdate,
+    initialAuthStateUpdate, selectAuthState,
     selectAuthStateRole,
     selectAuthStateTutorialState,
     selectAuthStateUserName,
@@ -78,6 +79,7 @@ import CardTutorial from "../components/CardTutorial";
 import styled from "@emotion/styled";
 import CheckIcon from "@mui/icons-material/Check";
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import GoProDisplay from "../components/GoProDisplay";
 
 
 
@@ -159,6 +161,8 @@ function CreateProject() {
     const reduxCustomWorkspaceConfigContent = useAppSelector(selectCustomWorkspaceConfigContent);
     const reduxCreateWorkspaceConfig = JSON.stringify(selectCreateWorkspaceConfig);
     const username = useAppSelector(selectAuthStateUserName);
+    const authState = useAppSelector(selectAuthState);
+    const [goProPopup, setGoProPopup] = useState(false)
 
     const status = useAppSelector(selectAuthStateRole);
 
@@ -2214,6 +2218,12 @@ function CreateProject() {
         )
     }
 
+    let premium = authState.role.toString()
+    // //remove after testing
+    // premium = "0"
+
+    const toggleProPopup = () => setGoProPopup(!goProPopup)
+
 
     /**
      * Renders the `1. Basic Info` section of the Create Project card
@@ -2401,19 +2411,43 @@ function CreateProject() {
                         />
                     </Grid>
                     <Grid item xs={12}>
-                        <div style={{ display: "flex", flexDirection: "row" }}>
+                        <div style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center", // Align items vertically in the center
+                            opacity: premium === "0" ? 0.5 : 1, // Apply conditional opacity
+                            filter: premium === "0" ? "grayscale(100%)" : "none", // Apply conditional grayscale filter
+                        }}>
                             <Typography>Public</Typography>
-                            <Switch value={visibility} checked={visibility} disabled={status.toString() !== "1"}
-                                onClick={() => {
-                                    // copy initial state
-                                    let updateState = Object.assign({}, initialCreateProjectStateUpdate);
-                                    // update description in state update
-                                    updateState.visibility = !visibility;
-                                    // execute state update
-                                    updateFormState(updateState)
-                                    setVisibility(!visibility)
-                                }} />
+                            <Switch value={visibility} checked={visibility} disabled={status.toString() !== "1" || premium === "0"}
+                                    onClick={() => {
+                                        if (premium !== "0") {
+                                            let updateState = Object.assign({}, initialCreateProjectStateUpdate);
+                                            updateState.visibility = !visibility;
+                                            updateFormState(updateState);
+                                            setVisibility(!visibility);
+                                        }
+                                    }} />
                             <Typography>Private</Typography>
+                            {premium === "0" && (
+                                <Tooltip
+                                    title={<React.Fragment>
+                                        Want to make a private project? <br/>
+                                        <div style={{
+                                            textAlign: 'center',
+                                            marginTop: '8px'
+                                        }}> {/* Center the button and add some spacing */}
+                                            <Button variant="outlined" onClick={() => setGoProPopup(true)} style={{width: "75%"}}
+                                                    color="primary">
+                                                Go Pro
+                                            </Button>
+                                        </div>
+                                    </React.Fragment>}
+                                    disableHoverListener={premium !== "0"}
+                                >
+                                    <LockIcon style={{marginLeft: 8, cursor: 'pointer', color: 'gray'}}/>
+                                </Tooltip>
+                            )}
                         </div>
                         {renderVisibilityExplanationPopover()}
                     </Grid>
@@ -2435,6 +2469,7 @@ function CreateProject() {
                             Continue
                         </Button>
                     </Grid>
+                    <GoProDisplay open={goProPopup} onClose={toggleProPopup}/>
                 </Grid>
             </div>
         )

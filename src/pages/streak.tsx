@@ -8,7 +8,7 @@ import {
     Grid,
     Modal,
     PaletteMode,
-    ThemeProvider,
+    ThemeProvider, Tooltip,
     Typography
 } from "@mui/material";
 import {getAllTokens} from "../theme";
@@ -18,7 +18,7 @@ import swal from "sweetalert";
 import config from "../config";
 import ReactGA from "react-ga4";
 import {
-    initialAuthStateUpdate,
+    initialAuthStateUpdate, selectAuthState,
     selectAuthStateId,
     selectAuthStateTutorialState,
     updateAuthState
@@ -39,6 +39,8 @@ import CardTutorial from "../components/CardTutorial";
 import styled from "@emotion/styled";
 import {selectAppWrapperChatOpen, selectAppWrapperSidebarOpen} from "../reducers/appWrapper/appWrapper";
 import LottieAnimation from "../components/LottieAnimation";
+import LockIcon from '@mui/icons-material/Lock';
+import GoProDisplay from "../components/GoProDisplay";
 
 
 function Streak() {
@@ -48,6 +50,9 @@ function Streak() {
 
     const sidebarOpen = useAppSelector(selectAppWrapperSidebarOpen);
     const chatOpen = useAppSelector(selectAppWrapperChatOpen);
+    const [goProPopup, setGoProPopup] = useState(false)
+
+    const authState = useAppSelector(selectAuthState);
 
     const TutorialBox = styled(Box)`
       animation: auraEffect 2s infinite alternate;
@@ -440,24 +445,67 @@ function Streak() {
         )
     }
 
+    let premium = authState.role.toString()
+    // //remove after testing
+    // premium = "0"
+
+
     let renderStreakFreeze = () => {
+        // Function to handle the click event, which sets goProPopup to true
+        const handleGoProClick = () => {
+            if (premium === "0" && streakCount === 0) {
+                // Assuming you're using a functional component with hooks. For class components, use this.setState({ goProPopup: true })
+                setGoProPopup(true);
+            }
+        };
+
+
         const children = (
             <>
-                <img src={freeze} alt="image not found"
-                     style={{zIndex: 4, alignItems: "center", width: "50%", height: "50%", marginTop: "10px"}}/>
-                <h3
-                    style={{
-                        marginTop: "auto",
-                    }}
-                >{
-                    //@ts-ignore
-                    streakCount + "   Streak Freezes"}</h3>
+                <div style={{ position: 'relative', display: 'inline-block', width: "50%", marginTop: "10px", cursor: premium === "0" && streakCount === 0 ? 'pointer' : 'default' }}
+                     onClick={premium === "0" && streakCount === 0 ? handleGoProClick : undefined} // Only add click handler if premium is "0"
+                >
+                    <img src={freeze} alt="image not found"
+                         style={{
+                             zIndex: 4,
+                             alignItems: "center",
+                             width: "100%",
+                             height: "auto",
+                             filter: premium === "0" && streakCount === 0 ? 'grayscale(100%)' : 'none',
+                         }}/>
+                    {premium === "0" && streakCount === 0 && (
+                        <>
+                            <Tooltip title={"Want more streak freezes? Go Pro"}>
+                                <div style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    left: 0,
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    // backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                }}>
+                                    <LockIcon style={{
+                                        color: 'grey',
+                                        fontSize: '48px'
+                                    }}/> {/* Adjust this according to your icon */}
+                                </div>
+                            </Tooltip>
+                        </>
+                    )}
+                </div>
+                <h3 style={{marginTop: "auto"}}>
+                    {streakCount + " Streak Freezes"}
+                </h3>
             </>
-        )
+        );
 
         if (runTutorial && stepIndex === 3) {
             return (
-                <TutorialBox sx={{...styles.box, marginLeft: "auto", marginRight: "auto", alignItems: "center"}} className={"streak"} display={"flex"} flexDirection={"column"}>
+                <TutorialBox sx={{...styles.box, marginLeft: "auto", marginRight: "auto", alignItems: "center"}}
+                             className={"streak"} display={"flex"} flexDirection={"column"}>
                     {children}
                 </TutorialBox>
             )
@@ -467,8 +515,10 @@ function Streak() {
             <Box sx={{...styles.box, marginLeft: "auto", marginRight: "auto", alignItems: "center"}} className={"streak"} display={"flex"} flexDirection={"column"}>
                 {children}
             </Box>
-        )
+        );
     }
+
+
 
     let renderStats = () => {
         return (
@@ -681,6 +731,8 @@ function Streak() {
         topBarWidth = 11.5;
     }
 
+    const toggleProPopup = () => setGoProPopup(!goProPopup)
+
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
@@ -792,6 +844,7 @@ function Streak() {
                         >
                             {renderCal()}
                         </Grid>
+                        <GoProDisplay open={goProPopup} onClose={toggleProPopup}/>
                     </Grid>
                 )}
             </CssBaseline>

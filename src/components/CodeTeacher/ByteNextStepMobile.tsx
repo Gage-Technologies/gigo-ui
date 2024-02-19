@@ -23,6 +23,9 @@ import { Checklist, Circle } from "@mui/icons-material";
 import { useGlobalCtWebSocket } from "../../services/ct_websocket";
 import { CtByteNextStepsRequest, CtByteNextStepsResponse, CtGenericErrorPayload, CtMessage, CtMessageOrigin, CtMessageType, CtValidationErrorPayload } from "../../models/ct_websocket";
 import CodeTeacherChatIcon from "./CodeTeacherChatIcon";
+import GoProDisplay from "../GoProDisplay";
+import {selectAuthState} from "../../reducers/auth/auth";
+import {useAppSelector} from "../../app/hooks";
 
 export type ByteNextStepProps = {
     trigger: boolean;
@@ -47,11 +50,13 @@ enum State {
 
 export default function ByteNextStepMobile(props: ByteNextStepProps) {
     let userPref = localStorage.getItem("theme");
+    let authState = useAppSelector(selectAuthState);
     const [mode, _] = useState<PaletteMode>(userPref === "light" ? "light" : "dark");
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
     const [response, setResponse] = useState<string>("");
     const [state, setState] = useState<State>(State.WAITING)
     const [hidden, setHidden] = useState<boolean>(true);
+    const [goProPopup, setGoProPopup] = useState(false)
 
     const ctWs = useGlobalCtWebSocket();
 
@@ -138,6 +143,10 @@ export default function ByteNextStepMobile(props: ByteNextStepProps) {
         }
     `;
 
+    let premium = authState.role.toString()
+    // //remove after testing
+    // premium = "0"
+
     useEffect(() => {
         if (state !== State.LOADING && hidden) {
             setResponse("")
@@ -197,6 +206,8 @@ export default function ByteNextStepMobile(props: ByteNextStepProps) {
             return false
         })
     }, [props.bytesID, props.bytesDescription, props.bytesDevSteps, props.bytesLang, props.codePrefix, props.codeSuffix])
+
+    const toggleProPopup = () => setGoProPopup(!goProPopup)
 
     const renderWaiting = React.useMemo(() => {
         return (
@@ -319,18 +330,31 @@ export default function ByteNextStepMobile(props: ByteNextStepProps) {
                             }}
                             onClick={hide}
                         >
-                            <Close />
+                            <Close/>
                         </Button>
                     ) : headerLoadingAnim}
                 </Box>
-                <MarkdownRenderer
-                    markdown={response}
-                    style={{
-                        overflowWrap: 'break-word',
-                        borderRadius: '10px',
-                        padding: '0px',
-                    }}
-                />
+                <div style={{display: 'flex', flexDirection: 'column'}}>
+                    <MarkdownRenderer
+                        markdown={response}
+                        style={{
+                            overflowWrap: 'break-word',
+                            borderRadius: '10px',
+                            padding: '0px',
+                        }}
+                    />
+                    <div style={{display: 'flex', justifyContent: 'flex-end', marginTop: '10px', marginRight: "10px"}}>
+                        {premium === "0" && (
+                            <Tooltip title={"Get Access to more coding help and resources by going pro"}>
+                                <Button onClick={(event) => {
+                                    setGoProPopup(true)
+                                }} variant={"outlined"}>
+                                    Go Pro
+                                </Button>
+                            </Tooltip>
+                        )}
+                    </div>
+                </div>
                 {state === State.LOADING && response.length > 0 && loadingAnim}
             </Box>
         )
@@ -363,6 +387,7 @@ export default function ByteNextStepMobile(props: ByteNextStepProps) {
             }}
         >
             {renderExpanded()}
+            <GoProDisplay open={goProPopup} onClose={toggleProPopup}/>
         </Box>
     );
 }
