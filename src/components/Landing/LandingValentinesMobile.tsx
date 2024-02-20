@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Button, Typography, Box, PaletteMode, createTheme, Link } from '@mui/material';
 import { styled } from '@mui/system';
-import backgroundImageWebP from "../../img/gigo-landing-valentines.webp";
-import backgroundImagePNG from "../../img/gigo-landing-valentines.png";
+import backgroundImageWebP from "../../img/gigo-landing-valentines-mobile.webp";
 import { getAllTokens, themeHelpers } from '../../theme';
 import LazyLoad from 'react-lazyload';
 import { SocialIcon } from 'react-social-icons';
@@ -18,7 +17,7 @@ const HeroContainer = styled(Box)(({ theme }) => ({
     flexDirection: 'column', // Change to column for mobile
     alignItems: 'center',
     justifyContent: 'flex-start', // Change alignment for mobile
-    backgroundImage: `url(${backgroundImageWebP}), url(${backgroundImagePNG})`,
+    backgroundImage: `url(${backgroundImageWebP})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
     overflow: 'hidden',
