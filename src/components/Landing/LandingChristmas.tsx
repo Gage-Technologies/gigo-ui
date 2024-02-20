@@ -4,8 +4,6 @@ import { styled } from '@mui/system';
 
 import backgroundImageWebP from "../../img/gigo-landing-christmas.webp"
 import backgroundImageLargeWebP from "../../img/gigo-landing-christmas-large.webp"
-import backgroundImagePNG from "../../img/gigo-landing-christmas.png"
-import backgroundImageLargePNG from "../../img/gigo-landing-christmas-large.png"
 import { useAppSelector } from '../../app/hooks';
 import { selectAppWrapperChatOpen, selectAppWrapperSidebarOpen } from '../../reducers/appWrapper/appWrapper';
 import { getAllTokens, themeHelpers } from '../../theme';
@@ -26,8 +24,7 @@ const HeroContainer = styled(Box)(({ theme }) => ({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundImage: `
-        url(${window.innerWidth > 2000 ? backgroundImageLargeWebP : backgroundImageWebP}),
-        url(${window.innerWidth > 2000 ? backgroundImageLargePNG : backgroundImagePNG})
+        url(${window.innerWidth > 2000 ? backgroundImageLargeWebP : backgroundImageWebP})
     `,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
