@@ -410,11 +410,11 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
     };
 
     const handleCreateAccount = () => {
-        navigate("/signup")
+        navigate("/signup?forward="+encodeURIComponent(window.location.pathname))
     }
 
     const handleLogin = () => {
-        navigate("/login")
+        navigate("/login?forward="+encodeURIComponent(window.location.pathname))
     }
 
 
@@ -585,7 +585,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
 
         if (res !== undefined && res["message"] !== undefined) {
             if (res["message"] === "success") {
-                navigate("/login")
+                navigate("/login?forward="+encodeURIComponent(window.location.pathname))
             }
 
             const persistOptions = {};
@@ -851,7 +851,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                         </Button>
                     ) : (
                         <Button onClick={async () => {
-                            navigate("/signup")
+                            navigate("/signup?forward="+encodeURIComponent(window.location.pathname))
                         }} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '18%', height: '55px', left: '8% ', color: holiday === "Christmas" && mode === "light" ? theme.palette.text.primary : theme.palette.primary.contrastText }}>
                             New accounts get 1 month of Pro!
                         </Button>
@@ -1129,7 +1129,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
-            navigate("/login")
+            navigate("/login?forward="+encodeURIComponent(window.location.pathname))
         }
         if (res !== undefined && res["return url"] !== undefined) {
             window.location.replace(res["return url"])
@@ -1210,7 +1210,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
 
                     {loggedIn ? renderDevSpaceControls() : (
                         <Button onClick={async () => {
-                            navigate("/signup")
+                            navigate("/signup?forward="+encodeURIComponent(window.location.pathname))
                         }} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '18%', height: '55px', left: '8% ', color: theme.palette.primary.contrastText }}>
                             New accounts get 1 month of Pro!
                         </Button>

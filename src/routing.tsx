@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from './app/hooks';
 import { initialAuthState, initialAuthStateUpdate, selectAuthState, updateAuthState } from "./reducers/auth/auth";
 import TrackedOutlet from './components/OutletTracking';
 import config from './config';
+import {useLocation} from "react-router";
 
 const CurateAdminPage = React.lazy(() => import("./pages/curateAdmin"));
 const Home = React.lazy(() => import("./pages/home"));
@@ -70,6 +71,8 @@ export default function Routing() {
      * @param role role required for a user to access the page (optional)
      */
     const PrivateRoute = ({ role = null, softBlock = false }) => {
+        const location = useLocation();
+
         // if it's a crawler, allow access
         if (isCrawler && softBlock) {
             return <Outlet />;
@@ -82,18 +85,18 @@ export default function Routing() {
 
         // route to login for an unauthenticated user
         if (!authState.authenticated) {
-            return <Navigate to="/signup" replace={true} />
+            return <Navigate to={"/signup?forward="+encodeURIComponent(location.pathname)} replace={true} />
         }
 
         // clear expired authentication and route to login
         if (authState.expiration * 1000 < new Date().getTime()) {
             dispatch(updateAuthState(initialAuthState))
-            return <Navigate to="/signup" replace={true} />
+            return <Navigate to={"/signup?forward="+encodeURIComponent(location.pathname)} replace={true} />
         }
 
         // route to route for out-of-role url
         if (role !== null && role !== authState.role) {
-            return <Navigate to="/signup" replace={true} />
+            return <Navigate to={"/signup?forward="+encodeURIComponent(location.pathname)} replace={true} />
         }
 
         return <Outlet />

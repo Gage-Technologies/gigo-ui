@@ -776,7 +776,7 @@ function ByteMobile() {
         if (!outputPopup && buttonClickedRef.current) {
             buttonClickedRef.current = false;
             if (!authState.authenticated) {
-                navigate("/signup")
+                navigate("/signup?forward="+encodeURIComponent(window.location.pathname))
                 return
             }
             executeCode();
@@ -1055,7 +1055,7 @@ function ByteMobile() {
                                                 setOutputPopup(false);
                                                 buttonClickedRef.current = true;
                                                 if (!authState.authenticated) {
-                                                    navigate("/signup")
+                                                    navigate("/signup?forward="+encodeURIComponent(window.location.pathname))
                                                     return;
                                                 }
                                                 executeCode();

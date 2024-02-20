@@ -485,7 +485,7 @@ function Challenge() {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
-            navigate("/login")
+            navigate("/login?forward="+encodeURIComponent(window.location.pathname))
         }
 
         if (projectResponse === undefined || attemptResponse === undefined || closedAttemptResponse === undefined) {
@@ -549,7 +549,7 @@ function Challenge() {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
-            navigate("/login")
+            navigate("/login?forward="+encodeURIComponent(window.location.pathname))
         }
 
         if (res === undefined || res["message"] === undefined) {
@@ -1883,7 +1883,7 @@ function Challenge() {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
-            navigate("/login")
+            navigate("/login?forward="+encodeURIComponent(window.location.pathname))
         }
 
         if (res === undefined) {
@@ -2262,7 +2262,7 @@ function Challenge() {
                 let authState = Object.assign({}, initialAuthStateUpdate)
                 // @ts-ignore
                 dispatch(updateAuthState(authState))
-                navigate("/login")
+                navigate("/login?forward="+encodeURIComponent(window.location.pathname))
             }
 
             if (edit === undefined || edit["message"] === undefined || edit["new_discussion"] === undefined) {
@@ -3468,7 +3468,7 @@ function Challenge() {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
-            navigate("/login")
+            navigate("/login?forward="+encodeURIComponent(window.location.pathname))
         }
 
         // handle expected failure
@@ -3508,7 +3508,7 @@ function Challenge() {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
-            navigate("/login")
+            navigate("/login?forward="+encodeURIComponent(window.location.pathname))
         }
 
 
@@ -3917,7 +3917,7 @@ function Challenge() {
     const renderLaunchButton = () => {
         let clickCallback = () => {
             if (!loggedIn) {
-                window.location.href = "/signup";
+                window.location.href = "/signup?forward="+encodeURIComponent(window.location.pathname)
             }
             if (project !== null && project["has_access"] !== null && project["has_access"] === false) {
                 setPurchasePopup(true);
@@ -3982,7 +3982,7 @@ function Challenge() {
     const renderLaunchButtonMobile = () => {
         let clickCallback = () => {
             if (!loggedIn) {
-                window.location.href = "/signup";
+                window.location.href = "/signup?forward="+encodeURIComponent(window.location.pathname)
             }
             if (project !== null && project["has_access"] !== null && project["has_access"] === false) {
                 setPurchasePopup(true);

@@ -468,7 +468,7 @@ const WorkspacePage = () => {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
-            navigate("/login")
+            navigate("/login?forward="+encodeURIComponent(window.location.pathname))
         }
     }
 
@@ -499,7 +499,7 @@ const WorkspacePage = () => {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
-            navigate("/login")
+            navigate("/login?forward="+encodeURIComponent(window.location.pathname))
         }
     }
 

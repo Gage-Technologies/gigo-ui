@@ -237,7 +237,7 @@ function Search() {
                 let authState = Object.assign({}, initialAuthStateUpdate)
                 // @ts-ignore
                 dispatch(updateAuthState(authState))
-                navigate("/login")
+                navigate("/login?forward="+encodeURIComponent(window.location.pathname))
             }
 
             if (res["challenges"].length === 0) {
@@ -294,7 +294,7 @@ function Search() {
                 let authState = Object.assign({}, initialAuthStateUpdate)
                 // @ts-ignore
                 dispatch(updateAuthState(authState))
-                navigate("/login")
+                navigate("/login?forward="+encodeURIComponent(window.location.pathname))
             }
 
             if (res["users"].length === 0) {
@@ -355,7 +355,7 @@ function Search() {
                 let authState = Object.assign({}, initialAuthStateUpdate)
                 // @ts-ignore
                 dispatch(updateAuthState(authState))
-                navigate("/login")
+                navigate("/login?forward="+encodeURIComponent(window.location.pathname))
             }
 
             if (res["posts"].length === 0) {

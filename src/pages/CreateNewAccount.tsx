@@ -24,7 +24,7 @@ import {
     TutorialState,
     updateAuthState
 } from "../reducers/auth/auth";
-import { useNavigate } from "react-router-dom";
+import {useNavigate, useSearchParams} from "react-router-dom";
 import LockPersonIcon from '@mui/icons-material/LockPerson';
 import call from "../services/api-call";
 import config from "../config";
@@ -112,6 +112,9 @@ function CreateNewAccount() {
         }
     });
     const location = useLocation();
+
+    const [searchParams, setSearchParams] = useSearchParams();
+    const forwardPath = searchParams.get("forward") ? decodeURIComponent(searchParams.get("forward") || "") : "";
 
     const styles = {
         themeButton: {
@@ -515,7 +518,7 @@ function CreateNewAccount() {
 
             await sleep(1000)
 
-            window.location.href = "/home";
+            window.location.href = forwardPath || "/home";
 
             setLoading(false)
         } else {
@@ -726,7 +729,7 @@ function CreateNewAccount() {
                         // this makes sure the dispatch occurs
                         await sleep(1000)
 
-                        window.location.href = "/home";
+                        window.location.href = forwardPath || "/home";
 
                         setLoading(false)
                     } else {
@@ -899,7 +902,7 @@ function CreateNewAccount() {
 
                         await sleep(1000)
 
-                        window.location.href = "/home";
+                        window.location.href = forwardPath || "/home";
 
                         setLoading(false)
                     } else {
@@ -1732,7 +1735,7 @@ function CreateNewAccount() {
                                     </Typography>
                                     <Button
                                         onClick={async () => {
-                                            navigate("/login")
+                                            navigate("/login?forward="+encodeURIComponent(forwardPath || ""))
                                         }}
                                         variant={`text`}
                                         color={"primary"}

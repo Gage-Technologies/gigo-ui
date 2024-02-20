@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import SendIcon from '@mui/icons-material/Send';
 import {getAllTokens, isHoliday} from "../theme";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useSearchParams} from "react-router-dom";
 import call from "../services/api-call";
 import config from "../config";
 import {authorize, authorizeGithub, authorizeGoogle} from "../services/auth";
@@ -69,6 +69,9 @@ function Login(this: any) {
         }
     });
     const location = useLocation();
+
+    const [searchParams, setSearchParams] = useSearchParams();
+    const forwardPath = searchParams.get("forward") ? decodeURIComponent(searchParams.get("forward") || "") : "";
 
     const styles = {
         themeButton: {
@@ -179,7 +182,7 @@ function Login(this: any) {
 
             await sleep(1000)
 
-            window.location.href = "/home";
+            window.location.href = forwardPath || "/home";
 
         } else {
             if (sessionStorage.getItem("alive") === null || auth["user"] === undefined)
@@ -293,7 +296,7 @@ function Login(this: any) {
 
             await sleep(1000)
 
-            window.location.href = "/home";
+            window.location.href = forwardPath || "/home";
 
         } else {
             if (sessionStorage.getItem("alive") === null)
@@ -427,7 +430,7 @@ function Login(this: any) {
 
             await sleep(1000)
 
-            window.location.href = "/home";
+            window.location.href = forwardPath || "/home";
             const payload: RecordWebUsage = {
                 host: window.location.host,
                 event: WebTrackingEvent.Login,
@@ -561,7 +564,7 @@ function Login(this: any) {
                         </Button>
                         <Button
                             onClick={async () => {
-                                navigate("/signup")
+                                navigate("/signup?forward="+encodeURIComponent(forwardPath || ""))
                             }}
                             variant={`text`}
                             color={"primary"}
@@ -738,7 +741,7 @@ function Login(this: any) {
                         </Typography>
                         <Button
                             onClick={async () => {
-                                navigate("/signup")
+                                navigate("/signup?forward="+encodeURIComponent(forwardPath || ""))
                             }}
                             variant={`text`}
                             color={"primary"}

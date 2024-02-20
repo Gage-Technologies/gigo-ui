@@ -1066,7 +1066,7 @@ function Byte() {
         if (!outputPopup && buttonClickedRef.current) {
             buttonClickedRef.current = false;
             if (!authState.authenticated) {
-                navigate("/signup")
+                navigate("/signup?forward="+encodeURIComponent(window.location.pathname))
                 return
             }
             executeCode();
@@ -1390,7 +1390,7 @@ function Byte() {
                                                 setOutputPopup(false);
                                                 buttonClickedRef.current = true;
                                                 if (!authState.authenticated) {
-                                                    navigate("/signup")
+                                                    navigate("/signup?forward="+encodeURIComponent(window.location.pathname))
                                                     return
                                                 }
 

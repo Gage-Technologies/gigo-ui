@@ -169,7 +169,7 @@ function AttemptPage() {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
-            navigate("/login")
+            navigate("/login?forward="+encodeURIComponent(window.location.pathname))
         }
     }
 
@@ -543,7 +543,7 @@ function AttemptPage() {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
-            navigate("/login")
+            navigate("/login?forward="+encodeURIComponent(window.location.pathname))
         }
 
         if (res["post"] === undefined || res["description"] === undefined) {
@@ -820,7 +820,7 @@ function AttemptPage() {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
-            navigate("/login")
+            navigate("/login?forward="+encodeURIComponent(window.location.pathname))
         }
 
         // handle failed call
@@ -876,7 +876,7 @@ function AttemptPage() {
             let authState = Object.assign({}, initialAuthStateUpdate)
             // @ts-ignore
             dispatch(updateAuthState(authState))
-            navigate("/login")
+            navigate("/login?forward="+encodeURIComponent(window.location.pathname))
         }
 
 
@@ -1714,7 +1714,7 @@ function AttemptPage() {
                                                 }}
                                                 onClick={() => {
                                                     if (!loggedIn) {
-                                                        window.location.href = "/signup";
+                                                        window.location.href = "/signup?forward="+encodeURIComponent(window.location.pathname)
                                                     }
                                                     userId === attempt?.author_id ? launchWorkspace() : createAttempt();
                                                 }}
@@ -1936,7 +1936,7 @@ function AttemptPage() {
                             sx={{ position: "fixed", bottom: "80px", right: "20px", zIndex: 6000 }}
                             onClick={() => {
                                 if (!loggedIn) {
-                                    window.location.href = "/signup";
+                                    window.location.href = "/signup?forward="+encodeURIComponent(window.location.pathname);
                                 }
                                 userId === attempt?.author_id ? launchWorkspace() : createAttempt();
                             }}

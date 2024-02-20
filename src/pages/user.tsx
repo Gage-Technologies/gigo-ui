@@ -680,7 +680,7 @@ function User() {
                 let authState = Object.assign({}, initialAuthStateUpdate)
                 // @ts-ignore
                 dispatch(updateAuthState(authState))
-                navigate("/login")
+                navigate("/login?forward="+encodeURIComponent(window.location.pathname))
             }
             if (res["message"] === "successful"){
                 setFollowing(true)
@@ -718,7 +718,7 @@ function User() {
                 let authState = Object.assign({}, initialAuthStateUpdate)
                 // @ts-ignore
                 dispatch(updateAuthState(authState))
-                navigate("/login")
+                navigate("/login?forward="+encodeURIComponent(window.location.pathname))
             }
 
             if (res["message"] === "successful"){
