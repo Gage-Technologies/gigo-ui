@@ -287,16 +287,12 @@ function Byte() {
     const [workspaceId, setWorkspaceId] = useState<string>('')
 
     const [connectButtonLoading, setConnectButtonLoading] = useState<boolean>(false)
-    const [startSuggestionLine, setStartSuggestionLine] = React.useState<number | null>(null)
-    const [endSuggestionLine, setEndSuggestionLine] = React.useState<number | null>(null)
 
     const [editorExtensions, setEditorExtensions] = useState<Extension[]>([])
 
     const [lastParse, setLastParse] = useState("")
     const [parsedSymbols, setParsedSymbols] = useState<CtParseFileResponse | null>(null)
     const [codeActionPortals, setCodeActionPortals] = useState<{id: string, portal: React.ReactPortal}[]>([])
-
-    const [codingTimeout, setCodingTimeout] = useState<NodeJS.Timeout | null>(null)
 
     const [loadingCodeCleanup, setLoadingCodeCleanup] = React.useState<string | null>(null);
 
@@ -907,10 +903,10 @@ function Byte() {
                     }, 1000);
                     return true
                 }
-                // wait 3s to link the lsp to ensure the startup completes
+                // wait 1s to link the lsp to ensure the startup completes
                 setTimeout(() => {
                     setLspActive(true)
-                }, 3000);
+                }, 1000);
                 return true
             }
         )
@@ -929,7 +925,7 @@ function Byte() {
 
     useEffect(() => {
         console.log("called useEffect")
-        if (parsedSymbols !== null && parsedSymbols.nodes.length > 0 && workspaceState === 1 && lspActive) {
+        if (parsedSymbols !== null && parsedSymbols.nodes.length > 0 && workspaceState === 1) {
             console.log("updating extensions")
             setEditorExtensions([ctCreateCodeActions(
                 alpha(theme.palette.text.primary, 0.6),
@@ -954,7 +950,7 @@ function Byte() {
                     parsedSymbols.nodes.some((node) => node.id === id));
             });
         }
-    }, [parsedSymbols, loadingCodeCleanup, workspaceState, lspActive]);
+    }, [parsedSymbols, loadingCodeCleanup, workspaceState]);
 
     // Handle changes in the editor and activate the button
     const handleEditorChange = async (newCode: string) => {
@@ -1195,7 +1191,7 @@ function Byte() {
         )
         let stateIcon = (<LinkOffIcon sx={{color: alpha(theme.palette.text.primary, 0.6)}}/>)
         if (workspaceState !== null) {
-            if (workspaceState === 1 && lspActive) {
+            if (workspaceState === 1) {
                 stateTooltipTitle = "Connected To DevSpace"
                 stateIcon = (<LinkIcon sx={{color: theme.palette.success.main}} />)
             } else {
@@ -1425,7 +1421,7 @@ function Byte() {
                                             // default
                                             workspaceState === null ? {} :
                                             // starting or active
-                                            workspaceState === 1 && lspActive ?
+                                            workspaceState === 1 ?
                                                 {border: `1px solid ${theme.palette.primary.main}`} :
                                                 {border: `1px solid grey`}
                                         )
