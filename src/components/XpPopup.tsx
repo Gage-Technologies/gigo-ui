@@ -94,7 +94,7 @@ const XpPopup = (props: IProps) => {
         let premium = authState.role.toString()
         // //remove
         // premium = "0"
-        if (premium === "0") {
+        if (authState.authenticated && premium === "0") {
             retrieveProUrls()
         }
         if (props.levelUp) {

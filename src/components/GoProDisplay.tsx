@@ -6,7 +6,9 @@ import premiumGorilla from "../img/pro-pop-up-icon-plain.svg";
 import {getAllTokens} from "../theme";
 import call from "../services/api-call";
 import config from "../config";
-import proBackground from "../img/popu-up-backgraound-plain.svg"; // Adjust import based on actual location
+import proBackground from "../img/popu-up-backgraound-plain.svg";
+import {useAppSelector} from "../app/hooks";
+import {selectAuthState} from "../reducers/auth/auth"; // Adjust import based on actual location
 
 interface GoProPopupProps {
     open: boolean;
@@ -16,8 +18,10 @@ interface GoProPopupProps {
 const GoProDisplay: React.FC<GoProPopupProps> = ({ open, onClose }) => {
     let userPref = localStorage.getItem('theme')
     const [mode, setMode] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
-
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
+
+    const authState = useAppSelector(selectAuthState);
+
     const [proUrlsLoading, setProUrlsLoading] = useState(false);
     const [proMonthlyLink, setProMonthlyLink] = useState('');
     const [proYearlyLink, setProYearlyLink] = useState('');
@@ -54,8 +58,10 @@ const GoProDisplay: React.FC<GoProPopupProps> = ({ open, onClose }) => {
     }
 
     useEffect(() => {
-        retrieveProUrls()
-    }, [])
+        if (authState.authenticated) {
+            retrieveProUrls()
+        }
+    }, [authState.authenticated])
 
     return (
         <Dialog open={open} onClose={onClose} maxWidth="md" PaperProps={{sx: {borderRadius: 7, overflow: "hidden"}}}>
