@@ -47,7 +47,7 @@ const GIGOLandingPageChristmasMobile: React.FC = () => {
     return (
         <>
             <HeroContainer sx={{ width: "100vw" }}>
-                <Snowfall />
+                <Snowfall snowflakeCount={15}/>
                 <HeroContent>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                         <GigoCircleIcon sx={{ height: '60px', width: '60px', color: "#fff" }}/>

@@ -1,80 +1,77 @@
-
-
 import * as React from "react";
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 import {
     Box,
     Button,
     createTheme,
     CssBaseline,
-    Dialog, DialogActions, DialogContent, DialogTitle,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
     Grid,
-    Link,
     PaletteMode,
+    styled,
     ThemeProvider,
-    Typography,
     Tooltip,
-    Popover,
-    styled
+    Typography
 } from "@mui/material";
-import { getAllTokens, isHoliday, themeHelpers } from "../theme";
+import {getAllTokens, isHoliday, themeHelpers} from "../theme";
 import ProjectCard from "../components/ProjectCard";
-import AppWrapper from "../components/AppWrapper";
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import config from "../config";
 import call from "../services/api-call";
 import swal from "sweetalert";
-import { ThreeDots } from "react-loading-icons";
-import Lottie from "react-lottie";
 import * as animationData from '../img/85023-no-data.json'
-import Carousel from "../components/Carousel";
-import '../components/Carousel.css'
+import Carousel from "../components/Carousel2";
 import {
     initialAuthStateUpdate,
     selectAuthState,
-    selectAuthStateId, selectAuthStateTutorialState, updateAuthState,
+    selectAuthStateId,
+    selectAuthStateTutorialState,
+    updateAuthState,
 } from "../reducers/auth/auth";
-import { useAppDispatch, useAppSelector } from "../app/hooks";
+import {useAppDispatch, useAppSelector} from "../app/hooks";
 import XpPopup from "../components/XpPopup";
-import Joyride, { ACTIONS, CallBackProps, EVENTS, STATUS } from 'react-joyride';
-import { string } from "prop-types";
 import MoonLoader from "react-spinners/MoonLoader";
 import useInfiniteScroll from "../hooks/infiniteScroll";
-import { fontGrid } from "@mui/material/styles/cssUtils";
-import { FontDownload } from "@mui/icons-material";
 import LazyLoad from 'react-lazyload';
-import { selectAppWrapperChatOpen, selectAppWrapperSidebarOpen } from "../reducers/appWrapper/appWrapper";
+import {selectAppWrapperChatOpen, selectAppWrapperSidebarOpen} from "../reducers/appWrapper/appWrapper";
 //@ts-ignore
 import ReactGA from "react-ga4";
 import ProjectCardLongStyle from "../components/ProjectCardLongStyle";
 import IconButton from '@mui/material/IconButton';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import ArrowBackIosNewSharpIcon from '@mui/icons-material/ArrowBackIosNewSharp';
-import HappyHalloweenIcon from "../components/Icons/HappyHalloween";
-import PumpkinIcon from "../components/Icons/Pumpkin";
-import Pumpkin2Icon from "../components/Icons/Pumpkin2";
 import GIGOLandingPage from "../components/Landing/Landing";
 import GIGOLandingPageMobile from "../components/Landing/LandingMobile";
 import GIGOLandingPageChristmas from "../components/Landing/LandingChristmas";
 import GIGOLandingPageChristmasMobile from "../components/Landing/LandingChristmasMobile";
-import { keyframes } from '@mui/system';
+import {keyframes} from '@mui/system';
 import StarIcon from '@mui/icons-material/Star';
 import CheckIcon from '@mui/icons-material/CheckCircleOutline';
-import { LoadingButton } from "@mui/lab";
+import {LoadingButton} from "@mui/lab";
 import GIGOLandingPageNewYearsMobile from "../components/Landing/LandingNewYearsMobile";
 import GIGOLandingPageNewYears from "../components/Landing/LandingNewYears";
 import BytesCard from "../components/BytesCard";
-import { programmingLanguages } from "../services/vars";
+import {programmingLanguages} from "../services/vars";
 import AboutBytesIcon from "../components/Icons/bytes/AboutPage";
 import GIGOLandingPageValentines from "../components/Landing/LandingValentines";
 import GIGOLandingPageValentinesMobile from "../components/Landing/LandingValentinesMobile";
-import { AwesomeButton } from "react-awesome-button";
+import {AwesomeButton} from "react-awesome-button";
 import BytesCardMobile from "../components/BytesCardMobile";
+import SheenPlaceholder from "../components/Loading/SheenPlaceholder";
 
 const gradientAnimation = keyframes`
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 `;
 
 const StartCodingButton = styled(LoadingButton)`
@@ -520,12 +517,12 @@ function Home() {
                     }}>
                         {document.documentElement.clientWidth > 1000 && topRec.length > 0 && currentProjectIndex < topRec.length ? (
                             <IconButton onClick={() => prevProject()}>
-                                <ArrowBackIosNewSharpIcon />
+                                <ArrowBackIosNewSharpIcon/>
                             </IconButton>
                         ) : null}
                         {
                             (topRec.length > 0 && currentProjectIndex < topRec.length) ? (
-                                <div className={'attempt'} style={{ paddingBottom: "10px" }}>
+                                <div className={'attempt'} style={{paddingBottom: "10px"}}>
                                     <LazyLoad once scroll unmountIfInvisible>
                                         <ProjectCardLongStyle
                                             height={document.documentElement.clientWidth < 1000 ? "23vh" : "42vh"}
@@ -558,7 +555,7 @@ function Home() {
                         }
                         {document.documentElement.clientWidth > 1000 && topRec.length > 0 && currentProjectIndex < topRec.length ? (
                             <IconButton onClick={() => nextProject()}>
-                                <ArrowForwardIosSharpIcon />
+                                <ArrowForwardIosSharpIcon/>
                             </IconButton>
                         ) : null}
                     </div>
@@ -569,10 +566,6 @@ function Home() {
 
 
     const ActiveProjects = () => {
-        if (activeData === null || activeData === undefined || activeData.length === 0) {
-            return (<div />)
-        }
-
         // @ts-ignore
         return (
             <div style={{
@@ -584,7 +577,7 @@ function Home() {
                 width: "100%",
                 paddingBottom: "10px"
             }}>
-                <div style={{ display: "inline-flex" }}>
+                <div style={{display: "inline-flex"}}>
                     <Typography variant="h6" gutterBottom sx={{
                         paddingLeft: "10px",
                         paddingTop: "6px",
@@ -593,12 +586,12 @@ function Home() {
                         Active Challenges
                     </Typography>
                     <Button variant="text"
-                        href={"/active"}
-                        sx={{
-                            fontSize: "0.8em",
-                            fontWeight: "light",
-                            textTransform: "lowercase",
-                        }}
+                            href={"/active"}
+                            sx={{
+                                fontSize: "0.8em",
+                                fontWeight: "light",
+                                textTransform: "lowercase",
+                            }}
                     >
                         (show all)
                     </Button>
@@ -612,43 +605,48 @@ function Home() {
                     marginLeft: "1%",
                 }}>
                     {/*TODO mobile => make carousel 1 for mobile*/}
-                    <Carousel show={(document.documentElement.clientWidth < 1000 ? 1 : 4)}>
+                    <Carousel itemsShown={(document.documentElement.clientWidth < 1000 ? 1 : 4)} infiniteLoop={true}
+                              itemsToSlide={(window.innerWidth < 1000 ? 1 : 4)}>
                         {
-                            //@ts-ignore
-                            activeData.map((project, index) => {
-                                return (
-                                    <div style={{ paddingBottom: "10px" }}>
-                                        <LazyLoad once scroll unmountIfInvisible>
-                                            <ProjectCard
-                                                height={"23vh"}
-                                                imageHeight={"23vh"}
-                                                // TODO mobile => make width 'fit-content'
-                                                width={(chatOpen || sidebarOpen) ? "16vw" : (document.documentElement.clientWidth < 1000 ? 'fit-content' : '20vw')}
-                                                imageWidth={(chatOpen || sidebarOpen) ? "16vw" : "23vw"}
-                                                projectId={project["_id"]}
-                                                projectTitle={project["title"] !== null ? project["title"] : project["post_title"]}
-                                                projectDesc={project["description"]}
-                                                projectThumb={config.rootPath + project["thumbnail"]}
-                                                projectDate={project["updated_at"]}
-                                                projectType={project["post_type_string"]}
-                                                renown={project["tier"]}
-                                                onClick={() => navigate("/attempt/" + project["_id"])}
-                                                userTier={authState.tier}
-                                                userThumb={config.rootPath + "/static/user/pfp/" + authState.id}
-                                                userId={authState.id}
-                                                username={authState.userName}
-                                                backgroundName={authState.backgroundName}
-                                                backgroundPalette={authState.backgroundColor}
-                                                backgroundRender={authState.backgroundRenderInFront}
-                                                exclusive={false}
-                                                hover={false}
-                                                attempt={true}
-                                                role={authState.role}
-                                            />
-                                        </LazyLoad>
-                                    </div>
-                                )
-                            })}
+                            activeData && activeData.length > 0 ?
+                                activeData.map((project, index) => {
+                                    return (
+                                        <div style={{paddingBottom: "10px"}}>
+                                            <LazyLoad once scroll unmountIfInvisible>
+                                                <ProjectCard
+                                                    height={"23vh"}
+                                                    imageHeight={"23vh"}
+                                                    // TODO mobile => make width 'fit-content'
+                                                    width={(chatOpen || sidebarOpen) ? "16vw" : (document.documentElement.clientWidth < 1000 ? 'fit-content' : '20vw')}
+                                                    imageWidth={(chatOpen || sidebarOpen) ? "16vw" : "23vw"}
+                                                    projectId={project["_id"]}
+                                                    projectTitle={project["title"] !== null ? project["title"] : project["post_title"]}
+                                                    projectDesc={project["description"]}
+                                                    projectThumb={config.rootPath + project["thumbnail"]}
+                                                    projectDate={project["updated_at"]}
+                                                    projectType={project["post_type_string"]}
+                                                    renown={project["tier"]}
+                                                    onClick={() => navigate("/attempt/" + project["_id"])}
+                                                    userTier={authState.tier}
+                                                    userThumb={config.rootPath + "/static/user/pfp/" + authState.id}
+                                                    userId={authState.id}
+                                                    username={authState.userName}
+                                                    backgroundName={authState.backgroundName}
+                                                    backgroundPalette={authState.backgroundColor}
+                                                    backgroundRender={authState.backgroundRenderInFront}
+                                                    exclusive={false}
+                                                    hover={false}
+                                                    attempt={true}
+                                                    role={authState.role}
+                                                />
+                                            </LazyLoad>
+                                        </div>
+                                    )
+                                }) :
+                                Array.from({length: 5}, (_, index) => (
+                                    <SheenPlaceholder height={"23vh"} width={(chatOpen || sidebarOpen) ? "16vw" : "23vw"}/>
+                                ))
+                        }
                     </Carousel>
                 </div>
             </div>
@@ -666,12 +664,19 @@ function Home() {
                 width: "100%",
                 paddingBottom: "10px",
             }}>
-                <div style={{ display: "inline-flex", alignItems: 'center', padding: "10px 0" }}>
-                    <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, marginLeft: "10%" }}>
-                        <AboutBytesIcon style={{ height: "20px", width: "20px", marginRight: "5px" }} miniIcon={userPref === 'light'} />
+                <div style={{display: "inline-flex", alignItems: 'center', padding: "10px 0"}}>
+                    <Typography variant="h6" gutterBottom
+                                sx={{display: 'flex', alignItems: 'center', flexGrow: 1, marginLeft: "10%"}}>
+                        <AboutBytesIcon style={{height: "20px", width: "20px", marginRight: "5px"}}
+                                        miniIcon={userPref === 'light'}/>
                         Bytes Swipe
                     </Typography>
-                    <Button variant="text" href="/bytesMobile" sx={{ fontSize: "0.8em", fontWeight: "light", textTransform: "lowercase", marginRight: "5%" }}>
+                    <Button variant="text" href="/bytesMobile" sx={{
+                        fontSize: "0.8em",
+                        fontWeight: "light",
+                        textTransform: "lowercase",
+                        marginRight: "5%"
+                    }}>
                         (show all)
                     </Button>
                 </div>
@@ -681,31 +686,34 @@ function Home() {
                     overflowX: "auto",
                     paddingLeft: "5%"
                 }}>
-                    <Carousel show={1}>
+                    <Carousel itemsShown={1} infiniteLoop={true} itemsToSlide={1}>
                         {
-                            byteContent.map((project, index) => (
-                                <div key={index} style={{ width: "100%", padding: "0 5%" }}>
-                                    <LazyLoad once scroll unmountIfInvisible>
-                                        <BytesCardMobile
-                                            height="auto"
-                                            imageHeight="40vh"
-                                            width="100%"
-                                            imageWidth="100%"
-                                            bytesId={project["_id"]}
-                                            bytesTitle={project["name"]}
-                                            bytesDesc={project["description_medium"]}
-                                            bytesThumb={config.rootPath + "/static/bytes/t/" + project["_id"]}
-                                            onClick={() => navigate("/byte/" + project["_id"])}
-                                            role={authState.role}
-                                            completedEasy={project["completed_easy"]}
-                                            completedMedium={project["completed_medium"]}
-                                            completedHard={project["completed_hard"]}
-                                            language={programmingLanguages[project["lang"]]}
-                                            isHome={false}
-                                        />
-                                    </LazyLoad>
-                                </div>
-                            ))
+                            byteContent && byteContent.length > 0 ?
+                                byteContent.map((project, index) => (
+                                    <div key={index} style={{width: "100%", padding: "0 5%"}}>
+                                        <LazyLoad once scroll unmountIfInvisible>
+                                            <BytesCardMobile
+                                                height="auto"
+                                                imageHeight="40vh"
+                                                width="100%"
+                                                imageWidth="100%"
+                                                bytesId={project["_id"]}
+                                                bytesTitle={project["name"]}
+                                                bytesDesc={project["description_medium"]}
+                                                bytesThumb={config.rootPath + "/static/bytes/t/" + project["_id"]}
+                                                onClick={() => navigate("/byte/" + project["_id"])}
+                                                role={authState.role}
+                                                completedEasy={project["completed_easy"]}
+                                                completedMedium={project["completed_medium"]}
+                                                completedHard={project["completed_hard"]}
+                                                language={programmingLanguages[project["lang"]]}
+                                                isHome={false}
+                                            />
+                                        </LazyLoad>
+                                    </div>
+                                )) : (
+                                    <SheenPlaceholder height={"40vh"} width={"100%"}/>
+                                )
                         }
                     </Carousel>
                 </div>
@@ -714,15 +722,10 @@ function Home() {
     }
 
     const Bytes = () => {
-        if (byteContent === null || byteContent === undefined || byteContent.length === 0 ) {
-            return (<div />)
-        }
-        if (window.innerWidth < 1000){
+        if (window.innerWidth < 1000) {
             return BytesMobile()
         }
 
-
-        // @ts-ignore
         return (
             <div style={{
                 display: "flex",
@@ -734,62 +737,7 @@ function Home() {
                 paddingBottom: "10px",
                 height: "100%"
             }}>
-                <div style={{ display: "inline-flex" }}>
-                    {/*<Tooltip*/}
-                    {/*    title={*/}
-                    {/*        !newBytesPopoverOpen ? (*/}
-                    {/*            <Box>*/}
-                    {/*                <Typography variant="body1">Just Released!</Typography>*/}
-                    {/*                <Button*/}
-                    {/*                    size="small"*/}
-                    {/*                    onClick={handleNewBytesPopoverOpen}*/}
-                    {/*                    sx={{*/}
-                    {/*                        p: "4px",*/}
-                    {/*                        fontSize: "10px"*/}
-                    {/*                    }}*/}
-                    {/*                >*/}
-                    {/*                    Learn More*/}
-                    {/*                </Button>*/}
-                    {/*            </Box>*/}
-                    {/*        ) : (*/}
-                    {/*            <Box>*/}
-                    {/*                <Typography variant="body1">Just Released!</Typography>*/}
-                    {/*                <Typography variant="body2">*/}
-                    {/*                    Bytes are bite-sized coding challenges that are deeply integrated with Code Teacher, offering a personalized learning experience.*/}
-                    {/*                </Typography>*/}
-                    {/*                <Button*/}
-                    {/*                    size="small"*/}
-                    {/*                    onClick={handleNewBytesPopoverClose}*/}
-                    {/*                    sx={{*/}
-                    {/*                        p: "4px",*/}
-                    {/*                        fontSize: "10px"*/}
-                    {/*                    }}*/}
-                    {/*                >*/}
-                    {/*                    Less Info*/}
-                    {/*                </Button>*/}
-                    {/*            </Box>*/}
-                    {/*        )*/}
-                    {/*    }*/}
-                    {/*    open={!runTutorial} // Tooltip always open*/}
-                    {/*    disableFocusListener*/}
-                    {/*    disableHoverListener*/}
-                    {/*    disableTouchListener*/}
-                    {/*    arrow*/}
-                    {/*    placement="top"*/}
-                    {/*    PopperProps={{*/}
-                    {/*        sx: {*/}
-                    {/*            zIndex: 800,*/}
-                    {/*            left: !newBytesPopoverOpen ? "40px !important" : "100px !important"*/}
-                    {/*        }*/}
-                    {/*    }}*/}
-                    {/*    sx={{*/}
-                    {/*        // backgroundColor: '#353535', // Dark background for tooltip*/}
-                    {/*        // color: 'white', // Light text for contrast*/}
-                    {/*        fontSize: '0.9rem', // Readable text size*/}
-                    {/*        borderRadius: '4px', // Rounded corners for modern look*/}
-                    {/*        padding: '8px 12px', // Spacing inside the tooltip*/}
-                    {/*    }}*/}
-                    {/*>*/}
+                <div style={{display: "inline-flex"}}>
                     <Typography
                         variant="h6"
                         gutterBottom
@@ -810,14 +758,13 @@ function Home() {
                         />
                         Bytes
                     </Typography>
-                    {/*</Tooltip>*/}
                     <Button variant="text"
-                        href={"/bytes"}
-                        sx={{
-                            fontSize: "0.8em",
-                            fontWeight: "light",
-                            textTransform: "lowercase",
-                        }}
+                            href={"/bytes"}
+                            sx={{
+                                fontSize: "0.8em",
+                                fontWeight: "light",
+                                textTransform: "lowercase",
+                            }}
                     >
                         (show all)
                     </Button>
@@ -831,34 +778,39 @@ function Home() {
                     marginLeft: "1%",
                 }}>
                     {/*TODO mobile => make carousel 1 for mobile*/}
-                    <Carousel show={(document.documentElement.clientWidth < 1000 ? 1 : 5)}>
+                    <Carousel itemsShown={(document.documentElement.clientWidth < 1000 ? 1 : 5)} infiniteLoop={true}
+                              itemsToSlide={document.documentElement.clientWidth < 1000 ? 1 : 5}>
                         {
-                            //@ts-ignore
-                            byteContent.map((project, index) => {
-                                return (
-                                    <div style={{ paddingBottom: "10px", width: "16vw" }}>
-                                        <LazyLoad once scroll unmountIfInvisible>
-                                            <BytesCard
-                                                height={"52vh"}
-                                                imageHeight={"43vh"}
-                                                // TODO mobile => make width 'fit-content'
-                                                width={'13vw'}
-                                                imageWidth={"13vw"}
-                                                bytesId={project["_id"]}
-                                                bytesTitle={project["name"]}
-                                                bytesDesc={project["description_medium"]}
-                                                bytesThumb={config.rootPath + "/static/bytes/t/" + project["_id"]}
-                                                onClick={() => navigate("/byte/" + project["_id"])}
-                                                role={authState.role}
-                                                completedEasy={project["completed_easy"]}
-                                                completedMedium={project["completed_medium"]}
-                                                completedHard={project["completed_hard"]}
-                                                language={programmingLanguages[project["lang"]]}
-                                            />
-                                        </LazyLoad>
-                                    </div>
-                                )
-                            })}
+                            byteContent && byteContent.length > 0 ?
+                                byteContent.map((project, index) => {
+                                    return (
+                                        <div style={{paddingBottom: "10px", width: "16vw"}}>
+                                            <LazyLoad once scroll unmountIfInvisible>
+                                                <BytesCard
+                                                    height={"52vh"}
+                                                    imageHeight={"43vh"}
+                                                    // TODO mobile => make width 'fit-content'
+                                                    width={'auto'}
+                                                    imageWidth={"auto"}
+                                                    bytesId={project["_id"]}
+                                                    bytesTitle={project["name"]}
+                                                    bytesDesc={project["description_medium"]}
+                                                    bytesThumb={config.rootPath + "/static/bytes/t/" + project["_id"]}
+                                                    onClick={() => navigate("/byte/" + project["_id"])}
+                                                    role={authState.role}
+                                                    completedEasy={project["completed_easy"]}
+                                                    completedMedium={project["completed_medium"]}
+                                                    completedHard={project["completed_hard"]}
+                                                    language={programmingLanguages[project["lang"]]}
+                                                />
+                                            </LazyLoad>
+                                        </div>
+                                    )
+                                }) :
+                                Array.from({length: 15}, (_, index) => (
+                                    <SheenPlaceholder height={"43vh"} width={"calc(43vh * 0.5625)"}/>
+                                ))
+                        }
                     </Carousel>
                 </div>
             </div>
@@ -888,7 +840,7 @@ function Home() {
                 paddingBottom: "10px",
                 marginLeft: "1%",
             }}>
-                <div style={{ display: "inline-flex" }}>
+                <div style={{display: "inline-flex"}}>
                     <Typography variant="h6" gutterBottom sx={{
                         paddingLeft: "10px",
                         paddingTop: "6px",
@@ -898,10 +850,10 @@ function Home() {
                     </Typography>
                 </div>
                 <Grid container spacing={4}
-                    sx={{
-                        paddingRight: "10px",
-                        paddingLeft: "10px"
-                    }}
+                      sx={{
+                          paddingRight: "10px",
+                          paddingLeft: "10px"
+                      }}
                 >
                     {
                         recData.map((project, index) => {
@@ -943,7 +895,7 @@ function Home() {
                 {
                     isFetching ? (
                         <Grid container spacing={2} justifyContent="center" alignItems="center"
-                            style={{ marginTop: "10px" }}
+                              style={{marginTop: "10px"}}
                         >
                             <Grid item xs={12}>
                                 <div
@@ -954,7 +906,7 @@ function Home() {
                                         width: "100%"
                                     }}
                                 >
-                                    <MoonLoader color={theme.palette.primary.main} loading={true} size={35} />
+                                    <MoonLoader color={theme.palette.primary.main} loading={true} size={35}/>
                                 </div>
                             </Grid>
                         </Grid>
@@ -1004,127 +956,140 @@ function Home() {
             "title": string | React.ReactElement,
             "content": string | React.ReactElement
         }[] = [
-                {
-                    title: "Welcome to GIGO!",
-                    content: "GIGO is a platform to help developers learn to code, practice their skills, and experiment quickly.",
-                },
-                {
-                    title: (
-                        <DialogTitle
-                            sx={{
-                                width: window.innerWidth > 1000 ? 450 : undefined,
-                                maxWidth: window.innerWidth > 1000 ? undefined : "90vw",
-                                background: "linear-gradient(90deg, #84E8A2, #63a4f8, #84E8A2)",
-                                backgroundSize: "200% 200%",
-                                animation: `${gradientAnimation} 3s ease infinite`,
-                                fontSize: "1.6em",
-                                textAlign: "center",
-                                paddingTop: "20px",
-                                paddingBottom: "20px",
-                                WebkitBackgroundClip: "text",
-                                WebkitTextFillColor: "transparent",
-                                MozBackgroundClip: "text",
-                                MozTextFillColor: "transparent",
-                            }}
-                        >
-                            GIGO Pro
-                        </DialogTitle>
-                    ),
-                    content: (
-                        <>
-                            {authState.role != 1 && (
-                                <>
-                                    <Typography variant="body2" sx={{ fontSize: ".8em", mb: 2, textAlign: 'center' }}>
-                                        You've received a free month of GIGO Pro!
-                                    </Typography>
-                                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', mb: 2 }}>
-                                        <LoadingButton loading={loadingProLinks} variant="contained" onClick={handleClaimButtonClick}>
-                                            Claim Free Month
-                                        </LoadingButton>
-                                    </Box>
-                                </>
-                            )}
-                            <Typography variant="body2" sx={{ fontSize: ".8em", mb: 2, textAlign: 'center' }}>
-                                Give a month, Get a month! For every friend you refer, both of you get a free month of GIGO Pro!
+            {
+                title: "Welcome to GIGO!",
+                content: "GIGO is a platform to help developers learn to code, practice their skills, and experiment quickly.",
+            },
+            {
+                title: (
+                    <DialogTitle
+                        sx={{
+                            width: window.innerWidth > 1000 ? 450 : undefined,
+                            maxWidth: window.innerWidth > 1000 ? undefined : "90vw",
+                            background: "linear-gradient(90deg, #84E8A2, #63a4f8, #84E8A2)",
+                            backgroundSize: "200% 200%",
+                            animation: `${gradientAnimation} 3s ease infinite`,
+                            fontSize: "1.6em",
+                            textAlign: "center",
+                            paddingTop: "20px",
+                            paddingBottom: "20px",
+                            WebkitBackgroundClip: "text",
+                            WebkitTextFillColor: "transparent",
+                            MozBackgroundClip: "text",
+                            MozTextFillColor: "transparent",
+                        }}
+                    >
+                        GIGO Pro
+                    </DialogTitle>
+                ),
+                content: (
+                    <>
+                        {authState.role != 1 && (
+                            <>
+                                <Typography variant="body2" sx={{fontSize: ".8em", mb: 2, textAlign: 'center'}}>
+                                    You've received a free month of GIGO Pro!
+                                </Typography>
+                                <Box sx={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    flexDirection: 'column',
+                                    mb: 2
+                                }}>
+                                    <LoadingButton loading={loadingProLinks} variant="contained"
+                                                   onClick={handleClaimButtonClick}>
+                                        Claim Free Month
+                                    </LoadingButton>
+                                </Box>
+                            </>
+                        )}
+                        <Typography variant="body2" sx={{fontSize: ".8em", mb: 2, textAlign: 'center'}}>
+                            Give a month, Get a month! For every friend you refer, both of you get a free month of GIGO
+                            Pro!
+                        </Typography>
+                        <Box sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            flexDirection: 'column'
+                        }}>
+                            <Tooltip
+                                open={openTooltip}
+                                disableFocusListener
+                                disableHoverListener
+                                disableTouchListener
+                                title={
+                                    <React.Fragment>
+                                        <div style={{display: 'flex', alignItems: 'center'}}>
+                                            Referral Link Copied
+                                            <CheckIcon sx={{color: theme.palette.success.main, ml: 1}}/>
+                                        </div>
+                                    </React.Fragment>
+                                }
+                                placement="top"
+                                arrow
+                            >
+                                <Button variant="contained" onClick={handleReferralButtonClick}>
+                                    Referral Link
+                                </Button>
+                            </Tooltip>
+                        </Box>
+                        <Box sx={{my: 2}}>
+                            <Typography variant="body1" component="div" sx={{display: 'flex', alignItems: 'center'}}>
+                                <StarIcon sx={{fontSize: ".8em", mr: 1}}/>
+                                <span style={{}}>Smarter Code Teacher</span>
                             </Typography>
-                            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
-                                <Tooltip
-                                    open={openTooltip}
-                                    disableFocusListener
-                                    disableHoverListener
-                                    disableTouchListener
-                                    title={
-                                        <React.Fragment>
-                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                Referral Link Copied
-                                                <CheckIcon sx={{ color: theme.palette.success.main, ml: 1 }} />
-                                            </div>
-                                        </React.Fragment>
-                                    }
-                                    placement="top"
-                                    arrow
-                                >
-                                    <Button variant="contained" onClick={handleReferralButtonClick}>
-                                        Referral Link
-                                    </Button>
-                                </Tooltip>
-                            </Box>
-                            <Box sx={{ my: 2 }}>
-                                <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <StarIcon sx={{ fontSize: ".8em", mr: 1 }} />
-                                    <span style={{}}>Smarter Code Teacher</span>
-                                </Typography>
-                                <Typography variant="body1" component="div" sx={{ fontSize: ".7em", ml: 3 }}>
-                                    Get better help and guidance on your coding journey.
-                                </Typography>
-                                <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <StarIcon sx={{ fontSize: ".8em", mr: 1 }} />
-                                    <span style={{}}>Private Projects</span>
-                                </Typography>
-                                <Typography variant="body1" component="div" sx={{ fontSize: ".7em", ml: 3 }}>
-                                    Learn in stealth mode.
-                                </Typography>
-                                <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <StarIcon sx={{ fontSize: ".8em", mr: 1 }} />
-                                    <span style={{}}>More DevSpace Resources</span>
-                                </Typography>
-                                <Typography variant="body1" component="div" sx={{ fontSize: ".7em", ml: 3 }}>
-                                    8 CPU cores, 8GB RAM, 50GB disk space.
-                                </Typography>
-                                <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <StarIcon sx={{ fontSize: ".8em", mr: 1 }} />
-                                    <span style={{}}>Three Concurrent DevSpaces</span>
-                                </Typography>
-                                <Typography variant="body1" component="div" sx={{ fontSize: ".7em", ml: 3 }}>
-                                    Run multiple projects.
-                                </Typography>
-                                <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <StarIcon sx={{ fontSize: ".8em", mr: 1 }} />
-                                    <span style={{}}>Two Streak Freezes a Week</span>
-                                </Typography>
-                                <Typography variant="body1" component="div" sx={{ fontSize: ".7em", ml: 3 }}>
-                                    Preserve your streak.
-                                </Typography>
-                                <Typography variant="body1" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <StarIcon sx={{ fontSize: ".8em", mr: 1 }} />
-                                    <span style={{}}>Premium VsCode Theme</span>
-                                </Typography>
-                                <Typography variant="body1" component="div" sx={{ fontSize: ".7em", ml: 3 }}>
-                                    Enhance your coding experience.
-                                </Typography>
-                            </Box>
-                        </>
-                    ),
-                },
-                {
-                    title: "How to use tutorials",
-                    content: "Tutorials will start on important pages to guide you through the platform. This is the only mandatory tutorial. If you skip a tutorial, you can always restart it using the help button at the bottom of the left-hand sidebar (desktop) or the user icon drop down (mobile).",
-                },
-                {
-                    title: "Let's Get Started!",
-                    content: "Start coding now, or select either a Byte or a Challenge to initiate your journey!"
-                }
-            ]
+                            <Typography variant="body1" component="div" sx={{fontSize: ".7em", ml: 3}}>
+                                Get better help and guidance on your coding journey.
+                            </Typography>
+                            <Typography variant="body1" component="div" sx={{display: 'flex', alignItems: 'center'}}>
+                                <StarIcon sx={{fontSize: ".8em", mr: 1}}/>
+                                <span style={{}}>Private Projects</span>
+                            </Typography>
+                            <Typography variant="body1" component="div" sx={{fontSize: ".7em", ml: 3}}>
+                                Learn in stealth mode.
+                            </Typography>
+                            <Typography variant="body1" component="div" sx={{display: 'flex', alignItems: 'center'}}>
+                                <StarIcon sx={{fontSize: ".8em", mr: 1}}/>
+                                <span style={{}}>More DevSpace Resources</span>
+                            </Typography>
+                            <Typography variant="body1" component="div" sx={{fontSize: ".7em", ml: 3}}>
+                                8 CPU cores, 8GB RAM, 50GB disk space.
+                            </Typography>
+                            <Typography variant="body1" component="div" sx={{display: 'flex', alignItems: 'center'}}>
+                                <StarIcon sx={{fontSize: ".8em", mr: 1}}/>
+                                <span style={{}}>Three Concurrent DevSpaces</span>
+                            </Typography>
+                            <Typography variant="body1" component="div" sx={{fontSize: ".7em", ml: 3}}>
+                                Run multiple projects.
+                            </Typography>
+                            <Typography variant="body1" component="div" sx={{display: 'flex', alignItems: 'center'}}>
+                                <StarIcon sx={{fontSize: ".8em", mr: 1}}/>
+                                <span style={{}}>Two Streak Freezes a Week</span>
+                            </Typography>
+                            <Typography variant="body1" component="div" sx={{fontSize: ".7em", ml: 3}}>
+                                Preserve your streak.
+                            </Typography>
+                            <Typography variant="body1" component="div" sx={{display: 'flex', alignItems: 'center'}}>
+                                <StarIcon sx={{fontSize: ".8em", mr: 1}}/>
+                                <span style={{}}>Premium VsCode Theme</span>
+                            </Typography>
+                            <Typography variant="body1" component="div" sx={{fontSize: ".7em", ml: 3}}>
+                                Enhance your coding experience.
+                            </Typography>
+                        </Box>
+                    </>
+                ),
+            },
+            {
+                title: "How to use tutorials",
+                content: "Tutorials will start on important pages to guide you through the platform. This is the only mandatory tutorial. If you skip a tutorial, you can always restart it using the help button at the bottom of the left-hand sidebar (desktop) or the user icon drop down (mobile).",
+            },
+            {
+                title: "Let's Get Started!",
+                content: "Start coding now, or select either a Byte or a Challenge to initiate your journey!"
+            }
+        ]
 
         return (
             <Dialog
@@ -1307,35 +1272,45 @@ function Home() {
     }
 
     const header = React.useMemo(() => {
+        // Generate a random index based on the length of byteContent
+        let project: any = undefined;
         if (byteContent.length > 0) {
-            // Generate a random index based on the length of byteContent
             const randomIndex = Math.floor(Math.random() * byteContent.length);
-            const project = byteContent[randomIndex];
+            project = byteContent[randomIndex];
+        }
 
-            // Now use this project to render your component
-            return (
-                <Box sx={{
+        // Now use this project to render your component
+        return (
+            <Box sx={{
+                width: "100%",
+                height: "600px",
+                backgroundColor: theme.palette.primary.light,
+                zIndex: 3,
+                m: 2,
+                borderRadius: "12px",
+                position: "relative"
+            }}>
+                <Box style={{
                     width: "100%",
-                    height: "600px",
-                    backgroundColor: theme.palette.primary.light,
-                    zIndex: 3,
-                    m: 2,
-                    borderRadius: "12px",
-                    position: "relative"
+                    display: "flex",
+                    flexDirection: "row",
+                    position: "relative",
+                    paddingLeft: "10%",
+                    paddingRight: "10%"
                 }}>
-                    <Box style={{ width: "100%", display: "flex", flexDirection: "row", position: "relative", paddingLeft: "10%", paddingRight: "10%" }}>
-                        <Box style={{ position: "relative", top: "100px", width: '50%' }}>
-                            <Typography variant={"h1"}
-                                sx={{ color: theme.palette.background.default, textTransform: 'none' }}>
-                                Take a Byte Today
-                            </Typography>
-                            <Typography variant={"subtitle1"}
-                                sx={{ color: theme.palette.text.primary, textTransform: "none", m: 3, ml: 0 }}>
-                                Bite-sized coding challenges that are deeply integrated with Code Teacher, offering a
-                                personalized learning experience.
-                            </Typography>
-                        </Box>
-                        <Box sx={{ pt: 5 , position: "absolute", right: "10%"}}>
+                    <Box style={{position: "relative", top: "100px", width: '50%'}}>
+                        <Typography variant={"h1"}
+                                    sx={{color: theme.palette.background.default, textTransform: 'none'}}>
+                            Take a Byte Today
+                        </Typography>
+                        <Typography variant={"subtitle1"}
+                                    sx={{color: theme.palette.text.primary, textTransform: "none", m: 3, ml: 0}}>
+                            Bite-sized coding challenges that are deeply integrated with Code Teacher, offering a
+                            personalized learning experience.
+                        </Typography>
+                    </Box>
+                    <Box sx={{pt: 5, position: "absolute", right: "10%"}}>
+                        {project ? (
                             <LazyLoad once scroll unmountIfInvisible>
                                 <BytesCard
                                     height={"550px"}
@@ -1354,17 +1329,21 @@ function Home() {
                                     language={programmingLanguages[project["lang"]]}
                                 />
                             </LazyLoad>
-                        </Box>
+                        ) : (
+                            <SheenPlaceholder width="253px" height={"450px"}/>
+                        )}
                     </Box>
-                    <Box 
-                        sx={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            position: "absolute",
-                            bottom: "40px",
-                            left: "calc(50% - 83px)"
-                        }}
-                    >
+                </Box>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        position: "absolute",
+                        bottom: "40px",
+                        left: "calc(50% - 83px)"
+                    }}
+                >
+                    {project ? (
                         <AwesomeButton style={{
                             width: "auto",
                             height: "50px",
@@ -1376,44 +1355,49 @@ function Home() {
                         }} type="primary" href={`/byte/${project["_id"]}`}>
                             <span>Take a Byte</span>
                         </AwesomeButton>
-                    </Box>
+                    ) : (
+                        <SheenPlaceholder width="196px" height={"46px"}/>
+                    )}
                 </Box>
-            );
-        }
+            </Box>
+        )
     }, [byteContent])
 
     const headerMobile = React.useMemo(() => {
+        let project: any = undefined;
         if (byteContent.length > 0) {
             const randomIndex = Math.floor(Math.random() * byteContent.length);
-            const project = byteContent[randomIndex];
+            project = byteContent[randomIndex];
+        }
 
-            return (
+        return (
+            <Box sx={{
+                width: "100%",
+                height: "auto",
+                backgroundColor: theme.palette.primary.light,
+                zIndex: 3,
+                m: 1,
+                borderRadius: "12px",
+                position: "relative",
+                padding: "20px",
+                marginTop: "2%"
+            }}>
                 <Box sx={{
-                    width: "100%",
-                    height: "auto",
-                    backgroundColor: theme.palette.primary.light,
-                    zIndex: 3,
-                    m: 1,
-                    borderRadius: "12px",
-                    position: "relative",
-                    padding: "20px",
-                    marginTop: "2%"
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    textAlign: "center",
                 }}>
-                    <Box sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        textAlign: "center",
-                    }}>
-                        <Typography variant="h4"
-                                    sx={{ color: theme.palette.background.default, textTransform: 'none' }}>
-                            Take a Byte Today
-                        </Typography>
-                        <Typography variant="subtitle2"
-                                    sx={{ color: theme.palette.text.primary, textTransform: "none", mt: 2 }}>
-                            Bite-sized coding challenges deeply integrated with Code Teacher for personalized learning.
-                        </Typography>
-                        <Box sx={{ width: "100%", mt: 3, display: 'flex', justifyContent: 'center' }}>
+                    <Typography variant="h4"
+                                sx={{color: theme.palette.background.default, textTransform: 'none'}}>
+                        Take a Byte Today
+                    </Typography>
+                    <Typography variant="subtitle2"
+                                sx={{color: theme.palette.text.primary, textTransform: "none", mt: 2}}>
+                        Bite-sized coding challenges deeply integrated with Code Teacher for personalized learning.
+                    </Typography>
+                    <Box sx={{width: "100%", mt: 3, display: 'flex', justifyContent: 'center'}}>
+                        {project ? (
                             <LazyLoad once scroll unmountIfInvisible>
                                 <BytesCardMobile
                                     height="300px"
@@ -1433,8 +1417,14 @@ function Home() {
                                     isHome={true}
                                 />
                             </LazyLoad>
-                        </Box>
-                        <Box sx={{ mt: -2 }}>
+                        ) : (
+                            <Box sx={{mb: 8}}>
+                                <SheenPlaceholder width="80vw" height={"200px"}/>
+                            </Box>
+                        )}
+                    </Box>
+                    <Box sx={{mt: -2}}>
+                        {project ? (
                             <AwesomeButton style={{
                                 '--button-primary-color': theme.palette.primary.main,
                                 '--button-primary-color-dark': theme.palette.primary.dark,
@@ -1444,11 +1434,14 @@ function Home() {
                             }} type="primary" href={`/byte/${project["_id"]}`}>
                                 Take a Byte
                             </AwesomeButton>
-                        </Box>
+                        ) : (
+                            <SheenPlaceholder width="137px" height={"40px"}/>
+                        )}
                     </Box>
                 </Box>
-            );
-        }
+            </Box>
+        );
+
     }, [byteContent]);
 
     const renderLanding = () => {
@@ -1458,30 +1451,30 @@ function Home() {
 
         if (window.innerWidth < 1000) {
             if (holiday === "Christmas") {
-                return (<GIGOLandingPageChristmasMobile />)
+                return (<GIGOLandingPageChristmasMobile/>)
             }
             if (holiday === "New Years") {
-                return (<GIGOLandingPageNewYearsMobile />)
+                return (<GIGOLandingPageNewYearsMobile/>)
             }
             if (holiday === "Valentines") {
-                return (<GIGOLandingPageValentinesMobile />)
+                return (<GIGOLandingPageValentinesMobile/>)
             }
-            return (<GIGOLandingPageMobile />)
+            return (<GIGOLandingPageMobile/>)
         }
 
         if (holiday === "Christmas") {
-            return (<GIGOLandingPageChristmas />)
+            return (<GIGOLandingPageChristmas/>)
         }
 
         if (holiday === "New Years") {
-            return (<GIGOLandingPageNewYears />)
+            return (<GIGOLandingPageNewYears/>)
         }
 
         if (holiday === "Valentines") {
-            return (<GIGOLandingPageValentines />)
+            return (<GIGOLandingPageValentines/>)
         }
 
-        return (<GIGOLandingPage />)
+        return (<GIGOLandingPage/>)
     }
 
     return (
@@ -1495,20 +1488,20 @@ function Home() {
                     {xpPopup ? (<XpPopup oldXP={
                         //@ts-ignore
                         (xpData["xp_update"]["old_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]} levelUp={
-                            //@ts-ignore
-                            xpData["level_up_reward"] === null ? false : true} maxXP={100}
                         //@ts-ignore
-                        newXP={(xpData["xp_update"]["new_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]}
+                        xpData["level_up_reward"] === null ? false : true} maxXP={100}
                         //@ts-ignore
-                        nextLevel={xpData["xp_update"]["old_level"] !== undefined ? xpData["xp_update"]["new_level"] : xpData["xp_update"]["next_level"]}
+                                         newXP={(xpData["xp_update"]["new_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]}
                         //@ts-ignore
-                        gainedXP={xpData["xp_update"]["new_xp"] - xpData["xp_update"]["old_xp"]}
+                                         nextLevel={xpData["xp_update"]["old_level"] !== undefined ? xpData["xp_update"]["new_level"] : xpData["xp_update"]["next_level"]}
                         //@ts-ignore
-                        reward={xpData["level_up_reward"]}
+                                         gainedXP={xpData["xp_update"]["new_xp"] - xpData["xp_update"]["old_xp"]}
                         //@ts-ignore
-                        renown={xpData["xp_update"]["current_renown"]} popupClose={PopupClose}
-                        homePage={true} />) : null}
-                    {/*{xpPopup ? (<XpPopup oldXP={*/}
+                                         reward={xpData["level_up_reward"]}
+                        //@ts-ignore
+                                         renown={xpData["xp_update"]["current_renown"]} popupClose={PopupClose}
+                                         homePage={true}/>) : null}
+                    {/*<XpPopup oldXP={*/}
                     {/*    //@ts-ignore*/}
                     {/*    8} levelUp={*/}
                     {/*    //@ts-ignore*/}
@@ -1520,26 +1513,11 @@ function Home() {
                     {/*    //@ts-ignore*/}
                     {/*                     gainedXP={7}*/}
                     {/*    //@ts-ignore*/}
-                    {/*                     reward={"blue_hat"}*/}
+                    {/*                     reward={{"reward_type": "xp_boost"}}*/}
                     {/*    //@ts-ignore*/}
                     {/*                     renown={9} popupClose={null}*/}
-                    {/*                     homePage={true} />) : null}*/}
-                    {loading ? <Grid container sx={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        height: "1",
-                        paddingLeft: "50px"
-                    }}>
-                        <Typography component={"div"} sx={{
-                            display: "flex",
-                            justifyContent: "center",
-                            height: window.innerHeight,
-                            alignItems: "center"
-                        }}>
-                            <ThreeDots />
-                        </Typography>
-                    </Grid> : <Grid container sx={{
+                    {/*                     homePage={true}/>*/}
+                    <Grid container sx={{
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
@@ -1558,58 +1536,7 @@ function Home() {
                                 borderRadius: 1,
                             }}
                         >
-                            {isHoliday() === "Halloween" && window.innerWidth > 1000 && loggedIn ?
-                                <>
-                                    <div id="happy-halloween"
-                                        style={
-                                            chatOpen ?
-                                                {
-                                                    width: "18%",
-                                                    height: "20%",
-                                                    left: "11%",
-                                                    position: "absolute",
-                                                }
-                                                :
-                                                {
-                                                    width: "25%",
-                                                    height: "25%",
-                                                    left: "10%",
-                                                    position: "absolute",
-                                                }
-                                        }>
-                                        <HappyHalloweenIcon />
-                                    </div>
-                                    <div id="happy-halloween-pumpkin"
-                                        style={chatOpen ?
-                                            { width: "15%", height: "15%", left: "67%", position: "absolute" }
-                                            :
-                                            { width: "17%", height: "17%", left: "80%", position: "absolute" }
-                                        }>
-                                        <PumpkinIcon />
-                                    </div>
-                                    <div id="happy-halloween-pumpkin2"
-                                        style={
-                                            chatOpen ?
-                                                aspectRatio === "21:9" ?
-                                                    { width: "8%", height: "8%", left: "67%", top: "36%", position: "absolute" }
-                                                    :
-                                                    { width: "8%", height: "8%", left: "67%", top: "32%", position: "absolute" }
-                                                :
-                                                aspectRatio === "21:9" ?
-                                                    { width: "10%", height: "10%", left: "80%", top: "36%", position: "absolute" }
-                                                    :
-                                                    { width: "10%", height: "10%", left: "80%", top: "32%", position: "absolute" }
-                                        }>
-                                        <Pumpkin2Icon />
-                                    </div>
-                                </>
-
-                                :
-                                <></>
-                            }
-
                             {(window.innerWidth > 1000) ? header : headerMobile}
-                            {/*{TopRecommendations()}*/}
                         </Box>
                         <Box
                             sx={{
@@ -1654,7 +1581,7 @@ function Home() {
                         >
                             {Recommended()}
                         </Box>
-                    </Grid>}
+                    </Grid>
                 </div>
             </CssBaseline>
         </ThemeProvider>

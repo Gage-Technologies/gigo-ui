@@ -47,7 +47,7 @@ const GIGOLandingPageNewYearsMobile: React.FC = () => {
     return (
         <>
             <HeroContainer sx={{ width: "100vw" }}>
-                <Confetti gravity={0.035} numberOfPieces={50} wind={0.001} colors={['#ad7832', '#dcb468', '#716c6c', '#8e8888']} friction={1} />
+                <Confetti gravity={0.035} numberOfPieces={15} wind={0.001} colors={['#ad7832', '#dcb468', '#716c6c', '#8e8888']} friction={1} />
                 <HeroContent>
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                         <GigoCircleIcon sx={{ height: '60px', width: '60px', color: "#fff" }}/>

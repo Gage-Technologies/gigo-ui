@@ -1,16 +1,11 @@
 import * as React from "react";
 import {createTheme, CssBaseline, PaletteMode, ThemeProvider, Box, Modal} from "@mui/material";
 import {getAllTokens} from "../theme";
-import * as LootBox from "../img/lootBox.json"
-import * as brightLights from "../img/brightlights.json"
-import * as LootConfetti from "../img/loot_confetti_.json"
 import { useEffect} from "react";
 import Lottie from "react-lottie";
 import freeze from "../img/streak/freeze.svg"
 import {Rotate, Slide} from "react-awesome-reveal"
 import Button from '@mui/material/Button';
-import * as XPBoost from "../img/doubleXP.json"
-import * as FreeWeek from "../img/freeWeek.json"
 import {handle} from "mdast-util-to-markdown/lib/handle";
 import config from "../config";
 
@@ -29,6 +24,12 @@ const LootPopup = (props: IProps) => {
     const [pause, setPause] = React.useState(false)
     const [open, setOpen] = React.useState(true)
     const [lottieBackground, setLottieBackground] = React.useState(null)
+
+    const [LootBox, setLootBox] = React.useState(null);
+    const [LootConfetti, setConfetti] = React.useState(null);
+    const [brightLights, setBrightLights] = React.useState(null);
+    const [FreeWeek, setFreeWeek] = React.useState(null);
+    const [XPBoost, setXPBoost] = React.useState(null);
 
     const lootBoxOptions = {
         loop: true,
@@ -99,6 +100,56 @@ const LootPopup = (props: IProps) => {
                 })
                 .catch(error => console.error(error));
         }
+    }, [])
+
+    useEffect(() => {
+        fetch(`${config.rootPath}/static/ui/lottie/general/lootBox.json`, {credentials: 'include'})
+            .then(data => {
+                data.json().then(json => {
+                    setLootBox(json)
+                })
+            })
+            .catch(error => console.error(error));
+    }, [])
+
+    useEffect(() => {
+        fetch(`${config.rootPath}/static/ui/lottie/general/brightlights.json`, {credentials: 'include'})
+            .then(data => {
+                data.json().then(json => {
+                    setBrightLights(json)
+                })
+            })
+            .catch(error => console.error(error));
+    }, [])
+
+    useEffect(() => {
+        fetch(`${config.rootPath}/static/ui/lottie/general/loot_confetti_.json`, {credentials: 'include'})
+            .then(data => {
+                data.json().then(json => {
+                    setConfetti(json)
+                })
+            })
+            .catch(error => console.error(error));
+    }, [])
+
+    useEffect(() => {
+        fetch(`${config.rootPath}/static/ui/lottie/general/doubleXP.json`, {credentials: 'include'})
+            .then(data => {
+                data.json().then(json => {
+                    setXPBoost(json)
+                })
+            })
+            .catch(error => console.error(error));
+    }, [])
+
+    useEffect(() => {
+        fetch(`${config.rootPath}/static/ui/lottie/general/freeWeek.json`, {credentials: 'include'})
+            .then(data => {
+                data.json().then(json => {
+                    setFreeWeek(json)
+                })
+            })
+            .catch(error => console.error(error));
     }, [])
 
     const handleClickClose = () => {

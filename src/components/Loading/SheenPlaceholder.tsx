@@ -1,10 +1,9 @@
 import React from 'react';
-import { styled } from '@mui/material/styles';
-import { alpha } from '@material-ui/core';
+import {alpha, Box, styled, useTheme} from '@mui/material';
 
-const SheenAnimation = styled('div')(({ theme }) => ({
-  backgroundColor: alpha(theme.palette.grey[500], 0.6),
-  borderRadius: '4px',
+const SheenAnimation = styled(Box)(({ theme }) => ({
+  backgroundColor: theme.palette.action.hover,
+  borderRadius: theme.shape.borderRadius,
   position: 'relative',
   overflow: 'hidden',
 
@@ -12,28 +11,48 @@ const SheenAnimation = styled('div')(({ theme }) => ({
     content: '""',
     position: 'absolute',
     top: 0,
-    left: 0,
-    bottom: 0,
-    right: 0,
-    background: 'linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.8), transparent)',
-    transform: 'translateX(-100%)',
-    animation: 'sheen 1.5s infinite linear',
+    left: '-100%', // Start from the left, out of view
+    width: '100%', // Width of the sheen effect
+    height: '100%',
+    background: `linear-gradient(
+      to right,
+      transparent, 
+      ${alpha(theme.palette.grey[100], 0.1)} 5%, 
+      ${theme.palette.grey[100]} 50%, 
+      ${alpha(theme.palette.grey[100], 0.1)} 95%, 
+      transparent
+    )`,
+    opacity: 0.5,
+    animation: 'sheen 2s infinite linear', // Use linear for constant speed
   },
 
   '@keyframes sheen': {
+    '0%': {
+      left: '-100%', // Start out of view
+    },
     '100%': {
-      transform: 'translateX(100%)',
+      left: '100%', // End completely on the other side
     },
   },
 }));
 
 interface SheenPlaceholderProps {
-  width?: string;
-  height?: string;
+  width?: string | number;
+  height?: string | number;
 }
 
 const SheenPlaceholder: React.FC<SheenPlaceholderProps> = ({ width = '100%', height = '16px' }) => {
-  return <SheenAnimation style={{ width, height }} />;
+  const theme = useTheme();
+
+  return (
+      <SheenAnimation
+          sx={{
+            width,
+            height,
+            // Optional: Additional styles can be applied here
+          }}
+      />
+  );
 };
 
 export default SheenPlaceholder;

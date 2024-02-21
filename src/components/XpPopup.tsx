@@ -13,7 +13,6 @@ import { styled } from "@mui/material/styles";
 import {getAllTokens} from "../theme";
 import { keyframes } from "@emotion/react";
 import LinearProgress from "@mui/material/LinearProgress";
-import * as levelUp from "../img/levelUp.json"
 import {useEffect} from "react";
 import { Button } from "@mui/material"
 import {Fade} from "react-awesome-reveal"
@@ -121,15 +120,6 @@ const XpPopup = (props: IProps) => {
         },
     }));
 
-    const confettiOptions = {
-        loop: true,
-        autoplay: true,
-        animationData: levelUp,
-        rendererSettings: {
-            preserveAspectRatio: 'xMidYMid slice'
-        }
-    };
-
     const confirmButton = () => {
         let premium = authState.role.toString()
         // //remove
@@ -184,6 +174,12 @@ const XpPopup = (props: IProps) => {
         window.sessionStorage.setItem("loginXP", "undefined")
         window.sessionStorage.setItem("attemptXP", "undefined")
     }
+
+    const xpBarMemo = React.useMemo(() => (
+        <Box sx={{width: "75%"}}>
+            <StyledLinearProgress variant="determinate"/>
+        </Box>
+    ), [])
 
     const renderXPPopup = () => {
         if (showLoot) {
@@ -382,19 +378,10 @@ const XpPopup = (props: IProps) => {
                     >
                         <h4>{"Lvl " + currentLevel}</h4>
                         <div style={{width: "20px"}}/>
-                        <Box sx={{width: "75%"}}>
-                            <StyledLinearProgress variant="determinate"/>
-                        </Box>
+                        {xpBarMemo}
                         <div style={{width: "20px"}}/>
                         <h4>{"Lvl " + nextLevel}</h4>
                     </div>
-                    {/* {showConfetti && (
-                        <div style={{position: "absolute"}}>
-                            <Lottie options={confettiOptions} isClickToPauseDisabled={true}
-                                    width={window.innerHeight / .8}
-                                    height={window.innerHeight / .8} style={{zIndex: 4}}/>
-                        </div>
-                    )} */}
                     <div style={{height: "5vh"}}/>
                     <div style={{display: "flex", alignItems: "end", justifyContent: "center"}}>
                         <Button variant={"contained"}

@@ -31,7 +31,6 @@ import {Calendar, utils} from "@amir04lm26/react-modern-calendar-date-picker";
 import '@amir04lm26/react-modern-calendar-date-picker/lib/DatePicker.css';
 import './calendar.css'
 import {ThreeDots} from "react-loading-icons";
-import * as XPBoost from "../img/doubleXP.json";
 import freeze from "../img/streak/freeze.svg"
 import Countdown from "react-countdown";
 import {useAppDispatch, useAppSelector} from "../app/hooks";
@@ -53,6 +52,18 @@ function Streak() {
     const [goProPopup, setGoProPopup] = useState(false)
 
     const authState = useAppSelector(selectAuthState);
+
+    const [XPBoost, setXPBoost] = React.useState(null);
+
+    useEffect(() => {
+        fetch(`${config.rootPath}/static/ui/lottie/general/doubleXP.json`, {credentials: 'include'})
+            .then(data => {
+                data.json().then(json => {
+                    setXPBoost(json)
+                })
+            })
+            .catch(error => console.error(error));
+    }, [])
 
     const TutorialBox = styled(Box)`
       animation: auraEffect 2s infinite alternate;
@@ -374,8 +385,8 @@ function Streak() {
                                 autoplay={true}
                                 loop={true}
                                 style={{
-                                    width: "50%",
-                                    height: "50%",
+                                    width: "75%",
+                                    height: "auto",
                                     zIndex: 4,
                                     display: "flex",
                                     // height: "100%",

@@ -22,12 +22,6 @@ import { useNavigate } from "react-router-dom";
 import call from "../services/api-call";
 import config from "../config";
 import swal from "sweetalert";
-import Lottie from "react-lottie";
-import * as animationData from '../img/85023-no-data.json'
-import Carousel from "../components/Carousel";
-import { ThreeDots } from "react-loading-icons";
-import aboutUsImg from "../img/aboutUsBackground.png"
-import loginImg from "../img/login/login_background.png";
 import { AwesomeButton } from "react-awesome-button";
 import 'react-awesome-button/dist/styles.css';
 

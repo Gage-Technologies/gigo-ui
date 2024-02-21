@@ -14,8 +14,7 @@ import config from "../config";
 import swal from "sweetalert";
 import Lottie from "react-lottie";
 import * as animationData from '../img/85023-no-data.json'
-import Carousel from "../components/Carousel";
-import '../components/Carousel.css';
+import Carousel from "../components/Carousel2";
 import {ThreeDots} from "react-loading-icons";
 import {selectAppWrapperChatOpen, selectAppWrapperSidebarOpen} from "../reducers/appWrapper/appWrapper";
 
@@ -185,7 +184,7 @@ function Active() {
                         //@ts-ignore
                         pastWeek !== null && pastWeek.length > 0 ? (
                             <div style={{width: "100%"}}>
-                                <Carousel show={(window.innerWidth < 1000 ? 1 : 4)}>
+                                <Carousel itemsShown={(window.innerWidth < 1000 ? 1 : 5)} infiniteLoop={true} itemsToSlide={(window.innerWidth < 1000 ? 1 : 5)}>
                                     {
                                         //@ts-ignore
                                         pastWeek.map((project, index) => {
@@ -303,7 +302,7 @@ function Active() {
                         mostChallenging !== null && mostChallenging.length > 0 ? (
                             // <ProjectCarousel projects={mostChallenging} height={200} width={450}/>
                             <div style={{width: "100%"}}>
-                                <Carousel show={(window.innerWidth < 1000 ? 1 : 4)}>
+                                <Carousel itemsShown={(window.innerWidth < 1000 ? 1 : 5)} infiniteLoop={true} itemsToSlide={(window.innerWidth < 1000 ? 1 : 5)}>
                                     {
                                         //@ts-ignore
                                         mostChallenging.map((project, index) => {
@@ -392,7 +391,7 @@ function Active() {
                                 width: "50vw"
                             }}>
                             <div style={{width: "100%"}}>
-                                <Carousel show={(window.innerWidth < 1000 ? 1 : 4)}>
+                                <Carousel itemsShown={(window.innerWidth < 1000 ? 1 : 5)} infiniteLoop={true} itemsToSlide={(window.innerWidth < 1000 ? 1 : 5)}>
                                     {
                                         //@ts-ignore
                                         incomplete.map((project, index) => {

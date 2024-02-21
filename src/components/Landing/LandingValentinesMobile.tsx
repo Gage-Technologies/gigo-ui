@@ -49,7 +49,7 @@ const GIGOLandingPageValentinesMobile: React.FC = () => {
     // Define the move animation
     useEffect(() => {
         // Generate unique keyframes for each firefly
-        setHearts(Array.from({ length: 30 }, (_, index) => {
+        setHearts(Array.from({ length: 15 }, (_, index) => {
             let moveX = Math.random() * window.innerWidth * (Math.random() > .5 ? -1 : 1);
             while (Math.abs(moveX) < 100) {
                 moveX = Math.random() * window.innerWidth * (Math.random() > .5 ? -1 : 1);

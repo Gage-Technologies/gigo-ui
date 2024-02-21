@@ -9,7 +9,6 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import {getAllTokens} from "../theme";
-import * as levelUp from "../img/levelUp.json"
 import Lottie from "react-lottie";
 import {useEffect} from "react";
 import Button from "@mui/material/Button";
@@ -105,17 +104,6 @@ const SendBroadcastPopop = ({ onClose }: { onClose?: () => void }) => {
 
         return () => clearTimeout(timer); // Clear the timeout if the component is unmounted
     }, [])
-
-
-    const confettiOptions = {
-        loop: false,
-        autoplay: false,
-        isClickToPauseDisabled: true,
-        animationData: levelUp,
-        rendererSettings: {
-            preserveAspectRatio: 'xMidYMid slice'
-        }
-    };
 
     const confirmButton = () => {
         if (message !== "") {
@@ -215,13 +203,6 @@ const SendBroadcastPopop = ({ onClose }: { onClose?: () => void }) => {
                                     />
                                 </form>
                             </div>
-                            {showConfetti && (
-                                <div style={{position: "absolute", zIndex: 3}}>
-                                    <Lottie options={confettiOptions} isClickToPauseDisabled={true}
-                                            width={window.innerHeight / .8}
-                                            height={window.innerHeight / .8} style={{zIndex: 4}}/>
-                                </div>
-                            )}
                             <div style={{height: "5vh"}}/>
                             <Grid container direction="column" alignItems="center" justifyContent="center">
                                 <Button

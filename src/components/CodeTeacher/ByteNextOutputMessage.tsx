@@ -24,7 +24,6 @@ import { Typography } from "@material-ui/core";
 import { BugReportOutlined, Close } from "@material-ui/icons";
 import Lottie from "react-lottie";
 import * as byteSuccess from "../../img/byteSuccess.json"
-import * as brightLights from "../../img/brightlights.json"
 import CodeTeacherChatIcon from "./CodeTeacherChatIcon";
 import { truncate } from "fs/promises";
 import { LoadingButton } from "@mui/lab";

@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { createTheme, PaletteMode, Dialog, DialogContent } from "@mui/material";
 import { getAllTokens } from "../theme";
-import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
-import { WindowRounded } from "@mui/icons-material";
 
 type EmojiProps = {
     open: boolean; // Prop to control dialog visibility
@@ -60,7 +58,13 @@ export default function EmojiPicker({ open, closeCallback, onEmojiSelect }: Emoj
                 }}
             >
                 <Picker
-                    data={data}
+                    data={async () => {
+                        const response = await fetch(
+                        'https://cdn.jsdelivr.net/npm/@emoji-mart/data',
+                        )
+
+                        return response.json()
+                    }}
                     onEmojiSelect={addEmoji}
                     theme={userPref === 'light' ? 'light' : 'dark'}
                     autoFocus={true}
