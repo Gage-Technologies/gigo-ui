@@ -566,6 +566,10 @@ function Home() {
 
 
     const ActiveProjects = () => {
+        if (!authState.authenticated) {
+            return null
+        }
+
         // @ts-ignore
         return (
             <div style={{
@@ -643,7 +647,7 @@ function Home() {
                                         </div>
                                     )
                                 }) :
-                                Array.from({length: 5}, (_, index) => (
+                                Array.from({length: 4}, (_, index) => (
                                     <SheenPlaceholder height={"23vh"} width={(chatOpen || sidebarOpen) ? "16vw" : "23vw"}/>
                                 ))
                         }
