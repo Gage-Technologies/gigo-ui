@@ -44,14 +44,9 @@ import LaunchPadRocket from "../components/Icons/launch-pad-rocket";
 import LaunchPadRocketIcon from "../components/Icons/launch-pad-rocket";
 import LaunchPadIcon from "../components/Icons/LaunchPad";
 import LottieAnimation from "../components/LottieAnimation";
-import * as animationData from "../img/launch-pad-smoke.json";
 import { useGlobalWebSocket } from "../services/websocket";
-// @ts-ignore
-import * as animationDataStopped from "../img/launch-page-stopped.json";
 import Lottie from "react-lottie";
 import { useSpring, animated, useSprings, SpringValues, useSpringRef } from 'react-spring';
-// @ts-ignore
-import * as fullRocket from "../img/rocket.json";
 import { AwesomeButton } from "react-awesome-button";
 import styled from "@emotion/styled";
 import CardTutorial from "../components/CardTutorial";
@@ -72,7 +67,6 @@ interface InitialStatusMessage {
     code_source: CodeSource;
     workspace_url: string
 }
-
 
 
 const WorkspacePage = () => {
@@ -138,6 +132,10 @@ const WorkspacePage = () => {
     const tutorialState = useAppSelector(selectAuthStateTutorialState)
     const [runTutorial, setRunTutorial] = React.useState(!tutorialState.vscode)
 
+    const [animationData, setAnimationData] = useState("");
+    const [animationDataStopped, setAnimationDataStopped] = useState("");
+    const [fullRocket, setFullRocket] = useState("");
+
     // const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
 
     // const playMicrowaveDing = () => {
@@ -163,6 +161,36 @@ const WorkspacePage = () => {
     //         oscillator.stop(audioContext.currentTime + delayTimes[index] + duration);
     //     });
     // };
+
+    useEffect(() => {
+        fetch(`${config.rootPath}/static/ui/lottie/general/launch-pad-smoke.json`, {credentials: 'include'})
+            .then(data => {
+                data.json().then(json => {
+                    setAnimationData(json)
+                })
+            })
+            .catch(error => console.error(error));
+    }, [])
+
+    useEffect(() => {
+        fetch(`${config.rootPath}/static/ui/lottie/general/launch-page-stopped.json`, {credentials: 'include'})
+            .then(data => {
+                data.json().then(json => {
+                    setAnimationDataStopped(json)
+                })
+            })
+            .catch(error => console.error(error));
+    }, [])
+
+    useEffect(() => {
+        fetch(`${config.rootPath}/static/ui/lottie/general/rocket.json`, {credentials: 'include'})
+            .then(data => {
+                data.json().then(json => {
+                    setFullRocket(json)
+                })
+            })
+            .catch(error => console.error(error));
+    }, [])
 
     const [hasPlayed, setHasPlayed] = useState(false);
 
@@ -1249,6 +1277,26 @@ const WorkspacePage = () => {
         }
     }
 
+    // const tRef = React.useRef<boolean>(false);
+    //
+    // const handleAnimationTriggers = (ws: Workspace | null, lastWS: Workspace | null) => {
+    //     let currentStates = ws;
+    //     let lastStates = lastWS;
+    //
+    //     if (currentStates === null || lastStates === null || currentStates.init_state === undefined || lastStates.init_state === undefined) {
+    //         return;
+    //     }
+    //     if (!tRef.current) {
+    //         satAnimPropsActiveRef.update({reset: true});
+    //         rocketAnimPropsActiveRef.update({reset: true});
+    //         satAnimPropsActiveRef.start();
+    //         rocketAnimPropsActiveRef.start();
+    //         satAnimPropsActiveRef.update({reset: false});
+    //         rocketAnimPropsActiveRef.update({reset: false});
+    //         tRef.current = true;
+    //     }
+    // }
+
     useEffect(() => {
         handleAnimationTriggers(workspace, lastWorkspace);
         setLastWorkspace(workspace);
@@ -1290,6 +1338,10 @@ const WorkspacePage = () => {
     }
 
     const renderPostProvisioningRocketAnim = () => {
+        if (animationData === "") {
+            return null
+        }
+
         let states = getSyncedWorkspaceStates();
 
         if (states.state !== 0 || states.init_state === 0) {
@@ -1348,23 +1400,24 @@ const WorkspacePage = () => {
                 {/*<animated.div style={animatedLaunchPadProps}>*/}
                 {/*top: 10*/}
                 {/*left: -120*/}
-                <div>
-                    <LaunchPadIcon style={{ position: 'absolute', top: "1.166vh", left: aspectRatio === "21:9" ? "-4.8vw" : "-6.25vw", zIndex: 1, height: "900%", width: "900%" }} />
-                </div>
+                <LaunchPadIcon style={{ position: 'absolute', top: "1.166vh", left: aspectRatio === "21:9" ? "-4.8vw" : "-6.25vw", zIndex: 1, height: "900%", width: "900%" }} />
                 {/*</animated.div>*/}
 
                 {/*non moving svg rocket*/}
                 {/*top: -110*/}
                 {/*left: -46*/}
-                <div>
-                    {/*<LaunchPadRocketIcon style={{position: 'absolute', top: -110, left: -46, zIndex: 99, height: 900, width: 750}} />*/}
-                    <LaunchPadRocketIcon style={{ position: 'absolute', top: "-12.821vh", left: aspectRatio === "21:9" ? "-6.5vw" : "-2.396vw", zIndex: 99, height: "104.895vh", width: "39.0625vw" }} />
+                <div style={{ position: 'absolute', top: "-12.821vh", left: aspectRatio === "21:9" ? "-6.5vw" : "-2.396vw", zIndex: 99 }}>
+                    <LaunchPadRocketIcon height={"104.895vh"} width={"39.0625vw"} />
                 </div>
             </animated.div>
         )
     }
 
     const renderActiveRocketLaunchAnim = () => {
+        if (fullRocket === "") {
+            return null
+        }
+
         let states = getSyncedWorkspaceStates();
 
         if (states.state !== 1) {
@@ -1403,6 +1456,10 @@ const WorkspacePage = () => {
     }
 
     const renderNotActiveSpaceMan = () => {
+        if (animationDataStopped === "") {
+            return null
+        }
+
         let states = getSyncedWorkspaceStates();
         if (states.state < 2) {
             return null

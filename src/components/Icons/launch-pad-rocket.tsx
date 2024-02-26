@@ -6,8 +6,6 @@ const LaunchPadRocketIcon = (props: any) => (
     width={props.width || 700}
     height={props.height || 950}
     style={{
-      width: "50%",
-      height: "50%",
       transform: "translate3d(0px, 0px, 0px)",
     }}
     preserveAspectRatio="xMidYMid meet"
