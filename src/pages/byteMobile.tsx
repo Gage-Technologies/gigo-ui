@@ -1,7 +1,8 @@
 import * as React from "react";
 import {useEffect, useRef, useState} from "react";
 import {
-    Box,
+    alpha,
+    Box, CircularProgress,
     createTheme,
     CssBaseline,
     Dialog,
@@ -35,7 +36,7 @@ import Editor from "../components/IDE/Editor";
 import chroma from 'chroma-js';
 import SheenPlaceholder from "../components/Loading/SheenPlaceholder";
 import {sleep} from "../services/utils";
-import {ReactCodeMirrorRef} from "@uiw/react-codemirror";
+import {Extension, ReactCodeMirrorRef} from "@uiw/react-codemirror";
 import {selectAuthState} from "../reducers/auth/auth";
 import {initialBytesStateUpdate, selectBytesState, updateBytesState} from "../reducers/bytes/bytes";
 import ByteTerminal from "../components/Terminal";
@@ -49,6 +50,24 @@ import ByteChatMobile from "../components/CodeTeacher/ByteChatMobile";
 import NextByteDrawerMobile from "../components/NextByteDrawerMobile";
 import MenuIcon from '@mui/icons-material/Menu';
 import PinIcon from '@mui/icons-material/Pin';
+import {LaunchLspRequest} from "../models/launch_lsp";
+import {
+    CtGenericErrorPayload,
+    CtMessage,
+    CtMessageOrigin,
+    CtMessageType, CtParseFileRequest,
+    CtParseFileResponse, CtValidationErrorPayload,
+    Node as CtParseNode
+} from "../models/ct_websocket";
+import {ctCreateCodeActions} from "../components/IDE/Extensions/CtCodeActionExtension";
+import {debounce} from "lodash";
+import {useGlobalCtWebSocket} from "../services/ct_websocket";
+import {createCtPopupExtension, CtPopupExtensionEngine} from "../components/IDE/Extensions/CtPopupExtension";
+import ByteSuggestions2 from "../components/CodeTeacher/ByteSuggestions2";
+import LinkOffIcon from "@mui/icons-material/LinkOff";
+import LinkIcon from "@mui/icons-material/Link";
+import ByteNextStep from "../components/CodeTeacher/ByteNextStep";
+import ByteNextOutputMessage from "../components/CodeTeacher/ByteNextOutputMessage";
 
 interface MergedOutputRow {
     error: boolean;
@@ -170,6 +189,8 @@ function ByteMobile() {
 
     const [output, setOutput] = useState<OutputState | null>(null);
 
+    const [loadingCodeCleanup, setLoadingCodeCleanup] = React.useState<string | null>(null);
+    const [lspActive, setLspActive] = React.useState(false)
     const [workspaceCreated, setWorkspaceCreated] = useState(false);
     const [containerStyle, setContainerSyle] = useState<React.CSSProperties>(containerStyleDefault)
     const [cursorPosition, setCursorPosition] = useState<{ row: number, column: number } | null>(null)
@@ -186,6 +207,17 @@ function ByteMobile() {
     const [commandId, setCommandId] = useState("");
     const [isDifficultyPopupOpen, setIsDifficultyPopupOpen] = useState(false);
     const [executingCode, setExecutingCode] = useState<boolean>(false)
+    const [suggestionRange, setSuggestionRange] = useState<{start_line: number, end_line: number} | null>(null);
+    const [userHasModified, setUserHasModified] = React.useState(false)
+    const [parsedSymbols, setParsedSymbols] = useState<CtParseFileResponse | null>(null)
+    const [lastParse, setLastParse] = useState("")
+    const [editorExtensions, setEditorExtensions] = useState<Extension[]>([])
+    const popupEngineRef = React.useRef<CtPopupExtensionEngine | null>(null);
+    const popupExtRef = React.useRef<Extension | null>(null);
+    const [codeActionPortals, setCodeActionPortals] = useState<{id: string, portal: React.ReactPortal}[]>([])
+    const [connectButtonLoading, setConnectButtonLoading] = useState<boolean>(false)
+
+
 
     const pingInterval = React.useRef<NodeJS.Timer | null>(null)
 
@@ -197,10 +229,14 @@ function ByteMobile() {
     const [nextByteDrawerOpen, setNextByteDrawerOpen] = useState(false);
     const [isSpeedDialVisible, setSpeedDialVisibility] = useState(true);
     const [speedDialOpen, setSpeedDialOpen] = useState(false);
+    const [workspaceState, setWorkspaceState] = useState<null | number>(null);
+    const [workspaceId, setWorkspaceId] = useState<string>('')
 
     const [editorStyles, setEditorStyles] = useState({
         fontSize: '14px',
     });
+
+    let ctWs = useGlobalCtWebSocket();
 
     let {id} = useParams();
 
@@ -570,7 +606,11 @@ function ByteMobile() {
             }
 
             if (res["message"] === "Workspace Created Successfully") {
-                // TODO implement what needs to be done if successful
+                let workspace = res["workspace"]
+                if (workspace["_id"] !== workspaceId) {
+                    setWorkspaceId(workspace["_id"])
+                    setWorkspaceState(workspace["state"])
+                }
                 setWorkspaceCreated(true)
                 return true
             }
@@ -679,9 +719,58 @@ function ByteMobile() {
         }
     }, [bytesState.byteDifficulty])
 
+    useEffect(() => {
+        if (popupEngineRef.current !== null) {
+            return
+        }
+        let {ext, engine} = createCtPopupExtension();
+        popupExtRef.current = ext;
+        popupEngineRef.current = engine;
+    }, [])
+
+    const debouncedUpdateCode = React.useCallback(debounce(updateCode, 1000, {
+        trailing: true
+    }), [updateCode]);
+
+    const parseSymbols = React.useCallback((newCode: string) => {
+        if (byteData === null) {
+            return
+        }
+
+        ctWs.sendWebsocketMessage(
+            {
+                sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                type: CtMessageType.WebSocketMessageTypeParseFileRequest,
+                origin: CtMessageOrigin.WebSocketMessageOriginClient,
+                created_at: Date.now(),
+                payload: {
+                    relative_path: "main." + (byteData.lang === 5 ? "py" : "go"),
+                    content: newCode,
+                }
+            } satisfies CtMessage<CtParseFileRequest>,
+            (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtParseFileResponse>): boolean => {
+                if (msg.type !== CtMessageType.WebSocketMessageTypeParseFileResponse) {
+                    console.log("failed to parse file: ", msg)
+                    return true
+                }
+                setParsedSymbols(msg.payload as CtParseFileResponse)
+                setLastParse(newCode);
+                return true
+            }
+        )
+    }, [byteData])
+
+    const debouncedParseSymbols = React.useCallback(debounce(parseSymbols, 3000, {
+        trailing: true
+    }), [parseSymbols]);
+
+    useEffect(() => {
+        setParsedSymbols(null)
+        debouncedParseSymbols(code)
+    }, [code]);
 
     // Handle changes in the editor and activate the button
-    const handleEditorChange = (newCode: string) => {
+    const handleEditorChange = async (newCode: string) => {
         // Update the code state with the new content
         setCode(newCode);
         switch (bytesState.byteDifficulty) {
@@ -696,6 +785,9 @@ function ByteMobile() {
                 break
         }
         startTypingTimer();
+
+        debouncedUpdateCode(newCode);
+
         if (newCode && newCode !== "// Write your code here..." && newCode !== initialCode) {
             setIsButtonActive(true);
 
@@ -704,6 +796,23 @@ function ByteMobile() {
 
         } else {
             setIsButtonActive(false);
+        }
+
+        if (!userHasModified) {
+            setUserHasModified(true)
+            setIsButtonActive(true);
+            if (byteData) {
+                for (let i = 0; i < 5; i++) {
+                    let created = await createWorkspace(byteData._id);
+                    if (created) {
+                        break
+                    }
+
+                    if (i === 4) {
+                        break
+                    }
+                }
+            }
         }
     };
 
@@ -948,6 +1057,175 @@ function ByteMobile() {
         });
     };
 
+    useEffect(() => {
+        if (workspaceState !== 1) {
+            return
+        }
+
+        if (byteData) {
+            launchLsp()
+        }
+    }, [workspaceState])
+
+    const launchLsp = async () => {
+        if (!byteData) {
+            return
+        }
+
+        globalWs.sendWebsocketMessage(
+            {
+                sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                type: WsMessageType.LaunchLspRequest,
+                payload: {
+                    byte_attempt_id: byteAttemptId,
+                    payload: {
+                        lang: byteData.lang,
+                        content: code,
+                    } satisfies LaunchLspRequest
+                }
+            }, (msg: WsMessage<any>): boolean => {
+                if (msg.type !== WsMessageType.LaunchLspResponse) {
+                    console.log("failed to start lsp: ", msg)
+                    setTimeout(() => {
+                        launchLsp()
+                    }, 1000);
+                    return true
+                }
+                // wait 3s to link the lsp to ensure the startup completes
+                setTimeout(() => {
+                    setLspActive(true)
+                }, 3000);
+                return true
+            }
+        )
+    }
+
+    useEffect(() => {
+        if (id === undefined) {
+            return
+        }
+
+        setOutput(null)
+        setExecutingCode(false)
+        setTerminalVisible(false)
+        setUserHasModified(false)
+        setWorkspaceId("")
+        setWorkspaceState(null)
+        setLspActive(false)
+        setLoading(true);
+        setSuggestionRange(null)
+        getRecommendedBytes()
+        getByte(id).then(() => {
+            if (authState.authenticated && id) {
+                startByteAttempt(id);
+            }
+        }).finally(() => {
+            setLoading(false);
+        });
+    }, [id]);
+
+    const triggerCodeCleanup = React.useCallback((node: CtParseNode) => {
+        if (!editorRef.current?.view) {
+            return
+        }
+        setLoadingCodeCleanup(node.id)
+
+
+        // set range here
+        setSuggestionRange({start_line: node.position.start_line, end_line: node.position.end_line})
+    }, [editorRef.current])
+
+    useEffect(() => {
+        console.log("called useEffect")
+        if (parsedSymbols !== null && parsedSymbols.nodes.length > 0 && workspaceState === 1 && lspActive) {
+            console.log("updating extensions")
+            setEditorExtensions([ctCreateCodeActions(
+                alpha(theme.palette.text.primary, 0.6),
+                parsedSymbols,
+                loadingCodeCleanup,
+                (id: string, portal: React.ReactPortal) => {
+                    setCodeActionPortals((prevState) => {
+                        // update the portal if it has a prior state or add it if new
+                        return prevState.some((x) => x.id === id) ?
+                            prevState.map((item) => item.id === id ? { ...item, portal } : item) :
+                            [...prevState, { id, portal }];
+                    })
+                },
+                (node: CtParseNode) => triggerCodeCleanup(node)
+            )])
+        }
+
+        // filter any code symbols from the portals that no longer exist
+        if (parsedSymbols !== null) {
+            setCodeActionPortals((prevState) => {
+                return prevState.filter(({id}) =>
+                    parsedSymbols.nodes.some((node) => node.id === id));
+            });
+        }
+    }, [parsedSymbols, loadingCodeCleanup, workspaceState, lspActive]);
+
+    const renderStateIndicator = () => {
+        let stateTooltipTitle: string | React.ReactElement = (
+            <Box>
+                <Typography variant='caption'>Disconnected From DevSpace</Typography>
+                <LoadingButton
+                    loading={connectButtonLoading}
+                    variant={"outlined"}
+                    sx={{
+                        fontSize: "10px",
+                        height: "18px",
+                        m: 0.5
+                    }}
+                    onClick={async () => {
+                        if (byteData) {
+                            setConnectButtonLoading(true)
+                            for (let i = 0; i < 5; i++) {
+                                let created = await createWorkspace(byteData._id);
+                                if (created) {
+                                    break
+                                }
+
+                                if (i === 4) {
+                                    break
+                                }
+                            }
+                            setConnectButtonLoading(false)
+                        }
+                    }}
+                >
+                    Connect
+                </LoadingButton>
+            </Box>
+        )
+        let stateIcon = (<LinkOffIcon sx={{color: alpha(theme.palette.text.primary, 0.6)}}/>)
+        if (workspaceState !== null) {
+            if (workspaceState === 1) {
+                stateTooltipTitle = "Connected To DevSpace"
+                stateIcon = (<LinkIcon sx={{color: theme.palette.success.main}} />)
+            } else {
+                stateTooltipTitle = "Connecting To DevSpace"
+                stateIcon = (<CircularProgress size={24} sx={{color: alpha(theme.palette.text.primary, 0.6)}} />)
+            }
+        }
+
+        return (
+            <Tooltip title={stateTooltipTitle}>
+                <Box
+                    sx={{
+                        position: "absolute",
+                        bottom: "10px",
+                        height: "30px",
+                        width: "30px",
+                        marginLeft: "10px",
+                        padding: "3px"
+                    }}
+                >
+                    {stateIcon}
+                </Box>
+            </Tooltip>
+        )
+    }
+
     // @ts-ignore
     return (
         <ThemeProvider theme={theme}>
@@ -955,7 +1233,7 @@ function ByteMobile() {
                 <Box sx={{...topContainerStyle, flexDirection: 'row', justifyContent: 'center', width: '100%'}}>
                     {tabValue === 0 && (
                         <>
-                            {activeSidebarTab !== "nextSteps" && (
+                            {activeSidebarTab !== "nextSteps" && activeSidebarTab !== "codeSuggestion" && (
                                 <ByteNextOutputMessageMobile
                                     trigger={outputPopup}
                                     acceptedCallback={() => {
@@ -988,6 +1266,31 @@ function ByteMobile() {
                                     }}
                                 />
                             )}
+                            {(activeSidebarTab === null || activeSidebarTab === "codeSuggestion") && activeSidebarTab !== "debug" && (
+                                <ByteSuggestions2
+                                    range={suggestionRange}
+                                    editorRef={editorRef}
+                                    onExpand={() => setActiveSidebarTab("codeSuggestion")}
+                                    onHide={() => setActiveSidebarTab(null)}
+                                    lang={programmingLanguages[byteData ? byteData.lang : 5]}
+                                    code={code}
+                                    byteId={id || ""}
+                                    // @ts-ignore
+                                    description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
+                                    // @ts-ignore
+                                    dev_steps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
+                                    maxWidth={"20vw"}
+                                    acceptedCallback={(c) => {
+                                        setCode(c)
+                                        setSuggestionRange(null)
+                                        setLoadingCodeCleanup(null)
+                                    }}
+                                    rejectedCallback={() => {
+                                        setSuggestionRange(null)
+                                        setLoadingCodeCleanup(null)
+                                    }}
+                                />
+                            )}
                             {activeSidebarTab === null && (
                                 byteData ? (
                                     <Typography variant="h4" component="h1" style={titleStyle}>
@@ -1001,7 +1304,7 @@ function ByteMobile() {
                                     </Box>
                                 )
                             )}
-                            {activeSidebarTab !== "debugOutput" && (
+                            {activeSidebarTab !== "debugOutput" && activeSidebarTab !== "codeSuggestion" && (
                                 <ByteNextStepMobile
                                     trigger={nextStepsPopup}
                                     acceptedCallback={() => {
@@ -1078,6 +1381,7 @@ function ByteMobile() {
                                         column: column
                                     })}
                                     editorStyles={editorStyles}
+                                    extensions={popupExtRef.current ? editorExtensions.concat(popupExtRef.current) : editorExtensions}
                                 />
                                 {terminalVisible && output && (
                                     <ByteTerminal
