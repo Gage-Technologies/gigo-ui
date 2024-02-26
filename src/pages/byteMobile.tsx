@@ -1165,66 +1165,49 @@ function ByteMobile() {
     }, [parsedSymbols, loadingCodeCleanup, workspaceState, lspActive]);
 
     const renderStateIndicator = () => {
-        let stateTooltipTitle: string | React.ReactElement = (
-            <Box>
-                <Typography variant='caption'>Disconnected From DevSpace</Typography>
-                <LoadingButton
-                    loading={connectButtonLoading}
-                    variant={"outlined"}
-                    sx={{
-                        fontSize: "10px",
-                        height: "18px",
-                        m: 0.5
-                    }}
-                    onClick={async () => {
-                        if (byteData) {
-                            setConnectButtonLoading(true)
-                            for (let i = 0; i < 5; i++) {
-                                let created = await createWorkspace(byteData._id);
-                                if (created) {
-                                    break
-                                }
+        let actionButton;
 
-                                if (i === 4) {
-                                    break
-                                }
-                            }
-                            setConnectButtonLoading(false)
-                        }
-                    }}
-                >
-                    Connect
-                </LoadingButton>
-            </Box>
-        )
-        let stateIcon = (<LinkOffIcon sx={{color: alpha(theme.palette.text.primary, 0.6)}}/>)
-        if (workspaceState !== null) {
-            if (workspaceState === 1) {
-                stateTooltipTitle = "Connected To DevSpace"
-                stateIcon = (<LinkIcon sx={{color: theme.palette.success.main}} />)
-            } else {
-                stateTooltipTitle = "Connecting To DevSpace"
-                stateIcon = (<CircularProgress size={24} sx={{color: alpha(theme.palette.text.primary, 0.6)}} />)
-            }
+        if (workspaceState === null || workspaceState === 0) {
+            // Define an action for the connect button
+            const connectAction = async () => {
+                if (byteData && !connectButtonLoading) {
+                    setConnectButtonLoading(true);
+                    const created = await createWorkspace(byteData._id);
+                    setConnectButtonLoading(false);
+                    // Additional logic for handling connection success or failure
+                }
+            };
+
+            actionButton = (
+                <Tooltip title={<Typography variant='caption'>Disconnected From DevSpace. Click to connect.</Typography>}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', ml: '-8px' }} onClick={connectAction}>
+                        <LinkOffIcon sx={{ color: theme.palette.error.main }} />
+                        {connectButtonLoading && <CircularProgress size={24} sx={{ color: theme.palette.error.main, ml: 1 }} />}
+                    </Box>
+                </Tooltip>
+            );
+        } else if (workspaceState === 1) {
+            // Show a non-clickable connected state
+            actionButton = (
+                <Tooltip title="Connected To DevSpace">
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <LinkIcon sx={{ color: theme.palette.success.main }} />
+                    </Box>
+                </Tooltip>
+            );
+        } else {
+            // Show a loading indicator while connecting
+            actionButton = (
+                <Tooltip title="Connecting To DevSpace">
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <CircularProgress size={24} sx={{ color: alpha(theme.palette.text.primary, 0.6) }} />
+                    </Box>
+                </Tooltip>
+            );
         }
 
-        return (
-            <Tooltip title={stateTooltipTitle}>
-                <Box
-                    sx={{
-                        position: "absolute",
-                        bottom: "10px",
-                        height: "30px",
-                        width: "30px",
-                        marginLeft: "10px",
-                        padding: "3px"
-                    }}
-                >
-                    {stateIcon}
-                </Box>
-            </Tooltip>
-        )
-    }
+        return actionButton;
+    };
 
     // @ts-ignore
     return (
@@ -1233,7 +1216,7 @@ function ByteMobile() {
                 <Box sx={{...topContainerStyle, flexDirection: 'row', justifyContent: 'center', width: '100%'}}>
                     {tabValue === 0 && (
                         <>
-                            {activeSidebarTab !== "nextSteps" && activeSidebarTab !== "codeSuggestion" && (
+                            {activeSidebarTab !== "nextSteps" && activeSidebarTab !== "codeSuggestion" &&(
                                 <ByteNextOutputMessageMobile
                                     trigger={outputPopup}
                                     acceptedCallback={() => {
@@ -1266,7 +1249,7 @@ function ByteMobile() {
                                     }}
                                 />
                             )}
-                            {(activeSidebarTab === null || activeSidebarTab === "codeSuggestion") && activeSidebarTab !== "debug" && (
+                            {activeSidebarTab !== "nextSteps" && activeSidebarTab !== "debugOutput" && (
                                 <ByteSuggestions2
                                     range={suggestionRange}
                                     editorRef={editorRef}
@@ -1303,6 +1286,16 @@ function ByteMobile() {
                                         </Box>
                                     </Box>
                                 )
+                            )}
+                            {activeSidebarTab === null && (
+                                <Box
+                                    style={{
+                                        marginRight: "3%",
+                                        marginTop: "1%"
+                                    }}
+                                >
+                                    {renderStateIndicator()}
+                                </Box>
                             )}
                             {activeSidebarTab !== "debugOutput" && activeSidebarTab !== "codeSuggestion" && (
                                 <ByteNextStepMobile
