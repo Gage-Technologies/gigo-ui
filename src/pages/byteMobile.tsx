@@ -1482,6 +1482,7 @@ function ByteMobile() {
                         )}
                     </Box>
                 )}
+                {parsedSymbols !== null ? codeActionPortals.map(x => x.portal) : null}
                 <NextByteDrawerMobile
                     open={nextByteDrawerOpen}
                     onClose={() => setNextByteDrawerOpen(false)}
