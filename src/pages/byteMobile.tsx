@@ -736,7 +736,7 @@ function ByteMobile() {
         if (byteData === null) {
             return
         }
-
+        console.log("parseSymbols called ")
         ctWs.sendWebsocketMessage(
             {
                 sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
@@ -754,6 +754,7 @@ function ByteMobile() {
                     return true
                 }
                 setParsedSymbols(msg.payload as CtParseFileResponse)
+                console.log("Symbol set " + msg.payload)
                 setLastParse(newCode);
                 return true
             }
@@ -1125,6 +1126,7 @@ function ByteMobile() {
     }, [id]);
 
     const triggerCodeCleanup = React.useCallback((node: CtParseNode) => {
+        console.log("triggerCodeCleanup called")
         if (!editorRef.current?.view) {
             return
         }
@@ -1137,7 +1139,7 @@ function ByteMobile() {
 
     useEffect(() => {
         console.log("called useEffect")
-        if (parsedSymbols !== null && parsedSymbols.nodes.length > 0 && workspaceState === 1 && lspActive) {
+        if (parsedSymbols !== null && parsedSymbols.nodes.length > 0 && workspaceState === 1) {
             console.log("updating extensions")
             setEditorExtensions([ctCreateCodeActions(
                 alpha(theme.palette.text.primary, 0.6),
@@ -1145,7 +1147,7 @@ function ByteMobile() {
                 loadingCodeCleanup,
                 (id: string, portal: React.ReactPortal) => {
                     setCodeActionPortals((prevState) => {
-                        // update the portal if it has a prior state or add it if new
+
                         return prevState.some((x) => x.id === id) ?
                             prevState.map((item) => item.id === id ? { ...item, portal } : item) :
                             [...prevState, { id, portal }];
@@ -1162,7 +1164,7 @@ function ByteMobile() {
                     parsedSymbols.nodes.some((node) => node.id === id));
             });
         }
-    }, [parsedSymbols, loadingCodeCleanup, workspaceState, lspActive]);
+    }, [parsedSymbols, loadingCodeCleanup, workspaceState]);
 
     const renderStateIndicator = () => {
         let actionButton;
@@ -1172,7 +1174,16 @@ function ByteMobile() {
             const connectAction = async () => {
                 if (byteData && !connectButtonLoading) {
                     setConnectButtonLoading(true);
-                    const created = await createWorkspace(byteData._id);
+                    for (let i = 0; i < 5; i++) {
+                        let created = await createWorkspace(byteData._id);
+                        if (created) {
+                            break
+                        }
+
+                        if (i === 4) {
+                            break
+                        }
+                    }
                     setConnectButtonLoading(false);
                     // Additional logic for handling connection success or failure
                 }
@@ -1208,6 +1219,20 @@ function ByteMobile() {
 
         return actionButton;
     };
+
+    const selectDiagnosticLevel = React.useCallback((): "hint" | "info" | "warning" | "error" => {
+        switch (bytesState.byteDifficulty) {
+            case 0:
+                return "error"
+            case 1:
+                return "warning"
+            case 2:
+                return "hint"
+        }
+        return "hint"
+    }, [bytesState.byteDifficulty])
+
+
 
     // @ts-ignore
     return (
@@ -1373,8 +1398,23 @@ function ByteMobile() {
                                         row: line,
                                         column: column
                                     })}
+                                    lspUrl={byteData && lspActive ? `wss://${byteData._id}-lsp.${config.coderPath.replace("https://", "")}` : undefined}
+                                    diagnosticLevel={selectDiagnosticLevel()}
                                     editorStyles={editorStyles}
                                     extensions={popupExtRef.current ? editorExtensions.concat(popupExtRef.current) : editorExtensions}
+                                    wrapperStyles={{
+                                        width: '100%',
+                                        height: '100%',
+                                        borderRadius: "10px",
+                                        ...(
+                                            // default
+                                            workspaceState === null ? {} :
+                                                // starting or active
+                                                workspaceState === 1 ?
+                                                    {border: `1px solid ${theme.palette.primary.main}`} :
+                                                    {border: `1px solid grey`}
+                                        )
+                                    }}
                                 />
                                 {terminalVisible && output && (
                                     <ByteTerminal
