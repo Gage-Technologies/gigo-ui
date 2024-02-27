@@ -16,6 +16,8 @@ import SearchBar from "../components/SearchBar";
 import {getAllTokens} from "../theme";
 import DetourCard from "../components/Icons/joruneyMainAssets/DetourCard";
 import Carousel from "../components/Carousel";
+import call from "../services/api-call";
+import config from "../config";
 
 function JourneyDetours() {
     let userPref = localStorage.getItem('theme');
@@ -94,6 +96,27 @@ function JourneyDetours() {
             window.removeEventListener('scroll', handleScroll);
         };
     }, []);
+
+    const getUnits = async () => {
+        let res = await call(
+            "/api/journey/getAllUnits",
+            "POST",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {},
+            null,
+            config.rootPath
+        )
+
+        console.log("this is the response: ", res)
+        return null
+    }
+
+    useEffect(() => {
+        getUnits()
+    }, [])
 
     const [showAll, setShowAll] = useState(false); // State to toggle visibility
 
