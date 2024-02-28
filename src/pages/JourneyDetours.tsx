@@ -27,6 +27,7 @@ function JourneyDetours() {
     const [isSticky, setIsSticky] = useState(false);
     const [activeTab, setActiveTab] = useState(0);
     const sections = useRef([]);
+    const [units, setUnits] = React.useState([])
 
     const handleScroll = () => {
         const top = window.scrollY;
@@ -75,10 +76,10 @@ function JourneyDetours() {
         }
     };
 
-    useEffect(() => {
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, [activeTab]);
+    // useEffect(() => {
+    //     window.addEventListener('scroll', handleScroll);
+    //     return () => window.removeEventListener('scroll', handleScroll);
+    // }, [activeTab]);
 
     // TODO subject to change
     // @ts-ignore
@@ -89,13 +90,13 @@ function JourneyDetours() {
         console.log("text: ", text)
     }
 
-    useEffect(() => {
-        window.addEventListener('scroll', handleScroll);
-
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-        };
-    }, []);
+    // useEffect(() => {
+    //     window.addEventListener('scroll', handleScroll);
+    //
+    //     return () => {
+    //         window.removeEventListener('scroll', handleScroll);
+    //     };
+    // }, []);
 
     const getUnits = async () => {
         let res = await call(
@@ -110,6 +111,10 @@ function JourneyDetours() {
             config.rootPath
         )
 
+        if (res !== undefined && res["success"] !== undefined && res["success"] === true){
+            setUnits(res["units"])
+        }
+
         console.log("this is the response: ", res)
         return null
     }
@@ -120,7 +125,7 @@ function JourneyDetours() {
 
     const [showAll, setShowAll] = useState(false); // State to toggle visibility
 
-    const items = [1, 2, 3, 4, 5, 6, 7]; // Your items array, this could be dynamic
+    // const items = [1, 2, 3, 4, 5, 6, 7]; // Your items array, this could be dynamic
 
     // Function to toggle the showAll state
     const handleShowAllToggle = () => setShowAll(!showAll);
@@ -162,10 +167,10 @@ function JourneyDetours() {
                             <Tabs value={activeTab} onChange={handleTabChange}>
                                 <Tab label="Python" />
                                 <Tab label="Golang" />
-                                <Tab label="Web Development" />
-                                <Tab label="Game Development" />
-                                <Tab label="JavaScript" />
-                                <Tab label="Databases" />
+                                {/*<Tab label="Web Development" />*/}
+                                {/*<Tab label="Game Development" />*/}
+                                {/*<Tab label="JavaScript" />*/}
+                                {/*<Tab label="Databases" />*/}
                             </Tabs>
                         </Box>
                      )}
@@ -187,109 +192,9 @@ function JourneyDetours() {
                         width: '50vw',
                     }}>
                         <Grid container spacing={2}>
-                            {items.slice(0, showAll ? items.length : 4).map((item) => ( // Only show first 4 or all based on showAll
-                                <Grid item xs={6} key={item}>
-                                    <DetourCard title={`Title ${item}`} />
-                                </Grid>
-                            ))}
-                        </Grid>
-                    </Box>
-                    <Box id="golang" sx={{display: 'flex', justifyContent: 'left', alignItems: 'left', width: '50vw'}}>
-                        <Typography variant={"h5"} sx={{textAlign: "center", p: 1}}>
-                            Golang
-                        </Typography>
-                    </Box>
-                    <Box sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        p: 2,
-                        width: '50vw'
-                    }}>
-                        <Grid container spacing={2}>
-                            {[1, 2, 3, 4].map((item) => (
-                                <Grid item xs={6} key={item}>
-                                    <DetourCard />
-                                </Grid>
-                            ))}
-                        </Grid>
-                    </Box>
-                    <Box id="webdev" sx={{display: 'flex', justifyContent: 'left', alignItems: 'left', width: '50vw'}}>
-                        <Typography variant={"h5"} sx={{textAlign: "center", p: 1}}>
-                            Web Development
-                        </Typography>
-                    </Box>
-                    <Box sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        p: 2,
-                        width: '50vw'
-                    }}>
-                        <Grid container spacing={2}>
-                            {[1, 2, 3, 4].map((item) => (
-                                <Grid item xs={6} key={item}>
-                                    <DetourCard />
-                                </Grid>
-                            ))}
-                        </Grid>
-                    </Box>
-                    <Box id="gamedev" sx={{display: 'flex', justifyContent: 'left', alignItems: 'left', width: '50vw'}}>
-                        <Typography variant={"h5"} sx={{textAlign: "center", p: 1}}>
-                            Game Development
-                        </Typography>
-                    </Box>
-                    <Box sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        p: 2,
-                        width: '50vw'
-                    }}>
-                        <Grid container spacing={2}>
-                            {[1, 2, 3, 4].map((item) => (
-                                <Grid item xs={6} key={item}>
-                                    <DetourCard />
-                                </Grid>
-                            ))}
-                        </Grid>
-                    </Box>
-                    <Box id="javascript" sx={{display: 'flex', justifyContent: 'left', alignItems: 'left', width: '50vw'}}>
-                        <Typography variant={"h5"} sx={{textAlign: "center", p: 1}}>
-                            JavaScript
-                        </Typography>
-                    </Box>
-                    <Box sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        p: 2,
-                        width: '50vw'
-                    }}>
-                        <Grid container spacing={2}>
-                            {[1, 2, 3, 4].map((item) => (
-                                <Grid item xs={6} key={item}>
-                                    <DetourCard />
-                                </Grid>
-                            ))}
-                        </Grid>
-                    </Box>
-                    <Box id="databases" sx={{display: 'flex', justifyContent: 'left', alignItems: 'left', width: '50vw'}}>
-                        <Typography variant={"h5"} sx={{textAlign: "center", p: 1}}>
-                            Databases
-                        </Typography>
-                    </Box>
-                    <Box sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        p: 2,
-                        width: '50vw'
-                    }}>
-                        <Grid container spacing={2}>
-                            {[1, 2, 3, 4].map((item) => (
-                                <Grid item xs={6} key={item}>
-                                    <DetourCard />
+                            {units.slice(0, showAll ? units.length : 4).map((unit) => (
+                                <Grid item xs={6} key={unit}>
+                                    <DetourCard data={unit} />
                                 </Grid>
                             ))}
                         </Grid>

@@ -2,7 +2,7 @@ import {AwesomeButton} from "react-awesome-button";
 import CheckIcon from "@mui/icons-material/Check";
 import python from "./Icons/joruneyMainAssets/journey-python-no-cirlce.svg";
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Box, Button, createTheme, Grid, PaletteMode, Popover, SpeedDial, Typography} from "@mui/material";
 import DetourCard from "./Icons/joruneyMainAssets/DetourCard";
 import {SpeedDialAction} from "@mui/lab";
@@ -10,8 +10,16 @@ import ArticleIcon from "@mui/icons-material/Article";
 import ForkRightIcon from "@mui/icons-material/ForkRight";
 import CloseIcon from "@material-ui/icons/Close";
 import {getAllTokens} from "../theme";
+import {useAppSelector} from "../app/hooks";
+import {selectAuthStateId} from "../reducers/auth/auth";
+import call from "../services/api-call";
+import config from "../config";
 
-function JourneyMap() {
+interface JourneyMapProps {
+    unitId: any;
+}
+
+function JourneyMap({ unitId }: JourneyMapProps) {
 
     const [anchorElDetour, setAnchorElDetour] = useState(null);
     const [anchorElDesc, setAnchorElDesc] = useState(null);
@@ -19,6 +27,7 @@ function JourneyMap() {
     const [mode, setMode] = React.useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
     const [openSpeedDial, setOpenSpeedDial] = useState(null);
+    const [tasks, setTasks] = React.useState([])
 
     function splitDataByUnit(data: any[]) {
         // Reduce the data into an object with unit numbers as keys
@@ -40,109 +49,6 @@ function JourneyMap() {
     }
 
     const items = [1, 2];
-
-    // todo replace test data
-    const data = [
-        {
-            unit: '1',
-            node_above: '2',
-            node: '3',
-            node_below: '4',
-            name: 'third',
-            completed: true,
-            detour: false,
-            color: '#dfce53'
-        },
-        {
-            unit: '1',
-            node_above: null,
-            node: '1',
-            node_below: '2',
-            name: 'First',
-            completed: true,
-            detour: false,
-            color: '#dfce53'
-        },
-        {
-            unit: '1',
-            node_above: '1',
-            node: '2',
-            node_below: '3',
-            name: 'Second',
-            completed: true,
-            detour: false,
-            color: '#dfce53'
-        },
-        {
-            unit: '1',
-            node_above: '3',
-            node: '4',
-            node_below: '5',
-            name: 'fourth',
-            completed: true,
-            detour: true,
-            color: '#dfce53'
-        },
-        {
-            unit: '1',
-            node_above: '4',
-            node: '5',
-            node_below: '6',
-            name: 'fifth',
-            completed: true,
-            detour: false,
-            color: '#dfce53'
-        },
-        {
-            unit: '1',
-            node_above: '5',
-            node: '6',
-            node_below: '7',
-            name: 'sixth',
-            completed: true,
-            detour: false,
-            color: '#dfce53'
-        },
-        {
-            unit: '1',
-            node_above: '6',
-            node: '7',
-            node_below: '8',
-            name: 'seventh',
-            completed: true,
-            detour: false,
-            color: '#dfce53'
-        },
-        {
-            unit: '1',
-            node_above: '7',
-            node: '8',
-            node_below: '9',
-            name: 'eighth',
-            completed: false,
-            detour: true,
-            color: '#dfce53'
-        },
-        {
-            unit: '1',
-            node_above: '8',
-            node: '9',
-            node_below: null,
-            name: 'ninth',
-            completed: false,
-            detour: false,
-            color: '#dfce53'
-        }
-    ];
-
-    const sortedData = data.sort((a, b) => {
-        if (a.node_above === null) return -1;
-        if (b.node_above === null) return 1;
-        // @ts-ignore
-        return a.node_above - b.node_above;
-    });
-
-    const structuredData = splitDataByUnit(sortedData);
 
     //@ts-ignore
     const handleMouseEnter = (id) => () => setOpenSpeedDial(id);
@@ -257,6 +163,44 @@ function JourneyMap() {
             );
         }
     }
+
+    const userId = useAppSelector(selectAuthStateId);
+
+    const getTasks = async () => {
+        let res = await call(
+            "/api/journey/getTasksInUnit",
+            "POST",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {unit_id: unitId},
+            null,
+            config.rootPath
+        )
+
+        if (res !== undefined && res["success"] !== undefined && res["success"] === true){
+            let tasks = res["data"]["tasks"]
+
+            let structuredData = tasks.sort((a: { node_above: number | null; }, b: { node_above: number | null; }) => {
+                if (a.node_above === null) return -1;
+                if (b.node_above === null) return 1;
+                // @ts-ignore
+                return a.node_above - b.node_above;
+            });
+
+            setTasks(structuredData)
+        }
+
+        console.log("this is the task: ", res)
+        return null
+    }
+
+    useEffect(() => {
+        getTasks()
+    }, [])
+
+    console.log("tasks first: ", tasks)
 
 
     const openDetour = Boolean(anchorElDetour);
@@ -549,13 +493,15 @@ function JourneyMap() {
     }
 
     return (
-        <div>
-            {structuredData.map((unit, index) => (
-                <>
-                    {JourneyStops(unit.metadata)}
-                </>
-            ))}
-        </div>
+        <>
+            {tasks.length > 0 ? (
+                <div>
+                    {JourneyStops(tasks)}
+                </div>
+            ) : (
+                <div>hello</div>
+            )}
+        </>
     )
 
 }
