@@ -14,6 +14,7 @@ import {useAppSelector} from "../app/hooks";
 import {selectAuthStateId} from "../reducers/auth/auth";
 import call from "../services/api-call";
 import config from "../config";
+import {ThreeDots} from "react-loading-icons";
 
 interface JourneyMapProps {
     unitId: any;
@@ -499,7 +500,9 @@ function JourneyMap({ unitId }: JourneyMapProps) {
                     {JourneyStops(tasks)}
                 </div>
             ) : (
-                <div>hello</div>
+                <Typography component={"div"} sx={{display: "flex", justifyContent: "center", height: "50vh", alignItems: "center"}}>
+                    <ThreeDots/>
+                </Typography>
             )}
         </>
     )
