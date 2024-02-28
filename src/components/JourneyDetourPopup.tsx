@@ -25,18 +25,24 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({ open, onClose, 
     // Determine if it's a mobile view
     const isMobile = window.innerWidth < 1000;
 
+    const [showFullDescription, setShowFullDescription] = useState(false);
+    //@ts-ignore
+    const isLongDescription = unit.description && unit.description.length > 100;
+    const toggleDescription = () => setShowFullDescription(!showFullDescription);
+    //@ts-ignore
+    const displayedDescription = showFullDescription || !isLongDescription ? unit.description : unit.description.substring(0, 100) + '...';
+
+
 
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 7, height: "100%", maxHeight: "95vh", overflowX: "hidden" } }}>
+        <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 7, maxHeight: "95vh", overflowX: "hidden", height: "auto", paddingBottom: "100px" } }}>
             <Box style={{
                 width: '100%', // Use 100% width to utilize the dialog's width fully
-                minHeight: "420px",
+                minHeight: "auto",
                 outlineColor: "black",
                 borderRadius: 7,
-                boxShadow: "0px 12px 6px -6px rgba(0,0,0,0.6),0px 6px 0px rgba(0,0,0,0.6),0px 6px 18px 0px rgba(0,0,0,0.6)",
                 height: "100%",
-                maxHeight: "95vh"
             }}>
                 <Grid container spacing={2} alignItems="center" justifyContent="center" style={{paddingTop: "20px"}}>
                     <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
@@ -56,31 +62,52 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({ open, onClose, 
                             <img src={config.rootPath + "/static/junit/t/" +
                                 //@ts-ignore
                                 unit._id} alt="Top Image"
-                                 style={{maxHeight: '150px', borderRadius: '30px', width: "300px", padding: "10px", marginRight: "20px"}}/>
+                                 style={{
+                                     maxHeight: '150px',
+                                     borderRadius: '30px',
+                                     width: "300px",
+                                     padding: "10px",
+                                     marginRight: "20px"
+                                 }}/>
                             <div style={{display: "flex", flexDirection: "column", textAlign: "left"}}>
-                                <Typography variant="subtitle1" style={{marginBottom: '8px'}}>{
-                                    //@ts-ignore
-                                    unit.name}</Typography>
-                                <Typography variant="h6">{
-                                    //@ts-ignore
-                                    unit.description}</Typography>
+                                <Typography variant="subtitle1" style={{marginBottom: '8px'}}>
+                                    {
+                                        //@ts-ignore
+                                        unit.name}
+                                </Typography>
+                                <Typography variant="h6">
+                                    {displayedDescription}
+                                </Typography>
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'flex-end'
+                                }}> {/* Container for the button */}
+                                    {isLongDescription && (
+                                        <Button onClick={toggleDescription} size="small">
+                                            {showFullDescription ? 'Read Less' : 'Read More'}
+                                        </Button>
+                                    )}
+                                </div>
                             </div>
                         </Box>
                     </Grid>
                 </Grid>
                 <Grid container spacing={2} alignItems="center" style={{display: "flex", flexDirection: "row"}}>
-                    <Grid item xs={6} style={{ position: "relative", left: "2vw", top: "3vh" }}>
+                    <Grid item xs={6} style={{position: "relative", left: "2vw", top: "3vh"}}>
                         <Box style={{
                             border: '2px solid white', // This creates a thin white line around the box
                             borderRadius: "50px", // Match the border-radius of the inner box
                             padding: '10px', // Adjust the space between the border and the inner box
-                            height: "560px"
+                            height: "auto",
+                            minHeight: "300px"
                         }}>
                             <Box style={{
                                 backgroundColor: '#dfce53',
                                 borderRadius: "50px",
                                 width: "100%", // 100% to fill up the outer Box
                                 height: "100%", // If you need to set a specific height
+                                minHeight: "275px",
+                                paddingBottom: "10px"
                             }}>
                                 <div style={{paddingTop: "5px"}}>
                                     <JourneyMap unitId={
@@ -97,8 +124,8 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({ open, onClose, 
                             borderRadius: '50px',
                             width: "70%",
                             height: "40vh",
-                            bottom: "3vh",
-                            position: "relative"
+                            bottom: "-3vh",
+                            position: "relative",
                         }}>
                             <Typography variant="subtitle1" style={{ marginBottom: '10px', textAlign: "center", width: "100%" }}>Topics</Typography>
                             <div style={{

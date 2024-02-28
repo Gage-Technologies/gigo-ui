@@ -175,7 +175,7 @@ function JourneyMap({ unitId }: JourneyMapProps) {
             null,
             null,
             // @ts-ignore
-            {unit_id: unitId},
+            {unit_id: unitId, user_id: userId},
             null,
             config.rootPath
         )
