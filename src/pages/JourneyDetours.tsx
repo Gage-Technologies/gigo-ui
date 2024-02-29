@@ -27,7 +27,9 @@ function JourneyDetours() {
     const [isSticky, setIsSticky] = useState(false);
     const [activeTab, setActiveTab] = useState(0);
     const sections = useRef([]);
-    const [units, setUnits] = React.useState([])
+    const [unitsPython, setUnitsPython] = React.useState([])
+    const [unitsGo, setUnitsGo] = React.useState([])
+    const [searchText, setSearchText] = React.useState("")
 
     const handleScroll = () => {
         const top = window.scrollY;
@@ -83,11 +85,12 @@ function JourneyDetours() {
 
     // TODO subject to change
     // @ts-ignore
-    sections.current = ['python', 'golang', 'webdev', 'gamedev', 'javascript', 'databases'];
+    sections.current = ['python', 'golang'];
+
 
 
     const handleSearchText = (text: string) => {
-        console.log("text: ", text)
+        setSearchText(text)
     }
 
     // useEffect(() => {
@@ -99,6 +102,11 @@ function JourneyDetours() {
     // }, []);
 
     const getUnits = async () => {
+        let params = {}
+        if (searchText !== "") {
+            //@ts-ignore
+            params["search_text"] = searchText
+        }
         let res = await call(
             "/api/journey/getAllUnits",
             "POST",
@@ -106,13 +114,20 @@ function JourneyDetours() {
             null,
             null,
             // @ts-ignore
-            {},
+            params,
             null,
             config.rootPath
         )
 
         if (res !== undefined && res["success"] !== undefined && res["success"] === true){
-            setUnits(res["units"])
+            // Array of units where the first language is Go
+            const goUnits = res["units"].filter((unit: { langs: string[]; }) => unit.langs[0] === "Go");
+
+// Array of units where the first language is Python
+            const pythonUnits = res["units"].filter((unit: { langs: string[]; }) => unit.langs[0] === "Python");
+
+            setUnitsGo(goUnits)
+            setUnitsPython(pythonUnits)
         }
 
         console.log("this is the response: ", res)
@@ -121,14 +136,16 @@ function JourneyDetours() {
 
     useEffect(() => {
         getUnits()
-    }, [])
+    }, [searchText])
 
-    const [showAll, setShowAll] = useState(false); // State to toggle visibility
+    const [showAllPython, setShowAllPython] = useState(false); // State to toggle visibility
+    const [showAllGo, setShowAllGo] = useState(false); // State to toggle visibility
 
     // const items = [1, 2, 3, 4, 5, 6, 7]; // Your items array, this could be dynamic
 
     // Function to toggle the showAll state
-    const handleShowAllToggle = () => setShowAll(!showAll);
+    const handleShowAllTogglePython = () => setShowAllPython(!showAllPython);
+    const handleShowAllToggleGo = () => setShowAllGo(!showAllGo);
 
     return (
         <ThemeProvider theme={theme}>
@@ -151,10 +168,10 @@ function JourneyDetours() {
                                 {/*// TODO subject to change*/}
                                 <Tab label="Python" />
                                 <Tab label="Golang" />
-                                <Tab label="Web Development" />
-                                <Tab label="Game Development" />
-                                <Tab label="JavaScript" />
-                                <Tab label="Databases" />
+                                {/*<Tab label="Web Development" />*/}
+                                {/*<Tab label="Game Development" />*/}
+                                {/*<Tab label="JavaScript" />*/}
+                                {/*<Tab label="Databases" />*/}
                             </Tabs>
                         </Box>
                     ) : (
@@ -180,8 +197,8 @@ function JourneyDetours() {
                         <Typography variant={"h5"} sx={{textAlign: "center", p: 1}}>
                             Python
                         </Typography>
-                        <Button onClick={handleShowAllToggle}>
-                            {showAll ? 'Show Less' : 'Show More'} {/* Toggle button text */}
+                        <Button onClick={handleShowAllTogglePython}>
+                            {showAllPython ? 'Show Less' : 'Show More'} {/* Toggle button text */}
                         </Button>
                     </Box>
                     <Box sx={{
@@ -192,7 +209,32 @@ function JourneyDetours() {
                         width: '50vw',
                     }}>
                         <Grid container spacing={2}>
-                            {units.slice(0, showAll ? units.length : 4).map((unit) => (
+                            {unitsPython.slice(0, showAllPython ? unitsPython.length : 4).map((unit) => (
+                                <Grid item xs={6} key={unit}>
+                                    <DetourCard data={unit} />
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Box>
+                </Box>
+                <Box sx={{display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: "column"}}>
+                    <Box id="python" sx={{display: 'flex', justifyContent: 'left', alignItems: 'left', width: '50vw'}}>
+                        <Typography variant={"h5"} sx={{textAlign: "center", p: 1}}>
+                            Golang
+                        </Typography>
+                        <Button onClick={handleShowAllToggleGo}>
+                            {showAllGo ? 'Show Less' : 'Show More'} {/* Toggle button text */}
+                        </Button>
+                    </Box>
+                    <Box sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        p: 2,
+                        width: '50vw',
+                    }}>
+                        <Grid container spacing={2}>
+                            {unitsGo.slice(0, showAllGo ? unitsGo.length : 4).map((unit) => (
                                 <Grid item xs={6} key={unit}>
                                     <DetourCard data={unit} />
                                 </Grid>

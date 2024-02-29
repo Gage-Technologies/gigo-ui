@@ -78,7 +78,7 @@ function JourneyMap({ unitId }: JourneyMapProps) {
             return (
                 <AwesomeButton style={{
                     width: "5em",
-                    height: "5em",
+                    height: "4.5em",
                     alignItems: 'center',
                     justifyContent: 'center',
                     textAlign: 'center',
@@ -107,7 +107,7 @@ function JourneyMap({ unitId }: JourneyMapProps) {
             return (
                 <AwesomeButton style={{
                     width: "5em",
-                    height: "5em",
+                    height: "4.5em",
                     alignItems: 'center',
                     justifyContent: 'center',
                     textAlign: 'center',
@@ -142,7 +142,7 @@ function JourneyMap({ unitId }: JourneyMapProps) {
             return (
                 <AwesomeButton style={{
                     width: "5.5em",
-                    height: "5em",
+                    height: "4.5em",
                     alignItems: 'center',
                     justifyContent: 'center',
                     textAlign: 'center',

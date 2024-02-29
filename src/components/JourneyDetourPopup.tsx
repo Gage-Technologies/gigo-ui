@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Typography, IconButton, Dialog, PaletteMode, createTheme, Box, Grid, Chip, Button} from '@mui/material';
 import Close from '@mui/icons-material/Close'; // Assuming you're using MUI icons
-import {getAllTokens} from "../theme";
+import {getAllTokens, themeHelpers} from "../theme";
 import call from "../services/api-call";
 import config from "../config";
 import proBackground from "../img/popu-up-backgraound-plain.svg";
@@ -36,13 +36,13 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({ open, onClose, 
 
 
     return (
-        <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 7, maxHeight: "95vh", overflowX: "hidden", height: "auto", paddingBottom: "100px" } }}>
+        <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 7, maxHeight: "95vh", overflowX: "hidden", height: "auto", paddingBottom: "100px", ...themeHelpers.frostedGlass } }}>
             <Box style={{
                 width: '100%', // Use 100% width to utilize the dialog's width fully
                 minHeight: "auto",
                 outlineColor: "black",
                 borderRadius: 7,
-                height: "100%",
+                height: "100%"
             }}>
                 <Grid container spacing={2} alignItems="center" justifyContent="center" style={{paddingTop: "20px"}}>
                     <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
