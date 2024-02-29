@@ -15,6 +15,7 @@ import {selectAuthStateId} from "../reducers/auth/auth";
 import call from "../services/api-call";
 import config from "../config";
 import {ThreeDots} from "react-loading-icons";
+import swal from "sweetalert";
 
 interface JourneyMapProps {
     unitId: any;
@@ -95,7 +96,7 @@ function JourneyMap({ unitId }: JourneyMapProps) {
                     '--button-default-font-size': '14px',
                     '--button-default-border-radius': '80%',
                     '--button-horizontal-padding': '3px',
-                    '--button-raise-level': '12px',
+                    '--button-raise-level': '6px',
                     '--button-hover-pressure': '3',
                     '--transform-speed': '0.275s',
                 }} type="primary" href={"/journey/main"}>
@@ -120,7 +121,7 @@ function JourneyMap({ unitId }: JourneyMapProps) {
                     '--button-default-font-size': '14px',
                     '--button-default-border-radius': '80%',
                     '--button-horizontal-padding': '3px',
-                    '--button-raise-level': '12px',
+                    '--button-raise-level': '6px',
                     '--button-hover-pressure': '3',
                     '--transform-speed': '0.275s',
                 }} type="primary" href={"/journey/main"}>
@@ -155,7 +156,7 @@ function JourneyMap({ unitId }: JourneyMapProps) {
                     '--button-default-font-size': '14px',
                     '--button-default-border-radius': '80%',
                     '--button-horizontal-padding': '3px',
-                    '--button-raise-level': '12px',
+                    '--button-raise-level': '6px',
                     '--button-hover-pressure': '3',
                     '--transform-speed': '0.275s',
                 }} type="primary">
@@ -191,6 +192,8 @@ function JourneyMap({ unitId }: JourneyMapProps) {
             });
 
             setTasks(structuredData)
+        } else {
+            swal("There was an issue getting this data. Please try again.")
         }
 
         console.log("this is the task: ", res)

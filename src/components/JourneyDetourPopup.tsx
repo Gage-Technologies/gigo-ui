@@ -101,7 +101,8 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({ open, onClose, 
                             borderRadius: "50px", // Match the border-radius of the inner box
                             padding: '10px', // Adjust the space between the border and the inner box
                             height: "auto",
-                            minHeight: "300px"
+                            minHeight: "300px",
+                            maxHeight: "45vh"
                         }}>
                             <Box style={{
                                 backgroundColor: `${
@@ -111,9 +112,10 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({ open, onClose, 
                                 width: "100%", // 100% to fill up the outer Box
                                 height: "100%", // If you need to set a specific height
                                 minHeight: "275px",
-                                paddingBottom: "10px"
+                                paddingBottom: "10px",
+                                maxHeight: "45vh"
                             }}>
-                                <div style={{paddingTop: "5px"}}>
+                                <div style={{paddingTop: "5px", height: "auto", maxHeight: "40vh", overflowY: "scroll", overflowX: "hidden"}}>
                                     <JourneyMap unitId={
                                         //@ts-ignore
                                         unit._id}/>
@@ -162,8 +164,10 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({ open, onClose, 
                                 ))}
                             </div>
                         </Box>
-                        <AwesomeButton style={{width: "50%", top: "9vh", "--button-default-border-radius": "20px" }}>Take Detour</AwesomeButton>
                     </Grid>
+                    <div style={{width: "100%", display: "flex", justifyContent: "center"}}>
+                        <AwesomeButton style={{width: "30%", top: "9vh", "--button-default-border-radius": "20px" }}>Take Detour</AwesomeButton>
+                    </div>
                 </Grid>
 
                 {/* Close Button */}
