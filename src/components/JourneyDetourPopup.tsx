@@ -57,7 +57,9 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({ open, onClose, 
                             width: "90%", // Set the width to 90% of the parent
                             textAlign: 'center', // Center the text horizontally
                             margin: 'auto', // Auto margins for horizontal centering if needed
-                            border: `2px solid ${'#dfce53'}`
+                            border: `2px solid ${
+                                //@ts-ignore
+                                unit.color}`
                         }}>
                             <img src={config.rootPath + "/static/junit/t/" +
                                 //@ts-ignore
@@ -102,7 +104,9 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({ open, onClose, 
                             minHeight: "300px"
                         }}>
                             <Box style={{
-                                backgroundColor: '#dfce53',
+                                backgroundColor: `${
+                                    //@ts-ignore
+                                    unit.color}`,
                                 borderRadius: "50px",
                                 width: "100%", // 100% to fill up the outer Box
                                 height: "100%", // If you need to set a specific height

@@ -5,6 +5,7 @@ import {Box, Card, CardContent, CardMedia, Typography} from "@mui/material";
 import JourneyDetourPopup from "../../JourneyDetourPopup";
 import {themeHelpers} from "../../../theme";
 import config from "../../../config"
+import cube from "../../../img/3d-cube.svg"
 
 function DetourCard(props: any) {
     const [openPopup, setOpenPopup] = useState<boolean>(false);
@@ -40,6 +41,16 @@ function DetourCard(props: any) {
                     image={config.rootPath + "/static/junit/t/" + props.data._id}
                     alt="Hexagon Image"
                 />
+                {/*<Box sx={{*/}
+                {/*    position: 'absolute',*/}
+                {/*    top: '.65vw',*/}
+                {/*    left: '1vw', // Adjust to align with the CardMedia image*/}
+                {/*    width: '3.5vw',*/}
+                {/*    height: '4vw',*/}
+                {/*    clipPath: 'polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)', // Match the CardMedia shape*/}
+                {/*}}>*/}
+                {/*    <img src={cube} alt="Overlay Image" style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>*/}
+                {/*</Box>*/}
                 <Box sx={{ display: 'flex', flexDirection: 'column', width: '450px' }}>
                     <CardContent>
                         <Typography component="div" variant="body1" sx={{ fontSize: '3vh', paddingBottom: "10px" }}>

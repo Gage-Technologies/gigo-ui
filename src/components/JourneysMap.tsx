@@ -125,8 +125,8 @@ function JourneyMap({ unitId }: JourneyMapProps) {
                     '--transform-speed': '0.275s',
                 }} type="primary" href={"/journey/main"}>
                     <div style={{
-                        height: "80px",
-                        width: "80px",
+                        height: "50px",
+                        width: "50px",
                     }}>
                         <img
                             src={python}
@@ -420,7 +420,7 @@ function JourneyMap({ unitId }: JourneyMapProps) {
                     <div
                         key={item.node}
                         style={{
-                            marginLeft: '3vw',
+                            marginLeft: '4vw',
                             transform: `translateX(${index % 2 === 0 ? '-75px' : '75px'})`,
                             position: 'relative', // To ensure it's above the SVG
                             zIndex: 1, // Bring SpeedDials above the SVG paths
