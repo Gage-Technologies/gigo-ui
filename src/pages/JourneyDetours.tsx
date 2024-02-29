@@ -70,11 +70,36 @@ function JourneyDetours() {
         return () => window.removeEventListener('resize', handleResize);
     }, [isSticky]); // Dependency array includes isSticky
 
-    const handleTabChange = (event: any, newValue: any) => {
+    // const handleTabChange = (event: any, newValue: any) => {
+    //     setActiveTab(newValue);
+    //     console.log("new value is: ", newValue)
+    //     const section = document.getElementById(sections.current[newValue]);
+    //     console.log("section: ", section)
+    //     console.log("offsetHeight: ", offsetHeight)
+    //     if (section) {
+    //         window.scrollTo({ top: section.offsetTop - offsetHeight, behavior: 'smooth' });
+    //     }
+    // };
+
+    const handleTabChange = (event: React.ChangeEvent<{}>, newValue: number): void => {
         setActiveTab(newValue);
-        const section = document.getElementById(sections.current[newValue]);
-        if (section) {
-            window.scrollTo({ top: section.offsetTop - offsetHeight, behavior: 'smooth' });
+        console.log("new value is: ", newValue);
+
+        if (newValue === 0) {
+            // Scroll to the top of the page
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (newValue === 1) {
+            // Scroll to the bottom of the page
+            // Use document.body.scrollHeight to get the total height of the body content
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        } else {
+            // For other tabs, continue to scroll to their respective section if applicable
+            const section = document.getElementById(sections.current[newValue]);
+            console.log("section: ", section);
+            console.log("offsetHeight: ", offsetHeight);
+            if (section) {
+                window.scrollTo({ top: section.offsetTop - offsetHeight, behavior: 'smooth' });
+            }
         }
     };
 
@@ -146,6 +171,8 @@ function JourneyDetours() {
     // Function to toggle the showAll state
     const handleShowAllTogglePython = () => setShowAllPython(!showAllPython);
     const handleShowAllToggleGo = () => setShowAllGo(!showAllGo);
+
+    console.log("y is: ", window.scrollY)
 
     return (
         <ThemeProvider theme={theme}>
