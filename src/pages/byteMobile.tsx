@@ -2,11 +2,11 @@ import * as React from "react";
 import {useEffect, useRef, useState} from "react";
 import {
     alpha,
-    Box, CircularProgress,
+    Box, Button, CircularProgress,
     createTheme,
     CssBaseline,
-    Dialog,
-    DialogTitle,
+    Dialog, DialogContent,
+    DialogTitle, Grid, IconButton,
     List,
     ListItem,
     ListItemText,
@@ -63,11 +63,17 @@ import {ctCreateCodeActions} from "../components/IDE/Extensions/CtCodeActionExte
 import {debounce} from "lodash";
 import {useGlobalCtWebSocket} from "../services/ct_websocket";
 import {createCtPopupExtension, CtPopupExtensionEngine} from "../components/IDE/Extensions/CtPopupExtension";
-import ByteSuggestions2 from "../components/CodeTeacher/ByteSuggestions2";
 import LinkOffIcon from "@mui/icons-material/LinkOff";
 import LinkIcon from "@mui/icons-material/Link";
-import ByteNextStep from "../components/CodeTeacher/ByteNextStep";
-import ByteNextOutputMessage from "../components/CodeTeacher/ByteNextOutputMessage";
+import ByteSuggestions2Mobile from "../components/CodeTeacher/ByteSuggestions2Mobile";
+import ByteSuggestions2 from "../components/CodeTeacher/ByteSuggestions2";
+import HelpIcon from '@mui/icons-material/Help';
+import CloseIcon from "@material-ui/icons/Close";
+import {styled} from "@mui/system";
+import { BugReportOutlined } from "@material-ui/icons";
+import { Circle } from "@mui/icons-material";
+import ConstructionIcon from '@mui/icons-material/Construction';
+
 
 interface MergedOutputRow {
     error: boolean;
@@ -159,7 +165,6 @@ function ByteMobile() {
         width: "100%",
         minWidth: `100%`,
         alignItems: 'center',
-        // justifyContent: 'center',
         overflowX: 'auto',
         position: 'relative',
         overflowY: 'hidden',
@@ -231,6 +236,7 @@ function ByteMobile() {
     const [speedDialOpen, setSpeedDialOpen] = useState(false);
     const [workspaceState, setWorkspaceState] = useState<null | number>(null);
     const [workspaceId, setWorkspaceId] = useState<string>('')
+    const [helpPopupOpen, setHelpPopupOpen] = useState(false);
 
     const [editorStyles, setEditorStyles] = useState({
         fontSize: '14px',
@@ -497,11 +503,9 @@ function ByteMobile() {
         }
 
         if (res["rec_bytes"]) {
-            // Map through each byte and add a random image from byteImages
             const enhancedBytes = res["rec_bytes"].map((byte: any) => ({
                 ...byte,
                 id: byte._id,
-                bytesThumb: byteImages[Math.floor(Math.random() * byteImages.length)],
                 completedEasy: byte["completed_easy"],
                 completedMedium: byte["completed_medium"],
                 completedHard: byte["completed_hard"],
@@ -817,14 +821,6 @@ function ByteMobile() {
         }
     };
 
-    const byteImages = [
-        "/static/posts/t/1688617436791701504",
-        "/static/posts/t/1688570643030736896",
-        "/static/posts/t/1688638972722413568",
-        "/static/posts/t/1688940677359992832",
-        "/static/posts/t/1693725878338453504"
-    ];
-
     // Add a function to handle closing the terminal
     const handleCloseTerminal = () => {
         setTerminalVisible(false);
@@ -988,11 +984,10 @@ function ByteMobile() {
     }
 
     const DifficultyPopup: React.FC<DifficultyPopupProps> = ({
-                                                                 open,
-                                                                 onClose,
-                                                                 onSelectDifficulty,
-                                                                 currentDifficulty
-                                                             }) => {
+         open,
+         onClose,
+         onSelectDifficulty,
+         currentDifficulty}) => {
         const difficulties = ['Easy', 'Medium', 'Hard'];
 
         return (
@@ -1047,6 +1042,11 @@ function ByteMobile() {
                 icon: <PinIcon/>,
                 name: 'Difficulty',
                 action: () => setIsDifficultyPopupOpen(true),
+            },
+            {
+                icon: <HelpIcon/>,
+                name: 'Help',
+                action: () => setHelpPopupOpen(true),
             },
         ];
 
@@ -1185,7 +1185,6 @@ function ByteMobile() {
                         }
                     }
                     setConnectButtonLoading(false);
-                    // Additional logic for handling connection success or failure
                 }
             };
 
@@ -1232,13 +1231,156 @@ function ByteMobile() {
         return "hint"
     }, [bytesState.byteDifficulty])
 
+    const WaitingButton = styled(Button)`
+        animation: nextStepsButtonAuraEffect 2s infinite alternate;
+        padding: 8px;
+        min-width: 0px;
 
+        @keyframes nextStepsButtonAuraEffect {
+            0% {
+                box-shadow: 0 0 3px #84E8A2, 0 0 6px #84E8A2;
+                color: #84E8A2;
+                border: 1px solid #84E8A2;
+            }
+            20% {
+                box-shadow: 0 0 3px #29C18C, 0 0 6px #29C18C;
+                color: #29C18C;
+                border: 1px solid #29C18C;
+            }
+            40% {
+                box-shadow: 0 0 3px #1C8762, 0 0 6px #1C8762;
+                color: #1C8762;
+                border: 1px solid #1C8762;
+            }
+            60% {
+                box-shadow: 0 0 3px #2A63AC, 0 0 6px #2A63AC;
+                color: #2A63AC;
+                border: 1px solid #2A63AC;
+            }
+            80% {
+                box-shadow: 0 0 3px #3D8EF7, 0 0 6px #3D8EF7;
+                color: #3D8EF7;
+                border: 1px solid #3D8EF7;
+            }
+            100% {
+                box-shadow: 0 0 3px #63A4F8, 0 0 6px #63A4F8;
+                color: #63A4F8;
+                border: 1px solid #63A4F8;
+            }
+        }
+    `;
+
+
+    const helpPopup = () => {
+        return (
+            <Dialog
+                fullScreen
+                open={helpPopupOpen}
+                onClose={() => setHelpPopupOpen(false)}
+                aria-labelledby="help-popup-title"
+            >
+                <DialogTitle id="help-popup-title">
+                    <IconButton
+                        edge="start"
+                        color="inherit"
+                        onClick={() => setHelpPopupOpen(false)}
+                        aria-label="close"
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                    Whats going on?
+                </DialogTitle>
+                <DialogContent dividers>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <Typography variant="h5" gutterBottom>
+                                GIGO Bytes
+                            </Typography>
+                            <Typography>
+                                This experience can be a little confusing on mobile, but this short guide will have you improving your programming skills shortly.
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <Box display="flex" alignItems="center" gap={2}>
+                                <Typography variant="h5" gutterBottom>
+                                    Byte Chat
+                                </Typography>
+                                <img alt="CT" src={CTIcon} style={{width: 42, height: 42, marginBottom: "3%"}}/>
+                            </Box>
+                            <Typography>
+                                Byte Chat is your guide through the coding challenge, providing the task to be completed. Upon dropping into a Byte, you should first check out the Byte Chat to understand the task. Ask Byte Chat any questions you have!
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <Box display="flex" alignItems="center" gap={2}>
+                                <Typography variant="h5" gutterBottom display="inline">
+                                    Editor
+                                </Typography>
+                                <DeveloperModeIcon style={{width: 42, height: 42, marginBottom: "3%"}} />
+                            </Box>
+                            <Typography>
+                                You were initially dropped inside of our AI powered Code Editor. The editor will come with some basic code to get you started. You will see a number of important AI powered tools that will help you on your coding journey.
+                            </Typography>
+                        </Grid>
+                        {/* Debug Section */}
+                        <Grid item xs={12} md={6}>
+                            <Box display="flex" alignItems="center" gap={2}>
+                                <Typography variant="h5">
+                                    Debug
+                                </Typography>
+                                <BugReportOutlined style={{width: 42, height: 42, marginBottom: "1%"}} />
+                            </Box>
+                            <Typography>
+                                Encounter an error? Use the debug feature to automatically identify and help you correct mistakes.
+                                Debug will automatically pop up if Code Teacher detects any errors after your code runs. You can open the Debug menu after closing it by pressing the bug icon.
+                            </Typography>
+                        </Grid>
+                        {/* Next Steps Section */}
+                        <Grid item xs={12} md={6}>
+                            <Box display="flex" alignItems="center" gap={2}>
+                                <Typography variant="h5">
+                                    Next Steps
+                                </Typography>
+                                <WaitingButton
+                                    sx={{
+                                        height: "30px",
+                                        width: "30px",
+                                        minWidth: "24px",
+                                        marginRight: "25px"
+                                    }}
+                                    variant="outlined"
+                                >
+                                    <Circle style={{ fontSize: "12px" }} />
+                                </WaitingButton>
+                            </Box>
+                            <Typography>
+                               Not sure what to do next? Code Teacher will automatically detect when you have been idle for a certain amount of time and will provide you with AI-powered hints to tackle the next step.
+                            </Typography>
+                        </Grid>
+                        {/* Code Improvement Section */}
+                        <Grid item xs={12} md={6}>
+                            <Box display="flex" alignItems="center" gap={2}>
+                                <Typography variant="h5">
+                                    Code Improvement
+                                </Typography>
+                                <ConstructionIcon style={{width: 36, height: 36, marginBottom: "1%"}}/>
+                            </Box>
+                            <Typography>
+                                Once you are connected to the workspace, a Clean Up Code option will be available. Code teacher will analyze your code and suggest improvements
+                            </Typography>
+                        </Grid>
+                    </Grid>
+                </DialogContent>
+            </Dialog>
+        )
+    };
 
     // @ts-ignore
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
                 <Box sx={{...topContainerStyle, flexDirection: 'row', justifyContent: 'center', width: '100%'}}>
+                    {helpPopup()}
                     {tabValue === 0 && (
                         <>
                             {activeSidebarTab !== "nextSteps" && activeSidebarTab !== "codeSuggestion" &&(
@@ -1287,7 +1429,7 @@ function ByteMobile() {
                                     description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
                                     // @ts-ignore
                                     dev_steps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
-                                    maxWidth={"20vw"}
+                                    maxWidth={"100%"}
                                     acceptedCallback={(c) => {
                                         setCode(c)
                                         setSuggestionRange(null)
