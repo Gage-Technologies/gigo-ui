@@ -265,6 +265,7 @@ export interface CtHhUserMessage {
     chat_id: string;
     user_message: string;
     code: string;
+    code_language: string;
 }
 
 export interface CtExecCommand {
@@ -279,6 +280,7 @@ export interface CtHHAssistantMessage {
     code_token: string;
     complete_message: string;
     complete_code: string;
+    code_language: string;
     message_type: CtChatMessageType;
     command: CtExecCommand;
     done: boolean;
@@ -342,6 +344,7 @@ export interface CtGetHHChatMessagesResponseMessage {
     message_type: CtChatMessageType;
     content: string;
     code: string;
+    code_language: string;
     created_at: Date;
     message_number: number;
     command: CtExecCommand;

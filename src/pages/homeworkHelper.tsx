@@ -4,10 +4,10 @@ import {
     Button,
     Container,
     createTheme,
-    CssBaseline,
-    Grid,
+    CssBaseline, FormControl,
+    Grid, InputLabel, MenuItem,
     PaletteMode,
-    Paper,
+    Paper, Select,
     TextField,
     Theme,
     ThemeProvider,
@@ -45,6 +45,30 @@ import {
     CtNewHhChatResponse,
     CtValidationErrorPayload
 } from "../models/ct_websocket";
+
+interface LanguageOption {
+    name: string;
+    extensions: string[];
+}
+
+const languages: LanguageOption[] = [
+    { name: 'Go', extensions: ['go'] },
+    { name: 'Python', extensions: ['py'] },
+    { name: 'C++', extensions: ['cpp', 'cc', 'cxx', 'hpp'] },
+    { name: 'HTML', extensions: ['html', 'htm'] },
+    { name: 'Java', extensions: ['java'] },
+    { name: 'JavaScript', extensions: ['js'] },
+    { name: 'JSON', extensions: ['json'] },
+    { name: 'Markdown', extensions: ['md'] },
+    { name: 'PHP', extensions: ['php'] },
+    { name: 'Rust', extensions: ['rs'] },
+    { name: 'SQL', extensions: ['sql'] },
+    { name: 'XML', extensions: ['xml'] },
+    { name: 'LESS', extensions: ['less'] },
+    { name: 'SASS', extensions: ['sass', 'scss'] },
+    { name: 'Clojure', extensions: ['clj'] },
+    { name: 'C#', extensions: ['cs'] },
+];
 
 const InitStyledContainer = styled(Container)(({theme}) => ({
     display: 'flex',
@@ -480,6 +504,8 @@ function HomeworkHelper() {
     const [messages, setMessages] = React.useState<CtGetHHChatMessagesResponseMessage[]>([]);
 
     const [code, setCode] = React.useState("");
+    const [codeLanguage, setCodeLanguage] = React.useState("")
+    const [langSelectActive, setLangSelectActive] = React.useState(false)
 
     let ctWs = useGlobalCtWebSocket();
 
@@ -521,6 +547,7 @@ function HomeworkHelper() {
                 message_type: CtChatMessageType.User,
                 content: userMessage,
                 code: code,
+                code_language: codeLanguage,
                 created_at: new Date(),
                 message_number: 0,
                 command: {command: "", lang: ""},
@@ -538,6 +565,7 @@ function HomeworkHelper() {
                     chat_id: chatId,
                     user_message: userMessage,
                     code: code,
+                    code_language: codeLanguage,
                 }
             } satisfies CtMessage<CtHhUserMessage>,
             (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtHHAssistantMessage>): boolean => {
@@ -550,6 +578,7 @@ function HomeworkHelper() {
 
                 if (res.complete_code !== "") {
                     setCode(res.complete_code)
+                    setCodeLanguage(res.code_language)
                     setEditorOpen(true)
                 }
 
@@ -564,6 +593,7 @@ function HomeworkHelper() {
                         message_type: res.message_type,
                         content: res.complete_message,
                         code: res.complete_code,
+                        code_language: res.code_language,
                         created_at: new Date(),
                         message_number: prev.length,
                         command: res.command,
@@ -592,6 +622,7 @@ function HomeworkHelper() {
             message_type: CtChatMessageType.User,
             content: userMessage,
             code: code,
+            code_language: codeLanguage,
             created_at: new Date(),
             message_number: 0,
             command: {command: "", lang: ""},
@@ -677,6 +708,63 @@ function HomeworkHelper() {
         return (
             <Slide direction="left" in={editorOpen} mountOnEnter unmountOnExit>
                 <Box>
+                    <FormControl
+                        sx={{
+                            minWidth: "100px", // Adjust based on your UI needs
+                            m: 0, // Minimize margin
+                            p: 0, // Minimize padding
+                        }}
+                    >
+                        <InputLabel
+                            id="language-selector-label"
+                            sx={{
+                                fontSize: "0.7rem !important",
+                                m: 0, // Minimize margin
+                                p: 0, // Minimize padding
+                                top: langSelectActive || codeLanguage !== "" ? "0px" : "-11px",
+                            }}
+                        >
+                            Language
+                        </InputLabel>
+                        <Select
+                            labelId="language-selector-label"
+                            id="language-selector"
+                            value={codeLanguage}
+                            label="Language"
+                            onFocus={() => setLangSelectActive(true)}
+                            onBlur={() => setLangSelectActive(false)}
+                            onChange={(e) => {
+                                setCodeLanguage(e.target.value)
+                            }}
+                            size="small" // Make Select more compact
+                            sx={{
+                                fontSize: "0.7rem !important",
+                                m: 0, // Minimize margin
+                                p: 0, // Minimize padding
+                                '& .MuiSelect-select': {
+                                    py: '5px', // Adjust padding vertically as needed
+                                },
+                                // '& .MuiOutlinedInput-notchedOutline': {
+                                //     border: 'none', // Remove border if desired for compactness
+                                // },
+                            }}
+                        >
+                            {languages.map((language) => (
+                                <MenuItem
+                                    key={language.name}
+                                    value={language.name.toLowerCase()}
+                                    sx={{
+                                        fontSize: "0.7rem !important",
+                                        m: 0, // Minimize margin
+                                        p: 0, // Minimize padding,
+                                        paddingLeft: "5px"
+                                    }}
+                                >
+                                    {language.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                     <Editor
                         // ref={editorRef}
                         editorStyles={{
@@ -688,14 +776,14 @@ function HomeworkHelper() {
                             height: "100%",
                             borderRadius: "10px",
                         }}
-                        language={"python"}
+                        language={codeLanguage}
                         code={code}
                         theme={mode}
                         readonly={false}
                         onChange={(val, view) => setCode(val)}
                         wrapperStyles={{
                             width: '100%',
-                            height: 'calc(100vh - 100px)',
+                            height: 'calc(100vh - 130px)',
                             borderRadius: "10px",
                             border: `1px solid ${theme.palette.primary.light}`
                         }}

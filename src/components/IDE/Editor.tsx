@@ -2,6 +2,21 @@ import React, {useEffect, useState} from "react";
 import CodeMirror, {Extension, ReactCodeMirrorRef, ViewUpdate} from '@uiw/react-codemirror';
 import {indentUnit, StreamLanguage} from '@codemirror/language';
 import {python} from '@codemirror/lang-python';
+import {cpp} from '@codemirror/lang-cpp';
+import {html} from '@codemirror/lang-html';
+import {java} from '@codemirror/lang-java';
+import {javascript} from '@codemirror/lang-javascript';
+import {json} from '@codemirror/lang-json';
+import {lezer} from '@codemirror/lang-lezer';
+import {markdown} from '@codemirror/lang-markdown';
+import {php} from '@codemirror/lang-php';
+import {rust} from '@codemirror/lang-rust';
+import {sql} from '@codemirror/lang-sql';
+import {xml} from '@codemirror/lang-xml';
+import {less} from '@codemirror/lang-less';
+import {sass} from '@codemirror/lang-sass';
+import {clojure} from '@nextjournal/lang-clojure';
+import {csharp} from '@replit/codemirror-lang-csharp';
 import {go} from '@codemirror/legacy-modes/mode/go';
 import {copilot} from '@uiw/codemirror-theme-copilot';
 import {quietlight} from '@uiw/codemirror-theme-quietlight';
@@ -83,14 +98,53 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
 
     const selectLang = () => {
         switch (props.language.toLowerCase()) {
-            case "go":
             case "golang":
-                return StreamLanguage.define(go)
+            case "go":
+                return StreamLanguage.define(go);
             case "py":
             case "python":
-                return python()
+                return python();
+            case "cpp":
+            case "cc":
+            case "cxx":
+            case "hpp":
+                return cpp();
+            case "html":
+            case "htm":
+                return html();
+            case "java":
+                return java();
+            case "js":
+            case "javascript":
+                return javascript();
+            case "json":
+                return json();
+            case "md":
+            case "markdown":
+                return markdown();
+            case "php":
+                return php();
+            case "rs":
+            case "rust":
+                return rust();
+            case "sql":
+                return sql();
+            case "xml":
+                return xml();
+            case "less":
+                return less();
+            case "sass":
+            case "scss":
+                return sass();
+            case "clj":
+            case "clojure":
+                return clojure();
+            case "cs":
+            case "csharp":
+                return csharp();
+            // Additional cases for other languages and their extensions
             default:
-                return undefined
+                return undefined;
         }
     }
 
