@@ -15,7 +15,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import SearchBar from "../components/SearchBar";
 import {getAllTokens} from "../theme";
 import DetourCard from "../components/Icons/joruneyMainAssets/DetourCard";
-import Carousel from "../components/Carousel";
+import Carousel from "../components/Carousel2";
 import call from "../services/api-call";
 import config from "../config";
 

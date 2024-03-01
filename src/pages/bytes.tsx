@@ -12,7 +12,7 @@ import XpPopup from "../components/XpPopup";
 import { getAllTokens } from "../theme";
 import { Close, PlayArrow } from "@material-ui/icons";
 import { useAppDispatch, useAppSelector } from "../app/hooks";
-import { useNavigate } from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import swal from "sweetalert";
 import call from "../services/api-call";
 import 'ace-builds';
@@ -298,6 +298,8 @@ function Byte() {
 
     const [suggestionRange, setSuggestionRange] = useState<{start_line: number, end_line: number} | null>(null);
 
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
 
     let { id } = useParams();
 
@@ -1258,6 +1260,7 @@ function Byte() {
                         codeOutput={output?.merged || ""}
                         nextByte={getNextByte()}
                         containerRef={containerRef}
+                        journey={queryParams.has('journey')}
                     />
                 )}
                 {(activeSidebarTab === null || activeSidebarTab === "codeSuggestion") && (
@@ -1323,9 +1326,9 @@ function Byte() {
 
     const containerRef = useRef(null)
 
-    return (
-        <ThemeProvider theme={theme}>
-            <CssBaseline>
+    const bytesPage = () => {
+        return (
+            <>
                 <Container maxWidth="xl" style={containerStyle}>
                     <Box sx={topContainerStyle} ref={containerRef}>
                         <Box sx={difficultyAdjusterStyle}>
@@ -1461,6 +1464,163 @@ function Byte() {
                     //@ts-ignore
                                      renown={xpData["xp_update"]["current_renown"]} popupClose={null}
                                      homePage={true} />) : null}
+            </>
+        )
+    }
+
+    const journeyBytesPage = () => {
+        return (
+            <>
+                <Container maxWidth="xl" style={containerStyle}>
+                    <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0rem',
+                    }} ref={containerRef}>
+                        {byteData ? (
+                            <Typography variant="h4" component="h1" style={titleStyle}>
+                                {byteData.name}
+                            </Typography>
+                        ) : (
+                            <Box sx={titlePlaceholderContainerStyle}>
+                                <Box sx={titlePlaceholderStyle}>
+                                    <SheenPlaceholder width="400px" height={"45px"} />
+                                </Box>
+                            </Box>
+                        )}
+                    </Box>
+                    <div style={mainLayoutStyle}>
+                        <div style={{
+                            display: 'flex',
+                            height: '80vh',
+                            width: '95vw',
+                            marginLeft: '30px',
+                            marginRight: 'auto',
+                            borderRadius: theme.shape.borderRadius,
+                            overflow: 'hidden',
+                            boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.2)',
+                            border: `1px solid ${theme.palette.grey[300]}`,
+                            padding: "10px",
+                            backgroundColor: theme.palette.background.default
+                        }}>
+                            <div style={markdownSectionStyle}>
+                                {byteData && id !== undefined && (
+                                    <ByteChat
+                                        byteID={id}
+                                        // @ts-ignore
+                                        description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
+                                        // @ts-ignore
+                                        devSteps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
+                                        // @ts-ignore
+                                        difficulty={difficultyToString(determineDifficulty())}
+                                        // @ts-ignore
+                                        questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
+                                        codePrefix={codeBeforeCursor}
+                                        codeSuffix={codeAfterCursor}
+                                        codeLanguage={programmingLanguages[byteData ? byteData.lang : 5]}
+                                        containerRef={containerRef}
+                                    />
+                                )}
+                            </div>
+                            <Box
+                                style={editorAndTerminalStyle}
+                                ref={editorContainerRef}
+                            >
+                                {code.length > 0 && (
+                                    <Tooltip title="Run Code">
+                                        <LoadingButton
+                                            loading={executingCode}
+                                            variant="text"
+                                            color={"success"}
+                                            style={{
+                                                position: 'absolute',
+                                                right: '8px',
+                                                top: '8px',
+                                                zIndex: 3,
+                                                borderRadius: "50%",
+                                                minWidth: 0,
+                                            }}
+                                            onClick={() => {
+                                                setOutputPopup(false);
+                                                buttonClickedRef.current = true;
+                                                if (!authState.authenticated) {
+                                                    navigate("/signup")
+                                                    return
+                                                }
+
+                                                executeCode(); // Indicate button click
+                                            }}
+                                        >
+                                            <PlayArrow />
+                                        </LoadingButton>
+                                    </Tooltip>
+                                )}
+                                <Editor
+                                    ref={editorRef}
+                                    parentStyles={editorStyle}
+                                    language={programmingLanguages[byteData ? byteData.lang : 5]}
+                                    code={code}
+                                    theme={mode}
+                                    readonly={!authState.authenticated}
+                                    onChange={(val, view) => handleEditorChange(val)}
+                                    onCursorChange={(bytePosition, line, column) => setCursorPosition({ row: line, column: column })}
+                                    lspUrl={byteData && lspActive ? `wss://${byteData._id}-lsp.${config.coderPath.replace("https://", "")}` : undefined}
+                                    diagnosticLevel={selectDiagnosticLevel()}
+                                    extensions={popupExtRef.current ? editorExtensions.concat(popupExtRef.current) : editorExtensions}
+                                    wrapperStyles={{
+                                        width: '100%',
+                                        height: '100%',
+                                        borderRadius: "10px",
+                                        ...(
+                                            // default
+                                            workspaceState === null ? {} :
+                                                // starting or active
+                                                workspaceState === 1 && lspActive ?
+                                                    {border: `1px solid ${theme.palette.primary.main}`} :
+                                                    {border: `1px solid grey`}
+                                        )
+                                    }}
+                                />
+                                {terminalVisible && output && (
+                                    <ByteTerminal
+                                        output={output}
+                                        onClose={handleCloseTerminal}
+                                        onStop={() => cancelCodeExec(commandId)}
+                                        onInputSubmit={(input: string) => stdInExecRequest(commandId, input)}
+                                        isRunning={executingCode}
+                                    />
+                                )}
+                            </Box>
+                            {renderEditorSideBar()}
+                        </div>
+                    </div>
+                </Container>
+                {parsedSymbols !== null ? codeActionPortals.map(x => x.portal) : null}
+                {xpPopup ? (<XpPopup oldXP={
+                    //@ts-ignore
+                    (xpData["xp_update"]["old_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]} levelUp={
+                    //@ts-ignore
+                    xpData["level_up_reward"] !== null} maxXP={100}
+                    //@ts-ignore
+                                     newXP={(xpData["xp_update"]["new_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]}
+                    //@ts-ignore
+                                     nextLevel={xpData["xp_update"]["old_level"] !== undefined ? xpData["xp_update"]["new_level"] : xpData["xp_update"]["next_level"]}
+                    //@ts-ignore
+                                     gainedXP={xpData["xp_update"]["new_xp"] - xpData["xp_update"]["old_xp"]}
+                    //@ts-ignore
+                                     reward={xpData["level_up_reward"]}
+                    //@ts-ignore
+                                     renown={xpData["xp_update"]["current_renown"]} popupClose={null}
+                                     homePage={true} />) : null}
+            </>
+        )
+    }
+
+    return (
+        <ThemeProvider theme={theme}>
+            <CssBaseline>
+                {(queryParams.has('journey')) ? journeyBytesPage() : bytesPage()}
             </CssBaseline>
         </ThemeProvider >
     );

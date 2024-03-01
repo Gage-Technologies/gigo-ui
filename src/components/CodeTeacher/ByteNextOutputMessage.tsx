@@ -37,6 +37,8 @@ import {selectAuthState} from "../../reducers/auth/auth";
 import proBackground from "../../img/popu-up-backgraound-plain.svg";
 import premiumGorilla from "../../img/pro-pop-up-icon-plain.svg";
 import GoProDisplay from "../GoProDisplay";
+import completed from "../Icons/joruneyMainAssets/journey-completed-no-cirlce.svg";
+import {AwesomeButton} from "react-awesome-button";
 
 export type ByteNextOutputMessageProps = {
     trigger: boolean;
@@ -52,6 +54,7 @@ export type ByteNextOutputMessageProps = {
     maxWidth: string;
     codeOutput: string;
     nextByte?: any;
+    journey: boolean
     containerRef: React.MutableRefObject<null>;
 };
 
@@ -432,6 +435,64 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
         )
     }
 
+    const renderSuccesPageJourney = () => {
+        return (
+            <Box
+                display={"flex"}
+                flexDirection={"column"}
+                sx={{
+                    alignItems: 'center',
+                    maxWidth: props.maxWidth,
+                    height: "100%",
+                    width: "100%"
+                }}
+            >
+                <Typography component={Box} variant="h5">
+                    Journey Task Completed!
+                </Typography>
+                <Player
+                    src={byteSuccess}
+                    loop={false}
+                    keepLastFrame={true}
+                    autoplay={true}
+                    renderer="svg"
+                />
+                <Box
+                    display={"flex"}
+                    flexDirection={"row"}
+                    justifyContent={"space-between"}
+                    sx={{
+                        width: "100%",
+                        marginTop: "auto",
+                        mb: 2,
+                        justifyContent: 'center',
+                    }}
+                >
+                    <AwesomeButton style={{
+                        width: "auto",
+                        //@ts-ignore
+                        '--button-primary-color': theme.palette.tertiary.dark,
+                        '--button-primary-color-dark': "#afa33d",
+                        '--button-primary-color-light': "#dfce53",
+                        //@ts-ignore
+                        '--button-primary-color-active': theme.palette.tertiary.dark,
+                        //@ts-ignore
+                        '--button-primary-color-hover': theme.palette.tertiary.main,
+                        '--button-default-border-radius': "24px",
+                        '--button-hover-pressure': "4",
+                        height: "10vh",
+                        '--button-raise-level': "10px"
+                    }} type="primary" href={"/journey/main"}>
+                        <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
+                            Continue
+                        </h1>
+                    </AwesomeButton>
+                </Box>
+            </Box>
+        )
+    }
+
+
     const renderContent = () => {
         if (hidden && (response.length > 0 || success)) {
             return renderHidden
@@ -443,6 +504,10 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
 
         if (hidden) {
             return renderHiddenDisabled
+        }
+
+        if (success && props.journey) {
+            return renderSuccesPageJourney()
         }
 
         if (success) {

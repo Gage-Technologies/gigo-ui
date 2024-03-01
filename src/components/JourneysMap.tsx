@@ -61,8 +61,15 @@ function JourneyMap({ unitId }: JourneyMapProps) {
         setAnchorElDetour(event.currentTarget);
     };
 
+    const [taskDescription, setTaskDescription] = useState("")
+    const [taskTitle, setTaskTitle] = useState("")
+    const [taskId, setTaskId] = useState("")
+
     //@ts-ignore
-    const handleClickDesc = (event) => {
+    const handleClickDesc = (description, title, taskID) => (event) => {
+        setTaskTitle(title)
+        setTaskDescription(description)
+        setTaskId(taskID)
         setAnchorElDesc(event.currentTarget);
     };
     const handleDetourClose = () => {
@@ -99,7 +106,7 @@ function JourneyMap({ unitId }: JourneyMapProps) {
                     '--button-raise-level': '6px',
                     '--button-hover-pressure': '3',
                     '--transform-speed': '0.275s',
-                }} type="primary" href={"/journey/main"}>
+                }} type="primary">
                     <CheckIcon fontSize="large" sx={{width: '1.5em', height: '1.3em'}}/>
                 </AwesomeButton>
 
@@ -124,7 +131,7 @@ function JourneyMap({ unitId }: JourneyMapProps) {
                     '--button-raise-level': '6px',
                     '--button-hover-pressure': '3',
                     '--transform-speed': '0.275s',
-                }} type="primary" href={"/journey/main"}>
+                }} type="primary">
                     <div style={{
                         height: "50px",
                         width: "50px",
@@ -282,32 +289,70 @@ function JourneyMap({ unitId }: JourneyMapProps) {
         return (
             <>
                 <Box sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
-                    <Typography sx={{textTransform: "none"}} variant={"h3"}>
-                        Binary Tree Visualizer
+                    <Typography sx={{textTransform: "none"}} variant={"h6"}>
+                        {taskTitle}
                     </Typography>
                 </Box>
                 <Box sx={{
                     display: "flex",
-                    justifyContent: "center",
+                    justifyContent: "flex-start",
                     alignItems: "center",
                     flexDirection: "column",
-                    pt: 4
+                    pt: 4,
+                    height: "225px"
                 }}>
-                    <Typography
-                        sx={{textTransform: "none", textAlign: 'justify', marginLeft: '28px', marginRight: '28px'}}
-                        variant={"h6"}>
-                        Learn to visualize a binary tree structure in the terminal by implementing a simple tree and
-                        displaying it. You'll understand the basics of binary trees and how to represent them textually.
+                    <Typography sx={{textTransform: "none", textAlign: 'justify', marginLeft: '28px', marginRight: '28px'}} variant={"h6"}>
+                        {taskDescription}
                     </Typography>
+
                 </Box>
             </>
 
         )
     }
 
+    const taskPopups = () => {;
+        return(
+            <>
+                <Popover
+                    id={openDesc ? 'simple-popover' : undefined}
+                    open={openDesc}
+                    anchorEl={anchorElDesc}
+                    onClose={handleDescClose}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right',
+                    }}
+                    transformOrigin={{
+                        vertical: 'center',
+                        horizontal: 'left',
+                    }}
+                    PaperProps={{
+                        style: {
+                            boxShadow: 'none',
+                            borderRadius: "30px",
+                            //@ts-ignore
+                            backgroundColor: theme.palette.background.chat,
+                        }
+                    }}
+                >
+                    <Box sx={{width: "20vw", height: '30vh', m: 3}}>
+                        <Box sx={{display: "flex", justifyContent: "right", alignItems: "right"}}>
+                            <Button onClick={handleDescClose}>
+                                <CloseIcon/>
+                            </Button>
+                        </Box>
+                        {TaskDescription()}
+                    </Box>
+                </Popover>
+            </>
+        )
+    }
+
     const Tasks = (item: any, index: any, firstIncomplete: any) => {
-        if (item.detour && (index === firstIncomplete)) {
-            return (
+        return (
+            <>
+
                 <SpeedDial
                     sx={{
                         '& .MuiSpeedDial-fab': {
@@ -320,85 +365,35 @@ function JourneyMap({ unitId }: JourneyMapProps) {
                             },
                         },
                     }}
-                    onClick={() => console.log("clicked: ", item.name)}
                     ariaLabel={`SpeedDial ${item.name}`}
                     icon={handleIcon(item, index, firstIncomplete)}
                     direction="right"
-                    open={openSpeedDial === item.node}
+                    open={openSpeedDial === item._id}
                 >
                     {/*//@ts-ignore*/}
                     <SpeedDialAction
                         icon={<ArticleIcon/>}
                         //@ts-ignore
                         tooltipTitle="Info"
-                        onClick={handleClickDesc}
-                        sx={{
-                            backgroundColor: "#52ad94",
-                            color: "white"
-                        }}
-                    />
-                    <SpeedDialAction
-                        icon={<ForkRightIcon/>}
-                        //@ts-ignore
-                        tooltipTitle="Take a Detour"
-                        onClick={handleClickDetour}
+                        onClick={handleClickDesc(item.description, item.name, item.code_source_id)}
                         sx={{
                             backgroundColor: "#52ad94",
                             color: "white"
                         }}
                     />
                 </SpeedDial>
-            )
-        } else {
-            return (
-                <SpeedDial
-                    sx={{
-                        '& .MuiSpeedDial-fab': {
-                            width: "30px",
-                            height: "30px",
-                            backgroundColor: 'transparent',
-                            boxShadow: "none",
-                            '&:hover': {
-                                backgroundColor: 'transparent',
-                            },
-                        },
-                    }}
-                    onClick={() => console.log("clicked: ", item.name)}
-                    ariaLabel={`SpeedDial ${item.name}`}
-                    icon={handleIcon(item, index, firstIncomplete)}
-                    direction="right"
-                    open={openSpeedDial === item.node}
-                >
-                    {/*//@ts-ignore*/}
-                    <SpeedDialAction
-                        icon={<ArticleIcon/>}
-                        //@ts-ignore
-                        tooltipTitle="Info"
-                        onClick={handleClickDesc}
-                        sx={{
-                            backgroundColor: "#52ad94",
-                            color: "white"
-                        }}
-                    />
-                    <SpeedDialAction
-                        sx={{
-                            opacity: 0,
-                            '&:hover': {
-                                cursor: 'default',
-                            },
-                        }}
-                    />
-                </SpeedDial>
-            )
-        }
+
+                {taskPopups()}
+            </>
+        )
     }
 
     function JourneyStops(metadata: any[]) {
         // Assuming each SpeedDial is 130px high and we want 20px gap between them
-        const speedDialHeight = 33;
+        const speedDialHeight = 35;
         const gap = 25;
         const points = metadata.map((item, index) => {
-            const x = index % 2 === 0 ? 100 : 280; // Alternate X position
+            const x = index % 2 === 0 ? 100 : 250; // Alternate X position
             const y = (speedDialHeight + gap) * index + speedDialHeight / 2; // Y position based on index
             return {x, y};
         });
@@ -421,75 +416,17 @@ function JourneyMap({ unitId }: JourneyMapProps) {
                 <CurvedPath points={points}/>
                 {metadata.map((item, index) => (
                     <div
-                        key={item.node}
+                        key={item._id}
                         style={{
                             marginLeft: '4vw',
                             transform: `translateX(${index % 2 === 0 ? '-75px' : '75px'})`,
                             position: 'relative', // To ensure it's above the SVG
                             zIndex: 1, // Bring SpeedDials above the SVG paths
                         }}
-                        onMouseEnter={handleMouseEnter(item.node)}
+                        onMouseEnter={handleMouseEnter(item._id)}
                         onMouseLeave={handleMouseLeave}
                     >
                         {Tasks(item, index, firstIncompleteIndex)}
-                        <Popover
-                            id={openDetour ? 'simple-popover' : undefined}
-                            open={openDetour}
-                            anchorEl={anchorElDetour}
-                            onClose={handleDetourClose}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'right',
-                            }}
-                            transformOrigin={{
-                                vertical: 'center',
-                                horizontal: 'left',
-                            }}
-                            PaperProps={{
-                                style: {
-                                    boxShadow: 'none',
-                                    borderRadius: "30px",
-                                }
-                            }}
-                        >
-                            <Box sx={{width: "30vw", height: '50vh'}}>
-                                <Box sx={{display: "flex", justifyContent: "right", alignItems: "right"}}>
-                                    <Button onClick={handleDetourClose}>
-                                        <CloseIcon/>
-                                    </Button>
-                                </Box>
-                                {DetourSelection()}
-                            </Box>
-                        </Popover>
-                        <Popover
-                            id={openDesc ? 'simple-popover' : undefined}
-                            open={openDesc}
-                            anchorEl={anchorElDesc}
-                            onClose={handleDescClose}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'right',
-                            }}
-                            transformOrigin={{
-                                vertical: 'center',
-                                horizontal: 'left',
-                            }}
-                            PaperProps={{
-                                style: {
-                                    boxShadow: 'none',
-                                    borderRadius: "30px",
-                                }
-                            }}
-                        >
-                            <Box sx={{width: "30vw", height: '50vh', m: 3}}>
-                                <Box sx={{display: "flex", justifyContent: "right", alignItems: "right"}}>
-                                    <Button onClick={handleDescClose}>
-                                        <CloseIcon/>
-                                    </Button>
-                                </Box>
-                                {TaskDescription()}
-                            </Box>
-                        </Popover>
                     </div>
                 ))}
             </div>

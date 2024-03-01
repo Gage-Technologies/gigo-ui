@@ -42,6 +42,8 @@ import Lottie from "react-lottie";
 import Particles from "react-tsparticles";
 import { loadStarsPreset } from "tsparticles-preset-stars";
 import { Engine } from 'tsparticles-engine';
+import JourneyPortals from "../components/Icons/joruneyMainAssets/JourneyPortals";
+import AddIcon from '@mui/icons-material/Add';
 
 function JourneyMain() {
     const sidebarOpen = useAppSelector(selectAppWrapperSidebarOpen);
@@ -60,230 +62,144 @@ function JourneyMain() {
         }),
         [mode],
     );
-
-    const portalOptions = {
-        loop: true,
-        autoplay: true,
-        animationData: portal,
-        rendererSettings: {
-            preserveAspectRatio: 'xMidYMid slice'
-        },
-    };
-
-    let designTokensJourney = getAllTokens(mode);
-    designTokensJourney.palette.background.default = '#1b1b1a';
-    const journeyTheme = React.useMemo(() => createTheme(designTokensJourney), [mode]);
-
-    // todo replace test data
-    const data = [
-        {
-            unit: '1',
-            node_above: '2',
-            node: '3',
-            node_below: '4',
-            name: 'third',
-            completed: true,
-            detour: false,
-            color: '#dfce53'
-        },
-        {
-            unit: '1',
-            node_above: null,
-            node: '1',
-            node_below: '2',
-            name: 'First',
-            completed: true,
-            detour: false,
-            color: '#dfce53'
-        },
-        {
-            unit: '1',
-            node_above: '1',
-            node: '2',
-            node_below: '3',
-            name: 'Second',
-            completed: true,
-            detour: false,
-            color: '#dfce53'
-        },
-        {
-            unit: '1',
-            node_above: '3',
-            node: '4',
-            node_below: '5',
-            name: 'fourth',
-            completed: true,
-            detour: true,
-            color: '#dfce53'
-        },
-        {
-            unit: '1',
-            node_above: '4',
-            node: '5',
-            node_below: '6',
-            name: 'fifth',
-            completed: true,
-            detour: false,
-            color: '#dfce53'
-        },
-        {
-            unit: '1',
-            node_above: '5',
-            node: '6',
-            node_below: '7',
-            name: 'sixth',
-            completed: true,
-            detour: false,
-            color: '#dfce53'
-        },
-        {
-            unit: '1',
-            node_above: '6',
-            node: '7',
-            node_below: '8',
-            name: 'seventh',
-            completed: true,
-            detour: false,
-            color: '#dfce53'
-        },
-        {
-            unit: '1',
-            node_above: '7',
-            node: '8',
-            node_below: '9',
-            name: 'eighth',
-            completed: false,
-            detour: true,
-            color: '#dfce53'
-        },
-        {
-            unit: '1',
-            node_above: '8',
-            node: '9',
-            node_below: null,
-            name: 'ninth',
-            completed: false,
-            detour: false,
-            color: '#dfce53'
-        },
-        {
-            unit: '2',
-            node_above: '2',
-            node: '3',
-            node_below: '4',
-            name: 'third',
-            completed: false,
-            detour: false,
-            color: '#52ad94'
-        },
-        {
-            unit: '2',
-            node_above: null,
-            node: '1',
-            node_below: '2',
-            name: 'First',
-            completed: false,
-            detour: false,
-            color: '#52ad94'
-        },
-        {
-            unit: '2',
-            node_above: '1',
-            node: '2',
-            node_below: '3',
-            name: 'Second',
-            completed: false,
-            detour: false,
-            color: '#52ad94'
-        },
-        {
-            unit: '2',
-            node_above: '3',
-            node: '4',
-            node_below: '5',
-            name: 'fourth',
-            completed: false,
-            detour: true,
-            color: '#52ad94'
-        },
-    ];
-
+    
     const userId = useAppSelector(selectAuthStateId) as string
 
+    type Task = {
+        _id: string;
+        name: string;
+        description: string;
+        lang: string;
+        journey_unit_id: string;
+        node_above: string | null;
+        node_below: string | null;
+        completed: boolean;
+    };
+
+    type Unit = {
+        _id: string;
+        name: string;
+        unit_above: string | null;
+        unit_below: string | null;
+        description: string;
+        langs: string[];
+        tags: string[];
+        published: boolean;
+        color: string;
+        tasks: Task[];
+    };
+
+    const [unitData, setUnitData] = useState<Unit[]>([])
+    const [nextUnit, setNextUnit] = useState<Unit>()
+    const [taskData, setTaskData] = useState<Task[]>([])
     // const getTasks = async () => {
     //     let res = await call(
-    //         "/api/journey/getUserMap",
+    //         "/api/journey/getUnitMetadata",
     //         "post",
     //         null,
     //         null,
     //         null,
     //         // @ts-ignore
     //         {
-    //             user_id: userId
+    //             unit_id: "1759701436645507072"
     //         },
     //         null,
     //         config.rootPath
     //     )
     //
-    //     console.log("this is the response: ", res)
+    //
+    //     //@ts-ignore
+    //     unitData.push(res['unit']);
     //     return null
     // }
+
+    // const getTasks = async () => {
     //
-    // useEffect(() => {
-    //     getTasks()
-    // }, [])
-
-    function splitDataByUnit(data: any[]) {
-        // Reduce the data into an object with unit numbers as keys
-        const unitData = data.reduce((acc, item) => {
-            // If the unit doesn't exist in the accumulator, initialize it
-            if (!acc[item.unit]) {
-                acc[item.unit] = [];
-            }
-            // Push the current item into the array for its unit
-            acc[item.unit].push(item);
-            return acc;
-        }, {});
-
-        // Convert the object into an array of objects with unit and metadata properties
-        return Object.keys(unitData).map(unit => ({
-            unit: unit,
-            metadata: unitData[unit],
-        }));
-    }
-
-    const items = [1, 2];
-
-    const sortedData = data.sort((a, b) => {
-        if (a.node_above === null) return -1;
-        if (b.node_above === null) return 1;
-        // @ts-ignore
-        return a.node_above - b.node_above;
-    });
-
-    const structuredData = splitDataByUnit(sortedData);
-    console.log("unit data", structuredData);
-
-    //@ts-ignore
-    // function findFirstIncompleteNodeIndex(structuredData) {
-    //     // Loop through each unit
-    //     for (let i = 0; i < structuredData.length; i++) {
-    //         const unit = structuredData[i];
-    //         // Search for the first node with completed=false
-    //         for (let j = 0; j < unit.metadata.length; j++) {
-    //             const node = unit.metadata[j];
-    //             if (!node.completed) {
-    //                 // Return the first incomplete node found along with its unit and index
-    //                 return j;
-    //             }
-    //         }
+    //     if (unitData !== null) {
+    //         let res = await call(
+    //             "/api/journey/createMap",
+    //             "post",
+    //             null,
+    //             null,
+    //             null,
+    //             // @ts-ignore
+    //             {
+    //                 user_id: userId,
+    //                 units: ['1759701436645507072']
+    //             },
+    //             null,
+    //             config.rootPath
+    //         )
+    //
+    //         return null
     //     }
-    //     // If no incomplete node is found
-    //     return null;
     // }
     //
-    // const firstIncompleteIndex = findFirstIncompleteNodeIndex(structuredData);
 
+    const getTasks = async () => {
+        let res = await call(
+            "/api/journey/getUserMap",
+            "post",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {
+                user_id: userId,
+            },
+            null,
+            config.rootPath
+        )
+
+        const units = (res['user_map']['units'])
+        //@ts-ignore
+        const sortedUnitData = units.sort((a, b) => {
+            if (a.node_above === null) return -1;
+            if (b.node_above === null) return 1;
+            // @ts-ignore
+            return a.node_above - b.node_above;
+        });
+
+        // @ts-ignore
+        const fetchedTasks = sortedUnitData.map(async (unit: any) => {
+            let res = await call(
+                "/api/journey/getTasksInUnit",
+                "post",
+                null,
+                null,
+                null,
+                // @ts-ignore
+                {
+                    user_id: userId,
+                    unit_id: unit._id
+                },
+                null,
+                config.rootPath
+            )
+
+            const tasks = res.data.tasks
+
+            //@ts-ignore
+            const sortedTaskData = tasks.sort((a, b) => {
+                if (a.node_above === null) return -1;
+                if (b.node_above === null) return 1;
+                // @ts-ignore
+                return a.node_above - b.node_above;
+            });
+            return { ...unit, tasks: sortedTaskData };
+        });
+
+        const allUnits = await Promise.all(fetchedTasks);
+
+        setUnitData(allUnits.slice(0, -1));
+        setNextUnit(allUnits[allUnits.length - 1]);
+    }
+
+    useEffect(() => {
+        getTasks()
+    }, []);
+
+    const items = [1, 2];
 
     const [openSpeedDial, setOpenSpeedDial] = useState(null);
     const [anchorElDetour, setAnchorElDetour] = useState(null);
@@ -292,6 +208,8 @@ function JourneyMain() {
         width: window.innerWidth,
         height: window.innerHeight,
     });
+
+    const [taskId, setTaskId] = useState("")
 
     useEffect(() => {
         const handleResize = () => {
@@ -317,8 +235,15 @@ function JourneyMain() {
         setAnchorElDetour(event.currentTarget);
     };
 
+    const [taskDescription, setTaskDescription] = useState("")
+    const [taskTitle, setTaskTitle] = useState("")
+    const [currentTask, setCurrentTask] = useState(false)
     //@ts-ignore
-    const handleClickDesc = (event) => {
+    const handleClickDesc = (description, title, taskID, current) => (event) => {
+        setTaskTitle(title)
+        setTaskDescription(description)
+        setTaskId(taskID)
+        setCurrentTask(current)
         setAnchorElDesc(event.currentTarget);
     };
     const handleDetourClose = () => {
@@ -330,7 +255,6 @@ function JourneyMain() {
     };
 
     const handleIcon = (item: any, index: any, firstIncomplete: any) => {
-
         if (item.completed) {
             return (
                 <AwesomeButton style={{
@@ -355,7 +279,7 @@ function JourneyMain() {
                     '--button-raise-level': '12px',
                     '--button-hover-pressure': '3',
                     '--transform-speed': '0.275s',
-                }} type="primary" href={"/journey/main"}>
+                }} type="primary">
                     <CheckIcon fontSize="large" sx={{width: '2em', height: '2em'}}/>
                 </AwesomeButton>
 
@@ -380,7 +304,9 @@ function JourneyMain() {
                     '--button-raise-level': '12px',
                     '--button-hover-pressure': '3',
                     '--transform-speed': '0.275s',
-                }} type="primary" href={"/journey/main"}>
+                }} type="primary"
+                               href={`/byte/${item.code_source_id}?journey`}
+                >
                     <div style={{
                         height: "80px",
                         width: "80px",
@@ -478,11 +404,11 @@ function JourneyMain() {
                     flexDirection: "column",
                     pt: 4
                 }}>
-                    {items.map((item) => ( // Only show first 4 or all based on showAll
-                        <Grid item xs={12} key={item} sx={{pb: 2}}>
-                            <DetourCard title={`Title ${item}`}/>
-                        </Grid>
-                    ))}
+                    {/*{items.map((item) => ( // Only show first 4 or all based on showAll*/}
+                    {/*    <Grid item xs={12} key={item} sx={{pb: 2}}>*/}
+                    {/*        <DetourCard title={`Title ${item}`}/>*/}
+                    {/*    </Grid>*/}
+                    {/*))}*/}
                 </Box>
             </>
 
@@ -493,116 +419,179 @@ function JourneyMain() {
         return (
             <>
                 <Box sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
-                    <Typography sx={{textTransform: "none"}} variant={"h3"}>
-                        Binary Tree Visualizer
+                    <Typography sx={{textTransform: "none"}} variant={"h4"}>
+                        {taskTitle}
                     </Typography>
                 </Box>
                 <Box sx={{
                     display: "flex",
-                    justifyContent: "center",
+                    justifyContent: "flex-start",
                     alignItems: "center",
                     flexDirection: "column",
-                    pt: 4
+                    pt: 4,
+                    height: "225px"
                 }}>
                     <Typography sx={{textTransform: "none", textAlign: 'justify', marginLeft: '28px', marginRight: '28px'}} variant={"h6"}>
-                        Learn to visualize a binary tree structure in the terminal by implementing a simple tree and
-                        displaying it. You'll understand the basics of binary trees and how to represent them textually.
+                        {taskDescription}
                     </Typography>
+
+                </Box>
+                <Box sx={{display: 'flex', justifyContent: 'center'}}>
+                    {(currentTask)
+                    ?
+                        <AwesomeButton style={{
+                            width: "auto",
+                            //@ts-ignore
+                            '--button-primary-color': theme.palette.secondary.main,
+                            '--button-primary-color-dark': theme.palette.secondary.dark,
+                            '--button-primary-color-light': theme.palette.secondary.dark,
+                            //@ts-ignore
+                            '--button-primary-color-active': theme.palette.secondary.dark,
+                            //@ts-ignore
+                            '--button-primary-color-hover': theme.palette.secondary.main,
+                            '--button-default-border-radius': "24px",
+                            '--button-hover-pressure': "4",
+                            height: "10vh",
+                            '--button-raise-level': "10px"
+                        }} type="primary" href={`/byte/${taskId}?journey`}>
+                            <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
+                                Start
+                            </h1>
+                        </AwesomeButton>
+                    :
+                    <></>}
                 </Box>
             </>
 
         )
     }
 
-    const Tasks = (item: any, index: any, firstIncomplete: any) => {
-        if (item.detour && (index === firstIncomplete)) {
-            return (
-                <SpeedDial
-                    sx={{
-                        '& .MuiSpeedDial-fab': {
-                            width: "130px",
-                            height: "130px",
-                            backgroundColor: 'transparent',
-                            boxShadow: "none",
-                            '&:hover': {
-                                backgroundColor: 'transparent',
-                            },
-                        },
+    const taskPopups = () => {;
+        return(
+            <>
+                <Popover
+                    id={openDetour ? 'simple-popover' : undefined}
+                    open={openDetour}
+                    anchorEl={anchorElDetour}
+                    onClose={handleDetourClose}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right',
                     }}
-                    onClick={() => console.log("clicked: ", item.name)}
-                    ariaLabel={`SpeedDial ${item.name}`}
-                    icon={handleIcon(item, index, firstIncomplete)}
-                    direction="right"
-                    open={openSpeedDial === item.node}
-                >
-                    {/*//@ts-ignore*/}
-                    <SpeedDialAction
-                        icon={<ArticleIcon/>}
-                        //@ts-ignore
-                        tooltipTitle="Info"
-                        onClick={handleClickDesc}
-                        sx={{
-                            backgroundColor: "#52ad94",
-                            color: "white"
-                        }}
-                    />
-                    <SpeedDialAction
-                        icon={<ForkRightIcon/>}
-                        //@ts-ignore
-                        tooltipTitle="Take a Detour"
-                        onClick={handleClickDetour}
-                        sx={{
-                            backgroundColor: "#52ad94",
-                            color: "white"
-                        }}
-                    />
-                </SpeedDial>
-            )
-        } else {
-            return (
-                <SpeedDial
-                    sx={{
-                        '& .MuiSpeedDial-fab': {
-                            width: "130px",
-                            height: "130px",
-                            backgroundColor: 'transparent',
-                            boxShadow: "none",
-                            '&:hover': {
-                                backgroundColor: 'transparent',
-                            },
-                        },
+                    transformOrigin={{
+                        vertical: 'center',
+                        horizontal: 'left',
                     }}
-                    onClick={() => console.log("clicked: ", item.name)}
-                    ariaLabel={`SpeedDial ${item.name}`}
-                    icon={handleIcon(item, index, firstIncomplete)}
-                    direction="right"
-                    open={openSpeedDial === item.node}
+                    PaperProps={{
+                        style: {
+                            boxShadow: 'none',
+                            borderRadius: "30px",
+                        }
+                    }}
                 >
-                    {/*//@ts-ignore*/}
-                    <SpeedDialAction
-                        icon={<ArticleIcon/>}
-                        //@ts-ignore
-                        tooltipTitle="Info"
-                        onClick={handleClickDesc}
-                        sx={{
-                            backgroundColor: "#52ad94",
-                            color: "white"
-                        }}
-                    />
-                    <SpeedDialAction
-                        sx={{
-                            opacity: 0,
-                            '&:hover': {
-                                cursor: 'default',
-                            },
-                        }}
-                    />
-                </SpeedDial>
-            )
-        }
+                    <Box sx={{width: "30vw", height: '50vh'}}>
+                        <Box sx={{display: "flex", justifyContent: "right", alignItems: "right"}}>
+                            <Button onClick={handleDetourClose}>
+                                <CloseIcon/>
+                            </Button>
+                        </Box>
+                        {DetourSelection()}
+                    </Box>
+                </Popover>
+                <Popover
+                    id={openDesc ? 'simple-popover' : undefined}
+                    open={openDesc}
+                    anchorEl={anchorElDesc}
+                    onClose={handleDescClose}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right',
+                    }}
+                    transformOrigin={{
+                        vertical: 'center',
+                        horizontal: 'left',
+                    }}
+                    PaperProps={{
+                        style: {
+                            boxShadow: 'none',
+                            borderRadius: "30px",
+                        }
+                    }}
+                >
+                    <Box sx={{width: "30vw", height: '45vh', m: 3}}>
+                        <Box sx={{display: "flex", justifyContent: "right", alignItems: "right"}}>
+                            <Button onClick={handleDescClose}>
+                                <CloseIcon/>
+                            </Button>
+                        </Box>
+                        {TaskDescription()}
+                    </Box>
+                </Popover>
+            </>
+        )
     }
 
-    function JourneyStops(metadata: any[]) {
+    const Tasks = (item: any, index: any, firstIncomplete: any) => {
+        return (
+            <>
+
+                <SpeedDial
+                    sx={{
+                        '& .MuiSpeedDial-fab': {
+                            width: "130px",
+                            height: "130px",
+                            backgroundColor: 'transparent',
+                            boxShadow: "none",
+                            '&:hover': {
+                                backgroundColor: 'transparent',
+                            },
+                        },
+                    }}
+                    ariaLabel={`SpeedDial ${item.name}`}
+                    icon={handleIcon(item, index, firstIncomplete)}
+                    direction="right"
+                    open={openSpeedDial === item._id}
+                >
+                    {/*//@ts-ignore*/}
+                    <SpeedDialAction
+                        icon={<ArticleIcon/>}
+                        //@ts-ignore
+                        tooltipTitle="Info"
+                        onClick={handleClickDesc(item.description, item.name, item.code_source_id, (index === firstIncomplete))}
+                        sx={{
+                            backgroundColor: "#52ad94",
+                            color: "white"
+                        }}
+                    />
+                    {(index === firstIncomplete) ?
+                        <SpeedDialAction
+                        icon={<ForkRightIcon/>}
+                    //@ts-ignore
+                    tooltipTitle="Take a Detour"
+                    onClick={handleClickDetour}
+                    sx={{
+                        backgroundColor: "#52ad94",
+                        color: "white"
+                    }}
+                />
+                    :
+                        <SpeedDialAction
+                            sx={{
+                                opacity: 0,
+                                '&:hover': {
+                                    cursor: 'default',
+                                },
+                            }}
+                        />
+                    }
+                </SpeedDial>
+
+                {taskPopups()}
+            </>
+        )
+    }
+
+    function JourneyStops(metadata: Task[]) {
         // Assuming each SpeedDial is 130px high and we want 20px gap between them
         const speedDialHeight = 130;
         const gap = 20;
@@ -630,7 +619,7 @@ function JourneyMain() {
                 <CurvedPath points={points}/>
                 {metadata.map((item, index) => (
                     <div
-                        key={item.node}
+                        key={item._id}
                         style={{
                             marginBottom: '20px',
                             marginLeft: '5vw',
@@ -638,216 +627,263 @@ function JourneyMain() {
                             position: 'relative', // To ensure it's above the SVG
                             zIndex: 1, // Bring SpeedDials above the SVG paths
                         }}
-                        onMouseEnter={handleMouseEnter(item.node)}
+                        onMouseEnter={handleMouseEnter(item._id)}
                         onMouseLeave={handleMouseLeave}
                     >
                         {Tasks(item, index, firstIncompleteIndex)}
-                        <Popover
-                            id={openDetour ? 'simple-popover' : undefined}
-                            open={openDetour}
-                            anchorEl={anchorElDetour}
-                            onClose={handleDetourClose}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'right',
-                            }}
-                            transformOrigin={{
-                                vertical: 'center',
-                                horizontal: 'left',
-                            }}
-                            PaperProps={{
-                                style: {
-                                    boxShadow: 'none',
-                                    borderRadius: "30px",
-                                }
-                            }}
-                        >
-                            <Box sx={{width: "30vw", height: '50vh'}}>
-                                <Box sx={{display: "flex", justifyContent: "right", alignItems: "right"}}>
-                                    <Button onClick={handleDetourClose}>
-                                        <CloseIcon/>
-                                    </Button>
-                                </Box>
-                                {DetourSelection()}
-                            </Box>
-                        </Popover>
-                        <Popover
-                            id={openDesc ? 'simple-popover' : undefined}
-                            open={openDesc}
-                            anchorEl={anchorElDesc}
-                            onClose={handleDescClose}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'right',
-                            }}
-                            transformOrigin={{
-                                vertical: 'center',
-                                horizontal: 'left',
-                            }}
-                            PaperProps={{
-                                style: {
-                                    boxShadow: 'none',
-                                    borderRadius: "30px",
-                                }
-                            }}
-                        >
-                            <Box sx={{width: "30vw", height: '50vh', m: 3}}>
-                                <Box sx={{display: "flex", justifyContent: "right", alignItems: "right"}}>
-                                    <Button onClick={handleDescClose}>
-                                        <CloseIcon/>
-                                    </Button>
-                                </Box>
-                                {TaskDescription()}
-                            </Box>
-                        </Popover>
                     </div>
                 ))}
             </div>
         );
     }
 
-    const ParticlesBackground = () => {
-        const particlesInit = async (main: Engine) => {
-            console.log(main);
-            await loadStarsPreset(main);
-        };
-
-        const options = {
-            preset: "stars",
-        };
-
+    const GetStarted = () => {
         return (
-            <Particles
-                id="tsparticles"
-                init={particlesInit}
-                options={options}
-                style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    zIndex: -1, // Ensure this is behind all other content
-                }}
-            />
+            <Box sx={{ flexGrow: 1, height: '100vh' }}>
+                <Box sx={{ height: '15vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Typography variant="h4">Header</Typography>
+                </Box>
+                <Grid container spacing={2} sx={{ height: '85vh' }}>
+                    <Grid item xs={2}>
+                        {/* Content for left grid */}
+                    </Grid>
+                    <Grid item xs={8} container direction="row" justifyContent="center" alignItems="center" style={{ gap: 20 }}>
+                        <Box sx={{
+                            borderColor: 'white',
+                            borderRadius: "10px",
+                            width: '10vw',
+                            height: '10vw'
+                        }}>
+                            Box
+                        </Box>
+                                         
+                    </Grid>
+                    <Grid item xs={2}>
+                        {/* Content for right grid */}
+                    </Grid>
+                </Grid>
+            </Box>
         );
-    };
+    }
 
-    const journeyPortal = () => {
-        return (
-            <div style={{position: 'relative', width: '400px', height: '400px'}}>
-                <Lottie options={portalOptions} speed={0.25} isClickToPauseDisabled={true} style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '410px',
-                    height: '420px',
-                    zIndex: 3,
-                    overflow: "visible"
-                }}/>
-                <img
-                    src={journeySide1}
-                    style={{
-                        position: 'absolute',
-                        top: 17,
-                        left: 1,
-                        height: '100%',
-                        width: '100%',
-                        zIndex: 1
-                    }}
-                    alt="py"
-                />
-            </div>
+    const nextUnitPreview = () => {
+        return(
+            <Box sx={{
+                position: 'relative',
+                width: '100%',
+                height: '100%',
+                zIndex: 1,
+            }}>
+                {nextUnit && (
+                    <Grid container>
+                        <Grid item xl={4} sx={{
+                            display: "flex",
+                            justifyContent: "start",
+                            paddingTop: '20vh',
+                            flexDirection: "column",
+                            alignItems: "center",
+                        }}>
+                        </Grid>
+                        <Grid item xl={4} sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            borderRadius: "30px",
+                            mt: 2,
+                            backgroundColor: nextUnit.color,
+                            opacity: 0.2
+                        }}>
+                            <Box sx={{p: 2}}>
+                                <Typography variant={'h5'}>{nextUnit.name}</Typography>
+                            </Box>
+                            {JourneyStops(nextUnit.tasks)}
+                            <Box sx={{p: 2}}>
+                                <AwesomeButton style={{
+                                    width: "auto",
+                                    // @ts-ignore
+                                    '--button-primary-color': theme.palette.tertiary.dark,
+                                    '--button-primary-color-dark': "#afa33d",
+                                    '--button-primary-color-light': "#dfce53",
+                                    // @ts-ignore
+                                    '--button-primary-color-active': theme.palette.tertiary.dark,
+                                    // @ts-ignore
+                                    '--button-primary-color-hover': theme.palette.tertiary.main,
+                                    '--button-default-border-radius': "24px",
+                                    '--button-hover-pressure': "1",
+                                    height: "10vh",
+                                    '--button-raise-level': "10px"
+                                }} type="primary">
+                                    <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
+                                        Unit Project
+                                    </h1>
+                                    <div style={{
+                                        height: "80px",
+                                        width: "80px",
+                                    }}>
+                                        <img
+                                            src={completed}
+                                            style={{
+                                                height: "100%",
+                                                width: "100%",
+                                            }}
+                                            alt="py"/>
+                                    </div>
+                                </AwesomeButton>
+                            </Box>
+                        </Grid>
+                        <Grid item xl={4}/>
+                            <Box sx={{
+                                position: 'absolute', // This is the 'wall' overlay.
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '100%',
+                                zIndex: 2,
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                backdropFilter: "blur(2.8px)",
+                                "-webkit-backdrop-filter": "blur(2.8px)",
+                                backgroundColor: userPref === "dark" ? "rgba(28, 28, 26,0.2)" : "rgba(250, 250, 250,0.2)",
+                            }}>
+                            </Box>
+                            <Box sx={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                width: '100%',
+                                height: '100%',
+                                zIndex: 2,
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}>
+                                <AwesomeButton style={{
+                                    width: "auto",
+                                    '--button-primary-color': theme.palette.secondary.main,
+                                    '--button-primary-color-dark': theme.palette.secondary.dark,
+                                    '--button-primary-color-light': theme.palette.secondary.dark,
+                                    '--button-primary-color-active': theme.palette.secondary.dark,
+                                    '--button-primary-color-hover': theme.palette.secondary.main,
+                                    '--button-default-border-radius': "24px",
+                                    '--button-hover-pressure': "1",
+                                    height: "10vh",
+                                    '--button-raise-level': "10px"
+                                }} type="primary">
+                                    <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
+                                        Add Unit to Map
+                                    </h1>
+                                </AwesomeButton>
+                            </Box>
+                    </Grid>
+                )}
+            </Box>
         )
     }
 
-    const starMemo = React.useMemo(() => (
-        <ParticlesBackground/>
-    ), [])
+    const userJourney = () => {
+        return (
+            <Box sx={{overflow: 'hidden', position: "relative"}}>
+            <Box sx={{display: "flex", justifyContent: "center", alignItems: "center", m: 2}}>
+                <Typography variant="h2" sx={{color: theme.palette.text.primary}}>
+                    Your Journey
+                </Typography>
+                {/*<Button onClick={() => {getTasks()}}>*/}
+                {/*    Testing*/}
+                {/*</Button>*/}
+            </Box>
+            {unitData.map((unit: any, index: number) => (
+                <Grid container>
+                    {(index % 2 === 0)
+                        ?
+                        <Grid item xl={4} sx={{
+                            display: "flex",
+                            justifyContent: "start",
+                            paddingTop: '20vh',
+                            flexDirection: "column",
+                            alignItems: "center",
+                        }}>
+                            {<JourneyPortals/>}
+                        </Grid>
+                        :
+                        <Grid item xl={4}/>
+                    }
+                    <Grid item xl={4} sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        flexDirection: "column",
+                        alignItems: "center", borderRadius: "30px",
+                        mt: 2,
+                        backgroundColor: unit.color,
+                    }}>
+                    <Box sx={{p: 2}}>
+                            <Typography variant={'h5'}>{unit.name}</Typography>
+                        </Box>
+                        {JourneyStops(unit.tasks)}
+                        <Box sx={{p: 2}}>
+                            <AwesomeButton style={{
+                                width: "auto",
+                                //@ts-ignore
+                                '--button-primary-color': theme.palette.tertiary.dark,
+                                '--button-primary-color-dark': "#afa33d",
+                                '--button-primary-color-light': "#dfce53",
+                                //@ts-ignore
+                                '--button-primary-color-active': theme.palette.tertiary.dark,
+                                //@ts-ignore
+                                '--button-primary-color-hover': theme.palette.tertiary.main,
+                                '--button-default-border-radius': "24px",
+                                '--button-hover-pressure': "1",
+                                height: "10vh",
+                                '--button-raise-level': "10px"
+                            }} type="primary">
+                                <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
+                                    Unit Project
+                                </h1>
+                                <div style={{
+                                    height: "80px",
+                                    width: "80px",
+                                }}>
+                                    <img
+                                        src={completed}
+                                        style={{
+                                            height: "100%",
+                                            width: "100%",
+                                        }}
+                                        alt="py"/>
+                                </div>
+                            </AwesomeButton>
+                        </Box>
+                    </Grid>
+                    {(index % 2 === 0)
+                        ?
+                        <Grid item xl={4}/>
+                        :
+                        <Grid item xl={4} sx={{
+                            display: "flex",
+                            justifyContent: "start",
+                            paddingTop: '20vh',
+                            flexDirection: "column",
+                            alignItems: "center",
+                        }}>
+                            {<JourneyPortals/>}
+                        </Grid>
+                    }
+                </Grid>
+            ))}
+                {nextUnitPreview()}
+        </Box>
+        )
+    }
 
     return (
         <ThemeProvider theme={theme}>
-            {/*{starMemo}*/}
             <CssBaseline>
-                <Box sx={{overflow: 'hidden', position: "relative"}}>
-                    <Box sx={{display: "flex", justifyContent: "center", alignItems: "center", m: 2}}>
-                        <Typography variant="h2" sx={{color: "white"}}>
-                            Your Journey
-                        </Typography>
-                    </Box>
-                    {structuredData.map((unit, index) => (
-                        <Grid container>
-                            {(index % 2 === 0 ? <Grid item xl={4} sx={{
-                                display: "flex",
-                                justifyContent: "start",
-                                paddingTop: '20vh',
-                                flexDirection: "column",
-                                alignItems: "center",
-                            }}>
-                                {journeyPortal()}
-                            </Grid> : <Grid item xl={4}/>)}
-                            <Grid item xl={4} sx={{
-                                display: "flex",
-                                justifyContent: "center",
-                                flexDirection: "column",
-                                alignItems: "center", borderRadius: "30px",
-                                mt: 2,
-                                backgroundColor: unit.metadata[index].color
-                            }}>
-                            <Box sx={{p: 2}}>
-                                    <Typography variant={'h4'}>Unit Title Here</Typography>
-                                </Box>
-                                {JourneyStops(unit.metadata)}
-                                <Box sx={{p: 2}}>
-                                    <AwesomeButton style={{
-                                        width: "auto",
-                                        //@ts-ignore
-                                        '--button-primary-color': theme.palette.tertiary.dark,
-                                        '--button-primary-color-dark': "#afa33d",
-                                        '--button-primary-color-light': "#dfce53",
-                                        //@ts-ignore
-                                        '--button-primary-color-active': theme.palette.tertiary.dark,
-                                        //@ts-ignore
-                                        '--button-primary-color-hover': theme.palette.tertiary.main,
-                                        '--button-default-border-radius': "24px",
-                                        '--button-hover-pressure': "4",
-                                        height: "10vh",
-                                        '--button-raise-level': "10px"
-                                    }} type="primary">
-                                        <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
-                                            Unit Project
-                                        </h1>
-                                        <div style={{
-                                            height: "80px",
-                                            width: "80px",
-                                        }}>
-                                            <img
-                                                src={completed}
-                                                style={{
-                                                    height: "100%",
-                                                    width: "100%",
-                                                }}
-                                                alt="py"/>
-                                        </div>
-                                    </AwesomeButton>
-                                </Box>
-                            </Grid>
-                            {(index % 2 === 0) ? <Grid item xl={4}/> : <Grid item xl={4} sx={{
-                                display: "flex",
-                                justifyContent: "end",
-                                paddingBottom: '20vh',
-                                flexDirection: "column",
-                                alignItems: "center",
-                            }}>
-                                {journeyPortal()}
-                            </Grid>}
-                        </Grid>
-                    ))}
-                </Box>
+                {userJourney()}
+                {/*<GetStarted/>*/}
             </CssBaseline>
         </ThemeProvider>
     );
 }
 
 export default JourneyMain;
-
