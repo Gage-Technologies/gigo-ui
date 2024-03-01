@@ -765,13 +765,13 @@ export const getAllTokens = (mode: PaletteMode) => {
         return getValentinesTokens(mode);
     }
 
-   let easterMonth = gaussEaster(today.getFullYear());
-    // Set Easter Range Each Year
-    if (today.getMonth() === easterMonth){
-        // Easter
-        holiday = "Easter"
-        return getEasterTokens(mode);
-    }
+   // let easterMonth = gaussEaster(today.getFullYear());
+   //  // Set Easter Range Each Year
+   //  if (today.getMonth() === easterMonth){
+   //      // Easter
+   //      holiday = "Easter"
+   //      return getEasterTokens(mode);
+   //  }
 
     if ((today.getMonth() === 6 && today.getDate() >= 1)  && (today.getMonth() === 6 && today.getDate() <= 7)){
         // Independence
