@@ -1217,34 +1217,34 @@ function ByteMobile() {
         setSuggestionRange({start_line: node.position.start_line, end_line: node.position.end_line})
     }, [editorRef.current])
 
-    useEffect(() => {
-        console.log("called useEffect")
-        if (parsedSymbols !== null && parsedSymbols.nodes.length > 0 && workspaceState === 1) {
-            console.log("updating extensions")
-            setEditorExtensions([ctCreateCodeActions(
-                alpha(theme.palette.text.primary, 0.6),
-                parsedSymbols,
-                loadingCodeCleanup,
-                (id: string, portal: React.ReactPortal) => {
-                    setCodeActionPortals((prevState) => {
-
-                        return prevState.some((x) => x.id === id) ?
-                            prevState.map((item) => item.id === id ? { ...item, portal } : item) :
-                            [...prevState, { id, portal }];
-                    })
-                },
-                (node: CtParseNode) => triggerCodeCleanup(node)
-            )])
-        }
-
-        // filter any code symbols from the portals that no longer exist
-        if (parsedSymbols !== null) {
-            setCodeActionPortals((prevState) => {
-                return prevState.filter(({id}) =>
-                    parsedSymbols.nodes.some((node) => node.id === id));
-            });
-        }
-    }, [parsedSymbols, loadingCodeCleanup, workspaceState]);
+    // useEffect(() => {
+    //     console.log("called useEffect")
+    //     if (parsedSymbols !== null && parsedSymbols.nodes.length > 0 && workspaceState === 1) {
+    //         console.log("updating extensions")
+    //         setEditorExtensions([ctCreateCodeActions(
+    //             alpha(theme.palette.text.primary, 0.6),
+    //             parsedSymbols,
+    //             loadingCodeCleanup,
+    //             (id: string, portal: React.ReactPortal) => {
+    //                 setCodeActionPortals((prevState) => {
+    //
+    //                     return prevState.some((x) => x.id === id) ?
+    //                         prevState.map((item) => item.id === id ? { ...item, portal } : item) :
+    //                         [...prevState, { id, portal }];
+    //                 })
+    //             },
+    //             (node: CtParseNode) => triggerCodeCleanup(node)
+    //         )])
+    //     }
+    //
+    //     // filter any code symbols from the portals that no longer exist
+    //     if (parsedSymbols !== null) {
+    //         setCodeActionPortals((prevState) => {
+    //             return prevState.filter(({id}) =>
+    //                 parsedSymbols.nodes.some((node) => node.id === id));
+    //         });
+    //     }
+    // }, [parsedSymbols, loadingCodeCleanup, workspaceState]);
 
     const renderStateIndicator = () => {
         let actionButton;
@@ -1518,32 +1518,32 @@ function ByteMobile() {
                                     }}
                                 />
                             )}
-                            {activeSidebarTab !== "nextSteps" && activeSidebarTab !== "debugOutput" && (
-                                <ByteSuggestions2
-                                    range={suggestionRange}
-                                    editorRef={editorRef}
-                                    onExpand={() => setActiveSidebarTab("codeSuggestion")}
-                                    onHide={() => setActiveSidebarTab(null)}
-                                    lang={programmingLanguages[byteData ? byteData.lang : 5]}
-                                    code={code}
-                                    byteId={id || ""}
-                                    // @ts-ignore
-                                    description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
-                                    // @ts-ignore
-                                    dev_steps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
-                                    maxWidth={"100%"}
-                                    acceptedCallback={(c) => {
-                                        console.log("accepted callback:\n", c)
-                                        setCode(c)
-                                        setSuggestionRange(null)
-                                        setLoadingCodeCleanup(null)
-                                    }}
-                                    rejectedCallback={() => {
-                                        setSuggestionRange(null)
-                                        setLoadingCodeCleanup(null)
-                                    }}
-                                />
-                            )}
+                            {/*{activeSidebarTab !== "nextSteps" && activeSidebarTab !== "debugOutput" && (*/}
+                            {/*    <ByteSuggestions2*/}
+                            {/*        range={suggestionRange}*/}
+                            {/*        editorRef={editorRef}*/}
+                            {/*        onExpand={() => setActiveSidebarTab("codeSuggestion")}*/}
+                            {/*        onHide={() => setActiveSidebarTab(null)}*/}
+                            {/*        lang={programmingLanguages[byteData ? byteData.lang : 5]}*/}
+                            {/*        code={code}*/}
+                            {/*        byteId={id || ""}*/}
+                            {/*        // @ts-ignore*/}
+                            {/*        description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}*/}
+                            {/*        // @ts-ignore*/}
+                            {/*        dev_steps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}*/}
+                            {/*        maxWidth={"100%"}*/}
+                            {/*        acceptedCallback={(c) => {*/}
+                            {/*            console.log("accepted callback:\n", c)*/}
+                            {/*            setCode(c)*/}
+                            {/*            setSuggestionRange(null)*/}
+                            {/*            setLoadingCodeCleanup(null)*/}
+                            {/*        }}*/}
+                            {/*        rejectedCallback={() => {*/}
+                            {/*            setSuggestionRange(null)*/}
+                            {/*            setLoadingCodeCleanup(null)*/}
+                            {/*        }}*/}
+                            {/*    />*/}
+                            {/*)}*/}
                             {activeSidebarTab === null && (
                                 byteData ? (
                                     <Typography variant="h4" component="h1" style={titleStyle}>
