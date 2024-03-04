@@ -152,6 +152,7 @@ export default function Routing() {
                     <Route path={"/aboutBytes"} element={<AboutBytes />} />
                     <Route path={"/privacyPolicy"} element={<PrivacyPolicy/>} />
                     <Route path={"/homework"} element={<HomeworkHelperPage />} />
+                    <Route path={"/homework/:id"} element={<HomeworkHelperPage />} />
                     <Route element={<PrivateRoute />}>
                         {/*<Route path={"/journey"} element={<Journey />}/>*/}
                         {/*<Route path={"/journey/form"} element={<JourneyForm />}/>*/}

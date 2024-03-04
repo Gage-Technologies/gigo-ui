@@ -2,12 +2,24 @@ import {
     alpha,
     Box,
     Button,
+    CircularProgress,
     Container,
     createTheme,
-    CssBaseline, FormControl,
-    Grid, InputLabel, MenuItem,
+    CssBaseline,
+    Dialog,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    Grid,
+    InputLabel,
+    List,
+    ListItemButton,
+    MenuItem,
     PaletteMode,
-    Paper, Select,
+    Paper,
+    Select,
+    SpeedDial,
+    SpeedDialAction,
     TextField,
     Theme,
     ThemeProvider,
@@ -36,6 +48,9 @@ import {
     CtGetHHChatMessagesRequest,
     CtGetHHChatMessagesResponse,
     CtGetHHChatMessagesResponseMessage,
+    CtGetHHChatsRequest,
+    CtGetHHChatsResponse,
+    CtGetHHChatsResponseChat,
     CtHHAssistantMessage,
     CtHhUserMessage,
     CtMessage,
@@ -45,29 +60,69 @@ import {
     CtNewHhChatResponse,
     CtValidationErrorPayload
 } from "../models/ct_websocket";
+import {Add, LibraryBooks, PlayArrow} from "@material-ui/icons";
+import {useAppSelector} from "../app/hooks";
+import {selectAuthState} from "../reducers/auth/auth";
+import {format, formatDistanceToNow, parseISO} from 'date-fns';
+import {Helmet, HelmetProvider} from "react-helmet-async";
+import {useParams} from "react-router";
+import {useNavigate} from "react-router-dom";
+import MenuIcon from "@mui/icons-material/Menu";
+import ByteTerminal from "../components/Terminal";
+import {ExecResponsePayload, OutputRow} from "../models/bytes";
+import {WsGenericErrorPayload, WsMessage, WsMessageType} from "../models/websocket";
+import {useGlobalWebSocket} from "../services/websocket";
+import call from "../services/api-call";
+import config from "../config";
+import swal from "sweetalert";
+import {Workspace} from "../models/workspace";
+import CodeSource from "../models/codeSource";
+import {LoadingButton} from "@mui/lab";
+import {sleep} from "../services/utils";
+import LinkOffIcon from "@mui/icons-material/LinkOff";
+import LinkIcon from "@mui/icons-material/Link";
+
+interface MergedOutputRow {
+    error: boolean;
+    content: string;
+    timestamp: number;
+}
+
+interface OutputState {
+    stdout: OutputRow[];
+    stderr: OutputRow[];
+    merged: string;
+    mergedLines: MergedOutputRow[];
+}
 
 interface LanguageOption {
     name: string;
     extensions: string[];
 }
 
+interface InitialStatusMessage {
+    workspace: Workspace;
+    code_source: CodeSource;
+    workspace_url: string
+}
+
 const languages: LanguageOption[] = [
-    { name: 'Go', extensions: ['go'] },
-    { name: 'Python', extensions: ['py'] },
-    { name: 'C++', extensions: ['cpp', 'cc', 'cxx', 'hpp'] },
-    { name: 'HTML', extensions: ['html', 'htm'] },
-    { name: 'Java', extensions: ['java'] },
-    { name: 'JavaScript', extensions: ['js'] },
-    { name: 'JSON', extensions: ['json'] },
-    { name: 'Markdown', extensions: ['md'] },
-    { name: 'PHP', extensions: ['php'] },
-    { name: 'Rust', extensions: ['rs'] },
-    { name: 'SQL', extensions: ['sql'] },
-    { name: 'XML', extensions: ['xml'] },
-    { name: 'LESS', extensions: ['less'] },
-    { name: 'SASS', extensions: ['sass', 'scss'] },
-    { name: 'Clojure', extensions: ['clj'] },
-    { name: 'C#', extensions: ['cs'] },
+    {name: 'Go', extensions: ['go']},
+    {name: 'Python', extensions: ['py']},
+    {name: 'C++', extensions: ['cpp', 'cc', 'cxx', 'hpp', 'c++']},
+    {name: 'HTML', extensions: ['html', 'htm']},
+    {name: 'Java', extensions: ['java']},
+    {name: 'JavaScript', extensions: ['js']},
+    {name: 'JSON', extensions: ['json']},
+    {name: 'Markdown', extensions: ['md']},
+    {name: 'PHP', extensions: ['php']},
+    {name: 'Rust', extensions: ['rs']},
+    {name: 'SQL', extensions: ['sql']},
+    {name: 'XML', extensions: ['xml']},
+    {name: 'LESS', extensions: ['less']},
+    {name: 'SASS', extensions: ['sass', 'scss']},
+    {name: 'Clojure', extensions: ['clj']},
+    {name: 'C#', extensions: ['cs']},
 ];
 
 const InitStyledContainer = styled(Container)(({theme}) => ({
@@ -180,9 +235,9 @@ interface ActiveProps {
     theme: Theme;
     messages: Array<CtGetHHChatMessagesResponseMessage>;
     toggleEditor: (state?: boolean) => void;
-    setEditorCode: (code: string) => void;
+    setEditorCode: (code: string, lang: string | undefined) => void;
     sendMessage: (content: string) => void;
-    activeResponse?: { text: string, code: string, command: CtExecCommand | null };
+    activeResponse?: { text: string, code: string, codeLanguage: string, command: CtExecCommand | null };
 }
 
 const HomeworkHelperActive = ({
@@ -203,9 +258,9 @@ const HomeworkHelperActive = ({
     const scrollContainerRef = React.useRef<HTMLDivElement>(null);
     const targetScrollRef = React.useRef<HTMLDivElement>(null);
 
-    const renderInlineCodeEditor = (id: string, code: string) => {
+    const renderInlineCodeEditor = (id: string, code: string, codeLanguage: string) => {
         return (
-            <Box>
+            <Box sx={{width: "100%"}}>
                 <Button
                     variant={"text"}
                     sx={{
@@ -229,11 +284,11 @@ const HomeworkHelperActive = ({
                     }
                 </Button>
                 {expandedCodeBlock.findIndex((x) => x === id) > -1 && (
-                    <>
+                    <Box sx={{marginBottom: "40px", width: "100%"}}>
                         <MarkdownRenderer
                             markdown={
                                 code ?
-                                    "```\n" +
+                                    "```" + codeLanguage + "\n" +
                                     code.split("\n").slice(
                                         0,
                                         Math.min(25, code.split("\n").length)
@@ -254,14 +309,14 @@ const HomeworkHelperActive = ({
                                 float: "right"
                             }}
                             onClick={() => {
-                                setEditorCode(code)
+                                setEditorCode(code, codeLanguage)
                                 toggleEditor(true)
                             }}
                         >
                             Open In Editor
                             <CodeIcon sx={{marginLeft: "8px"}} fontSize={"small"}/>
                         </Button>
-                    </>
+                    </Box>
                 )}
             </Box>
         )
@@ -291,11 +346,12 @@ const HomeworkHelperActive = ({
     }
 
     const renderUserMessage = (
-        {idx, text, code}:
+        {idx, text, code, codeLanguage}:
             {
                 idx: number,
                 text: string,
                 code?: string,
+                codeLanguage?: string
             }
     ) => {
         return (
@@ -316,19 +372,20 @@ const HomeworkHelperActive = ({
                             width: "calc(100% - 10px)",
                         }}
                     />
-                    {code && renderInlineCodeEditor(`q:${idx}`, code)}
+                    {code && renderInlineCodeEditor(`q:${idx}`, code, codeLanguage !== undefined ? codeLanguage : "")}
                 </Box>
             </Box>
         )
     }
 
     const renderAssistantMessage = (
-        {idx, text, loading, code, command, commandResult}:
+        {idx, text, loading, code, codeLanguage, command, commandResult}:
             {
                 idx: number,
                 text: string,
                 loading: boolean,
                 code?: string,
+                codeLanguage?: string,
                 command?: CtExecCommand,
                 commandResult?: any
             }
@@ -354,7 +411,7 @@ const HomeworkHelperActive = ({
                         />
                     </Box>
                 )}
-                {!loading && code && renderInlineCodeEditor(`q:${idx}`, code)}
+                {!loading && code && renderInlineCodeEditor(`q:${idx}`, code, codeLanguage !== undefined ? codeLanguage : "")}
                 {loading && (
                     <Box sx={{float: "right", right: "20px"}}>
                         <CtCircularProgress size={18}/>
@@ -372,6 +429,7 @@ const HomeworkHelperActive = ({
                 text: string,
                 loading: boolean,
                 code?: string,
+                codeLanguage?: string,
                 command?: CtExecCommand,
                 commandResult?: any
             };
@@ -387,6 +445,7 @@ const HomeworkHelperActive = ({
                         text: m.content,
                         loading: false,
                         code: m.code !== "" ? m.code : undefined,
+                        codeLanguage: m.code_language !== "" ? m.code_language : undefined,
                         command: m.command.command !== "" ? m.command : undefined,
                         commandResult: undefined,
                     }
@@ -414,12 +473,13 @@ const HomeworkHelperActive = ({
                 command: activeResponse && activeResponse.command !== null ? activeResponse.command : undefined,
                 loading: true,
                 code: activeResponse && activeResponse.code.length > 0 ? activeResponse.code : undefined,
+                codeLanguage: activeResponse && activeResponse.codeLanguage.length > 0 ? activeResponse.codeLanguage : undefined,
             })
         )
     }
 
     return (
-        <ActiveStyledContainer maxWidth={"md"} sx={{position: "relative", height: "calc(100vh - 100px)"}}>
+        <ActiveStyledContainer maxWidth={"md"} sx={{position: "relative", height: "calc(100vh - 82px)"}}>
             <Box
                 display={"flex"}
                 flexDirection={"column"}
@@ -494,47 +554,162 @@ function HomeworkHelper() {
     const [mode, _] = useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
 
+    const authState = useAppSelector(selectAuthState);
+
+    const [connectButtonLoading, setConnectButtonLoading] = useState<boolean>(false)
+    const [commandId, setCommandId] = useState("");
+    const [executingCode, setExecutingCode] = useState<boolean>(false)
+    const [workspaceState, setWorkspaceState] = useState<null | number>(null);
+    const [workspaceId, setWorkspaceId] = useState<string>('')
+    const [speedDialOpen, setSpeedDialOpen] = React.useState(false);
+    const [newChat, setNewChat] = React.useState(false);
     const [selectedChat, setSelectedChat] = React.useState<string | null>(null);
+    const [chatSelectionOpen, setChatSelectionOpen] = React.useState(false);
     const [editorOpen, setEditorOpen] = React.useState(false);
     const [activeResponse, setActiveResponse] = React.useState<{
         text: string,
         code: string,
+        codeLanguage: string,
         command: CtExecCommand | null
     } | null>(null);
     const [messages, setMessages] = React.useState<CtGetHHChatMessagesResponseMessage[]>([]);
+    const [chats, setChats] = React.useState<CtGetHHChatsResponseChat[]>([]);
 
     const [code, setCode] = React.useState("");
     const [codeLanguage, setCodeLanguage] = React.useState("")
     const [langSelectActive, setLangSelectActive] = React.useState(false)
 
+    const [terminalVisible, setTerminalVisible] = useState(false);
+    const [output, setOutput] = useState<OutputState | null>(null);
+
+    const navigate = useNavigate();
+
     let ctWs = useGlobalCtWebSocket();
 
-    // useEffect(() => {
-    //     if (selectedChat === null || selectedChat === "-1") {
-    //         setMessages([])
-    //         return
-    //     }
-    //
-    //     ctWs.sendWebsocketMessage({
-    //             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-    //             type: CtMessageType.WebSocketMessageTypeGetHHChatMessagesRequest,
-    //             origin: CtMessageOrigin.WebSocketMessageOriginClient,
-    //             created_at: Date.now(),
-    //             payload: {
-    //                 chat_id: selectedChat,
-    //             }
-    //         } satisfies CtMessage<CtGetHHChatMessagesRequest>,
-    //         (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtGetHHChatMessagesResponse>): boolean => {
-    //             if (msg.type !== CtMessageType.WebSocketMessageTypeGetHHChatMessagesResponse) {
-    //                 console.log("failed getting chat messages", msg)
-    //                 return true;
-    //             }
-    //
-    //             let res = msg.payload as CtGetHHChatMessagesResponse
-    //             setMessages(res.messages)
-    //             return true;
-    //         })
-    // }, [selectedChat]);
+    let globalWs = useGlobalWebSocket();
+
+    let {id} = useParams()
+
+    useEffect(() => {
+        if (!id || id === selectedChat)
+            return
+        setMessages([])
+        setCode("")
+        setCodeLanguage("")
+        setEditorOpen(false)
+        setActiveResponse(null)
+        setSelectedChat(id)
+    }, [id])
+
+    useEffect(() => {
+        if (workspaceId === "") {
+            return
+        }
+
+        globalWs.registerCallback(WsMessageType.WorkspaceStatusUpdate, `workspace:status:${workspaceId}`,
+            (msg: WsMessage<any>) => {
+                if (msg.type !== WsMessageType.WorkspaceStatusUpdate) {
+                    return
+                }
+
+                // attempt to parse json message
+                let jsonMessage: Object | null = null
+                try {
+                    jsonMessage = msg.payload;
+                } catch (e) {
+                    return
+                }
+
+                if (jsonMessage === null) {
+                    return
+                }
+
+                // handle initial state message
+                let payload = jsonMessage as InitialStatusMessage;
+                let workspace = payload.workspace as Workspace
+
+                if (workspaceId !== workspace._id) {
+                    setWorkspaceId(workspace._id)
+                }
+                setWorkspaceState(workspace.state)
+            },
+        );
+
+        // generate a random alphanumeric id
+        let seqId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        globalWs.sendWebsocketMessage({
+            sequence_id: seqId,
+            type: WsMessageType.SubscribeWorkspace,
+            payload: {
+                workspace_id: workspaceId,
+            }
+        }, null)
+
+        return () => {
+            globalWs.sendWebsocketMessage({
+                sequence_id: seqId,
+                type: WsMessageType.UnsubscribeWorkspace,
+                payload: {
+                    workspace_id: workspaceId,
+                }
+            }, null)
+        }
+    }, [workspaceId])
+
+    useEffect(() => {
+        if (selectedChat === null || selectedChat === "-1" || newChat) {
+            return
+        }
+
+        ctWs.sendWebsocketMessage({
+                sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                type: CtMessageType.WebSocketMessageTypeGetHHChatMessagesRequest,
+                origin: CtMessageOrigin.WebSocketMessageOriginClient,
+                created_at: Date.now(),
+                payload: {
+                    chat_id: selectedChat,
+                }
+            } satisfies CtMessage<CtGetHHChatMessagesRequest>,
+            (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtGetHHChatMessagesResponse>): boolean => {
+                if (msg.type !== CtMessageType.WebSocketMessageTypeGetHHChatMessagesResponse) {
+                    console.log("failed getting chat messages", msg)
+                    return true;
+                }
+
+                let res = msg.payload as CtGetHHChatMessagesResponse
+                setMessages(res.messages)
+                return true;
+            })
+    }, [selectedChat]);
+
+    useEffect(() => {
+        if (!authState.authenticated) {
+            setChats([])
+            return
+        }
+
+        ctWs.sendWebsocketMessage({
+                sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                type: CtMessageType.WebSocketMessageTypeGetHHChatsRequest,
+                origin: CtMessageOrigin.WebSocketMessageOriginClient,
+                created_at: Date.now(),
+                payload: {
+                    partition: "default",
+                    offset: 0,
+                    limit: 100
+                }
+            } satisfies CtMessage<CtGetHHChatsRequest>,
+            (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtGetHHChatsResponse>): boolean => {
+                if (msg.type !== CtMessageType.WebSocketMessageTypeGetHHChatsResponse) {
+                    console.log("failed getting chats", msg)
+                    return true;
+                }
+
+                let res = msg.payload as CtGetHHChatsResponse
+                setChats(res.chats)
+                return true;
+            })
+    }, [authState.authenticated]);
 
     const sendUserMessage = async (chatId: string, userMessage: string, addMessage: boolean = true) => {
         if (addMessage) {
@@ -600,10 +775,12 @@ function HomeworkHelper() {
                         premium_llm: res.premium_llm,
                         free_credit_use: res.free_credit_use
                     }))
+                    setNewChat(false)
                 } else {
                     setActiveResponse({
                         text: res.complete_message,
                         code: res.complete_code,
+                        codeLanguage: res.code_language,
                         command: res.command,
                     })
                 }
@@ -612,6 +789,7 @@ function HomeworkHelper() {
     }
 
     const startNewChat = async (userMessage: string) => {
+        setNewChat(true)
         setSelectedChat("-1")
         setMessages([{
             _id: "",
@@ -629,7 +807,7 @@ function HomeworkHelper() {
             premium_llm: false,
             free_credit_use: false
         }]);
-        setActiveResponse({text: "", code: "", command: null});
+        setActiveResponse({text: "", code: "", codeLanguage: "", command: null});
 
         // create a new promise that will return the chat id or null to us
         let resolver: (value: string | null) => void;
@@ -665,6 +843,7 @@ function HomeworkHelper() {
         }
 
         setSelectedChat(chatId);
+        navigate(`/homework/${chatId}`)
         sendUserMessage(chatId, userMessage, false)
     }
 
@@ -677,7 +856,12 @@ function HomeworkHelper() {
                     messages={messages}
                     activeResponse={activeResponse !== null ? activeResponse : undefined}
                     toggleEditor={(state) => setEditorOpen(state !== undefined ? state : !editorOpen)}
-                    setEditorCode={(c) => setCode(c)}
+                    setEditorCode={(c, l) => {
+                        setCode(c)
+                        if (l !== "" && l !== undefined) {
+                            setCodeLanguage(l)
+                        }
+                    }}
                     sendMessage={(content: string) => {
                         if (selectedChat === null || selectedChat === "-1" || content === "") {
                             return
@@ -698,73 +882,392 @@ function HomeworkHelper() {
         )
     }
 
+    const mapToLang = (l: string) => {
+        l = l.trim()
+        for (let i = 0; i < languages.length; i++) {
+            if (l.toLowerCase() == languages[i].name.toLowerCase()) {
+                return languages[i].name.toLowerCase()
+            }
+
+            for (let j = 0; j < languages[i].extensions.length; j++) {
+                if (l.toLowerCase() === languages[i].extensions[j]) {
+                    return languages[i].name.toLowerCase()
+                }
+            }
+        }
+        return l
+    }
+
+    const createWorkspace = async (chatId: string): Promise<boolean> => {
+        try {
+            const response = await call(
+                "/api/homework/createWorkspace",
+                "POST",
+                null,
+                null,
+                null,
+                // @ts-ignore
+                {hh_id: chatId},
+                null,
+                config.rootPath
+            );
+
+            const [res] = await Promise.all([response]);
+
+            if (res === undefined) {
+                swal("Server Error", "Cannot fetch byte data. Please try again later.");
+                return false;
+            }
+
+            if (res["message"] === "Workspace Created Successfully") {
+                // TODO implement what needs to be done if successful
+                let workspace = res["workspace"]
+                if (workspace["_id"] !== workspaceId) {
+                    setWorkspaceId(workspace["_id"])
+                    setWorkspaceState(workspace["state"])
+                }
+                return true
+            }
+        } catch (error) {
+            swal("Error", "An error occurred while creating the byte workspace.");
+        }
+        return false
+    };
+
+    const cancelCodeExec = (commandId: string) => {
+        const message = {
+            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            type: WsMessageType.CancelExecRequest,
+            payload: {
+                code_source_id: selectedChat,
+                payload: {
+                    command_id: commandId,
+                }
+            }
+        };
+
+        globalWs.sendWebsocketMessage(message, null);
+
+        // Set executingCode false to indicate that execution has been stopped
+        setExecutingCode(false);
+    };
+
+    const stdInExecRequest = (commandId: string, input: string) => {
+
+        const message = {
+            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            type: WsMessageType.StdinExecRequest,
+            payload: {
+                code_source_id: selectedChat,
+                payload: {
+                    command_id: commandId,
+                    input: input + "\n"
+                }
+            }
+        };
+
+        globalWs.sendWebsocketMessage(message, null);
+    }
+
+    const sendExecRequest = (retryCount: number = 0) => {
+        const message = {
+            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            type: WsMessageType.AgentExecRequest,
+            payload: {
+                code_source_id: selectedChat,
+                payload: {
+                    lang: 5,
+                    code: code
+                }
+            }
+        };
+
+        setTerminalVisible(true)
+        setOutput({
+            stdout: [{timestamp: Date.now() * 1000, content: "Running..."}],
+            stderr: [],
+            merged: "Running...",
+            mergedLines: [{timestamp: Date.now() * 1000, content: "Running...", error: false}],
+        });
+        setExecutingCode(true)
+        setCommandId("");
+        globalWs.sendWebsocketMessage(
+            message,
+            (msg: WsMessage<any>): boolean => {
+                if (msg.type !== WsMessageType.AgentExecResponse) {
+                    if (msg.type === WsMessageType.GenericError) {
+                        const payload = msg.payload as WsGenericErrorPayload;
+
+                        if (payload.error === "workspace is not active" || payload.error === "cannot find workspace or workspace agent") {
+                            if (retryCount >= 60) {
+                                setOutput({
+                                    stdout: [],
+                                    stderr: [{
+                                        timestamp: Date.now() * 1000,
+                                        content: "Failed to connect to DevSpace"
+                                    }],
+                                    merged: "Failed to connect to DevSpace",
+                                    mergedLines: [{
+                                        error: true,
+                                        timestamp: Date.now() * 1000,
+                                        content: "Failed to connect to DevSpace",
+                                    }],
+                                })
+
+                                setConnectButtonLoading(false)
+                                setExecutingCode(false)
+                                return true
+                            }
+                            // wait 1s and try again
+                            sleep(1000).then(() => {
+                                sendExecRequest(retryCount + 1)
+                            })
+                            return true
+                        }
+                    }
+                    return true;
+                }
+
+                const payload = msg.payload as ExecResponsePayload;
+
+                if (payload.command_id_string) {
+                    setCommandId(payload.command_id_string);
+                }
+                const {stdout, stderr, done} = payload;
+
+                // skip the processing if this is the first response
+                if (stdout.length === 0 && stderr.length === 0 && !done) {
+                    return false;
+                }
+
+                // merge all the lines together
+                let mergedRows: MergedOutputRow[] = [];
+                mergedRows = mergedRows.concat(stdout.map(row => ({
+                    content: row.content,
+                    error: false,
+                    timestamp: row.timestamp
+                }))).sort((a, b) => a.timestamp - b.timestamp);
+                mergedRows = mergedRows.concat(stderr.map(row => ({
+                    content: row.content,
+                    error: true,
+                    timestamp: row.timestamp
+                }))).sort((a, b) => a.timestamp - b.timestamp);
+
+                // sort the lines by timestamp
+                mergedRows = mergedRows.sort((a, b) => a.timestamp - b.timestamp);
+
+                // assemble the final output state and set it
+                setOutput({
+                    stdout: stdout,
+                    stderr: stderr,
+                    merged: mergedRows.map(row => row.content).join("\n"),
+                    mergedLines: mergedRows,
+                })
+
+                setExecutingCode(!done)
+
+                // we only return true here if we are done since true removes this callback
+                return done
+            }
+        );
+    };
+
+    const executeCode = async () => {
+        if (selectedChat === null) {
+            return
+        }
+
+        for (let i = 0; i < 5; i++) {
+            let created = await createWorkspace(selectedChat);
+            if (created) {
+                break
+            }
+            if (i === 4) {
+                setOutput({
+                    stdout: [],
+                    stderr: [{
+                        timestamp: Date.now() * 1000,
+                        content: "Failed to create DevSpace"
+                    }],
+                    merged: "Failed to create DevSpace",
+                    mergedLines: [{
+                        error: true,
+                        timestamp: Date.now() * 1000,
+                        content: "Failed to create DevSpace",
+                    }],
+                })
+            }
+        }
+
+        sendExecRequest();
+    };
+
     const renderEditor = () => {
         if (!editorOpen) {
             return null
         }
 
-        console.log("rendering editor")
+        let stateTooltipTitle: string | React.ReactElement = (
+            <Box>
+                <Typography variant='caption'>Disconnected From DevSpace</Typography>
+                <LoadingButton
+                    loading={connectButtonLoading}
+                    variant={"outlined"}
+                    sx={{
+                        fontSize: "10px",
+                        height: "18px",
+                        m: 0.5
+                    }}
+                    onClick={async () => {
+                        if (selectedChat) {
+                            setConnectButtonLoading(true)
+                            for (let i = 0; i < 5; i++) {
+                                let created = await createWorkspace(selectedChat);
+                                if (created) {
+                                    break
+                                }
+
+                                if (i === 4) {
+                                    break
+                                }
+                            }
+                            setConnectButtonLoading(false)
+                        }
+                    }}
+                >
+                    Connect
+                </LoadingButton>
+            </Box>
+        )
+        let stateIcon = (<LinkOffIcon sx={{color: alpha(theme.palette.text.primary, 0.6)}}/>)
+        if (workspaceState !== null) {
+            if (workspaceState === 1) {
+                stateTooltipTitle = "Connected To DevSpace"
+                stateIcon = (<LinkIcon sx={{color: theme.palette.success.main}}/>)
+            } else {
+                stateTooltipTitle = "Connecting To DevSpace"
+                stateIcon = (<CircularProgress size={24} sx={{color: alpha(theme.palette.text.primary, 0.6)}}/>)
+            }
+        }
 
         return (
             <Slide direction="left" in={editorOpen} mountOnEnter unmountOnExit>
-                <Box>
-                    <FormControl
+                <Box
+                    sx={{
+                        paddingLeft: "20px",
+                        paddingRight: "20px",
+                    }}
+                >
+                    <Box
+                        display={"inline-flex"}
+                        justifyContent={"space-between"}
                         sx={{
-                            minWidth: "100px", // Adjust based on your UI needs
-                            m: 0, // Minimize margin
-                            p: 0, // Minimize padding
+                            width: "100%",
+                            marginBottom: "8px"
                         }}
                     >
-                        <InputLabel
-                            id="language-selector-label"
+                        <FormControl
                             sx={{
-                                fontSize: "0.7rem !important",
+                                minWidth: "100px", // Adjust based on your UI needs
                                 m: 0, // Minimize margin
                                 p: 0, // Minimize padding
-                                top: langSelectActive || codeLanguage !== "" ? "0px" : "-11px",
                             }}
                         >
-                            Language
-                        </InputLabel>
-                        <Select
-                            labelId="language-selector-label"
-                            id="language-selector"
-                            value={codeLanguage}
-                            label="Language"
-                            onFocus={() => setLangSelectActive(true)}
-                            onBlur={() => setLangSelectActive(false)}
-                            onChange={(e) => {
-                                setCodeLanguage(e.target.value)
-                            }}
-                            size="small" // Make Select more compact
-                            sx={{
-                                fontSize: "0.7rem !important",
-                                m: 0, // Minimize margin
-                                p: 0, // Minimize padding
-                                '& .MuiSelect-select': {
-                                    py: '5px', // Adjust padding vertically as needed
-                                },
-                                // '& .MuiOutlinedInput-notchedOutline': {
-                                //     border: 'none', // Remove border if desired for compactness
-                                // },
-                            }}
+                            <InputLabel
+                                id="language-selector-label"
+                                sx={{
+                                    fontSize: "0.7rem !important",
+                                    m: 0, // Minimize margin
+                                    p: 0, // Minimize padding
+                                    top: langSelectActive || codeLanguage !== "" ? "0px" : "-11px",
+                                }}
+                            >
+                                Language
+                            </InputLabel>
+                            <Select
+                                labelId="language-selector-label"
+                                id="language-selector"
+                                value={mapToLang(codeLanguage)}
+                                label="Language"
+                                onFocus={() => setLangSelectActive(true)}
+                                onBlur={() => setLangSelectActive(false)}
+                                onChange={(e) => {
+                                    setCodeLanguage(e.target.value)
+                                }}
+                                size="small" // Make Select more compact
+                                sx={{
+                                    fontSize: "0.7rem !important",
+                                    m: 0, // Minimize margin
+                                    p: 0, // Minimize padding
+                                    '& .MuiSelect-select': {
+                                        py: '5px', // Adjust padding vertically as needed
+                                    },
+                                    // '& .MuiOutlinedInput-notchedOutline': {
+                                    //     border: 'none', // Remove border if desired for compactness
+                                    // },
+                                }}
+                            >
+                                {languages.map((language) => (
+                                    <MenuItem
+                                        key={language.name}
+                                        value={language.name.toLowerCase()}
+                                        sx={{
+                                            fontSize: "0.7rem !important",
+                                            m: 0, // Minimize margin
+                                            p: 0, // Minimize padding,
+                                            paddingLeft: "5px"
+                                        }}
+                                    >
+                                        {language.name}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <Box
+                            display={"inline-flex"}
                         >
-                            {languages.map((language) => (
-                                <MenuItem
-                                    key={language.name}
-                                    value={language.name.toLowerCase()}
+                            <Tooltip title={stateTooltipTitle}>
+                                <Box
                                     sx={{
-                                        fontSize: "0.7rem !important",
-                                        m: 0, // Minimize margin
-                                        p: 0, // Minimize padding,
-                                        paddingLeft: "5px"
+                                        height: "30px",
+                                        width: "30px",
+                                        marginRight: "20px",
+                                        padding: "3px"
                                     }}
                                 >
-                                    {language.name}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                                    {stateIcon}
+                                </Box>
+                            </Tooltip>
+                            <Tooltip title="Run Code">
+                                <LoadingButton
+                                    loading={executingCode}
+                                    variant="outlined"
+                                    color={"success"}
+                                    sx={{
+                                        // position: 'absolute',
+                                        // right: '8px',
+                                        // top: '8px',
+                                        zIndex: 3,
+                                        m: 0,
+                                        p: 0,
+                                        fontSize: "0.7rem !important",
+                                        // borderRadius: "50%",
+                                        // minWidth: 0,
+                                    }}
+                                    onClick={() => {
+                                        if (!authState.authenticated) {
+                                            navigate("/signup?forward=" + encodeURIComponent(window.location.pathname))
+                                            return
+                                        }
+
+                                        executeCode(); // Indicate button click
+                                    }}
+                                >
+                                    Run <PlayArrow fontSize={"small"}/>
+                                </LoadingButton>
+                            </Tooltip>
+                        </Box>
+                    </Box>
                     <Editor
                         // ref={editorRef}
                         editorStyles={{
@@ -783,29 +1286,135 @@ function HomeworkHelper() {
                         onChange={(val, view) => setCode(val)}
                         wrapperStyles={{
                             width: '100%',
-                            height: 'calc(100vh - 130px)',
+                            height: terminalVisible ? 'calc(100vh - 364px)' : 'calc(100vh - 138px)',
                             borderRadius: "10px",
                             border: `1px solid ${theme.palette.primary.light}`
                         }}
                     />
+                    {terminalVisible && output && (
+                        <ByteTerminal
+                            output={output}
+                            onClose={() => setTerminalVisible(false)}
+                            onStop={() => cancelCodeExec(commandId)}
+                            onInputSubmit={(input: string) => stdInExecRequest(commandId, input)}
+                            isRunning={executingCode}
+                        />
+                    )}
                 </Box>
             </Slide>
         )
     }
 
+    const renderActions = () => {
+        return (
+            <>
+                <SpeedDial
+                    ariaLabel="SpeedDial"
+                    sx={{position: 'fixed', bottom: 24, right: 16}}
+                    icon={<MenuIcon/>}
+                    open={speedDialOpen}
+                    onOpen={() => setSpeedDialOpen(true)}
+                    onClose={() => setSpeedDialOpen(false)}
+                >
+                    <SpeedDialAction
+                        key={"new"}
+                        icon={<Add/>}
+                        tooltipTitle={"New Homework"}
+                        onClick={clearChatState}
+                    />
+                    <SpeedDialAction
+                        key={"history"}
+                        icon={<LibraryBooks/>}
+                        tooltipTitle={"Homework History"}
+                        onClick={() => setChatSelectionOpen(prev => !prev)}
+                    />
+                </SpeedDial>
+                <Dialog
+                    open={chatSelectionOpen}
+                    onClose={() => setChatSelectionOpen(false)}
+                    maxWidth={"lg"}
+                >
+                    <DialogTitle>
+                        Homework History
+                    </DialogTitle>
+                    <DialogContent
+                        sx={{
+                            maxHeight: "70vh",
+                            minWidth: "400px"
+                        }}
+                    >
+                        <List>
+                            {chats.map((item, index) => (
+                                <ListItemButton
+                                    key={item._id}
+                                    sx={{
+                                        borderRadius: "10px"
+                                    }}
+                                    onClick={() => {
+                                        setSelectedChat(item._id)
+                                        navigate(`/homework/${item._id}`)
+                                        setChatSelectionOpen(false)
+                                    }}
+                                >
+                                    <Box
+                                        display={"flex"}
+                                        flexDirection={"column"}
+                                    >
+                                        {item.name}
+                                        <Typography variant="caption" color="textPrimary" noWrap>
+                                            {
+                                                Date.now() - parseISO(item.last_message_at).getTime() > 86400000 ?
+                                                    format(parseISO(item.last_message_at), 'MMMM d, yyyy') :
+                                                    formatDistanceToNow(parseISO(item.last_message_at), {addSuffix: true})
+                                            }
+                                        </Typography>
+                                    </Box>
+                                </ListItemButton>
+                            ))}
+                        </List>
+                    </DialogContent>
+                </Dialog>
+            </>
+        )
+    }
+
+    const clearChatState = () => {
+        setMessages([])
+        setCode("")
+        setCodeLanguage("")
+        setEditorOpen(false)
+        setActiveResponse(null)
+        setSelectedChat(null)
+        navigate("/homework")
+    }
+
+    let bodySize = 12;
+    if (editorOpen) {
+        bodySize -= 6
+    }
+
     return (
         <ThemeProvider theme={theme}>
             <CssBaseline>
-                <Container sx={{maxHeight: "calc(100vh - 72px)", overflow: "hidden", maxWidth: "100% !important"}}>
-                    <Grid container>
-                        <Grid item xs={editorOpen ? 7 : 12}>
+                <HelmetProvider>
+                    <Helmet>
+                        <title>GIGO Homework Helper</title>
+                        <meta property="og:title" content={"GIGO Homework Helper"} data-rh="true"/>
+                    </Helmet>
+                </HelmetProvider>
+                <Box
+                    sx={{maxHeight: "calc(100vh - 72px)", overflow: "hidden", width: "100% !important"}}
+                >
+                    <Grid container sx={{width: "100% !important"}}>
+                        <Grid item xs={bodySize}>
                             {renderBody()}
                         </Grid>
-                        <Grid item xs={5} sx={{height: "calc(100vh - 72px)", mt: 2, mb: 2}}>
+                        <Grid item xs={editorOpen ? 6 : 0} sx={{height: "calc(100vh - 72px)", mt: 2, mb: 2}}>
                             {renderEditor()}
                         </Grid>
                     </Grid>
-                </Container>
+                </Box>
+                {renderActions()}
             </CssBaseline>
         </ThemeProvider>
     )

@@ -315,12 +315,12 @@ export interface CtGetHHChatsResponseChat {
     assistant_id: string;
     assistant_name: string;
     owner_id: string;
-    last_message_at: Date;
+    last_message_at: string;
     name: string;
     message_count: number;
     user_message_count: number;
     assistant_message_count: number;
-    created_at: Date;
+    created_at: string;
     repo_id: string;
     partition: string;
 }

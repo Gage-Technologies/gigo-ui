@@ -107,6 +107,7 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
             case "cpp":
             case "cc":
             case "cxx":
+            case "c++":
             case "hpp":
                 return cpp();
             case "html":
