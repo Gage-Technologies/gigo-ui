@@ -1,5 +1,3 @@
-
-
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {RootState} from '../../app/store';
 import Post from "../../models/post";
@@ -9,6 +7,7 @@ export interface BytesState {
     initialized: boolean;
     byteDifficulty: number;
     acceptedExplanationSuggestion: boolean;
+    helpPopupClosedByUser: boolean;
 }
 
 export interface BytesStateUpdate {
@@ -21,6 +20,7 @@ export const initialBytesState: BytesState = {
     initialized: false,
     byteDifficulty: 0,
     acceptedExplanationSuggestion: true,
+    helpPopupClosedByUser: true
 };
 
 export const initialBytesStateUpdate: BytesStateUpdate = {
@@ -51,10 +51,13 @@ export const bytesSlice = createSlice({
                 state.acceptedExplanationSuggestion = update.payload.acceptedExplanationSuggestion
             }
         },
+        setHelpPopupClosedByUser: (state, action: PayloadAction<boolean>) => {
+            state.helpPopupClosedByUser = action.payload;
+        },
     }
 });
 
-export const {updateBytesState, clearBytesState} = bytesSlice.actions;
+export const {updateBytesState, clearBytesState, setHelpPopupClosedByUser} = bytesSlice.actions;
 
 // The function below is called a selector and allows us to select a value from
 // the state. Selectors can also be defined inline where they're used instead of
@@ -63,5 +66,7 @@ export const selectBytesState = (state: RootState) => state.bytes;
 export const selectBytesInitialized = (state: RootState) => state.bytes.initialized;
 export const selectBytesDifficulty = (state: RootState) => state.bytes.byteDifficulty;
 export const selectBytesExplanationSuggestion = (state: RootState) => state.bytes.acceptedExplanationSuggestion;
+
+export const selectHelpPopupClosedByUser = (state: RootState) => state.bytes.helpPopupClosedByUser;
 
 export default bytesSlice.reducer;

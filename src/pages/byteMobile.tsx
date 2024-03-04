@@ -5,7 +5,7 @@ import {
     Box, Button, CircularProgress,
     createTheme,
     CssBaseline,
-    Dialog, DialogContent,
+    Dialog, DialogActions, DialogContent,
     DialogTitle, Grid, IconButton,
     List,
     ListItem,
@@ -73,6 +73,8 @@ import {styled} from "@mui/system";
 import { BugReportOutlined } from "@material-ui/icons";
 import { Circle } from "@mui/icons-material";
 import ConstructionIcon from '@mui/icons-material/Construction';
+import BlockIcon from '@mui/icons-material/Block';
+import { setHelpPopupClosedByUser, selectHelpPopupClosedByUser } from '../reducers/bytes/bytes';
 
 
 interface MergedOutputRow {
@@ -180,6 +182,7 @@ function ByteMobile() {
 
     // Define the state and dispatch hook
     const dispatch = useAppDispatch();
+    const helpPopupClosedByUser = useAppSelector(selectHelpPopupClosedByUser);
     const navigate = useNavigate();
 
     // Define the state for your data and loading state
@@ -237,6 +240,7 @@ function ByteMobile() {
     const [workspaceState, setWorkspaceState] = useState<null | number>(null);
     const [workspaceId, setWorkspaceId] = useState<string>('')
     const [helpPopupOpen, setHelpPopupOpen] = useState(false);
+    const [shouldShowHelp, setShouldShowHelp] = useState(false);
 
     const [editorStyles, setEditorStyles] = useState({
         fontSize: '14px',
@@ -655,6 +659,82 @@ function ByteMobile() {
             setXpPopup(true)
         }
     }
+
+    const checkShouldHelp = async () => {
+        if (authState.authenticated === false) {
+
+            if (!helpPopupClosedByUser) {
+                setHelpPopupOpen(true);
+            }
+        }
+
+        let help = await call(
+            "/api/bytes/checkHelpMobile",
+            "POST",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {},
+            null,
+            config.rootPath
+        );
+
+        const [res] = await Promise.all([help]);
+
+        if (res === undefined) {
+            return;
+        }
+
+        if (res["byte_help_mobile"] === undefined) {
+            setShouldShowHelp(false);
+            return;
+        }
+
+        if (res["byte_help_mobile"] === true) {
+            setShouldShowHelp(true);
+            setHelpPopupOpen(true);
+        } else {
+            setShouldShowHelp(false);
+        }
+
+        console.log("shouldShowHelp : " + shouldShowHelp);
+    };
+
+    const disableHelp = async () => {
+        if (authState.authenticated === false) {
+            return;
+        }
+
+        let help = await call(
+            "/api/bytes/disableHelpMobile",
+            "POST",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {},
+            null,
+            config.rootPath
+        );
+
+        const [res] = await Promise.all([help]);
+
+        if (res === undefined) {
+            return;
+        }
+
+        if (res["message"] !== undefined) {
+            setShouldShowHelp(false)
+            return;
+        }
+
+        console.log("shouldShowHelp : " + shouldShowHelp)
+    };
+
+    useEffect(() => {
+         checkShouldHelp()
+    }, []);
 
     useEffect(() => {
         if (id === undefined) {
@@ -1169,46 +1249,57 @@ function ByteMobile() {
     const renderStateIndicator = () => {
         let actionButton;
 
-        if (workspaceState === null || workspaceState === 0) {
-            // Define an action for the connect button
-            const connectAction = async () => {
-                if (byteData && !connectButtonLoading) {
-                    setConnectButtonLoading(true);
-                    for (let i = 0; i < 5; i++) {
-                        let created = await createWorkspace(byteData._id);
-                        if (created) {
-                            break
-                        }
-
-                        if (i === 4) {
-                            break
-                        }
+        const connectAction = async () => {
+            if (byteData && !connectButtonLoading) {
+                setConnectButtonLoading(true);
+                let connectionEstablished = false;
+                for (let i = 0; i < 5 && !connectionEstablished; i++) {
+                    const created = await createWorkspace(byteData._id);
+                    if (created) {
+                        connectionEstablished = true;
+                        setWorkspaceState(1); // Assuming 1 means connected
+                        break;
                     }
-                    setConnectButtonLoading(false);
                 }
-            };
+                if (!connectionEstablished) {
+                    // Handle the case where connection could not be established after retries
+                    setWorkspaceState(0); // Assuming 0 means disconnected
+                }
+                setConnectButtonLoading(false);
+            }
+        };
 
+        // Use a function to dynamically generate the tooltip title based on the state
+        const generateTooltipTitle = () => {
+            if (workspaceState === 0 || workspaceState === null) {
+                return "Disconnected From DevSpace. Click to connect.";
+            } else if (workspaceState === 1) {
+                return "Connected To DevSpace";
+            } else {
+                return "Connecting To DevSpace";
+            }
+        };
+
+        if (workspaceState === null || workspaceState === 0) {
             actionButton = (
-                <Tooltip title={<Typography variant='caption'>Disconnected From DevSpace. Click to connect.</Typography>}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', ml: '-8px' }} onClick={connectAction}>
+                <Tooltip title={<Typography variant='caption'>{generateTooltipTitle()}</Typography>}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={connectAction}>
                         <LinkOffIcon sx={{ color: theme.palette.error.main }} />
                         {connectButtonLoading && <CircularProgress size={24} sx={{ color: theme.palette.error.main, ml: 1 }} />}
                     </Box>
                 </Tooltip>
             );
         } else if (workspaceState === 1) {
-            // Show a non-clickable connected state
             actionButton = (
-                <Tooltip title="Connected To DevSpace">
+                <Tooltip title={generateTooltipTitle()}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <LinkIcon sx={{ color: theme.palette.success.main }} />
                     </Box>
                 </Tooltip>
             );
         } else {
-            // Show a loading indicator while connecting
             actionButton = (
-                <Tooltip title="Connecting To DevSpace">
+                <Tooltip title={generateTooltipTitle()}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <CircularProgress size={24} sx={{ color: alpha(theme.palette.text.primary, 0.6) }} />
                     </Box>
@@ -1270,6 +1361,13 @@ function ByteMobile() {
         }
     `;
 
+    const handleCloseHelpPopup = () => {
+        if ( authState.authenticated === true ) {
+            return;
+        }
+        dispatch(setHelpPopupClosedByUser(true));
+        setHelpPopupOpen(false);
+    };
 
     const helpPopup = () => {
         return (
@@ -1283,7 +1381,11 @@ function ByteMobile() {
                     <IconButton
                         edge="start"
                         color="inherit"
-                        onClick={() => setHelpPopupOpen(false)}
+                        onClick={async () => {
+                            await disableHelp();
+                            setHelpPopupOpen(false);
+                            handleCloseHelpPopup()
+                        }}
                         aria-label="close"
                     >
                         <CloseIcon />
