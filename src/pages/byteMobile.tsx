@@ -1533,6 +1533,7 @@ function ByteMobile() {
                                     dev_steps={byteData ? byteData[`dev_steps_${difficultyToString(determineDifficulty())}`] : ""}
                                     maxWidth={"100%"}
                                     acceptedCallback={(c) => {
+                                        console.log("accepted callback:\n", c)
                                         setCode(c)
                                         setSuggestionRange(null)
                                         setLoadingCodeCleanup(null)

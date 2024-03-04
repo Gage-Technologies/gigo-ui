@@ -324,7 +324,9 @@ export default function ByteSuggestions2(props: ByteSuggestions2Props) {
                                 color={"success"}
                                 variant={"outlined"}
                                 onClick={() => {
+                                    console.log("accept clicked")
                                     if (!props.range || !props.editorRef.current?.view) {
+                                        console.log("exiting accept, ", props.range, props.editorRef)
                                         return
                                     }
 
