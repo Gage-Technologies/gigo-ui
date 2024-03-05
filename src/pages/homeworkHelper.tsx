@@ -1,4 +1,7 @@
 import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
     alpha,
     Box,
     Button,
@@ -81,6 +84,8 @@ import {LoadingButton} from "@mui/lab";
 import {sleep} from "../services/utils";
 import LinkOffIcon from "@mui/icons-material/LinkOff";
 import LinkIcon from "@mui/icons-material/Link";
+import CodeTeacherChatIcon from "../components/CodeTeacher/CodeTeacherChatIcon";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 interface MergedOutputRow {
     error: boolean;
@@ -98,6 +103,7 @@ interface OutputState {
 interface LanguageOption {
     name: string;
     extensions: string[];
+    languageId: number;
 }
 
 interface InitialStatusMessage {
@@ -107,23 +113,71 @@ interface InitialStatusMessage {
 }
 
 const languages: LanguageOption[] = [
-    {name: 'Go', extensions: ['go']},
-    {name: 'Python', extensions: ['py']},
-    {name: 'C++', extensions: ['cpp', 'cc', 'cxx', 'hpp', 'c++']},
-    {name: 'HTML', extensions: ['html', 'htm']},
-    {name: 'Java', extensions: ['java']},
-    {name: 'JavaScript', extensions: ['js']},
-    {name: 'JSON', extensions: ['json']},
-    {name: 'Markdown', extensions: ['md']},
-    {name: 'PHP', extensions: ['php']},
-    {name: 'Rust', extensions: ['rs']},
-    {name: 'SQL', extensions: ['sql']},
-    {name: 'XML', extensions: ['xml']},
-    {name: 'LESS', extensions: ['less']},
-    {name: 'SASS', extensions: ['sass', 'scss']},
-    {name: 'Clojure', extensions: ['clj']},
-    {name: 'C#', extensions: ['cs']},
+    {name: 'Go', extensions: ['go'], languageId: 6},
+    {name: 'Python', extensions: ['py', 'pytho'], languageId: 5},
+    {name: 'C++', extensions: ['cpp', 'cc', 'cxx', 'hpp', 'c++'], languageId: 8},
+    {name: 'HTML', extensions: ['html', 'htm'], languageId: 27},
+    {name: 'Java', extensions: ['java'], languageId: 2},
+    {name: 'JavaScript', extensions: ['js'], languageId: 3},
+    {name: 'JSON', extensions: ['json'], languageId: 1},
+    {name: 'Markdown', extensions: ['md'], languageId: 1},
+    {name: 'PHP', extensions: ['php'], languageId: 13},
+    {name: 'Rust', extensions: ['rs'], languageId: 14},
+    {name: 'SQL', extensions: ['sql'], languageId: 34},
+    {name: 'XML', extensions: ['xml'], languageId: 1},
+    {name: 'LESS', extensions: ['less'], languageId: 1},
+    {name: 'SASS', extensions: ['sass', 'scss'], languageId: 1},
+    {name: 'Clojure', extensions: ['clj'], languageId: 21},
+    {name: 'C#', extensions: ['cs'], languageId: 10},
 ];
+
+const mapToLang = (l: string) => {
+    l = l.trim()
+    for (let i = 0; i < languages.length; i++) {
+        if (l.toLowerCase() == languages[i].name.toLowerCase()) {
+            return languages[i].name.toLowerCase()
+        }
+
+        for (let j = 0; j < languages[i].extensions.length; j++) {
+            if (l.toLowerCase() === languages[i].extensions[j]) {
+                return languages[i].name.toLowerCase()
+            }
+        }
+    }
+    return l
+}
+
+const mapToLangId = (l: string) => {
+    l = l.trim()
+    for (let i = 0; i < languages.length; i++) {
+        if (l.toLowerCase() == languages[i].name.toLowerCase()) {
+            return languages[i].languageId
+        }
+
+        for (let j = 0; j < languages[i].extensions.length; j++) {
+            if (l.toLowerCase() === languages[i].extensions[j]) {
+                return languages[i].languageId
+            }
+        }
+    }
+    return 5
+}
+
+const mapToLangMarkdown = (l: string) => {
+    l = l.trim()
+    for (let i = 0; i < languages.length; i++) {
+        if (l.toLowerCase() == languages[i].name.toLowerCase()) {
+            return languages[i].extensions[0]
+        }
+
+        for (let j = 0; j < languages[i].extensions.length; j++) {
+            if (l.toLowerCase() === languages[i].extensions[j]) {
+                return languages[i].extensions[0]
+            }
+        }
+    }
+    return ""
+}
 
 const InitStyledContainer = styled(Container)(({theme}) => ({
     display: 'flex',
@@ -150,6 +204,32 @@ const StyledTextField = styled(TextField)(({theme}) => ({
     padding: theme.spacing(0.5),
     backgroundColor: theme.palette.background.default,
 }));
+
+const CodeTeacherPopupPaper = styled(Paper)`
+    animation: ctPopupAuraEffect 2s infinite alternate;
+    border: none;
+
+    @keyframes ctPopupAuraEffect {
+        0% {
+            box-shadow: 0 0 3px #84E8A2, 0 0 6px #84E8A2;
+        }
+        20% {
+            box-shadow: 0 0 3px #29C18C, 0 0 6px #29C18C;
+        }
+        40% {
+            box-shadow: 0 0 3px #1C8762, 0 0 6px #1C8762;
+        }
+        60% {
+            box-shadow: 0 0 3px #2A63AC, 0 0 6px #2A63AC;
+        }
+        80% {
+            box-shadow: 0 0 3px #3D8EF7, 0 0 6px #3D8EF7;
+        }
+        100% {
+            box-shadow: 0 0 3px #63A4F8, 0 0 6px #63A4F8;
+        }
+    }
+`;
 
 interface InitProps {
     theme: Theme;
@@ -284,11 +364,11 @@ const HomeworkHelperActive = ({
                     }
                 </Button>
                 {expandedCodeBlock.findIndex((x) => x === id) > -1 && (
-                    <Box sx={{marginBottom: "40px", width: "100%"}}>
+                    <Box sx={{marginBottom: "60px", width: "100%"}}>
                         <MarkdownRenderer
                             markdown={
                                 code ?
-                                    "```" + codeLanguage + "\n" +
+                                    "```" + mapToLangMarkdown(codeLanguage) + "\n" +
                                     code.split("\n").slice(
                                         0,
                                         Math.min(25, code.split("\n").length)
@@ -318,6 +398,70 @@ const HomeworkHelperActive = ({
                         </Button>
                     </Box>
                 )}
+            </Box>
+        )
+    }
+
+    const renderCodeExecResult = (_id: string, result: string) => {
+        return (
+            <Box sx={{width: "calc(100% - 10px)"}}>
+                <Box
+                    sx={{
+                        // backgroundColor: alpha(grey[800], mode === "light" ? 0.1 : 0.25),
+                        // borderRadius: "20px",
+                        // p: 2,
+                        maxWidth: "calc(100% - 10px)",
+                        height: "fit-content"
+                    }}
+                >
+                    <Accordion
+                        sx={{
+                            backgroundColor: "transparent",
+                            // border: "1px solid #31343a",
+                            p: "8px",
+                            borderRadius: "20px !important",
+                            width: "auto",
+                            height: "auto",
+                            display: "block",
+                            maxWidth: "100%",
+                            boxShadow: "none",
+                            marginTop: "6px"
+                        }}
+                    >
+                        <AccordionSummary
+                            expandIcon={<ExpandMoreIcon />}
+                            aria-controls="panel1a-content"
+                            id={`exec-result-header-${_id}`}
+                            sx={{
+                                padding: "0px",
+                                backgroundColor: "transparent",
+                            }}
+                        >
+                            <Typography
+                                sx={{
+                                    fontWeight: 300,
+                                    fontSize: "0.9rem",
+                                }}
+                            >
+                                Code Execution Result
+                            </Typography>
+                        </AccordionSummary>
+                        <AccordionDetails
+                            sx={{
+                                padding: "0px",
+                                backgroundColor: "transparent",
+                            }}
+                        >
+                            <MarkdownRenderer
+                                markdown={"```bash\n" + result + "\n```"}
+                                style={{
+                                    fontSize: "0.9rem",
+                                    width: "calc(100% - 10px)",
+                                }}
+                            />
+                        </AccordionDetails>
+                    </Accordion>
+                </Box>
             </Box>
         )
     }
@@ -379,7 +523,7 @@ const HomeworkHelperActive = ({
     }
 
     const renderAssistantMessage = (
-        {idx, text, loading, code, codeLanguage, command, commandResult}:
+        {idx, text, loading, code, codeLanguage, command, commandResult, codeExecResult}:
             {
                 idx: number,
                 text: string,
@@ -387,7 +531,8 @@ const HomeworkHelperActive = ({
                 code?: string,
                 codeLanguage?: string,
                 command?: CtExecCommand,
-                commandResult?: any
+                commandResult?: any,
+                codeExecResult: string
             }
     ) => {
         return (
@@ -412,6 +557,7 @@ const HomeworkHelperActive = ({
                     </Box>
                 )}
                 {!loading && code && renderInlineCodeEditor(`q:${idx}`, code, codeLanguage !== undefined ? codeLanguage : "")}
+                {!loading && codeExecResult.length > 0 && renderCodeExecResult(`${idx}`, codeExecResult)}
                 {loading && (
                     <Box sx={{float: "right", right: "20px"}}>
                         <CtCircularProgress size={18}/>
@@ -431,13 +577,14 @@ const HomeworkHelperActive = ({
                 code?: string,
                 codeLanguage?: string,
                 command?: CtExecCommand,
-                commandResult?: any
+                commandResult?: any,
+                codeExecResult: string
             };
         }[] = [];
 
         for (let i = 0; i < messages.length; ++i) {
             let m = messages[i];
-            if (m.message_type !== CtChatMessageType.CommandResponse) {
+            if (m.message_type !== CtChatMessageType.CommandResponse && m.message_type !== CtChatMessageType.CodeExecutionResult) {
                 processedMessages.push({
                     user: m.message_type === CtChatMessageType.User,
                     params: {
@@ -448,13 +595,18 @@ const HomeworkHelperActive = ({
                         codeLanguage: m.code_language !== "" ? m.code_language : undefined,
                         command: m.command.command !== "" ? m.command : undefined,
                         commandResult: undefined,
+                        codeExecResult: ""
                     }
                 })
                 continue
             }
 
-            if (i > 0) {
-                processedMessages[-1].params.commandResult = m.content
+            if (i > 0 && m.message_type === CtChatMessageType.CommandResponse) {
+                processedMessages[processedMessages.length-1].params.commandResult = m.content
+            }
+
+            if (i > 0 && m.message_type === CtChatMessageType.CodeExecutionResult) {
+                processedMessages[processedMessages.length-1].params.codeExecResult = m.content
             }
         }
 
@@ -474,6 +626,7 @@ const HomeworkHelperActive = ({
                 loading: true,
                 code: activeResponse && activeResponse.code.length > 0 ? activeResponse.code : undefined,
                 codeLanguage: activeResponse && activeResponse.codeLanguage.length > 0 ? activeResponse.codeLanguage : undefined,
+                codeExecResult: ""
             })
         )
     }
@@ -556,6 +709,8 @@ function HomeworkHelper() {
 
     const authState = useAppSelector(selectAuthState);
 
+    const sendExecOutputToCT = React.useRef<boolean>(false)
+    const [ctRequestingExec, setCTRequestingExec] = useState<boolean>(false)
     const [connectButtonLoading, setConnectButtonLoading] = useState<boolean>(false)
     const [commandId, setCommandId] = useState("");
     const [executingCode, setExecutingCode] = useState<boolean>(false)
@@ -598,6 +753,13 @@ function HomeworkHelper() {
         setCodeLanguage("")
         setEditorOpen(false)
         setActiveResponse(null)
+        setTerminalVisible(false)
+        setOutput(null)
+        setCTRequestingExec(false)
+        setConnectButtonLoading(false)
+        setExecutingCode(false)
+        setCommandId("")
+        sendExecOutputToCT.current = false
         setSelectedChat(id)
     }, [id])
 
@@ -678,6 +840,16 @@ function HomeworkHelper() {
 
                 let res = msg.payload as CtGetHHChatMessagesResponse
                 setMessages(res.messages)
+
+                for (let i = res.messages.length; --i >= 0;) {
+                    if (res.messages[i].code !== "") {
+                        setCode(res.messages[i].code)
+                        setCodeLanguage(res.messages[i].code_language)
+                        setEditorOpen(true)
+                        break
+                    }
+                }
+
                 return true;
             })
     }, [selectedChat]);
@@ -711,7 +883,7 @@ function HomeworkHelper() {
             })
     }, [authState.authenticated]);
 
-    const sendUserMessage = async (chatId: string, userMessage: string, addMessage: boolean = true) => {
+    const sendUserMessage = async (chatId: string, userMessage: string, addMessage: boolean = true, codeExec: boolean = false) => {
         if (addMessage) {
             setMessages(prev => prev.concat({
                 _id: "",
@@ -719,10 +891,10 @@ function HomeworkHelper() {
                 assistant_id: "",
                 assistant_name: "",
                 user_id: "",
-                message_type: CtChatMessageType.User,
+                message_type: codeExec ? CtChatMessageType.CodeExecutionResult : CtChatMessageType.User,
                 content: userMessage,
-                code: code,
-                code_language: codeLanguage,
+                code: codeExec ? "" : code,
+                code_language: codeExec ? "" : codeLanguage,
                 created_at: new Date(),
                 message_number: 0,
                 command: {command: "", lang: ""},
@@ -741,6 +913,7 @@ function HomeworkHelper() {
                     user_message: userMessage,
                     code: code,
                     code_language: codeLanguage,
+                    code_exec_result: codeExec
                 }
             } satisfies CtMessage<CtHhUserMessage>,
             (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtHHAssistantMessage>): boolean => {
@@ -755,6 +928,10 @@ function HomeworkHelper() {
                     setCode(res.complete_code)
                     setCodeLanguage(res.code_language)
                     setEditorOpen(true)
+
+                    if (res.done) {
+                        setCTRequestingExec(true)
+                    }
                 }
 
                 if (res.done) {
@@ -882,22 +1059,6 @@ function HomeworkHelper() {
         )
     }
 
-    const mapToLang = (l: string) => {
-        l = l.trim()
-        for (let i = 0; i < languages.length; i++) {
-            if (l.toLowerCase() == languages[i].name.toLowerCase()) {
-                return languages[i].name.toLowerCase()
-            }
-
-            for (let j = 0; j < languages[i].extensions.length; j++) {
-                if (l.toLowerCase() === languages[i].extensions[j]) {
-                    return languages[i].name.toLowerCase()
-                }
-            }
-        }
-        return l
-    }
-
     const createWorkspace = async (chatId: string): Promise<boolean> => {
         try {
             const response = await call(
@@ -969,6 +1130,23 @@ function HomeworkHelper() {
         globalWs.sendWebsocketMessage(message, null);
     }
 
+    const handleCtExecResult = React.useCallback((result: string) => {
+        console.log("handleCtExecResult", sendExecOutputToCT, selectedChat);
+        if (sendExecOutputToCT.current) {
+            console.log("setSendExecOutputToCT");
+            sendExecOutputToCT.current = false
+            if (selectedChat !== null) {
+                console.log("sending output to backend");
+                sendUserMessage(
+                    selectedChat,
+                    result,
+                    true,
+                    true
+                )
+            }
+        }
+    }, [selectedChat]);
+
     const sendExecRequest = (retryCount: number = 0) => {
         const message = {
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
@@ -976,7 +1154,7 @@ function HomeworkHelper() {
             payload: {
                 code_source_id: selectedChat,
                 payload: {
-                    lang: 5,
+                    lang: mapToLangId(codeLanguage),
                     code: code
                 }
             }
@@ -1066,6 +1244,11 @@ function HomeworkHelper() {
 
                 setExecutingCode(!done)
 
+                if (done) {
+                    setCTRequestingExec(false)
+                    handleCtExecResult(mergedRows.map(row => row.content).join("\n"))
+                }
+
                 // we only return true here if we are done since true removes this callback
                 return done
             }
@@ -1101,6 +1284,83 @@ function HomeworkHelper() {
 
         sendExecRequest();
     };
+
+    const renderCtExecRequestPopup = () => {
+        if (!ctRequestingExec) {
+            return null
+        }
+
+        return (
+            <CodeTeacherPopupPaper
+                sx={{
+                    position: "absolute",
+                    zIndex: 4,
+                    bottom: "20px",
+                    left: "20px",
+                    p: 2
+                }}
+            >
+                <Box
+                    display={'inline-flex'}
+                >
+                    <CodeTeacherChatIcon
+                        style={{
+                            marginRight: '10px',
+                            width: '35px',
+                            height: '35px',
+                        }}
+                    />
+                    <Typography variant={"h6"} sx={{paddingTop: "8px"}}>
+                        Code Teacher
+                    </Typography>
+                </Box>
+                {executingCode ? (
+                    <>
+                        <Box
+                            display={'inline-flex'}
+                            justifyContent={'space-between'}
+                            sx={{width: "100%"}}
+                        >
+                            <Typography variant={"body2"}>
+                                CT is running the code
+                            </Typography>
+                            <CtCircularProgress size={18}/>
+                        </Box>
+                    </>
+                ): (
+                    <>
+                        <Typography variant={"body2"}>
+                            CT would like to run this code.
+                        </Typography>
+                        <Box
+                            display={'inline-flex'}
+                            justifyContent={'space-between'}
+                            sx={{width: "100%", paddingTop: "8px"}}
+                        >
+                            <LoadingButton
+                                color={"success"}
+                                variant={"outlined"}
+                                loading={executingCode}
+                                onClick={() => {
+                                    sendExecOutputToCT.current = true
+                                    executeCode()
+                                }}
+                            >
+                                Permit
+                            </LoadingButton>
+                            <Button
+                                color={"error"}
+                                variant={"outlined"}
+                                onClick={() => setCTRequestingExec(false)}
+                            >
+                                Deny
+                            </Button>
+                        </Box>
+                    </>
+                )}
+            </CodeTeacherPopupPaper>
+        )
+    }
 
     const renderEditor = () => {
         if (!editorOpen) {
@@ -1268,29 +1528,34 @@ function HomeworkHelper() {
                             </Tooltip>
                         </Box>
                     </Box>
-                    <Editor
-                        // ref={editorRef}
-                        editorStyles={{
-                            fontSize: "0.7rem",
-                            borderRadius: "10px",
-                            outline: "none !important"
-                        }}
-                        parentStyles={{
-                            height: "100%",
-                            borderRadius: "10px",
-                        }}
-                        language={codeLanguage}
-                        code={code}
-                        theme={mode}
-                        readonly={false}
-                        onChange={(val, view) => setCode(val)}
-                        wrapperStyles={{
-                            width: '100%',
-                            height: terminalVisible ? 'calc(100vh - 364px)' : 'calc(100vh - 138px)',
-                            borderRadius: "10px",
-                            border: `1px solid ${theme.palette.primary.light}`
-                        }}
-                    />
+                    <Box
+                        sx={{position: "relative"}}
+                    >
+                        <Editor
+                            // ref={editorRef}
+                            editorStyles={{
+                                fontSize: "0.7rem",
+                                borderRadius: "10px",
+                                outline: "none !important"
+                            }}
+                            parentStyles={{
+                                height: "100%",
+                                borderRadius: "10px",
+                            }}
+                            language={mapToLangMarkdown(codeLanguage)}
+                            code={code}
+                            theme={mode}
+                            readonly={false}
+                            onChange={(val, view) => setCode(val)}
+                            wrapperStyles={{
+                                width: '100%',
+                                height: terminalVisible ? 'calc(100vh - 364px)' : 'calc(100vh - 138px)',
+                                borderRadius: "10px",
+                                border: `1px solid ${theme.palette.primary.light}`
+                            }}
+                        />
+                        {renderCtExecRequestPopup()}
+                    </Box>
                     {terminalVisible && output && (
                         <ByteTerminal
                             output={output}

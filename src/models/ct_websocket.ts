@@ -41,7 +41,8 @@ export enum CtChatMessageType {
     User,
     Assistant,
     CommandRequest,
-    CommandResponse
+    CommandResponse,
+    CodeExecutionResult
 }
 
 export enum CtResponseCode {
@@ -266,6 +267,7 @@ export interface CtHhUserMessage {
     user_message: string;
     code: string;
     code_language: string;
+    code_exec_result: boolean;
 }
 
 export interface CtExecCommand {
