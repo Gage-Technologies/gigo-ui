@@ -129,6 +129,7 @@ const languages: LanguageOption[] = [
     {name: 'SASS', extensions: ['sass', 'scss'], languageId: 1},
     {name: 'Clojure', extensions: ['clj'], languageId: 21},
     {name: 'C#', extensions: ['cs'], languageId: 10},
+    {name: 'Shell', extensions: ['bash', 'sh'], languageId: 38}
 ];
 
 const mapToLang = (l: string) => {
@@ -759,6 +760,8 @@ function HomeworkHelper() {
         setConnectButtonLoading(false)
         setExecutingCode(false)
         setCommandId("")
+        setWorkspaceId("")
+        setWorkspaceState(null)
         sendExecOutputToCT.current = false
         setSelectedChat(id)
     }, [id])
