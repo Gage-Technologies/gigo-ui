@@ -46,6 +46,11 @@ import JourneyPortals from "../components/Icons/joruneyMainAssets/JourneyPortals
 import AddIcon from '@mui/icons-material/Add';
 import {initialCreateProjectStateUpdate} from "../reducers/createProject/createProject";
 import {initialJourneyDetourStateUpdate, updateJourneyDetourState} from "../reducers/journeyDetour/journeyDetour";
+import {ThreeDots} from "react-loading-icons";
+import Carousel from "../components/Carousel2";
+import LazyLoad from "react-lazyload";
+import ProjectCard from "../components/ProjectCard";
+import SheenPlaceholder from "../components/Loading/SheenPlaceholder";
 
 function JourneyMain() {
     const sidebarOpen = useAppSelector(selectAppWrapperSidebarOpen);
@@ -210,6 +215,8 @@ function JourneyMain() {
         width: window.innerWidth,
         height: window.innerHeight,
     });
+    const [popupLoading, setPopupLoading] = useState(false)
+    const [detours, setDetours] = useState([])
 
     const [taskId, setTaskId] = useState("")
 
@@ -235,9 +242,9 @@ function JourneyMain() {
     const dispatch = useAppDispatch();
 
     //@ts-ignore
-    const handleClickDetour = (event, id) => {
-        console.log("event is: ", event)
-        console.log("id is: ", id)
+    const handleClickDetour = async(event, id) => {
+        setPopupLoading(true)
+        setAnchorElDetour(event.currentTarget);
         let updateState = Object.assign({}, initialJourneyDetourStateUpdate);
         // update file in state update
         updateState.id = id;
@@ -245,7 +252,22 @@ function JourneyMain() {
         updateJourneyDetourState(updateState)
         dispatch(updateJourneyDetourState(updateState))
 
-        setAnchorElDetour(event.currentTarget);
+        let res = await call(
+            "/api/journey/getUnitsPreview",
+            "POST",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {},
+            null,
+            config.rootPath
+        )
+
+        if (res !== undefined && res["success"] !== undefined && res["success"] === true){
+            setDetours(res["units"])
+        }
+        setPopupLoading(false)
     };
 
     const [taskDescription, setTaskDescription] = useState("")
@@ -406,7 +428,7 @@ function JourneyMain() {
                     </Typography>
                 </Box>
                 <Box sx={{display: "flex", justifyContent: "center", alignItems: "center"}}>
-                    <Button>
+                    <Button href={"/journey/detours"}>
                         See All
                     </Button>
                 </Box>
@@ -415,13 +437,29 @@ function JourneyMain() {
                     justifyContent: "center",
                     alignItems: "center",
                     flexDirection: "column",
-                    pt: 4
+                    pt: 4,
                 }}>
-                    {/*{items.map((item) => ( // Only show first 4 or all based on showAll*/}
-                    {/*    <Grid item xs={12} key={item} sx={{pb: 2}}>*/}
-                    {/*        <DetourCard title={`Title ${item}`}/>*/}
-                    {/*    </Grid>*/}
-                    {/*))}*/}
+                    <Carousel itemsShown={1} infiniteLoop={true}
+                              itemsToSlide={1}>
+                        {
+                            detours && detours.length > 0 ?
+                                detours.map((unit, index) => {
+                                    return (
+                                        <div style={{paddingBottom: "20px", paddingLeft: "5vw"}}>
+                                            <LazyLoad once scroll unmountIfInvisible>
+                                                <Grid item xs={6}>
+                                                    <DetourCard data={unit} width={"20vw"}/>
+                                                </Grid>
+                                            </LazyLoad>
+                                        </div>
+                                    )
+                                }) : (
+                                    <>
+                                        <ThreeDots/>
+                                    </>
+                                )
+                        }
+                    </Carousel>
                 </Box>
             </>
 
@@ -502,7 +540,7 @@ function JourneyMain() {
                         }
                     }}
                 >
-                    <Box sx={{width: "30vw", height: '50vh'}}>
+                    <Box sx={{width: "30vw", height: '40vh'}}>
                         <Box sx={{display: "flex", justifyContent: "right", alignItems: "right"}}>
                             <Button onClick={handleDetourClose}>
                                 <CloseIcon/>

@@ -13,11 +13,12 @@ function DetourCard(props: any) {
     const closePopup = () => {
         setOpenPopup(false);
     }
+
     return (
         <>
             <Card sx={{
                 display: 'flex',
-                width: '23vw',
+                width: props.width !== undefined && props.width !== null ? props.width : '23vw',
                 height: '14vh',
                 overflow: 'hidden',
                 transition: 'transform 0.3s ease-in-out',
@@ -28,7 +29,15 @@ function DetourCard(props: any) {
             }} onClick={() => setOpenPopup(true)}>
                 <CardMedia
                     component="img"
-                    sx={{
+                    sx={props.width !== undefined && props.width !== null ? {
+                        width: '7vw',
+                        height: '4.5vw',
+                        objectFit: 'cover',
+                        alignSelf: 'center',
+                        clipPath: 'polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%)',
+                        marginLeft: '1vw',
+                        marginRight: ".3vw"
+                    } : {
                         width: '3.5vw',
                         height: '4vw',
                         objectFit: 'cover',
@@ -53,10 +62,16 @@ function DetourCard(props: any) {
                 {/*</Box>*/}
                 <Box sx={{ display: 'flex', flexDirection: 'column', width: '450px' }}>
                     <CardContent>
-                        <Typography component="div" variant="body1" sx={{ fontSize: '3vh', paddingBottom: "10px" }}>
+                        <Typography component="div" variant="body1" sx={props.width !== undefined && props.width !== null ? {fontSize: '2vh', paddingBottom: "10px"} : { fontSize: '3vh', paddingBottom: "10px" }}>
                             {props.data.name}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{
+                        <Typography variant="body2" color="text.secondary" sx={props.width !== undefined && props.width !== null ? {
+                            fontSize: '1.5vh',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            maxWidth: '15vw', // Adjust based on the actual width of the card minus image width and any padding/margins
+                        } : {
                             fontSize: '1.5vh',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',

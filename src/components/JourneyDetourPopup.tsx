@@ -8,7 +8,9 @@ import proBackground from "../img/popu-up-backgraound-plain.svg";
 import JourneyMap from "./JourneysMap";
 import {AwesomeButton} from "react-awesome-button";
 import {useAppSelector} from "../app/hooks";
-import {selectAuthStateId} from "../reducers/auth/auth"; // Adjust import based on actual location
+import {selectAuthStateId} from "../reducers/auth/auth";
+import {selectJourneysId} from "../reducers/journeyDetour/journeyDetour"; // Adjust import based on actual location
+import swal from "sweetalert";
 
 interface JourneyDetourPopupProps {
     open: boolean;
@@ -31,6 +33,47 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({ open, onClose, 
     const toggleDescription = () => setShowFullDescription(!showFullDescription);
     //@ts-ignore
     const displayedDescription = showFullDescription || !isLongDescription ? unit.description : unit.description.substring(0, 100) + '...';
+
+    const reduxIdState = useAppSelector(selectJourneysId);
+
+    useEffect(() => {
+        console.log("id is:", reduxIdState)
+    }, [])
+
+    const userId = useAppSelector(selectAuthStateId);
+
+    function redirectToMain(newPath: string) {
+        // Get the current URL's protocol, hostname, and port
+        const baseUrl = `${window.location.protocol}//${window.location.host}`;
+
+        // Construct the new URL
+        const newUrl = `${baseUrl}${newPath}`;
+
+        // Redirect to the new URL
+        window.location.href = newUrl;
+    }
+
+
+    const TakeDetour = async() => {
+        let detour = await call(
+            "/api/journey/createDetour",
+            "post",
+            null,
+            null,
+            null,
+            //@ts-ignore
+            { detour_unit_id: unit._id, user_id: userId, task_id: reduxIdState, },
+            null,
+            config.rootPath
+        )
+
+        if (detour !== undefined && detour["success"] !== undefined && detour["success"] === true){
+            swal("Detour added")
+            redirectToMain("/journey/main")
+        } else {
+            swal("There was an issue adding this detour")
+        }
+    }
 
 
 
@@ -166,7 +209,7 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({ open, onClose, 
                         </Box>
                     </Grid>
                     <div style={{width: "100%", display: "flex", justifyContent: "center"}}>
-                        <AwesomeButton style={{width: "30%", top: "9vh", "--button-default-border-radius": "20px" }}>Take Detour</AwesomeButton>
+                        <AwesomeButton style={{width: "30%", top: "9vh", "--button-default-border-radius": "20px" }} onPress={TakeDetour}>Take Detour</AwesomeButton>
                     </div>
                 </Grid>
 

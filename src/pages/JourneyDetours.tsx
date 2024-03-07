@@ -165,7 +165,6 @@ function JourneyDetours() {
 
     useEffect(() => {
         getUnits()
-        console.log("id is:", reduxIdState)
     }, [searchText])
 
     const [showAllPython, setShowAllPython] = useState(false); // State to toggle visibility

@@ -418,7 +418,7 @@ function JourneyMap({ unitId }: JourneyMapProps) {
                     <div
                         key={item._id}
                         style={{
-                            marginLeft: '4vw',
+                            marginLeft: '3vw',
                             transform: `translateX(${index % 2 === 0 ? '-75px' : '75px'})`,
                             position: 'relative', // To ensure it's above the SVG
                             zIndex: 1, // Bring SpeedDials above the SVG paths
