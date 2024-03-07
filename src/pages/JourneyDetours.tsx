@@ -18,6 +18,9 @@ import DetourCard from "../components/Icons/joruneyMainAssets/DetourCard";
 import Carousel from "../components/Carousel2";
 import call from "../services/api-call";
 import config from "../config";
+import {useAppSelector} from "../app/hooks";
+import {selectJourneysId} from "../reducers/journeyDetour/journeyDetour";
+import {JourneyDetourState} from "../reducers/journeyDetour/journeyDetour";
 
 function JourneyDetours() {
     let userPref = localStorage.getItem('theme');
@@ -30,6 +33,7 @@ function JourneyDetours() {
     const [unitsPython, setUnitsPython] = React.useState([])
     const [unitsGo, setUnitsGo] = React.useState([])
     const [searchText, setSearchText] = React.useState("")
+    const reduxIdState = useAppSelector(selectJourneysId);
 
     const handleScroll = () => {
         const top = window.scrollY;
@@ -161,6 +165,7 @@ function JourneyDetours() {
 
     useEffect(() => {
         getUnits()
+        console.log("id is:", reduxIdState)
     }, [searchText])
 
     const [showAllPython, setShowAllPython] = useState(false); // State to toggle visibility

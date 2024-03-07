@@ -14,6 +14,7 @@ import devSpaceCacheReducer from '../reducers/devSpace/usageCache';
 import bytesReducer from '../reducers/bytes/bytes'
 import journeyCreateUnitReducer from '../reducers/journeyCreate/journeyCreateUnit'
 import journeyCreateProjectReducer from '../reducers/journeyCreate/journeyCreateProject'
+import journeyDetourReducer from "../reducers/journeyDetour/journeyDetour"
 
 const persistConfig = {
     key: 'root',
@@ -39,7 +40,8 @@ const reducers = combineReducers({
     devSpaceCache: devSpaceCacheReducer,
     bytes: bytesReducer,
     journeyCreateUnit: journeyCreateUnitReducer,
-    journeyCreateProject: journeyCreateProjectReducer
+    journeyCreateProject: journeyCreateProjectReducer,
+    journeyDetour: journeyDetourReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, reducers)

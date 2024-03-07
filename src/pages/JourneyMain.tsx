@@ -16,7 +16,7 @@ import {
     ThemeProvider,
     Typography
 } from "@mui/material";
-import {useAppSelector} from "../app/hooks";
+import {useAppDispatch, useAppSelector} from "../app/hooks";
 import {selectAppWrapperChatOpen, selectAppWrapperSidebarOpen} from "../reducers/appWrapper/appWrapper";
 import 'react-awesome-button/dist/styles.css';
 import '../img/journey/button.css'
@@ -36,7 +36,7 @@ import completed from "../components/Icons/joruneyMainAssets/journey-completed-n
 import {string} from "prop-types";
 import call from "../services/api-call";
 import config from "../config";
-import {selectAuthStateId} from "../reducers/auth/auth";
+import {initialAuthStateUpdate, selectAuthStateId, updateAuthState} from "../reducers/auth/auth";
 import journeySide1 from "../components/Icons/joruneyMainAssets/joureny-side-1.svg";
 import Lottie from "react-lottie";
 import Particles from "react-tsparticles";
@@ -44,6 +44,8 @@ import { loadStarsPreset } from "tsparticles-preset-stars";
 import { Engine } from 'tsparticles-engine';
 import JourneyPortals from "../components/Icons/joruneyMainAssets/JourneyPortals";
 import AddIcon from '@mui/icons-material/Add';
+import {initialCreateProjectStateUpdate} from "../reducers/createProject/createProject";
+import {initialJourneyDetourStateUpdate, updateJourneyDetourState} from "../reducers/journeyDetour/journeyDetour";
 
 function JourneyMain() {
     const sidebarOpen = useAppSelector(selectAppWrapperSidebarOpen);
@@ -230,8 +232,19 @@ function JourneyMain() {
     const handleMouseEnter = (id) => () => setOpenSpeedDial(id);
     const handleMouseLeave = () => setOpenSpeedDial(null);
 
+    const dispatch = useAppDispatch();
+
     //@ts-ignore
-    const handleClickDetour = (event) => {
+    const handleClickDetour = (event, id) => {
+        console.log("event is: ", event)
+        console.log("id is: ", id)
+        let updateState = Object.assign({}, initialJourneyDetourStateUpdate);
+        // update file in state update
+        updateState.id = id;
+        // execute state update
+        updateJourneyDetourState(updateState)
+        dispatch(updateJourneyDetourState(updateState))
+
         setAnchorElDetour(event.currentTarget);
     };
 
@@ -568,7 +581,7 @@ function JourneyMain() {
                         icon={<ForkRightIcon/>}
                     //@ts-ignore
                     tooltipTitle="Take a Detour"
-                    onClick={handleClickDetour}
+                    onClick={e => handleClickDetour(e, item._id)}
                     sx={{
                         backgroundColor: "#52ad94",
                         color: "white"
