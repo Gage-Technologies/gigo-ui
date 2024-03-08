@@ -72,7 +72,7 @@ import {
     updateAuthState,
 } from "../reducers/auth/auth";
 import { isChrome } from "react-device-detect";
-import { LocalFireDepartment } from "@mui/icons-material";
+import {LocalFireDepartment, Quiz} from "@mui/icons-material";
 import { Icon as IconifyIcon } from "@iconify/react";
 import { persistStore } from "redux-persist";
 import { store } from "../app/store"
@@ -1900,6 +1900,22 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                             </Typography>
                         </ListItemButton>
                     </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton color={"primary"} sx={{
+                            borderRadius: 2,
+                        }} href={"/homework"}>
+                            <ListItemIcon>
+                                <Quiz style={{ color: theme.palette.text.primary }} />
+                            </ListItemIcon>
+                            <Typography
+                                component={"div"}
+                                variant={"body1"}
+                                sx={{ fontSize: "0.8em" }}
+                            >
+                                Homework
+                            </Typography>
+                        </ListItemButton>
+                    </ListItem>
                 </List>
                 <DrawerFooter>
                     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -2028,6 +2044,22 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 sx={{ fontSize: "0.8em" }}
                             >
                                 Articles
+                            </Typography>
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton color={"primary"} sx={{
+                            borderRadius: 2,
+                        }} href={"/homework"}>
+                            <ListItemIcon>
+                                <Quiz style={{ color: theme.palette.text.primary }} />
+                            </ListItemIcon>
+                            <Typography
+                                component={"div"}
+                                variant={"body1"}
+                                sx={{ fontSize: "0.8em" }}
+                            >
+                                Homework
                             </Typography>
                         </ListItemButton>
                     </ListItem>

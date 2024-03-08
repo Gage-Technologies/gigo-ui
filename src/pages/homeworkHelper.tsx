@@ -310,14 +310,23 @@ const EditorTab = styled(Tab)(({theme}) => ({
 }));
 
 interface InitProps {
+    id: string | undefined;
     theme: Theme;
     toggleEditor: () => void;
     submit: (content: string) => void;
 }
 
-const HomeworkHelperInit = ({theme, toggleEditor, submit}: InitProps) => {
+const HomeworkHelperInit = ({id, theme, toggleEditor, submit}: InitProps) => {
     const [active, setActive] = React.useState(false);
     const [text, setText] = React.useState("");
+
+    useEffect(() => {
+        let unAuthReq = localStorage.getItem('gigo:unauth:hh');
+        if (id === undefined && unAuthReq !== null) {
+            setText(unAuthReq)
+            return
+        }
+    }, [id]);
 
     return (
         <InitStyledContainer maxWidth={active || text.length > 0 ? "md" : "sm"}>
@@ -893,7 +902,7 @@ function HomeworkHelper() {
         setWorkspaceId("")
         setWorkspaceState(null)
         sendExecOutputToCT.current = false
-        setSelectedChat(id ? id : "")
+        setSelectedChat(id ? id : null)
     }, [id])
 
     useEffect(() => {
@@ -952,7 +961,7 @@ function HomeworkHelper() {
     }, [workspaceId])
 
     useEffect(() => {
-        if (selectedChat === null || selectedChat === "-1" || newChat) {
+        if (selectedChat === null || selectedChat === "-1" || selectedChat === "" || newChat) {
             return
         }
 
@@ -972,6 +981,7 @@ function HomeworkHelper() {
                 }
 
                 let res = msg.payload as CtGetHHChatMessagesResponse
+
                 setMessages(res.messages)
 
                 let files: CtCodeFile[] = [];
@@ -1071,7 +1081,7 @@ function HomeworkHelper() {
                 let files: CtCodeFile[] = [];
                 if (res.files !== null && res.files?.length > 0) {
                     files = code
-                    
+
                     // update the files
                     for (let i = 0; i < res.files.length; ++i) {
                         // check if the file name already exists
@@ -1209,6 +1219,7 @@ function HomeworkHelper() {
         }
         return (
             <HomeworkHelperInit
+                id={id}
                 theme={theme}
                 toggleEditor={() => {
                     if (code.length === 0 && !editorOpen) {
@@ -1218,6 +1229,14 @@ function HomeworkHelper() {
                     setEditorOpen(!editorOpen)
                 }}
                 submit={(content: string) => {
+                    if (!authState.authenticated) {
+                        localStorage.setItem("gigo:unauth:hh", content)
+                        navigate("/signup?forward=" + encodeURIComponent(window.location.pathname))
+                        return
+                    }
+                    if (localStorage.getItem("gigo:unauth:hh") !== null) {
+                        localStorage.removeItem("gigo:unauth:hh")
+                    }
                     startNewChat(content)
                 }}
             />
@@ -1315,19 +1334,30 @@ function HomeworkHelper() {
             return
         }
 
+        let payloadContent: any = {
+            lang: lang.languageId,
+            exec_files: code.map(c => ({
+                file_name: c.file_name,
+                code: c.code,
+                execute: c.file_name === activeFile
+            }))
+        };
+
+        // if the active file is a bash file then we use the single file exec
+        if (lang.languageId === 38) {
+            let file = code.find((f) => f.file_name == activeFile)
+            payloadContent = {
+                lang: lang.languageId,
+                code: file ? file.code : "",
+            }
+        }
+
         const message = {
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
             type: WsMessageType.AgentExecRequest,
             payload: {
                 code_source_id: selectedChat,
-                payload: {
-                    lang: lang.languageId,
-                    exec_files: code.map(c => ({
-                        file_name: c.file_name,
-                        code: c.code,
-                        execute: c.file_name === activeFile
-                    }))
-                }
+                payload: payloadContent
             }
         };
 
@@ -1694,8 +1724,6 @@ function HomeworkHelper() {
             }
         }
         let lang = mapFilePathToLangOption(fileName)
-
-        console.log("editor: ", lang)
 
         return (
             <Slide direction="left" in={editorOpen} mountOnEnter unmountOnExit>
