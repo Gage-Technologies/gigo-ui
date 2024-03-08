@@ -91,6 +91,9 @@ import CodeTeacherChatIcon from "../components/CodeTeacher/CodeTeacherChatIcon";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CloseIcon from "@material-ui/icons/Close";
 import Carousel from "../components/Carousel2";
+import GoProDisplay from "../components/GoProDisplay";
+import proGorillaCrown from "../img/pro-pop-up-icon-plain.svg";
+import {selectAppWrapperChatOpen, selectAppWrapperSidebarOpen} from "../reducers/appWrapper/appWrapper";
 
 interface MergedOutputRow {
     error: boolean;
@@ -319,6 +322,11 @@ interface InitProps {
 const HomeworkHelperInit = ({id, theme, toggleEditor, submit}: InitProps) => {
     const [active, setActive] = React.useState(false);
     const [text, setText] = React.useState("");
+    const [goProPopup, setGoProPopup] = useState(false);
+
+    const authState = useAppSelector(selectAuthState);
+    const leftOpen = useAppSelector(selectAppWrapperSidebarOpen)
+    const rightOpen = useAppSelector(selectAppWrapperChatOpen)
 
     useEffect(() => {
         let unAuthReq = localStorage.getItem('gigo:unauth:hh');
@@ -328,60 +336,129 @@ const HomeworkHelperInit = ({id, theme, toggleEditor, submit}: InitProps) => {
         }
     }, [id]);
 
+    let plugPosition = 260;
+    if (leftOpen) {
+        plugPosition += 100
+    }
+    if (rightOpen) {
+        plugPosition += 150
+    }
+
     return (
-        <InitStyledContainer maxWidth={active || text.length > 0 ? "md" : "sm"}>
-            <Box sx={{textAlign: 'center'}}>
-                <Typography variant="h4" component="h1" gutterBottom>
-                    GIGO Homework Helper
-                </Typography>
-            </Box>
-            <SearchContainer elevation={6}>
-                <StyledTextField
-                    fullWidth
-                    multiline
-                    maxRows={16}
-                    placeholder="Enter your homework question..."
-                    onFocus={() => setActive(true)}
-                    onChange={(e) => setText(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            submit(text)
-                            setText("")
-                        }
-                        if (e.key === 'Tab') {
-                            e.preventDefault();
-                            setText(text + '    ');
-                        }
-                    }}
-                    value={text}
-                    InputProps={{
-                        sx: {
-                            padding: theme.spacing(3),
-                            fontSize: text.length > 0 ? "medium" : undefined,
-                            borderRadius: "20px"
-                        },
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <Tooltip title={"Add Code"}>
-                                    <Button
-                                        variant="outlined"
-                                        color="primary"
-                                        sx={{borderRadius: "50%", minWidth: "0px", p: 1}}
-                                        onClick={(e) => {
-                                            toggleEditor()
-                                        }}
-                                    >
-                                        <CodeIcon/>
-                                    </Button>
-                                </Tooltip>
-                            </InputAdornment>
-                        ),
-                        'aria-label': 'ask',
-                    }}
-                />
-            </SearchContainer>
-        </InitStyledContainer>
+        <>
+            <InitStyledContainer maxWidth={active || text.length > 0 ? "md" : "sm"}>
+                <Box sx={{textAlign: 'center'}}>
+                    <Typography variant="h4" component="h1" gutterBottom>
+                        GIGO Homework Helper
+                    </Typography>
+                </Box>
+                <SearchContainer elevation={6}>
+                    <StyledTextField
+                        fullWidth
+                        multiline
+                        maxRows={16}
+                        placeholder="Enter your homework question..."
+                        onFocus={() => setActive(true)}
+                        onChange={(e) => setText(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                submit(text)
+                                setText("")
+                            }
+                            if (e.key === 'Tab') {
+                                e.preventDefault();
+                                setText(text + '    ');
+                            }
+                        }}
+                        value={text}
+                        InputProps={{
+                            sx: {
+                                padding: theme.spacing(3),
+                                fontSize: text.length > 0 ? "medium" : undefined,
+                                borderRadius: "20px"
+                            },
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <Tooltip title={"Add Code"}>
+                                        <Button
+                                            variant="outlined"
+                                            color="primary"
+                                            sx={{borderRadius: "50%", minWidth: "0px", p: 1}}
+                                            onClick={(e) => {
+                                                toggleEditor()
+                                            }}
+                                        >
+                                            <CodeIcon/>
+                                        </Button>
+                                    </Tooltip>
+                                </InputAdornment>
+                            ),
+                            'aria-label': 'ask',
+                        }}
+                    />
+                </SearchContainer>
+            </InitStyledContainer>
+            {authState.authenticated && authState.role === 0 && (
+                <Box sx={{
+                    position: "relative",
+                    width: "520px",
+                    backgroundColor: theme.palette.background.default,
+                    borderRadius: "10px",
+                    boxShadow: "0 4px 8px rgba(0,0,0,0.2), 0 6px 20px rgba(0,0,0,0.19)",
+                    padding: "10px",
+                    display: "flex",
+                    flexDirection: "column", // Stack items vertically
+                    alignItems: "flex-start", // Align items to the left
+                    justifyContent: "space-between", // Even spacing
+                    height: "auto",
+                    border: `1px solid ${theme.palette.primary.main}`,
+                    bottom: "165px",
+                    left: `calc(50vw - ${plugPosition}px)`
+                }} id={"pro-banner"}>
+                    <Box sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-start", // Left align the title and subtitle
+                        width: "calc(100% - 120px)", // Adjust width to prevent overlap with image, assuming image width + some padding
+                    }}>
+                        <h2 style={{margin: "0 0 4px 0", textAlign: "left", fontSize: "18px"}}>Want better help on your
+                            homework?</h2>
+                        <p style={{
+                            textAlign: "left",
+                            margin: "0",
+                            fontSize: "12px",
+                            maxWidth: "100%", // Prevents subtitle from overlapping with the image
+                        }}>
+                            Go Pro to get smarter answers to your homework, evade AI detection tools, and access
+                            advanced
+                            features.
+                        </p>
+                    </Box>
+                    <Box sx={{
+                        width: "100%", // Full width for centering the button
+                        display: "flex",
+                        justifyContent: "center", // Center the button
+                        marginTop: "8px", // Add space above the button
+                    }}>
+                        <Button style={{
+                            padding: "8px 16px",
+                            fontSize: "14px",
+                        }} variant={"outlined"} onClick={() => setGoProPopup(true)}>Go Pro</Button>
+                    </Box>
+                    <Box sx={{
+                        position: "absolute",
+                        top: "20px", // Adjust as needed
+                        right: "20px", // Ensure it's aligned to the right
+                        height: "80px", // Image size
+                        width: "80px", // Image size
+                    }}>
+                        <img src={proGorillaCrown} alt={"GIGO Pro"} style={{width: "100%", height: "auto"}}/>
+                    </Box>
+                </Box>
+            )}
+            <GoProDisplay open={goProPopup} onClose={() => setGoProPopup(false)}/>
+        </>
     );
 };
 
@@ -425,6 +502,10 @@ const HomeworkHelperActive = ({
 
     const scrollContainerRef = React.useRef<HTMLDivElement>(null);
     const targetScrollRef = React.useRef<HTMLDivElement>(null);
+
+    const [goProPopup, setGoProPopup] = useState(false);
+
+    const authState = useAppSelector(selectAuthState);
 
     const renderInlineCodeEditor = (id: string, code: CtCodeFile[]) => {
         let selectedFileIdx = code.findIndex((f) => `${id}:${f.file_name}` === selectedFile)
@@ -775,7 +856,7 @@ const HomeworkHelperActive = ({
                 display={"flex"}
                 flexDirection={"column"}
                 sx={{
-                    marginBottom: "100px",
+                    marginBottom: authState.authenticated && authState.role !== 1 ? "108px" : "100px",
                     overflowY: "auto",
                     pb: 1,
                     width: "100%"
@@ -786,55 +867,80 @@ const HomeworkHelperActive = ({
                 {renderActiveMessage()}
                 <div ref={targetScrollRef}/>
             </Box>
-            <StyledTextField
-                fullWidth
-                multiline
-                maxRows={16}
-                placeholder="Ask a follow up question..."
-                disabled={activeResponse !== undefined}
-                onChange={(e) => setText(e.target.value)}
-                onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        sendMessage(text);
-                        setText("")
-                    }
-                    if (e.key === 'Tab') {
-                        e.preventDefault();
-                        setText(text + '    ');
-                    }
-                }}
-                value={text}
+            <Box
+                display={"flex"}
+                flexDirection={"column"}
                 sx={{
                     position: "absolute",
                     bottom: 0,
-                    width: "calc(100% - 50px)"
+                    width: "calc(100% - 50px)",
                 }}
-                InputProps={{
-                    sx: {
-                        padding: theme.spacing(3),
-                        fontSize: text.length > 0 ? "medium" : undefined,
-                        borderRadius: "20px",
-                    },
-                    endAdornment: (
-                        <InputAdornment position="end">
-                            <Tooltip title={"Add Code"}>
-                                <Button
-                                    variant="outlined"
-                                    color="primary"
-                                    sx={{borderRadius: "50%", minWidth: "0px", p: 1}}
-                                    onClick={(e) => {
-                                        toggleEditor()
-                                    }}
-                                >
-                                    <CodeIcon/>
-                                </Button>
-                            </Tooltip>
-                        </InputAdornment>
-                    ),
-                    'aria-label': 'ask',
-                }}
-            />
+            >
+                {authState.authenticated && authState.role !== 1 && (
+                    <ButtonBase
+                        sx={{
+                            borderRadius: "8px",
+                        }}
+                        onClick={() => setGoProPopup(true)}
+                    >
+                        <Typography
+                            variant={"caption"}
+                        >
+                            Go Pro to get better answers and advanced features
+                        </Typography>
+                    </ButtonBase>
+                )}
+                <StyledTextField
+                    fullWidth
+                    multiline
+                    maxRows={16}
+                    placeholder="Ask a follow up question..."
+                    disabled={activeResponse !== undefined}
+                    onChange={(e) => setText(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            sendMessage(text);
+                            setText("")
+                        }
+                        if (e.key === 'Tab') {
+                            e.preventDefault();
+                            setText(text + '    ');
+                        }
+                    }}
+                    value={text}
+                    // sx={{
+                    //     position: "absolute",
+                    //     bottom: 0,
+                    //     width: "calc(100% - 50px)"
+                    // }}
+                    InputProps={{
+                        sx: {
+                            padding: theme.spacing(3),
+                            fontSize: text.length > 0 ? "medium" : undefined,
+                            borderRadius: "20px",
+                        },
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <Tooltip title={"Add Code"}>
+                                    <Button
+                                        variant="outlined"
+                                        color="primary"
+                                        sx={{borderRadius: "50%", minWidth: "0px", p: 1}}
+                                        onClick={(e) => {
+                                            toggleEditor()
+                                        }}
+                                    >
+                                        <CodeIcon/>
+                                    </Button>
+                                </Tooltip>
+                            </InputAdornment>
+                        ),
+                        'aria-label': 'ask',
+                    }}
+                />
+            </Box>
+            <GoProDisplay open={goProPopup} onClose={() => setGoProPopup(false)}/>
         </ActiveStyledContainer>
     )
 }
