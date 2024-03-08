@@ -886,7 +886,7 @@ const HomeworkHelperActive = ({
                         <Typography
                             variant={"caption"}
                         >
-                            Go Pro to get better answers and advanced features
+                            Go Pro to get better answers and evade AI detection tools.
                         </Typography>
                     </ButtonBase>
                 )}
