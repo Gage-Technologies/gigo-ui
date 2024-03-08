@@ -5,24 +5,26 @@ import {
     alpha,
     Box,
     Button,
+    ButtonBase,
+    Card,
     CircularProgress,
     Container,
     createTheme,
     CssBaseline,
     Dialog,
+    DialogActions,
     DialogContent,
     DialogTitle,
-    FormControl,
     Grid,
-    InputLabel,
+    IconButton,
     List,
     ListItemButton,
-    MenuItem,
     PaletteMode,
     Paper,
-    Select,
     SpeedDial,
     SpeedDialAction,
+    Tab,
+    Tabs,
     TextField,
     Theme,
     ThemeProvider,
@@ -46,6 +48,7 @@ import {CtCircularProgress} from "../components/CodeTeacher/CtCircularProgress";
 import {useGlobalCtWebSocket} from "../services/ct_websocket";
 import {
     CtChatMessageType,
+    CtCodeFile,
     CtExecCommand,
     CtGenericErrorPayload,
     CtGetHHChatMessagesRequest,
@@ -86,6 +89,8 @@ import LinkOffIcon from "@mui/icons-material/LinkOff";
 import LinkIcon from "@mui/icons-material/Link";
 import CodeTeacherChatIcon from "../components/CodeTeacher/CodeTeacherChatIcon";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import CloseIcon from "@material-ui/icons/Close";
+import Carousel from "../components/Carousel2";
 
 interface MergedOutputRow {
     error: boolean;
@@ -104,6 +109,7 @@ interface LanguageOption {
     name: string;
     extensions: string[];
     languageId: number;
+    execSupported: boolean;
 }
 
 interface InitialStatusMessage {
@@ -113,23 +119,23 @@ interface InitialStatusMessage {
 }
 
 const languages: LanguageOption[] = [
-    {name: 'Go', extensions: ['go'], languageId: 6},
-    {name: 'Python', extensions: ['py', 'pytho'], languageId: 5},
-    {name: 'C++', extensions: ['cpp', 'cc', 'cxx', 'hpp', 'c++'], languageId: 8},
-    {name: 'HTML', extensions: ['html', 'htm'], languageId: 27},
-    {name: 'Java', extensions: ['java'], languageId: 2},
-    {name: 'JavaScript', extensions: ['js'], languageId: 3},
-    {name: 'JSON', extensions: ['json'], languageId: 1},
-    {name: 'Markdown', extensions: ['md'], languageId: 1},
-    {name: 'PHP', extensions: ['php'], languageId: 13},
-    {name: 'Rust', extensions: ['rs'], languageId: 14},
-    {name: 'SQL', extensions: ['sql'], languageId: 34},
-    {name: 'XML', extensions: ['xml'], languageId: 1},
-    {name: 'LESS', extensions: ['less'], languageId: 1},
-    {name: 'SASS', extensions: ['sass', 'scss'], languageId: 1},
-    {name: 'Clojure', extensions: ['clj'], languageId: 21},
-    {name: 'C#', extensions: ['cs'], languageId: 10},
-    {name: 'Shell', extensions: ['bash', 'sh'], languageId: 38}
+    {name: 'Go', extensions: ['go'], languageId: 6, execSupported: true},
+    {name: 'Python', extensions: ['py', 'pytho', 'pyt'], languageId: 5, execSupported: true},
+    {name: 'C++', extensions: ['cpp', 'cc', 'cxx', 'hpp', 'c++', 'h'], languageId: 8, execSupported: true},
+    {name: 'HTML', extensions: ['html', 'htm'], languageId: 27, execSupported: false},
+    {name: 'Java', extensions: ['java'], languageId: 2, execSupported: true},
+    {name: 'JavaScript', extensions: ['js'], languageId: 3, execSupported: true},
+    {name: 'JSON', extensions: ['json'], languageId: 1, execSupported: false},
+    {name: 'Markdown', extensions: ['md'], languageId: 1, execSupported: false},
+    {name: 'PHP', extensions: ['php'], languageId: 13, execSupported: false},
+    {name: 'Rust', extensions: ['rs'], languageId: 14, execSupported: true},
+    {name: 'SQL', extensions: ['sql'], languageId: 34, execSupported: false},
+    {name: 'XML', extensions: ['xml'], languageId: 1, execSupported: false},
+    {name: 'LESS', extensions: ['less'], languageId: 1, execSupported: false},
+    {name: 'SASS', extensions: ['sass', 'scss'], languageId: 1, execSupported: false},
+    {name: 'Clojure', extensions: ['clj'], languageId: 21, execSupported: false},
+    {name: 'C#', extensions: ['cs'], languageId: 10, execSupported: true},
+    {name: 'Shell', extensions: ['bash', 'sh'], languageId: 38, execSupported: true}
 ];
 
 const mapToLang = (l: string) => {
@@ -179,6 +185,47 @@ const mapToLangMarkdown = (l: string) => {
     }
     return ""
 }
+
+const mapFilePathToLang = (l: string) => {
+    let parts = l.trim().split('.');
+    l = parts[parts.length - 1];
+    if (l === undefined) {
+        return ""
+    }
+    for (let i = 0; i < languages.length; i++) {
+        if (l.toLowerCase() == languages[i].name.toLowerCase()) {
+            return languages[i].extensions[0]
+        }
+
+        for (let j = 0; j < languages[i].extensions.length; j++) {
+            if (l.toLowerCase() === languages[i].extensions[j]) {
+                return languages[i].extensions[0]
+            }
+        }
+    }
+    return l
+}
+
+const mapFilePathToLangOption = (l: string): LanguageOption | undefined => {
+    let parts = l.trim().split('.');
+    l = parts[parts.length - 1];
+    if (l === undefined) {
+        return undefined
+    }
+    for (let i = 0; i < languages.length; i++) {
+        if (l.toLowerCase() == languages[i].name.toLowerCase()) {
+            return languages[i]
+        }
+
+        for (let j = 0; j < languages[i].extensions.length; j++) {
+            if (l.toLowerCase() === languages[i].extensions[j]) {
+                return languages[i]
+            }
+        }
+    }
+    return undefined
+}
+
 
 const InitStyledContainer = styled(Container)(({theme}) => ({
     display: 'flex',
@@ -231,6 +278,36 @@ const CodeTeacherPopupPaper = styled(Paper)`
         }
     }
 `;
+
+const EditorTabs = styled(Tabs)(({theme}) => ({
+    p: 0,
+    m: 0,
+    minHeight: 0,
+}));
+
+const EditorTab = styled(Tab)(({theme}) => ({
+    fontSize: '0.7rem !important',
+    padding: "2px 6px",
+    marginRight: "4px",
+    textTransform: 'none',
+    minHeight: 0,
+    minWidth: 0,
+    borderRadius: "8px",
+    color: alpha(theme.palette.text.primary, 0.6),
+    fontWeight: theme.typography.fontWeightMedium,
+
+    '&:hover': {
+        backgroundColor: alpha(grey[800], theme.palette.mode === "light" ? 0.1 : 0.25),
+        opacity: 1,
+    },
+    '&.Mui-selected': {
+        backgroundColor: alpha(grey[800], theme.palette.mode === "light" ? 0.1 : 0.25),
+        color: alpha(theme.palette.text.primary, 0.8),
+    },
+    '&.Mui-focusVisible': {
+        backgroundColor: '#d1eaff',
+    },
+}));
 
 interface InitProps {
     theme: Theme;
@@ -316,9 +393,9 @@ interface ActiveProps {
     theme: Theme;
     messages: Array<CtGetHHChatMessagesResponseMessage>;
     toggleEditor: (state?: boolean) => void;
-    setEditorCode: (code: string, lang: string | undefined) => void;
+    setEditorCode: (code: CtCodeFile[], activeFile: string) => void;
     sendMessage: (content: string) => void;
-    activeResponse?: { text: string, code: string, codeLanguage: string, command: CtExecCommand | null };
+    activeResponse?: { text: string, files: CtCodeFile[], command: CtExecCommand | null };
 }
 
 const HomeworkHelperActive = ({
@@ -335,11 +412,14 @@ const HomeworkHelperActive = ({
     const [scrolledToBottom, setScrolledToBottom] = useState("")
 
     const [expandedCodeBlock, setExpandedCodeBlock] = useState<string[]>([]);
+    const [selectedFile, setSelectedFile] = useState<string>("");
 
     const scrollContainerRef = React.useRef<HTMLDivElement>(null);
     const targetScrollRef = React.useRef<HTMLDivElement>(null);
 
-    const renderInlineCodeEditor = (id: string, code: string, codeLanguage: string) => {
+    const renderInlineCodeEditor = (id: string, code: CtCodeFile[]) => {
+        let selectedFileIdx = code.findIndex((f) => `${id}:${f.file_name}` === selectedFile)
+
         return (
             <Box sx={{width: "100%"}}>
                 <Button
@@ -364,17 +444,50 @@ const HomeworkHelperActive = ({
                             (<KeyboardArrowDownIcon fontSize={"small"}/>)
                     }
                 </Button>
-                {expandedCodeBlock.findIndex((x) => x === id) > -1 && (
+                {expandedCodeBlock.findIndex((x) => x === id) > -1 && selectedFileIdx == -1 && (
+                    <Box sx={{marginBottom: "10px", width: "100%"}}>
+                        <Carousel itemsShown={8} itemsToSlide={8} infiniteLoop={true}>
+                            {code.map(
+                                (c, index) => (
+                                    <ButtonBase
+                                        sx={{
+                                            borderRadius: "8px",
+                                        }}
+                                        onClick={() => setSelectedFile(`${id}:${c.file_name}`)}
+                                    >
+                                        <Card
+                                            key={`${id}:${c.file_name}`}
+                                            sx={{
+                                                maxWidth: "100px",
+                                                textOverflow: "elipses",
+                                                p: 1,
+                                                boxShadow: "none"
+                                            }}
+                                        >
+                                            <Typography variant={"h6"} sx={{textTransform: "none"}}>
+                                                {c.file_name}
+                                            </Typography>
+                                            <Typography variant={"caption"}>
+                                                {c.code.split("\n").length} lines
+                                            </Typography>
+                                        </Card>
+                                    </ButtonBase>
+                                )
+                            )}
+                        </Carousel>
+                    </Box>
+                )}
+                {expandedCodeBlock.findIndex((x) => x === id) > -1 && selectedFileIdx >= 0 && (
                     <Box sx={{marginBottom: "60px", width: "100%"}}>
                         <MarkdownRenderer
                             markdown={
                                 code ?
-                                    "```" + mapToLangMarkdown(codeLanguage) + "\n" +
-                                    code.split("\n").slice(
+                                    "```" + mapFilePathToLang(code[selectedFileIdx].file_name) + "\n" +
+                                    code[selectedFileIdx].code.split("\n").slice(
                                         0,
-                                        Math.min(25, code.split("\n").length)
+                                        Math.min(25, code[selectedFileIdx].code.split("\n").length)
                                     ).join("\n") +
-                                    (code.split("\n").length > 25 ? `\n${code.split("\n").length - 25} more lines ...` : "") +
+                                    (code[selectedFileIdx].code.split("\n").length > 25 ? `\n${code[selectedFileIdx].code.split("\n").length - 25} more lines ...` : "") +
                                     "\n```" : ""
                             }
                             style={{
@@ -382,21 +495,41 @@ const HomeworkHelperActive = ({
                                 width: "100%",
                             }}
                         />
-                        <Button
-                            variant={"outlined"}
-                            sx={{
-                                m: 1,
-                                fontSize: "0.7rem",
-                                float: "right"
-                            }}
-                            onClick={() => {
-                                setEditorCode(code, codeLanguage)
-                                toggleEditor(true)
-                            }}
+                        <Box
+                            display={"inline-flex"}
+                            sx={{width: "100%"}}
                         >
-                            Open In Editor
-                            <CodeIcon sx={{marginLeft: "8px"}} fontSize={"small"}/>
-                        </Button>
+                            <Button
+                                variant={"outlined"}
+                                color={"error"}
+                                sx={{
+                                    m: 1,
+                                    fontSize: "0.7rem",
+                                    float: "right"
+                                }}
+                                onClick={() => {
+                                    setSelectedFile("")
+                                }}
+                            >
+                                Close Preview
+                                <CloseIcon fontSize={"small"}/>
+                            </Button>
+                            <Button
+                                variant={"outlined"}
+                                sx={{
+                                    m: 1,
+                                    fontSize: "0.7rem",
+                                    float: "right"
+                                }}
+                                onClick={() => {
+                                    setEditorCode(code, code[selectedFileIdx].file_name)
+                                    toggleEditor(true)
+                                }}
+                            >
+                                Open In Editor
+                                <CodeIcon sx={{marginLeft: "8px"}} fontSize={"small"}/>
+                            </Button>
+                        </Box>
                     </Box>
                 )}
             </Box>
@@ -430,7 +563,7 @@ const HomeworkHelperActive = ({
                         }}
                     >
                         <AccordionSummary
-                            expandIcon={<ExpandMoreIcon />}
+                            expandIcon={<ExpandMoreIcon/>}
                             aria-controls="panel1a-content"
                             id={`exec-result-header-${_id}`}
                             sx={{
@@ -491,12 +624,11 @@ const HomeworkHelperActive = ({
     }
 
     const renderUserMessage = (
-        {idx, text, code, codeLanguage}:
+        {idx, text, files}:
             {
                 idx: number,
                 text: string,
-                code?: string,
-                codeLanguage?: string
+                files: CtCodeFile[]
             }
     ) => {
         return (
@@ -517,20 +649,19 @@ const HomeworkHelperActive = ({
                             width: "calc(100% - 10px)",
                         }}
                     />
-                    {code && renderInlineCodeEditor(`q:${idx}`, code, codeLanguage !== undefined ? codeLanguage : "")}
+                    {files.length > 0 && renderInlineCodeEditor(`q:${idx}`, files)}
                 </Box>
             </Box>
         )
     }
 
     const renderAssistantMessage = (
-        {idx, text, loading, code, codeLanguage, command, commandResult, codeExecResult}:
+        {idx, text, loading, files, command, commandResult, codeExecResult}:
             {
                 idx: number,
                 text: string,
                 loading: boolean,
-                code?: string,
-                codeLanguage?: string,
+                files: CtCodeFile[],
                 command?: CtExecCommand,
                 commandResult?: any,
                 codeExecResult: string
@@ -557,7 +688,7 @@ const HomeworkHelperActive = ({
                         />
                     </Box>
                 )}
-                {!loading && code && renderInlineCodeEditor(`q:${idx}`, code, codeLanguage !== undefined ? codeLanguage : "")}
+                {!loading && files.length > 0 && renderInlineCodeEditor(`q:${idx}`, files)}
                 {!loading && codeExecResult.length > 0 && renderCodeExecResult(`${idx}`, codeExecResult)}
                 {loading && (
                     <Box sx={{float: "right", right: "20px"}}>
@@ -575,8 +706,7 @@ const HomeworkHelperActive = ({
                 idx: number,
                 text: string,
                 loading: boolean,
-                code?: string,
-                codeLanguage?: string,
+                files: CtCodeFile[],
                 command?: CtExecCommand,
                 commandResult?: any,
                 codeExecResult: string
@@ -592,8 +722,7 @@ const HomeworkHelperActive = ({
                         idx: i,
                         text: m.content,
                         loading: false,
-                        code: m.code !== "" ? m.code : undefined,
-                        codeLanguage: m.code_language !== "" ? m.code_language : undefined,
+                        files: m.files,
                         command: m.command.command !== "" ? m.command : undefined,
                         commandResult: undefined,
                         codeExecResult: ""
@@ -603,11 +732,11 @@ const HomeworkHelperActive = ({
             }
 
             if (i > 0 && m.message_type === CtChatMessageType.CommandResponse) {
-                processedMessages[processedMessages.length-1].params.commandResult = m.content
+                processedMessages[processedMessages.length - 1].params.commandResult = m.content
             }
 
             if (i > 0 && m.message_type === CtChatMessageType.CodeExecutionResult) {
-                processedMessages[processedMessages.length-1].params.codeExecResult = m.content
+                processedMessages[processedMessages.length - 1].params.codeExecResult = m.content
             }
         }
 
@@ -625,8 +754,7 @@ const HomeworkHelperActive = ({
                 text: activeResponse ? activeResponse.text : "",
                 command: activeResponse && activeResponse.command !== null ? activeResponse.command : undefined,
                 loading: true,
-                code: activeResponse && activeResponse.code.length > 0 ? activeResponse.code : undefined,
-                codeLanguage: activeResponse && activeResponse.codeLanguage.length > 0 ? activeResponse.codeLanguage : undefined,
+                files: activeResponse ? activeResponse.files : [],
                 codeExecResult: ""
             })
         )
@@ -724,15 +852,17 @@ function HomeworkHelper() {
     const [editorOpen, setEditorOpen] = React.useState(false);
     const [activeResponse, setActiveResponse] = React.useState<{
         text: string,
-        code: string,
-        codeLanguage: string,
+        files: CtCodeFile[],
         command: CtExecCommand | null
     } | null>(null);
+    const [newFilePopup, setNewFilePopup] = React.useState(false);
+    const [newFileName, setNewFileName] = React.useState("");
+    const [deleteFileRequest, setDeleteFileRequest] = React.useState<string | null>(null);
     const [messages, setMessages] = React.useState<CtGetHHChatMessagesResponseMessage[]>([]);
     const [chats, setChats] = React.useState<CtGetHHChatsResponseChat[]>([]);
 
-    const [code, setCode] = React.useState("");
-    const [codeLanguage, setCodeLanguage] = React.useState("")
+    const [code, setCode] = React.useState<CtCodeFile[]>([]);
+    const [activeFile, setActiveFile] = React.useState("");
     const [langSelectActive, setLangSelectActive] = React.useState(false)
 
     const [terminalVisible, setTerminalVisible] = useState(false);
@@ -747,11 +877,11 @@ function HomeworkHelper() {
     let {id} = useParams()
 
     useEffect(() => {
-        if (!id || id === selectedChat)
+        if (id === "-1" || newChat)
             return
         setMessages([])
-        setCode("")
-        setCodeLanguage("")
+        setCode([])
+        setActiveFile("")
         setEditorOpen(false)
         setActiveResponse(null)
         setTerminalVisible(false)
@@ -763,7 +893,7 @@ function HomeworkHelper() {
         setWorkspaceId("")
         setWorkspaceState(null)
         sendExecOutputToCT.current = false
-        setSelectedChat(id)
+        setSelectedChat(id ? id : "")
     }, [id])
 
     useEffect(() => {
@@ -844,13 +974,26 @@ function HomeworkHelper() {
                 let res = msg.payload as CtGetHHChatMessagesResponse
                 setMessages(res.messages)
 
-                for (let i = res.messages.length; --i >= 0;) {
-                    if (res.messages[i].code !== "") {
-                        setCode(res.messages[i].code)
-                        setCodeLanguage(res.messages[i].code_language)
-                        setEditorOpen(true)
-                        break
+                let files: CtCodeFile[] = [];
+                for (let i = 0; i < res.messages.length; ++i) {
+                    if (res.messages[i].files !== null && res.messages[i].files.length > 0) {
+                        // update the files
+                        for (let j = 0; j < res.messages[i].files.length; ++j) {
+                            // check if the file name already exists
+                            let fidx = files.findIndex((f: CtCodeFile) => f.file_name == res.messages[i].files[j].file_name)
+                            if (fidx < 0) {
+                                files.push(res.messages[i].files[j])
+                            } else {
+                                files[fidx] = res.messages[i].files[j];
+                            }
+                        }
                     }
+                }
+
+                if (files.length > 0) {
+                    setCode(files)
+                    setActiveFile(files[0].file_name)
+                    setEditorOpen(true)
                 }
 
                 return true;
@@ -896,8 +1039,7 @@ function HomeworkHelper() {
                 user_id: "",
                 message_type: codeExec ? CtChatMessageType.CodeExecutionResult : CtChatMessageType.User,
                 content: userMessage,
-                code: codeExec ? "" : code,
-                code_language: codeExec ? "" : codeLanguage,
+                files: code,
                 created_at: new Date(),
                 message_number: 0,
                 command: {command: "", lang: ""},
@@ -914,8 +1056,7 @@ function HomeworkHelper() {
                 payload: {
                     chat_id: chatId,
                     user_message: userMessage,
-                    code: code,
-                    code_language: codeLanguage,
+                    files: code,
                     code_exec_result: codeExec
                 }
             } satisfies CtMessage<CtHhUserMessage>,
@@ -927,9 +1068,23 @@ function HomeworkHelper() {
 
                 let res = msg.payload as CtHHAssistantMessage
 
-                if (res.complete_code !== "") {
-                    setCode(res.complete_code)
-                    setCodeLanguage(res.code_language)
+                let files: CtCodeFile[] = [];
+                if (res.files !== null && res.files?.length > 0) {
+                    files = code
+                    
+                    // update the files
+                    for (let i = 0; i < res.files.length; ++i) {
+                        // check if the file name already exists
+                        let fidx = files.findIndex((f: CtCodeFile) => f.file_name == res.files[i].file_name)
+                        if (fidx < 0) {
+                            files.push(res.files[i])
+                        } else {
+                            files[fidx] = res.files[i];
+                        }
+                    }
+
+                    setCode(files)
+                    setActiveFile(res.active_file)
                     setEditorOpen(true)
 
                     if (res.done) {
@@ -947,8 +1102,7 @@ function HomeworkHelper() {
                         user_id: "",
                         message_type: res.message_type,
                         content: res.complete_message,
-                        code: res.complete_code,
-                        code_language: res.code_language,
+                        files: files,
                         created_at: new Date(),
                         message_number: prev.length,
                         command: res.command,
@@ -959,8 +1113,7 @@ function HomeworkHelper() {
                 } else {
                     setActiveResponse({
                         text: res.complete_message,
-                        code: res.complete_code,
-                        codeLanguage: res.code_language,
+                        files: files,
                         command: res.command,
                     })
                 }
@@ -979,15 +1132,14 @@ function HomeworkHelper() {
             user_id: "",
             message_type: CtChatMessageType.User,
             content: userMessage,
-            code: code,
-            code_language: codeLanguage,
+            files: code,
             created_at: new Date(),
             message_number: 0,
             command: {command: "", lang: ""},
             premium_llm: false,
             free_credit_use: false
         }]);
-        setActiveResponse({text: "", code: "", codeLanguage: "", command: null});
+        setActiveResponse({text: "", files: code, command: null});
 
         // create a new promise that will return the chat id or null to us
         let resolver: (value: string | null) => void;
@@ -1035,12 +1187,16 @@ function HomeworkHelper() {
                     theme={theme}
                     messages={messages}
                     activeResponse={activeResponse !== null ? activeResponse : undefined}
-                    toggleEditor={(state) => setEditorOpen(state !== undefined ? state : !editorOpen)}
-                    setEditorCode={(c, l) => {
-                        setCode(c)
-                        if (l !== "" && l !== undefined) {
-                            setCodeLanguage(l)
+                    toggleEditor={(state) => {
+                        if (code.length === 0 && !editorOpen) {
+                            setNewFilePopup(true)
+                            return
                         }
+                        setEditorOpen(state !== undefined ? state : !editorOpen)
+                    }}
+                    setEditorCode={(code, activeFile) => {
+                        setCode(code)
+                        setActiveFile(activeFile)
                     }}
                     sendMessage={(content: string) => {
                         if (selectedChat === null || selectedChat === "-1" || content === "") {
@@ -1054,7 +1210,13 @@ function HomeworkHelper() {
         return (
             <HomeworkHelperInit
                 theme={theme}
-                toggleEditor={() => setEditorOpen(!editorOpen)}
+                toggleEditor={() => {
+                    if (code.length === 0 && !editorOpen) {
+                        setNewFilePopup(true)
+                        return
+                    }
+                    setEditorOpen(!editorOpen)
+                }}
                 submit={(content: string) => {
                     startNewChat(content)
                 }}
@@ -1134,15 +1296,12 @@ function HomeworkHelper() {
     }
 
     const handleCtExecResult = React.useCallback((result: string) => {
-        console.log("handleCtExecResult", sendExecOutputToCT, selectedChat);
         if (sendExecOutputToCT.current) {
-            console.log("setSendExecOutputToCT");
             sendExecOutputToCT.current = false
             if (selectedChat !== null) {
-                console.log("sending output to backend");
                 sendUserMessage(
                     selectedChat,
-                    result,
+                    result.length > 0 ? result : "No Output",
                     true,
                     true
                 )
@@ -1151,14 +1310,23 @@ function HomeworkHelper() {
     }, [selectedChat]);
 
     const sendExecRequest = (retryCount: number = 0) => {
+        let lang = mapFilePathToLangOption(activeFile)
+        if (lang === undefined || !lang?.execSupported) {
+            return
+        }
+
         const message = {
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
             type: WsMessageType.AgentExecRequest,
             payload: {
                 code_source_id: selectedChat,
                 payload: {
-                    lang: mapToLangId(codeLanguage),
-                    code: code
+                    lang: lang.languageId,
+                    exec_files: code.map(c => ({
+                        file_name: c.file_name,
+                        code: c.code,
+                        execute: c.file_name === activeFile
+                    }))
                 }
             }
         };
@@ -1299,7 +1467,7 @@ function HomeworkHelper() {
                     position: "absolute",
                     zIndex: 4,
                     bottom: "20px",
-                    left: "20px",
+                    right: "20px",
                     p: 2
                 }}
             >
@@ -1330,7 +1498,7 @@ function HomeworkHelper() {
                             <CtCircularProgress size={18}/>
                         </Box>
                     </>
-                ): (
+                ) : (
                     <>
                         <Typography variant={"body2"}>
                             CT would like to run this code.
@@ -1362,6 +1530,107 @@ function HomeworkHelper() {
                     </>
                 )}
             </CodeTeacherPopupPaper>
+        )
+    }
+
+    const renderNewFilePopup = () => {
+        return (
+            <Dialog open={newFilePopup} maxWidth={'sm'} onClose={() => setNewFilePopup(false)}>
+                <DialogTitle>Create New File</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        placeholder={"File Name"}
+                        value={newFileName}
+                        onChange={(event) => {
+                            setNewFileName(event.target.value)
+                        }}
+                        onKeyDown={(e) => {
+                            if (e.code == "Enter") {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                setCode(prev =>
+                                    prev.concat({
+                                        file_name: newFileName,
+                                        code: "",
+                                    })
+                                )
+                                setActiveFile(newFileName)
+                                setNewFilePopup(false)
+                                setEditorOpen(true)
+                            }
+                        }}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        color={"error"}
+                        variant={"outlined"}
+                        onClick={() => {
+                            setNewFilePopup(false)
+                            setNewFileName("")
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        color={"success"}
+                        variant={"outlined"}
+                        disabled={newFileName === ""}
+                        onClick={() => {
+                            setCode(prev =>
+                                prev.concat({
+                                    file_name: newFileName,
+                                    code: "",
+                                })
+                            )
+                            setActiveFile(newFileName)
+                            setNewFilePopup(false)
+                            setEditorOpen(true)
+                        }}
+                    >
+                        Create
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        )
+    }
+
+    const renderDeleteFilePopup = () => {
+        return (
+            <Dialog open={deleteFileRequest !== null} maxWidth={'sm'} onClose={() => setDeleteFileRequest(null)}>
+                <DialogTitle>Delete File</DialogTitle>
+                <DialogContent>
+                    <Typography variant={"body2"}>
+                        Are you sure you want to delete the file <b>{deleteFileRequest}</b>?
+                        <br/>
+                        This action cannot be undone.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        color={"inherit"}
+                        variant={"outlined"}
+                        onClick={() => {
+                            setDeleteFileRequest(null)
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        color={"error"}
+                        variant={"outlined"}
+                        onClick={() => {
+                            if (code.length === 1 && code[0].file_name === deleteFileRequest) {
+                                setEditorOpen(false)
+                            }
+                            setCode(prev => prev.filter((f) => f.file_name !== deleteFileRequest))
+                            setDeleteFileRequest(null)
+                        }}
+                    >
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
         )
     }
 
@@ -1413,6 +1682,21 @@ function HomeworkHelper() {
             }
         }
 
+        let fileIndex = 0;
+        let fileName = "New File"
+        let fileContents = ""
+        if (activeFile !== "") {
+            let fidx = code.findIndex((f) => f.file_name === activeFile)
+            if (fidx >= 0) {
+                fileIndex = fidx
+                fileName = code[fidx].file_name
+                fileContents = code[fidx].code
+            }
+        }
+        let lang = mapFilePathToLangOption(fileName)
+
+        console.log("editor: ", lang)
+
         return (
             <Slide direction="left" in={editorOpen} mountOnEnter unmountOnExit>
                 <Box
@@ -1429,107 +1713,84 @@ function HomeworkHelper() {
                             marginBottom: "8px"
                         }}
                     >
-                        <FormControl
-                            sx={{
-                                minWidth: "100px", // Adjust based on your UI needs
-                                m: 0, // Minimize margin
-                                p: 0, // Minimize padding
+                        <EditorTabs
+                            value={fileIndex + 1}
+                            onChange={(e, idx) => {
+                                if (idx === 0) {
+                                    setNewFilePopup(true)
+                                    return
+                                }
+                                setActiveFile(code[idx - 1].file_name)
                             }}
+                            variant="scrollable"
+                            scrollButtons="auto"
+                            aria-label="file tabs"
+                            TabIndicatorProps={{sx: {display: "none"}}}
                         >
-                            <InputLabel
-                                id="language-selector-label"
-                                sx={{
-                                    fontSize: "0.7rem !important",
-                                    m: 0, // Minimize margin
-                                    p: 0, // Minimize padding
-                                    top: langSelectActive || codeLanguage !== "" ? "0px" : "-11px",
-                                }}
+                            <EditorTab icon={<Add/>} aria-label="New file"/>
+                            {code.map((file, index) => (
+                                <EditorTab
+                                    key={file.file_name}
+                                    label={
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between'
+                                        }}>
+                                            {file.file_name}
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => setDeleteFileRequest(file.file_name)}
+                                                sx={{marginLeft: 0.5, padding: '2px', fontSize: "12px"}}
+                                            >
+                                                <CloseIcon fontSize="inherit"/>
+                                            </IconButton>
+                                        </div>
+                                    }
+                                />
+                            ))}
+                        </EditorTabs>
+                        {id !== undefined && lang?.execSupported && (
+                            <Box
+                                display={"inline-flex"}
                             >
-                                Language
-                            </InputLabel>
-                            <Select
-                                labelId="language-selector-label"
-                                id="language-selector"
-                                value={mapToLang(codeLanguage)}
-                                label="Language"
-                                onFocus={() => setLangSelectActive(true)}
-                                onBlur={() => setLangSelectActive(false)}
-                                onChange={(e) => {
-                                    setCodeLanguage(e.target.value)
-                                }}
-                                size="small" // Make Select more compact
-                                sx={{
-                                    fontSize: "0.7rem !important",
-                                    m: 0, // Minimize margin
-                                    p: 0, // Minimize padding
-                                    '& .MuiSelect-select': {
-                                        py: '5px', // Adjust padding vertically as needed
-                                    },
-                                    // '& .MuiOutlinedInput-notchedOutline': {
-                                    //     border: 'none', // Remove border if desired for compactness
-                                    // },
-                                }}
-                            >
-                                {languages.map((language) => (
-                                    <MenuItem
-                                        key={language.name}
-                                        value={language.name.toLowerCase()}
+                                <Tooltip title={stateTooltipTitle}>
+                                    <Box
                                         sx={{
-                                            fontSize: "0.7rem !important",
-                                            m: 0, // Minimize margin
-                                            p: 0, // Minimize padding,
-                                            paddingLeft: "5px"
+                                            height: "30px",
+                                            width: "30px",
+                                            marginRight: "20px",
+                                            padding: "3px"
                                         }}
                                     >
-                                        {language.name}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                        <Box
-                            display={"inline-flex"}
-                        >
-                            <Tooltip title={stateTooltipTitle}>
-                                <Box
-                                    sx={{
-                                        height: "30px",
-                                        width: "30px",
-                                        marginRight: "20px",
-                                        padding: "3px"
-                                    }}
-                                >
-                                    {stateIcon}
-                                </Box>
-                            </Tooltip>
-                            <Tooltip title="Run Code">
-                                <LoadingButton
-                                    loading={executingCode}
-                                    variant="outlined"
-                                    color={"success"}
-                                    sx={{
-                                        // position: 'absolute',
-                                        // right: '8px',
-                                        // top: '8px',
-                                        zIndex: 3,
-                                        m: 0,
-                                        p: 0,
-                                        fontSize: "0.7rem !important",
-                                        // borderRadius: "50%",
-                                        // minWidth: 0,
-                                    }}
-                                    onClick={() => {
-                                        if (!authState.authenticated) {
-                                            navigate("/signup?forward=" + encodeURIComponent(window.location.pathname))
-                                            return
-                                        }
+                                        {stateIcon}
+                                    </Box>
+                                </Tooltip>
+                                <Tooltip title="Run Code">
+                                    <LoadingButton
+                                        loading={executingCode}
+                                        variant="outlined"
+                                        color={"success"}
+                                        sx={{
+                                            zIndex: 3,
+                                            m: 0,
+                                            p: 0,
+                                            fontSize: "0.7rem !important",
+                                        }}
+                                        onClick={() => {
+                                            if (!authState.authenticated) {
+                                                navigate("/signup?forward=" + encodeURIComponent(window.location.pathname))
+                                                return
+                                            }
 
-                                        executeCode(); // Indicate button click
-                                    }}
-                                >
-                                    Run <PlayArrow fontSize={"small"}/>
-                                </LoadingButton>
-                            </Tooltip>
-                        </Box>
+                                            executeCode(); // Indicate button click
+                                        }}
+                                    >
+                                        Run <PlayArrow fontSize={"small"}/>
+                                    </LoadingButton>
+                                </Tooltip>
+                            </Box>
+                        )}
                     </Box>
                     <Box
                         sx={{position: "relative"}}
@@ -1545,11 +1806,24 @@ function HomeworkHelper() {
                                 height: "100%",
                                 borderRadius: "10px",
                             }}
-                            language={mapToLangMarkdown(codeLanguage)}
-                            code={code}
+                            language={mapFilePathToLang(activeFile)}
+                            code={fileContents}
                             theme={mode}
                             readonly={false}
-                            onChange={(val, view) => setCode(val)}
+                            onChange={(val, view) => {
+                                setCode(prev => {
+                                    let fidx = prev.findIndex((f) => f.file_name === activeFile)
+                                    if (fidx >= 0) {
+                                        prev[fidx].code = val
+                                    } else {
+                                        prev = prev.concat({
+                                            file_name: activeFile,
+                                            code: val,
+                                        })
+                                    }
+                                    return prev
+                                })
+                            }}
                             wrapperStyles={{
                                 width: '100%',
                                 height: terminalVisible ? 'calc(100vh - 364px)' : 'calc(100vh - 138px)',
@@ -1583,6 +1857,7 @@ function HomeworkHelper() {
                     open={speedDialOpen}
                     onOpen={() => setSpeedDialOpen(true)}
                     onClose={() => setSpeedDialOpen(false)}
+                    onClick={() => setSpeedDialOpen(true)}
                 >
                     <SpeedDialAction
                         key={"new"}
@@ -1590,12 +1865,14 @@ function HomeworkHelper() {
                         tooltipTitle={"New Homework"}
                         onClick={clearChatState}
                     />
-                    <SpeedDialAction
-                        key={"history"}
-                        icon={<LibraryBooks/>}
-                        tooltipTitle={"Homework History"}
-                        onClick={() => setChatSelectionOpen(prev => !prev)}
-                    />
+                    {chats.length > 0 && (
+                        <SpeedDialAction
+                            key={"history"}
+                            icon={<LibraryBooks/>}
+                            tooltipTitle={"Homework History"}
+                            onClick={() => setChatSelectionOpen(prev => !prev)}
+                        />
+                    )}
                 </SpeedDial>
                 <Dialog
                     open={chatSelectionOpen}
@@ -1648,8 +1925,8 @@ function HomeworkHelper() {
 
     const clearChatState = () => {
         setMessages([])
-        setCode("")
-        setCodeLanguage("")
+        setCode([])
+        setActiveFile("")
         setEditorOpen(false)
         setActiveResponse(null)
         setSelectedChat(null)
@@ -1683,6 +1960,8 @@ function HomeworkHelper() {
                     </Grid>
                 </Box>
                 {renderActions()}
+                {renderNewFilePopup()}
+                {renderDeleteFilePopup()}
             </CssBaseline>
         </ThemeProvider>
     )

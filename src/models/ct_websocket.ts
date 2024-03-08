@@ -265,8 +265,7 @@ export interface CtNewHhChatResponse {
 export interface CtHhUserMessage {
     chat_id: string;
     user_message: string;
-    code: string;
-    code_language: string;
+    files: CtCodeFile[];
     code_exec_result: boolean;
 }
 
@@ -275,14 +274,18 @@ export interface CtExecCommand {
     lang: string;
 }
 
+export interface CtCodeFile {
+    file_name: string;
+    code: string;
+}
+
 export interface CtHHAssistantMessage {
     user_message_id: string;
     assistant_message_id: string;
     token: string;
-    code_token: string;
     complete_message: string;
-    complete_code: string;
-    code_language: string;
+    files: CtCodeFile[];
+    active_file: string;
     message_type: CtChatMessageType;
     command: CtExecCommand;
     done: boolean;
@@ -345,8 +348,7 @@ export interface CtGetHHChatMessagesResponseMessage {
     user_id: string;
     message_type: CtChatMessageType;
     content: string;
-    code: string;
-    code_language: string;
+    files: CtCodeFile[];
     created_at: Date;
     message_number: number;
     command: CtExecCommand;
