@@ -7,7 +7,7 @@ import {
     Popper,
     PopperPlacementType,
     styled,
-    alpha, IconButton, Tooltip
+    alpha, IconButton, Tooltip, useTheme, Dialog, DialogTitle
 } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
 import { getAllTokens, themeHelpers } from "../../theme";
@@ -56,6 +56,7 @@ export type ByteNextOutputMessageProps = {
     nextByte?: any;
     journey: boolean
     containerRef: React.MutableRefObject<null>;
+    onTryHarderVersionClick?: () => void;
 };
 
 enum State {
@@ -459,7 +460,8 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                 />
                 <Box
                     display={"flex"}
-                    flexDirection={"row"}
+                    flexDirection={"column"}
+                    alignItems={"center"}
                     justifyContent={"space-between"}
                     sx={{
                         width: "100%",
@@ -487,6 +489,17 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                             Continue
                         </h1>
                     </AwesomeButton>
+                    <Button
+                        variant="contained"
+                        onClick={() => props.onTryHarderVersionClick?.()}
+                        sx={{
+                            mt: 2,
+                            fontSize: '0.875rem',
+                            padding: '6px 16px',
+                        }}
+                    >
+                        Try a harder version 🌊
+                    </Button>
                 </Box>
             </Box>
         )

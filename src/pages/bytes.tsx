@@ -6,7 +6,7 @@ import {
     PaletteMode,
     ThemeProvider,
     Typography,
-    Box, Tooltip, CircularProgress, alpha, Button
+    Box, Tooltip, CircularProgress, alpha, Button, Dialog, DialogContent, DialogTitle
 } from "@mui/material";
 import XpPopup from "../components/XpPopup";
 import { getAllTokens } from "../theme";
@@ -285,6 +285,7 @@ function Byte() {
     const [lspActive, setLspActive] = React.useState(false)
     const [workspaceState, setWorkspaceState] = useState<null | number>(null);
     const [workspaceId, setWorkspaceId] = useState<string>('')
+    const [journeySetupDone, setJourneySetupDone] = useState(false);
 
     const [connectButtonLoading, setConnectButtonLoading] = useState<boolean>(false)
 
@@ -297,6 +298,7 @@ function Byte() {
     const [loadingCodeCleanup, setLoadingCodeCleanup] = React.useState<string | null>(null);
 
     const [suggestionRange, setSuggestionRange] = useState<{start_line: number, end_line: number} | null>(null);
+    const [isHarderVersionPopupVisible, setIsHarderVersionPopupVisible] = useState(false);
 
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
@@ -761,19 +763,27 @@ function Byte() {
 
     useEffect(() => {
         if (id === undefined) {
-            return
+            return;
         }
 
-        setOutput(null)
-        setExecutingCode(false)
-        setTerminalVisible(false)
-        setUserHasModified(false)
-        setWorkspaceId("")
-        setWorkspaceState(null)
-        setLspActive(false)
+        const isJourneyVersion = queryParams.has('journey');
+        const shouldSetToEasy = isJourneyVersion && !journeySetupDone && bytesState.byteDifficulty !== 0;
+
+        if (shouldSetToEasy) {
+            dispatch(updateBytesState({ ...bytesState, byteDifficulty: 0, initialized: true }));
+            setJourneySetupDone(true); // Mark the journey setup as completed to prevent re-execution.
+        }
+
+        setOutput(null);
+        setExecutingCode(false);
+        setTerminalVisible(false);
+        setUserHasModified(false);
+        setWorkspaceId("");
+        setWorkspaceState(null);
+        setLspActive(false);
         setLoading(true);
-        setSuggestionRange(null)
-        getRecommendedBytes()
+        setSuggestionRange(null);
+        getRecommendedBytes();
         getByte(id).then(() => {
             if (authState.authenticated && id) {
                 startByteAttempt(id);
@@ -1158,6 +1168,13 @@ function Byte() {
         return recommendedBytes[0]
     }
 
+    const handleTryHarderVersionClick = () => {
+        setIsHarderVersionPopupVisible(true);
+        console.log("popup clicked")
+    };
+
+
+
     const renderEditorSideBar = () => {
         let stateTooltipTitle: string | React.ReactElement = (
             <Box>
@@ -1261,6 +1278,8 @@ function Byte() {
                         nextByte={getNextByte()}
                         containerRef={containerRef}
                         journey={queryParams.has('journey')}
+                        currentDifficulty={determineDifficulty()}
+                        onTryHarderVersionClick={handleTryHarderVersionClick}
                     />
                 )}
                 {(activeSidebarTab === null || activeSidebarTab === "codeSuggestion") && (
@@ -1287,6 +1306,24 @@ function Byte() {
                             setLoadingCodeCleanup(null)
                         }}
                     />
+                )}
+                {isHarderVersionPopupVisible && (
+                    <Dialog
+                        open={isHarderVersionPopupVisible}
+                        onClose={() => setIsHarderVersionPopupVisible(false)}
+                        aria-labelledby="change-difficulty-dialog-title"
+                    >
+                        <DialogTitle id="change-difficulty-dialog-title">Change Difficulty</DialogTitle>
+                        <DialogContent>
+                            <DifficultyAdjuster
+                                difficulty={determineDifficulty()}
+                                onChange={(newDifficulty) => {
+                                    updateDifficulty(newDifficulty);
+                                    setIsHarderVersionPopupVisible(false);
+                                }}
+                            />
+                        </DialogContent>
+                    </Dialog>
                 )}
                 {activeSidebarTab === null && (
                     <Tooltip title={stateTooltipTitle}>
