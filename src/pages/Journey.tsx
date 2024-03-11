@@ -46,7 +46,7 @@ function Journey() {
     const containerStyles: React.CSSProperties = {
         display: 'flex',
         flexDirection: 'column',
-        height: '95vh',
+        height: '90vh',
 
     };
 
@@ -110,8 +110,8 @@ function Journey() {
     const buttonShine: React.CSSProperties = {
         position: 'absolute',
         borderRadius: '50%',
-        width: '180px',
-        height: '180px',
+        width: '10%',
+        height: '10%',
 
         animation: 'shine 2s infinite linear',
     };
@@ -172,8 +172,9 @@ function Journey() {
     };
 
     const scrollToBottom = () => {
+        console.log('Scroll to bottom: ', document.body.scrollHeight)
         window.scrollTo({
-            top: document.body.scrollHeight,
+            top: 5000,
             behavior: 'smooth',
         });
     };
@@ -191,16 +192,17 @@ function Journey() {
                     style={buttonStyles}
                     onMouseEnter={() => setButtonHover(true)}
                     onMouseLeave={() => setButtonHover(false)}
-                    onClick={scrollToBottom}
+                    onClick={() => window.location.href = '/journey/main'}
                 >
-                    <div style={buttonShine} />
+                    <div style={buttonShine}/>
                     Get Started
                 </button>
+
             </div>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
+            <div style={{display: 'flex', justifyContent: 'center', alignItems: 'flex-start'}}>
                 <div style={textBoxStyles}>
-                    <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <br/>
+                    <div style={{display: 'flex', justifyContent: 'center'}}>
+                    <br/>
                         <br/>
                         <br/>
                         <br/>
@@ -213,11 +215,11 @@ function Journey() {
                                 <br/>
                                 <Grid container spacing={0}>
                                     <Grid item xs={6}>
-                                        <p>GIGO Code Journeys focus on delivering comprehensive programming education. The journey is structured to provide programmers of various skill levels with concise, well-defined, and efficient paths to enhance their programming expertise.</p>
+                                        <p>GIGO Journeys focus on delivering comprehensive programming education. The journey is structured to provide programmers of various skill levels with concise, well-defined, and efficient paths to enhance their programming expertise.</p>
                                         <ol>
                                             <strong>Incremental Learning Path</strong>
                                             <p>For Entry-Level Programmers: The journey starts with the basics of programming. Entry-level participants engage in simple exercises and challenges that introduce fundamental concepts like variables, loops, and functions.</p>
-                                            <p>For Experienced Programmers: Intermediate and advanced modules are available. These include complex algorithms, design patterns, data structures, and specialized areas like machine learning or distributed systems.</p>
+                                            <p>For Experienced Programmers: Intermediate and advanced units are available. These include complex algorithms, design patterns, data structures, and specialized areas like machine learning or distributed systems.</p>
                                             <li>
                                                 <strong>Bite-Sized Lessons</strong>
                                                 <p>Lessons are broken down into manageable, easily digestible segments. This allows participants to learn at their own pace and facilitates understanding by focusing on one concept at a time.</p>
@@ -253,15 +255,13 @@ function Journey() {
 
 
 
-                                        <h3>Mentorship and Community Support</h3>
-                                        <p>Participants have access to mentors, forums, and community groups that can provide support, guidance, and collaboration opportunities.</p>
+                                        <h3>Code Teacher Tutor Support</h3>
+                                        <p>Never venture alone! Code Teacher helps students overcome obstacles and achieve success together.</p>
                                     </Grid>
                                     <Grid item xs={12}>
-                                        <h3>Continuous Evaluation and Feedback</h3>
+                                        <br/>
+                                        <br/>
 
-                                        <p>Through quizzes, projects, and real-world scenarios, participants are constantly evaluated. Feedback is provided to ensure that they understand the concepts thoroughly and can apply them in practical situations.</p>
-                                        <br/>
-                                        <br/>
                                     </Grid>
                                     <Grid container xs={12} style={{justifyContent: "center", alignItems: "center"}}>
                                         <AwesomeButton style={{ width: "30%", height: "100%",
@@ -289,7 +289,7 @@ function Journey() {
                                     </Grid>
                                     <Grid item xs={12}>
                                         <h3>Conclusion</h3>
-                                        <p>The GIGO Journey system stands as a robust educational framework catering to different skill levels. Its incremental and bite-sized approach to lessons ensures that learners can progress at a comfortable pace without feeling overwhelmed. By connecting foundational concepts to advanced mastery through a well-structured pathway, it ensures a coherent and fulfilling learning experience for anyone looking to either start their coding journey or elevate their existing skills to complete mastery. Whether a novice seeking full competency or an experienced programmer aiming for complete mastery, the GIGO Code Journeys have the tools, resources, and support needed to reach those goals.</p>
+                                        <p>The GIGO Journey system stands as a robust educational framework catering to different skill levels. Its incremental and bite-sized approach to lessons ensures that learners can progress at a comfortable pace without feeling overwhelmed. By connecting foundational concepts to advanced mastery through a well-structured pathway, it ensures a coherent and fulfilling learning experience for anyone looking to either start their coding journey or elevate their existing skills to complete mastery. Whether a novice seeking full competency or an experienced programmer aiming for complete mastery, the GIGO Journeys have the tools, resources, and support needed to reach those goals.</p>
                                         <br/>
                                     </Grid>
 
