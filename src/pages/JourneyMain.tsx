@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {createRef, useEffect, useRef, useState} from 'react';
 import {themeHelpers, getAllTokens, isHoliday} from "../theme";
 import {
     Box, Button,
@@ -99,6 +99,8 @@ function JourneyMain() {
     const [unitData, setUnitData] = useState<Unit[]>([])
     const [nextUnit, setNextUnit] = useState<Unit>()
     const [taskData, setTaskData] = useState<Task[]>([])
+    const unitRefs = useRef<React.RefObject<HTMLDivElement>[]>([]);
+
     // const getTasks = async () => {
     //     let res = await call(
     //         "/api/journey/getUnitMetadata",
@@ -200,11 +202,70 @@ function JourneyMain() {
 
         setUnitData(allUnits.slice(0, -1));
         setNextUnit(allUnits[allUnits.length - 1]);
+        unitRefs.current = allUnits.map((_, i) => unitRefs.current[i] ?? createRef<HTMLDivElement>());
     }
 
     useEffect(() => {
         getTasks()
     }, []);
+
+    const smoothScrollTo = (element: Element, duration: number): void => {
+        let targetPosition = element.getBoundingClientRect().top;
+        let startPosition = window.pageYOffset;
+        let startTime: number | null = null;
+
+        const ease = (t: number, b: number, c: number, d: number): number => {
+            t /= d / 2;
+            if (t < 1) return c / 2 * t * t + b;
+            t--;
+            return -c / 2 * (t * (t - 2) - 1) + b;
+        };
+
+        const animation = (currentTime: number): void => {
+            if (startTime === null) startTime = currentTime;
+            let timeElapsed = currentTime - startTime;
+            let run = ease(timeElapsed, startPosition, targetPosition - startPosition, duration);
+            window.scrollTo(0, run);
+            if (timeElapsed < duration) requestAnimationFrame(animation);
+        };
+
+        requestAnimationFrame(animation);
+    };
+
+    // todo: works properly, but scrolls super fast. Keeping in case the smooth scroll causes too many issues.
+    // useEffect(() => {
+    //     // Find the index of the last unit with at least one completed task
+    //     const lastUnitWithCompletedTaskIndex = unitData.reduce((acc, unit, index) =>
+    //         unit.tasks.some(task => task.completed) ? index : acc, -1
+    //     );
+    //
+    //     // Scroll to the last unit with a completed task, if found
+    //     if (lastUnitWithCompletedTaskIndex !== -1) {
+    //         const ref = unitRefs.current[lastUnitWithCompletedTaskIndex];
+    //         ref?.current?.scrollIntoView({
+    //             behavior: 'smooth',
+    //             block: 'start',
+    //         });
+    //     }
+    // }, [unitData]);
+
+
+    useEffect(() => {
+        const lastUnitWithCompletedTaskIndex = unitData.reduce((acc, unit, index) =>
+            unit.tasks.some(task => task.completed) ? index : acc, -1
+        );
+
+        if (lastUnitWithCompletedTaskIndex !== -1) {
+            const ref = unitRefs.current[lastUnitWithCompletedTaskIndex];
+            if (ref?.current) {
+                requestAnimationFrame(() => {
+                    if (ref && ref?.current) {
+                        smoothScrollTo(ref.current, 2500);
+                    }
+                });
+            }
+        }
+    }, [unitData]);
 
     const items = [1, 2];
 
@@ -845,82 +906,84 @@ function JourneyMain() {
                 {/*</Button>*/}
             </Box>
             {unitData.map((unit: any, index: number) => (
-                <Grid container>
-                    {(index % 2 === 0)
-                        ?
+                <div ref={unitRefs.current[index]} key={unit._id}>
+                    <Grid container>
+                        {(index % 2 === 0)
+                            ?
+                            <Grid item xl={4} sx={{
+                                display: "flex",
+                                justifyContent: "start",
+                                paddingTop: '20vh',
+                                flexDirection: "column",
+                                alignItems: "center",
+                            }}>
+                                {<JourneyPortals/>}
+                            </Grid>
+                            :
+                            <Grid item xl={4}/>
+                        }
                         <Grid item xl={4} sx={{
                             display: "flex",
-                            justifyContent: "start",
-                            paddingTop: '20vh',
+                            justifyContent: "center",
                             flexDirection: "column",
-                            alignItems: "center",
+                            alignItems: "center", borderRadius: "30px",
+                            mt: 2,
+                            backgroundColor: unit.color,
                         }}>
-                            {<JourneyPortals/>}
-                        </Grid>
-                        :
-                        <Grid item xl={4}/>
-                    }
-                    <Grid item xl={4} sx={{
-                        display: "flex",
-                        justifyContent: "center",
-                        flexDirection: "column",
-                        alignItems: "center", borderRadius: "30px",
-                        mt: 2,
-                        backgroundColor: unit.color,
-                    }}>
-                    <Box sx={{p: 2}}>
-                            <Typography variant={'h5'}>{unit.name}</Typography>
-                        </Box>
-                        {JourneyStops(unit.tasks)}
                         <Box sx={{p: 2}}>
-                            <AwesomeButton style={{
-                                width: "auto",
-                                //@ts-ignore
-                                '--button-primary-color': theme.palette.tertiary.dark,
-                                '--button-primary-color-dark': "#afa33d",
-                                '--button-primary-color-light': "#dfce53",
-                                //@ts-ignore
-                                '--button-primary-color-active': theme.palette.tertiary.dark,
-                                //@ts-ignore
-                                '--button-primary-color-hover': theme.palette.tertiary.main,
-                                '--button-default-border-radius': "24px",
-                                '--button-hover-pressure': "1",
-                                height: "10vh",
-                                '--button-raise-level': "10px"
-                            }} type="primary">
-                                <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
-                                    Unit Project
-                                </h1>
-                                <div style={{
-                                    height: "80px",
-                                    width: "80px",
-                                }}>
-                                    <img
-                                        src={completed}
-                                        style={{
-                                            height: "100%",
-                                            width: "100%",
-                                        }}
-                                        alt="py"/>
-                                </div>
-                            </AwesomeButton>
-                        </Box>
-                    </Grid>
-                    {(index % 2 === 0)
-                        ?
-                        <Grid item xl={4}/>
-                        :
-                        <Grid item xl={4} sx={{
-                            display: "flex",
-                            justifyContent: "start",
-                            paddingTop: '20vh',
-                            flexDirection: "column",
-                            alignItems: "center",
-                        }}>
-                            {<JourneyPortals/>}
+                                <Typography variant={'h5'}>{unit.name}</Typography>
+                            </Box>
+                            {JourneyStops(unit.tasks)}
+                            <Box sx={{p: 2}}>
+                                <AwesomeButton style={{
+                                    width: "auto",
+                                    //@ts-ignore
+                                    '--button-primary-color': theme.palette.tertiary.dark,
+                                    '--button-primary-color-dark': "#afa33d",
+                                    '--button-primary-color-light': "#dfce53",
+                                    //@ts-ignore
+                                    '--button-primary-color-active': theme.palette.tertiary.dark,
+                                    //@ts-ignore
+                                    '--button-primary-color-hover': theme.palette.tertiary.main,
+                                    '--button-default-border-radius': "24px",
+                                    '--button-hover-pressure': "1",
+                                    height: "10vh",
+                                    '--button-raise-level': "10px"
+                                }} type="primary">
+                                    <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
+                                        Unit Project
+                                    </h1>
+                                    <div style={{
+                                        height: "80px",
+                                        width: "80px",
+                                    }}>
+                                        <img
+                                            src={completed}
+                                            style={{
+                                                height: "100%",
+                                                width: "100%",
+                                            }}
+                                            alt="py"/>
+                                    </div>
+                                </AwesomeButton>
+                            </Box>
                         </Grid>
-                    }
-                </Grid>
+                        {(index % 2 === 0)
+                            ?
+                            <Grid item xl={4}/>
+                            :
+                            <Grid item xl={4} sx={{
+                                display: "flex",
+                                justifyContent: "start",
+                                paddingTop: '20vh',
+                                flexDirection: "column",
+                                alignItems: "center",
+                            }}>
+                                {<JourneyPortals/>}
+                            </Grid>
+                        }
+                    </Grid>
+                </div>
             ))}
                 {nextUnitPreview()}
         </Box>
