@@ -143,6 +143,12 @@ function Home() {
 
     const [startingByte, setStartingByte] = useState(false)
 
+    const [completedJourneyTasks, setCompletedJourneyTasks] = useState(0)
+    const [incompletedJourneyTasks, setIncompletedJourneyTasks] = useState(0)
+    const [detourCount, setDetourCount] = useState(0)
+    const [completedJourneyUnits, setCompletedJourneyUnits] = useState(0)
+    const [startedJourney, setStartedJourney] = useState(false)
+
     /////// New Bytes
     const [newBytesPopoverOpen, setNewBytesPopoverOpen] = useState(false);
 
@@ -328,6 +334,88 @@ function Home() {
             setTopRec(res4["projects"])
         }
     }
+
+    const dataLoad = async () => {
+        let units = call(
+            "/api/journey/completesUnitsStats",
+            "post",
+            null,
+            null,
+            null,
+            //@ts-ignore
+            {},
+            null,
+            config.rootPath
+        )
+
+        let tasks = call(
+            "/api/journey/tasksStats",
+            "post",
+            null,
+            null,
+            null,
+            //@ts-ignore
+            {},
+            null,
+            config.rootPath
+        )
+
+        let detour = call(
+            "/api/journey/detourStats",
+            "post",
+            null,
+            null,
+            null,
+            //@ts-ignore
+            {},
+            null,
+            config.rootPath
+        )
+
+        let startedJourney = call(
+            "/api/journey/determineStart",
+            "post",
+            null,
+            null,
+            null,
+            //@ts-ignore
+            {},
+            null,
+            config.rootPath
+        )
+
+        const [res, res2, res3, res4] = await Promise.all([
+            units,
+            tasks,
+            detour,
+            startedJourney
+        ])
+
+        console.log("res 4: ", res4)
+
+        if (res4 !== undefined || res4["started_journey"] !== undefined) {
+            setStartedJourney(res4["started_journey"])
+        }
+
+        if (
+            (res === undefined || res["finished_journey_count"] === undefined ||
+                res2 === undefined || res2["completed_tasks"] === undefined || res2["incompleted_tasks"] === undefined ||
+                res3 === undefined || res3["detour_count"] === undefined) && loggedIn
+        ) {
+            swal("There has been an issue loading data. Please try again later.")
+        }
+
+        setCompletedJourneyTasks(res2["completed_tasks"])
+        setIncompletedJourneyTasks(res2["incompleted_tasks"])
+        setDetourCount(res3["detour_count"])
+        setCompletedJourneyUnits(res["finished_journey_count"])
+
+    }
+
+    useEffect(() => {
+        dataLoad().then(r => console.log("here: ", r))
+    }, []);
+    
 
 
     useEffect(() => {
@@ -566,36 +654,10 @@ function Home() {
     }
 
     const JourneyHeader = () => {
-        // return (
-        //     // TODO check if user has an active journey -- change for mobile --
-        //     <Box sx={{width: "100%", height: "500px", backgroundColor: "#ffef62", zIndex: 3, m: 2, borderRadius: "12px"}}>
-        //         <div style={{width: "100%", display: "flex", flexDirection: "row", justifyContent: "space-evenly"}}>
-        //             <div style={{position: "relative", top: "100px", width: '50%'}}>
-        //                 <Typography variant={"h1"} sx={{color: theme.palette.background.default, textTransform: 'none'}}>
-        //                     Embark on your Coding Journey
-        //                 </Typography>
-        //             </div>
-        //             <div>
-        //                 <JourneyIcon style={{height: "400px", width: "400px", paddingTop: "40px"}}/>
-        //             </div>
-        //         </div>
-        //         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-        //             <AwesomeButton style={{
-        //                 width: "auto",
-        //                 height: "50px",
-        //                 '--button-primary-color': theme.palette.primary.main,
-        //                 '--button-primary-color-dark': theme.palette.primary.dark,
-        //                 '--button-primary-color-light': "white",
-        //                 '--button-primary-color-hover': theme.palette.primary.main,
-        //                 fontSize: "28px"
-        //             }} type="primary" href={"/journey/detours"} >
-        //                 <span>Start Your Journey</span>
-        //             </AwesomeButton>
-        //         </Box>
-        //     </Box>
-        // )
-        return (
-            // TODO journey - change the color to the primary color in the theme provider
+
+        if (startedJourney) {
+            return (
+                // TODO journey - change the color to the primary color in the theme provider
                 <Grid container spacing={2} sx={{ width: "100%", height: "500px", backgroundColor: "#ffef62", zIndex: 3, m: 2, borderRadius: "12px" }}>
                     <Grid item xs={8} sx={{ height: "100%", overflow: 'auto' }}>
                         <Grid container sx={{ height: '100%', justifyContent: 'center', alignItems: 'center'}}>
@@ -620,7 +682,7 @@ function Home() {
                                         color: theme.palette.background.default,
                                         textTransform: 'none',
                                     }}>
-                                        69
+                                        {completedJourneyTasks}
                                     </Typography>
                                 </Box>
                                 <Typography variant="h5" sx={{
@@ -655,7 +717,7 @@ function Home() {
                                         color: theme.palette.background.default,
                                         textTransform: 'none',
                                     }}>
-                                        4
+                                        {completedJourneyUnits}
                                     </Typography>
                                 </Box>
                                 <Typography variant="h5" sx={{
@@ -689,7 +751,7 @@ function Home() {
                                         color: theme.palette.background.default,
                                         textTransform: 'none',
                                     }}>
-                                        20
+                                        {detourCount}
                                     </Typography>
                                 </Box>
                                 <Typography variant="h5" sx={{
@@ -724,7 +786,7 @@ function Home() {
                                         color: theme.palette.background.default,
                                         textTransform: 'none',
                                     }}>
-                                        3
+                                        {incompletedJourneyTasks}
                                     </Typography>
                                 </Box>
                                 <Typography variant="h5" sx={{
@@ -756,7 +818,37 @@ function Home() {
                         </Box>
                     </Grid>
                 </Grid>
-        )
+            )
+        } else {
+            return (
+                // TODO check if user has an active journey -- change for mobile --
+                <Box sx={{width: "100%", height: "500px", backgroundColor: "#ffef62", zIndex: 3, m: 2, borderRadius: "12px"}}>
+                    <div style={{width: "100%", display: "flex", flexDirection: "row", justifyContent: "space-evenly"}}>
+                        <div style={{position: "relative", top: "100px", width: '50%'}}>
+                            <Typography variant={"h1"} sx={{color: theme.palette.background.default, textTransform: 'none'}}>
+                                Embark on your Coding Journey
+                            </Typography>
+                        </div>
+                        <div>
+                            <JourneyIcon style={{height: "400px", width: "400px", paddingTop: "40px"}}/>
+                        </div>
+                    </div>
+                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <AwesomeButton style={{
+                            width: "auto",
+                            height: "50px",
+                            '--button-primary-color': theme.palette.primary.main,
+                            '--button-primary-color-dark': theme.palette.primary.dark,
+                            '--button-primary-color-light': "white",
+                            '--button-primary-color-hover': theme.palette.primary.main,
+                            fontSize: "28px"
+                        }} type="primary" href={"/journey/main"} >
+                            <span>Start Your Journey</span>
+                        </AwesomeButton>
+                    </Box>
+                </Box>
+            )
+        }
     }
 
 
