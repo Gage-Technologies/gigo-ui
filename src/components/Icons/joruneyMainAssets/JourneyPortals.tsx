@@ -1,22 +1,42 @@
-
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Lottie from "react-lottie";
-import journeySide1 from "./joureny-side-1.svg";
-import * as portal from "./portal.json";
+import config from "../../../config";
+import journeySide1 from "./journey-side-1.svg";
+import journeySide2 from "./journey-side-2.svg";
+import journeySide3 from "./journey-side-3.svg";
+import journeySide4 from "./journey-side-4.svg";
+import journeySide5 from "./journey-side-5.svg";
 
-function JourneyPortals() {
+// @ts-ignore
+function JourneyPortals({ currentIndex }) {  // Assume currentIndex is passed as a prop based on the map data
+
+    const [animationData, setAnimationData] = useState("");
+
+    useEffect(() => {
+        // TODO add light theme portal
+        fetch(`${config.rootPath}/static/ui/lottie/general/journey-portal-dark.json`, { credentials: 'include' })
+            .then(data => {
+                data.json().then(json => {
+                    setAnimationData(json);
+                });
+            })
+            .catch(error => console.error(error));
+    }, []);
+
+    const images = [journeySide1, journeySide2, journeySide3, journeySide4, journeySide5];
+    const currentImage = images[currentIndex % images.length];
 
     const portalOptions = {
         loop: true,
         autoplay: true,
-        animationData: portal,
+        animationData: animationData,
         rendererSettings: {
             preserveAspectRatio: 'xMidYMid slice'
         },
     };
 
     return (
-        <div style={{position: 'relative', width: '400px', height: '400px'}}>
+        <div style={{ position: 'relative', width: '400px', height: '400px' }}>
             <Lottie options={portalOptions} speed={0.25} isClickToPauseDisabled={true} style={{
                 position: 'absolute',
                 top: 0,
@@ -27,7 +47,7 @@ function JourneyPortals() {
                 overflow: "visible"
             }}/>
             <img
-                src={journeySide1}
+                src={currentImage}
                 style={{
                     position: 'absolute',
                     top: 17,
@@ -36,12 +56,10 @@ function JourneyPortals() {
                     width: '100%',
                     zIndex: 1
                 }}
-                alt="py"
+                alt="Journey Portal"
             />
         </div>
     );
-
-
 }
 
 export default JourneyPortals;
