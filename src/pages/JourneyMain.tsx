@@ -1008,100 +1008,102 @@ function JourneyMain() {
                     {/*</Button>*/}
                 </Box>
                 {unitData.map((unit: any, index: number) => (
-                    <Grid container>
-                        {(index % 2 === 0)
-                            ?
+                    <div ref={unitRefs.current[index]} key={unit._id}>
+                        <Grid container>
+                            {(index % 2 === 0)
+                                ?
+                                <Grid item xl={4} sx={{
+                                    display: "flex",
+                                    justifyContent: "start",
+                                    paddingTop: '20vh',
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                }}>
+                                    {<JourneyPortals currentIndex={index}/>}
+                                </Grid>
+                                :
+                                <Grid item xl={4} sx={{display: "flex", justifyContent: "center", alignItems: "start"}}>
+                                    <MarkdownRenderer
+                                        markdown={unit.handout}
+                                        style={{
+                                            fontSize: "0.8rem",
+                                            width: "fit-content",
+                                            maxWidth: "475px",
+                                        }}
+                                    />
+                                </Grid>
+                            }
                             <Grid item xl={4} sx={{
                                 display: "flex",
-                                justifyContent: "start",
-                                paddingTop: '20vh',
+                                justifyContent: "center",
                                 flexDirection: "column",
-                                alignItems: "center",
+                                alignItems: "center", borderRadius: "30px",
+                                mt: 2,
+                                backgroundColor: unit.color,
                             }}>
-                                {<JourneyPortals currentIndex={index}/>}
+                                <Box sx={{p: 2}}>
+                                    <Typography variant={'h5'}>{unit.name}</Typography>
+                                </Box>
+                                {JourneyStops(unit.tasks)}
+                                <Box sx={{p: 2}}>
+                                    <AwesomeButton style={{
+                                        width: "auto",
+                                        //@ts-ignore
+                                        '--button-primary-color': theme.palette.tertiary.dark,
+                                        '--button-primary-color-dark': "#afa33d",
+                                        '--button-primary-color-light': "#dfce53",
+                                        //@ts-ignore
+                                        '--button-primary-color-active': theme.palette.tertiary.dark,
+                                        //@ts-ignore
+                                        '--button-primary-color-hover': theme.palette.tertiary.main,
+                                        '--button-default-border-radius': "24px",
+                                        '--button-hover-pressure': "1",
+                                        height: "10vh",
+                                        '--button-raise-level': "10px"
+                                    }} type="primary">
+                                        <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
+                                            Unit Project
+                                        </h1>
+                                        <div style={{
+                                            height: "80px",
+                                            width: "80px",
+                                        }}>
+                                            <img
+                                                src={completed}
+                                                style={{
+                                                    height: "100%",
+                                                    width: "100%",
+                                                }}
+                                                alt="py"/>
+                                        </div>
+                                    </AwesomeButton>
+                                </Box>
                             </Grid>
-                            :
-                            <Grid item xl={4} sx={{display: "flex", justifyContent: "center", alignItems: "start"}}>
-                                <MarkdownRenderer
-                                    markdown={unit.handout}
-                                    style={{
-                                        fontSize: "0.8rem",
-                                        width: "fit-content",
-                                        maxWidth: "475px",
-                                    }}
-                                />
-                            </Grid>
-                        }
-                        <Grid item xl={4} sx={{
-                            display: "flex",
-                            justifyContent: "center",
-                            flexDirection: "column",
-                            alignItems: "center", borderRadius: "30px",
-                            mt: 2,
-                            backgroundColor: unit.color,
-                        }}>
-                            <Box sx={{p: 2}}>
-                                <Typography variant={'h5'}>{unit.name}</Typography>
-                            </Box>
-                            {JourneyStops(unit.tasks)}
-                            <Box sx={{p: 2}}>
-                                <AwesomeButton style={{
-                                    width: "auto",
-                                    //@ts-ignore
-                                    '--button-primary-color': theme.palette.tertiary.dark,
-                                    '--button-primary-color-dark': "#afa33d",
-                                    '--button-primary-color-light': "#dfce53",
-                                    //@ts-ignore
-                                    '--button-primary-color-active': theme.palette.tertiary.dark,
-                                    //@ts-ignore
-                                    '--button-primary-color-hover': theme.palette.tertiary.main,
-                                    '--button-default-border-radius': "24px",
-                                    '--button-hover-pressure': "1",
-                                    height: "10vh",
-                                    '--button-raise-level': "10px"
-                                }} type="primary">
-                                    <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
-                                        Unit Project
-                                    </h1>
-                                    <div style={{
-                                        height: "80px",
-                                        width: "80px",
-                                    }}>
-                                        <img
-                                            src={completed}
-                                            style={{
-                                                height: "100%",
-                                                width: "100%",
-                                            }}
-                                            alt="py"/>
-                                    </div>
-                                </AwesomeButton>
-                            </Box>
+                            {(index % 2 === 0)
+                                ?
+                                <Grid item xl={4} sx={{display: "flex", justifyContent: "center", alignItems: "start"}}>
+                                    <MarkdownRenderer
+                                        markdown={unit.handout}
+                                        style={{
+                                            fontSize: "0.8rem",
+                                            width: "fit-content",
+                                            maxWidth: "475px",
+                                        }}
+                                    />
+                                </Grid>
+                                :
+                                <Grid item xl={4} sx={{
+                                    display: "flex",
+                                    justifyContent: "start",
+                                    paddingTop: '20vh',
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                }}>
+                                    {<JourneyPortals currentIndex={index}/>}
+                                </Grid>
+                            }
                         </Grid>
-                        {(index % 2 === 0)
-                            ?
-                            <Grid item xl={4} sx={{display: "flex", justifyContent: "center", alignItems: "start"}}>
-                                <MarkdownRenderer
-                                    markdown={unit.handout}
-                                    style={{
-                                        fontSize: "0.8rem",
-                                        width: "fit-content",
-                                        maxWidth: "475px",
-                                    }}
-                                />
-                            </Grid>
-                            :
-                            <Grid item xl={4} sx={{
-                                display: "flex",
-                                justifyContent: "start",
-                                paddingTop: '20vh',
-                                flexDirection: "column",
-                                alignItems: "center",
-                            }}>
-                                {<JourneyPortals currentIndex={index}/>}
-                            </Grid>
-                        }
-                    </Grid>
+                    </div>
                 ))}
                 {nextUnitPreview()}
             </Box>
