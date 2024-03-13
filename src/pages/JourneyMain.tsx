@@ -1,18 +1,13 @@
 import React, {createRef, useEffect, useRef, useState} from 'react';
-import {themeHelpers, getAllTokens, isHoliday} from "../theme";
+import {getAllTokens} from "../theme";
 import {
     Box, Button,
     Card,
-    CardContent,
-    Container,
     createTheme,
-    CssBaseline, FormControl, FormControlLabel, FormLabel,
+    CssBaseline,
     Grid,
-    IconButton, Menu, MenuItem,
-    PaletteMode, Popover, Radio, RadioGroup,
+    PaletteMode, Popover,
     SpeedDial,
-    SpeedDialProps,
-    styled, Switch,
     ThemeProvider,
     Typography
 } from "@mui/material";
@@ -33,25 +28,17 @@ import python from "../components/Icons/bytes/python-logo.svg";
 import golang from "../components/Icons/bytes/golang-logo.svg";
 import completed from "../components/Icons/joruneyMainAssets/journey-completed-no-cirlce.svg"
 import journeyMap from "../components/Icons/bytes/journey-map.svg";
-import {string} from "prop-types";
 import call from "../services/api-call";
 import config from "../config";
 import {initialAuthStateUpdate, selectAuthStateId, updateAuthState} from "../reducers/auth/auth";
-import journeySide1 from "../components/Icons/joruneyMainAssets/joureny-side-1.svg";
-import Lottie from "react-lottie";
-import Particles from "react-tsparticles";
-import { loadStarsPreset } from "tsparticles-preset-stars";
-import { Engine } from 'tsparticles-engine';
 import JourneyPortals from "../components/Icons/joruneyMainAssets/JourneyPortals";
-import AddIcon from '@mui/icons-material/Add';
-import {initialCreateProjectStateUpdate} from "../reducers/createProject/createProject";
 import {initialJourneyDetourStateUpdate, updateJourneyDetourState} from "../reducers/journeyDetour/journeyDetour";
 import {ThreeDots} from "react-loading-icons";
 import Carousel from "../components/Carousel2";
 import LazyLoad from "react-lazyload";
-import ProjectCard from "../components/ProjectCard";
-import SheenPlaceholder from "../components/Loading/SheenPlaceholder";
 import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 function JourneyMain() {
     const sidebarOpen = useAppSelector(selectAppWrapperSidebarOpen);
@@ -995,51 +982,105 @@ function JourneyMain() {
         )
     }
 
+    const [expandedCard, setExpandedCard] = useState(null);
+
+    const handleToggleClick = (index: any) => {
+        if (expandedCard === index) {
+            setExpandedCard(null);
+        } else {
+            setExpandedCard(index);
+        }
+    };
 
     const userJourney = () => {
         return (
-            <Box sx={{overflow: 'hidden', position: "relative"}}>
-                <Box sx={{display: "flex", justifyContent: "center", alignItems: "center", m: 2}}>
-                    <Typography variant="h2" sx={{color: theme.palette.text.primary}}>
+            <Box sx={{ overflow: 'hidden', position: "relative" }}>
+                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", m: 2 }}>
+                    <Typography variant="h2" sx={{ color: theme.palette.text.primary }}>
                         Your Journey
                     </Typography>
-                    {/*<Button onClick={() => {getTasks()}}>*/}
-                    {/*    Testing*/}
-                    {/*</Button>*/}
                 </Box>
-                {unitData.map((unit: any, index: number) => (
-                    <div ref={unitRefs.current[index]} key={unit._id}>
+                {unitData.map((unit, index) => (
+                    <div key={unit._id}>
                         <Grid container>
-                            {(index % 2 === 0)
-                                ?
-                                <Grid item xl={4} sx={{
-                                    display: "flex",
-                                    justifyContent: "start",
-                                    paddingTop: '20vh',
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                }}>
-                                    {<JourneyPortals currentIndex={index}/>}
-                                </Grid>
+                            {index % 2 === 0 ?
+                                (<Grid item xl={4} sx={{ display: "flex", justifyContent: "start", paddingTop: '20vh', flexDirection: "column", alignItems: "center" }}>
+                                    {<JourneyPortals currentIndex={index} />}
+                                </Grid>)
                                 :
-                                <Grid item xl={4} sx={{display: "flex", justifyContent: "center", alignItems: "start"}}>
-                                    <MarkdownRenderer
-                                        markdown={unit.handout}
-                                        style={{
-                                            fontSize: "0.8rem",
-                                            width: "fit-content",
-                                            maxWidth: "475px",
-                                        }}
-                                    />
-                                </Grid>
+                                (<Grid item xl={4} sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: 'column', textAlign: "justify" }}>
+
+                                    <Card
+                                        sx={{
+                                            borderRadius: "30px",
+                                            backgroundColor: hexToRGBA(unit.color, 0.5),
+                                            overflow: "hidden",
+                                            position: 'relative',
+                                            boxShadow: (expandedCard === index) ? '' : `inset 0px -50px 75px -25px ${hexToRGBA(unit.color, 0.5)}`,
+                                        }}>
+                                        <div style={{
+                                            maxHeight: (expandedCard === index) ? 'none' : '60vh',
+                                            overflow: 'hidden',
+                                            position: 'relative',
+                                        }}>
+                                            <div style={{
+                                                backgroundColor: 'rgb(255,255,255,0.5)',
+                                                color: 'black',
+                                                textAlign: 'center',
+                                            }}>
+                                                <Typography variant={'h4'}>Handout</Typography>
+                                            </div>
+                                            <MarkdownRenderer
+                                                //markdown={unit.handout.replace(/^.*\n/, "# <p style=\"text-align: center;\">Handout</p>")}
+                                                markdown={unit.handout}
+                                                style={{
+                                                    margin: "20px",
+                                                    fontSize: "1rem",
+                                                    width: "fit-content",
+                                                    maxWidth: "475px",
+                                                }}
+                                            />
+                                        </div>
+                                        <div style={{
+                                            position: 'absolute',
+                                            bottom: 0,
+                                            left: 0,
+                                            width: '100%',
+                                            height: '43px',
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            backdropFilter: (expandedCard === index) ? '' : 'blur(1px)'
+                                        }}>
+                                            <Button
+                                                variant={"contained"}
+                                                onClick={() => handleToggleClick(index)}
+                                                sx={{
+                                                    zIndex: 2,
+                                                    opacity: (expandedCard === index) ? 0 : 0.7,
+                                                    '&:hover': { opacity: 0.7},
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                                                    borderRadius: '50%',
+                                                    color: 'black',
+                                                    minWidth: '30px',
+                                                    height: '30px',
+                                                    padding: '5px',
+                                                }}
+                                            >
+                                                {(expandedCard === index) ? <KeyboardArrowUpIcon/> : <KeyboardArrowDownIcon/>}
+                                            </Button>
+                                        </div>
+                                    </Card>
+                                </Grid>)
                             }
                             <Grid item xl={4} sx={{
                                 display: "flex",
                                 justifyContent: "center",
                                 flexDirection: "column",
-                                alignItems: "center", borderRadius: "30px",
+                                alignItems: "center",
+                                borderRadius: "30px",
                                 mt: 2,
-                                backgroundColor: unit.color,
+                                backgroundColor: unit.color
                             }}>
                                 <Box sx={{p: 2}}>
                                     <Typography variant={'h5'}>{unit.name}</Typography>
@@ -1079,28 +1120,76 @@ function JourneyMain() {
                                     </AwesomeButton>
                                 </Box>
                             </Grid>
-                            {(index % 2 === 0)
-                                ?
-                                <Grid item xl={4} sx={{display: "flex", justifyContent: "center", alignItems: "start"}}>
-                                    <MarkdownRenderer
-                                        markdown={unit.handout}
-                                        style={{
-                                            fontSize: "0.8rem",
-                                            width: "fit-content",
-                                            maxWidth: "475px",
-                                        }}
-                                    />
-                                </Grid>
+                            {index % 2 === 0 ?
+                                (<Grid item xl={4} sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: 'column', textAlign: "justify" }}>
+
+                                    <Card
+                                        sx={{
+                                            borderRadius: "30px",
+                                            backgroundColor: hexToRGBA(unit.color, 0.5),
+                                            overflow: "hidden",
+                                            position: 'relative',
+                                            boxShadow: (expandedCard === index) ? '' : `inset 0px -50px 75px -25px ${hexToRGBA(unit.color, 0.5)}`,
+                                        }}>
+                                        <div style={{
+                                            maxHeight: (expandedCard === index) ? 'none' : '60vh',
+                                            overflow: 'hidden',
+                                            position: 'relative',
+                                            textAlign: 'justify',
+                                        }}>
+                                            <div style={{
+                                                backgroundColor: 'rgb(255,255,255,0.5)',
+                                                color: 'black',
+                                                textAlign: 'center',
+                                            }}>
+                                                <Typography variant={'h4'}>Handout</Typography>
+                                            </div>
+                                            <MarkdownRenderer
+                                                //markdown={unit.handout.replace(/^.*\n/, "# <p style=\"text-align: center;\">Handout</p>")}
+                                                markdown={unit.handout}
+                                                style={{
+                                                    margin: "20px",
+                                                    fontSize: "1rem",
+                                                    width: "fit-content",
+                                                    maxWidth: "475px",
+                                                }}
+                                            />
+                                        </div>
+                                        <div style={{
+                                            position: 'absolute',
+                                            bottom: 0,
+                                            left: 0,
+                                            width: '100%',
+                                            height: '43px',
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            backdropFilter: (expandedCard === index) ? '' : 'blur(1px)'
+                                        }}>
+                                            <Button
+                                                variant={"contained"}
+                                                onClick={() => handleToggleClick(index)}
+                                                sx={{
+                                                    zIndex: 2,
+                                                    opacity: (expandedCard === index) ? 0 : 0.7,
+                                                    '&:hover': { opacity: 0.7},
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                                                    borderRadius: '50%',
+                                                    color: 'black',
+                                                    minWidth: '30px',
+                                                    height: '30px',
+                                                    padding: '5px',
+                                                }}
+                                            >
+                                                {(expandedCard === index) ? <KeyboardArrowUpIcon/> : <KeyboardArrowDownIcon/>}
+                                            </Button>
+                                        </div>
+                                    </Card>
+                                </Grid>)
                                 :
-                                <Grid item xl={4} sx={{
-                                    display: "flex",
-                                    justifyContent: "start",
-                                    paddingTop: '20vh',
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                }}>
-                                    {<JourneyPortals currentIndex={index}/>}
-                                </Grid>
+                                (<Grid item xl={4} sx={{ display: "flex", justifyContent: "start", paddingTop: '20vh', flexDirection: "column", alignItems: "center" }}>
+                                    {<JourneyPortals currentIndex={index} />}
+                                </Grid>)
                             }
                         </Grid>
                     </div>
@@ -1128,6 +1217,14 @@ function JourneyMain() {
         </ThemeProvider>
     );
 
+}
+
+function hexToRGBA(hex: any, alpha = 1) {
+    let r = parseInt(hex.slice(1, 3), 16),
+        g = parseInt(hex.slice(3, 5), 16),
+        b = parseInt(hex.slice(5, 7), 16);
+
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 export default JourneyMain;
