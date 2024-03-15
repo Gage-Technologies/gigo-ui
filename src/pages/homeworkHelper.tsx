@@ -452,9 +452,17 @@ const HomeworkHelperInit = ({ id, theme, toggleEditor, submit }: InitProps) => {
     return (
         <>
             <InitStyledContainer maxWidth={active || text.length > 0 ? "md" : "sm"}>
-                <Box sx={{ textAlign: 'center' }}>
+                <Box display={"inline-flex"} sx={{ 
+                    textAlign: 'center',
+                    justifyContent: "center",
+                    alignItems: "center",
+                    alignContent: "center"
+                }}>
                     <Typography variant="h4" component="h1" gutterBottom>
                         GIGO Homework Helper
+                    </Typography>
+                    <Typography variant="caption" component="span" style={{ fontSize: '12px', marginLeft: '5px', textTransform: 'lowercase' }}>
+                        [beta]
                     </Typography>
                 </Box>
                 <SearchContainer elevation={6}>

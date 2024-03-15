@@ -877,8 +877,6 @@ function ByteMobile() {
             setIsButtonActive(true);
 
             updateCode(newCode);
-
-
         } else {
             setIsButtonActive(false);
         }
