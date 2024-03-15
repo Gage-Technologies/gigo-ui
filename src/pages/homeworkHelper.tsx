@@ -32,9 +32,9 @@ import {
     Typography
 } from "@mui/material";
 import * as React from "react";
-import {useEffect, useState} from "react";
-import {getAllTokens} from "../theme";
-import {styled} from '@mui/material/styles';
+import { useEffect, useState } from "react";
+import { getAllTokens } from "../theme";
+import { styled } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
 import CodeIcon from '@mui/icons-material/Code';
 import Editor from "../components/IDE/Editor";
@@ -42,10 +42,10 @@ import Slide from "@mui/material/Slide";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
-import {grey} from "@mui/material/colors";
+import { grey } from "@mui/material/colors";
 import SheenPlaceholder from "../components/Loading/SheenPlaceholder";
-import {CtCircularProgress} from "../components/CodeTeacher/CtCircularProgress";
-import {useGlobalCtWebSocket} from "../services/ct_websocket";
+import { CtCircularProgress } from "../components/CodeTeacher/CtCircularProgress";
+import { useGlobalCtWebSocket } from "../services/ct_websocket";
 import {
     CtChatMessageType,
     CtCodeFile,
@@ -66,25 +66,25 @@ import {
     CtNewHhChatResponse,
     CtValidationErrorPayload
 } from "../models/ct_websocket";
-import {Add, LibraryBooks, PlayArrow} from "@material-ui/icons";
-import {useAppSelector} from "../app/hooks";
-import {selectAuthState} from "../reducers/auth/auth";
-import {format, formatDistanceToNow, parseISO} from 'date-fns';
-import {Helmet, HelmetProvider} from "react-helmet-async";
-import {useParams} from "react-router";
-import {useNavigate} from "react-router-dom";
+import { Add, LibraryBooks, PlayArrow } from "@material-ui/icons";
+import { useAppSelector } from "../app/hooks";
+import { selectAuthState } from "../reducers/auth/auth";
+import { format, formatDistanceToNow, parseISO } from 'date-fns';
+import { Helmet, HelmetProvider } from "react-helmet-async";
+import { useParams } from "react-router";
+import { useNavigate } from "react-router-dom";
 import MenuIcon from "@mui/icons-material/Menu";
 import ByteTerminal from "../components/Terminal";
-import {ExecResponsePayload, OutputRow} from "../models/bytes";
-import {WsGenericErrorPayload, WsMessage, WsMessageType} from "../models/websocket";
-import {useGlobalWebSocket} from "../services/websocket";
+import { ExecResponsePayload, OutputRow } from "../models/bytes";
+import { WsGenericErrorPayload, WsMessage, WsMessageType } from "../models/websocket";
+import { useGlobalWebSocket } from "../services/websocket";
 import call from "../services/api-call";
 import config from "../config";
 import swal from "sweetalert";
-import {Workspace} from "../models/workspace";
+import { Workspace } from "../models/workspace";
 import CodeSource from "../models/codeSource";
-import {LoadingButton} from "@mui/lab";
-import {sleep} from "../services/utils";
+import { LoadingButton } from "@mui/lab";
+import { sleep } from "../services/utils";
 import LinkOffIcon from "@mui/icons-material/LinkOff";
 import LinkIcon from "@mui/icons-material/Link";
 import CodeTeacherChatIcon from "../components/CodeTeacher/CodeTeacherChatIcon";
@@ -93,7 +93,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import Carousel from "../components/Carousel2";
 import GoProDisplay from "../components/GoProDisplay";
 import proGorillaCrown from "../img/pro-pop-up-icon-plain.svg";
-import {selectAppWrapperChatOpen, selectAppWrapperSidebarOpen} from "../reducers/appWrapper/appWrapper";
+import { selectAppWrapperChatOpen, selectAppWrapperSidebarOpen } from "../reducers/appWrapper/appWrapper";
 
 interface MergedOutputRow {
     error: boolean;
@@ -122,23 +122,24 @@ interface InitialStatusMessage {
 }
 
 const languages: LanguageOption[] = [
-    {name: 'Go', extensions: ['go'], languageId: 6, execSupported: true},
-    {name: 'Python', extensions: ['py', 'pytho', 'pyt'], languageId: 5, execSupported: true},
-    {name: 'C++', extensions: ['cpp', 'cc', 'cxx', 'hpp', 'c++', 'h'], languageId: 8, execSupported: true},
-    {name: 'HTML', extensions: ['html', 'htm'], languageId: 27, execSupported: false},
-    {name: 'Java', extensions: ['java'], languageId: 2, execSupported: true},
-    {name: 'JavaScript', extensions: ['js'], languageId: 3, execSupported: true},
-    {name: 'JSON', extensions: ['json'], languageId: 1, execSupported: false},
-    {name: 'Markdown', extensions: ['md'], languageId: 1, execSupported: false},
-    {name: 'PHP', extensions: ['php'], languageId: 13, execSupported: false},
-    {name: 'Rust', extensions: ['rs'], languageId: 14, execSupported: true},
-    {name: 'SQL', extensions: ['sql'], languageId: 34, execSupported: false},
-    {name: 'XML', extensions: ['xml'], languageId: 1, execSupported: false},
-    {name: 'LESS', extensions: ['less'], languageId: 1, execSupported: false},
-    {name: 'SASS', extensions: ['sass', 'scss'], languageId: 1, execSupported: false},
-    {name: 'Clojure', extensions: ['clj'], languageId: 21, execSupported: false},
-    {name: 'C#', extensions: ['cs'], languageId: 10, execSupported: true},
-    {name: 'Shell', extensions: ['bash', 'sh'], languageId: 38, execSupported: true}
+    { name: 'Go', extensions: ['go'], languageId: 6, execSupported: true },
+    { name: 'Python', extensions: ['py', 'pytho', 'pyt'], languageId: 5, execSupported: true },
+    { name: 'C++', extensions: ['cpp', 'cc', 'cxx', 'hpp', 'c++', 'h'], languageId: 8, execSupported: false },
+    { name: 'HTML', extensions: ['html', 'htm'], languageId: 27, execSupported: false },
+    { name: 'Java', extensions: ['java'], languageId: 2, execSupported: false },
+    { name: 'JavaScript', extensions: ['js'], languageId: 3, execSupported: true },
+    { name: 'JSON', extensions: ['json'], languageId: 1, execSupported: false },
+    { name: 'Markdown', extensions: ['md'], languageId: 1, execSupported: false },
+    { name: 'PHP', extensions: ['php'], languageId: 13, execSupported: false },
+    { name: 'Rust', extensions: ['rs'], languageId: 14, execSupported: true },
+    { name: 'SQL', extensions: ['sql'], languageId: 34, execSupported: false },
+    { name: 'XML', extensions: ['xml'], languageId: 1, execSupported: false },
+    { name: 'LESS', extensions: ['less'], languageId: 1, execSupported: false },
+    { name: 'SASS', extensions: ['sass', 'scss'], languageId: 1, execSupported: false },
+    { name: 'Clojure', extensions: ['clj'], languageId: 21, execSupported: false },
+    { name: 'C#', extensions: ['cs'], languageId: 10, execSupported: true },
+    { name: 'Shell', extensions: ['bash', 'sh'], languageId: 38, execSupported: true },
+    { name: 'Toml', extensions: ['toml'], languageId: 14, execSupported: true }
 ];
 
 const mapToLang = (l: string) => {
@@ -230,7 +231,7 @@ const mapFilePathToLangOption = (l: string): LanguageOption | undefined => {
 }
 
 
-const InitStyledContainer = styled(Container)(({theme}) => ({
+const InitStyledContainer = styled(Container)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -241,7 +242,7 @@ const InitStyledContainer = styled(Container)(({theme}) => ({
     }),
 }));
 
-const SearchContainer = styled(Paper)(({theme}) => ({
+const SearchContainer = styled(Paper)(({ theme }) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -249,7 +250,7 @@ const SearchContainer = styled(Paper)(({theme}) => ({
     background: "transparent"
 }));
 
-const StyledTextField = styled(TextField)(({theme}) => ({
+const StyledTextField = styled(TextField)(({ theme }) => ({
     color: 'inherit',
     width: '100%',
     padding: theme.spacing(0.5),
@@ -282,13 +283,13 @@ const CodeTeacherPopupPaper = styled(Paper)`
     }
 `;
 
-const EditorTabs = styled(Tabs)(({theme}) => ({
+const EditorTabs = styled(Tabs)(({ theme }) => ({
     p: 0,
     m: 0,
     minHeight: 0,
 }));
 
-const EditorTab = styled(Tab)(({theme}) => ({
+const EditorTab = styled(Tab)(({ theme }) => ({
     fontSize: '0.7rem !important',
     padding: "2px 6px",
     marginRight: "4px",
@@ -319,7 +320,7 @@ interface InitProps {
     submit: (content: string) => void;
 }
 
-const HomeworkHelperInit = ({id, theme, toggleEditor, submit}: InitProps) => {
+const HomeworkHelperInit = ({ id, theme, toggleEditor, submit }: InitProps) => {
     const [active, setActive] = React.useState(false);
     const [text, setText] = React.useState("");
     const [goProPopup, setGoProPopup] = useState(false);
@@ -344,10 +345,114 @@ const HomeworkHelperInit = ({id, theme, toggleEditor, submit}: InitProps) => {
         plugPosition += 150
     }
 
+    const renderGoProPlug = () => {
+        if (text.split("\n").length > 3) {
+            return (
+                <Box sx={{
+                    position: "relative",
+                    width: "520px",
+                    backgroundColor: theme.palette.background.default,
+                    borderRadius: "10px",
+                    boxShadow: "0 4px 8px rgba(0,0,0,0.2), 0 6px 20px rgba(0,0,0,0.19)",
+                    padding: "10px",
+                    display: "flex",
+                    flexDirection: "row", // Stack items horizontally
+                    alignItems: "flex-start", // Align items to the left
+                    justifyContent: "space-between", // Even spacing
+                    height: "auto",
+                    border: `1px solid ${theme.palette.primary.main}`,
+                    bottom: "80px",
+                    left: `calc(50vw - ${plugPosition}px)`
+                }} id={"pro-banner"}>
+                    <Box sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-start", // Left align the title and subtitle
+                        paddingTop: "12px"
+                    }}>
+                        <h2 style={{ margin: "0 0 4px 0", textAlign: "left", fontSize: "18px" }}>Want better help on your
+                            homework?</h2>
+                    </Box>
+                    <Box sx={{
+                        display: "flex",
+                        justifyContent: "right", // Center the button
+                        marginTop: "6px", // Add space above the button
+                        marginBottom: "6px",
+                        float: "right"
+                    }}>
+                        <Button style={{
+                            padding: "8px 16px",
+                            fontSize: "14px",
+                        }} variant={"outlined"} onClick={() => setGoProPopup(true)}>Go Pro</Button>
+                    </Box>
+                </Box>
+            )
+        }
+
+        return (
+            <Box sx={{
+                position: "relative",
+                width: "520px",
+                backgroundColor: theme.palette.background.default,
+                borderRadius: "10px",
+                boxShadow: "0 4px 8px rgba(0,0,0,0.2), 0 6px 20px rgba(0,0,0,0.19)",
+                padding: "10px",
+                display: "flex",
+                flexDirection: "column", // Stack items vertically
+                alignItems: "flex-start", // Align items to the left
+                justifyContent: "space-between", // Even spacing
+                height: "auto",
+                border: `1px solid ${theme.palette.primary.main}`,
+                bottom: "165px",
+                left: `calc(50vw - ${plugPosition}px)`
+            }} id={"pro-banner"}>
+                <Box sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start", // Left align the title and subtitle
+                    width: "calc(100% - 120px)", // Adjust width to prevent overlap with image, assuming image width + some padding
+                }}>
+                    <h2 style={{ margin: "0 0 4px 0", textAlign: "left", fontSize: "18px" }}>Want better help on your
+                        homework?</h2>
+                    <p style={{
+                        textAlign: "left",
+                        margin: "0",
+                        fontSize: "12px",
+                        maxWidth: "100%", // Prevents subtitle from overlapping with the image
+                    }}>
+                        Go Pro to get smarter answers to your homework, evade AI detection tools, and access
+                        advanced
+                        features.
+                    </p>
+                </Box>
+                <Box sx={{
+                    width: "100%", // Full width for centering the button
+                    display: "flex",
+                    justifyContent: "center", // Center the button
+                    marginTop: "8px", // Add space above the button
+                }}>
+                    <Button style={{
+                        padding: "8px 16px",
+                        fontSize: "14px",
+                    }} variant={"outlined"} onClick={() => setGoProPopup(true)}>Go Pro</Button>
+                </Box>
+                <Box sx={{
+                    position: "absolute",
+                    top: "20px", // Adjust as needed
+                    right: "20px", // Ensure it's aligned to the right
+                    height: "80px", // Image size
+                    width: "80px", // Image size
+                }}>
+                    <img src={proGorillaCrown} alt={"GIGO Pro"} style={{ width: "100%", height: "auto" }} />
+                </Box>
+            </Box>
+        )
+    }
+
     return (
         <>
             <InitStyledContainer maxWidth={active || text.length > 0 ? "md" : "sm"}>
-                <Box sx={{textAlign: 'center'}}>
+                <Box sx={{ textAlign: 'center' }}>
                     <Typography variant="h4" component="h1" gutterBottom>
                         GIGO Homework Helper
                     </Typography>
@@ -361,7 +466,7 @@ const HomeworkHelperInit = ({id, theme, toggleEditor, submit}: InitProps) => {
                         onFocus={() => setActive(true)}
                         onChange={(e) => setText(e.target.value)}
                         onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
+                            if (e.key === 'Enter' && !e.shiftKey && text.trim().length > 0) {
                                 e.preventDefault();
                                 submit(text)
                                 setText("")
@@ -384,12 +489,12 @@ const HomeworkHelperInit = ({id, theme, toggleEditor, submit}: InitProps) => {
                                         <Button
                                             variant="outlined"
                                             color="primary"
-                                            sx={{borderRadius: "50%", minWidth: "0px", p: 1}}
+                                            sx={{ borderRadius: "50%", minWidth: "0px", p: 1 }}
                                             onClick={(e) => {
                                                 toggleEditor()
                                             }}
                                         >
-                                            <CodeIcon/>
+                                            <CodeIcon />
                                         </Button>
                                     </Tooltip>
                                 </InputAdornment>
@@ -399,70 +504,13 @@ const HomeworkHelperInit = ({id, theme, toggleEditor, submit}: InitProps) => {
                     />
                 </SearchContainer>
             </InitStyledContainer>
-            {authState.authenticated && authState.role === 0 && (
-                <Box sx={{
-                    position: "relative",
-                    width: "520px",
-                    backgroundColor: theme.palette.background.default,
-                    borderRadius: "10px",
-                    boxShadow: "0 4px 8px rgba(0,0,0,0.2), 0 6px 20px rgba(0,0,0,0.19)",
-                    padding: "10px",
-                    display: "flex",
-                    flexDirection: "column", // Stack items vertically
-                    alignItems: "flex-start", // Align items to the left
-                    justifyContent: "space-between", // Even spacing
-                    height: "auto",
-                    border: `1px solid ${theme.palette.primary.main}`,
-                    bottom: "165px",
-                    left: `calc(50vw - ${plugPosition}px)`
-                }} id={"pro-banner"}>
-                    <Box sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "flex-start", // Left align the title and subtitle
-                        width: "calc(100% - 120px)", // Adjust width to prevent overlap with image, assuming image width + some padding
-                    }}>
-                        <h2 style={{margin: "0 0 4px 0", textAlign: "left", fontSize: "18px"}}>Want better help on your
-                            homework?</h2>
-                        <p style={{
-                            textAlign: "left",
-                            margin: "0",
-                            fontSize: "12px",
-                            maxWidth: "100%", // Prevents subtitle from overlapping with the image
-                        }}>
-                            Go Pro to get smarter answers to your homework, evade AI detection tools, and access
-                            advanced
-                            features.
-                        </p>
-                    </Box>
-                    <Box sx={{
-                        width: "100%", // Full width for centering the button
-                        display: "flex",
-                        justifyContent: "center", // Center the button
-                        marginTop: "8px", // Add space above the button
-                    }}>
-                        <Button style={{
-                            padding: "8px 16px",
-                            fontSize: "14px",
-                        }} variant={"outlined"} onClick={() => setGoProPopup(true)}>Go Pro</Button>
-                    </Box>
-                    <Box sx={{
-                        position: "absolute",
-                        top: "20px", // Adjust as needed
-                        right: "20px", // Ensure it's aligned to the right
-                        height: "80px", // Image size
-                        width: "80px", // Image size
-                    }}>
-                        <img src={proGorillaCrown} alt={"GIGO Pro"} style={{width: "100%", height: "auto"}}/>
-                    </Box>
-                </Box>
-            )}
-            <GoProDisplay open={goProPopup} onClose={() => setGoProPopup(false)}/>
+            {authState.authenticated && authState.role === 0 && renderGoProPlug()}
+            <GoProDisplay open={goProPopup} onClose={() => setGoProPopup(false)} />
         </>
     );
 };
 
-const ActiveStyledContainer = styled(Container)(({theme}) => ({
+const ActiveStyledContainer = styled(Container)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
     // justifyContent: 'center',
@@ -485,14 +533,14 @@ interface ActiveProps {
 }
 
 const HomeworkHelperActive = ({
-                                  mode,
-                                  theme,
-                                  activeResponse,
-                                  messages,
-                                  toggleEditor,
-                                  setEditorCode,
-                                  sendMessage
-                              }: ActiveProps) => {
+    mode,
+    theme,
+    activeResponse,
+    messages,
+    toggleEditor,
+    setEditorCode,
+    sendMessage
+}: ActiveProps) => {
     const [text, setText] = React.useState("");
 
     const [scrolledToBottom, setScrolledToBottom] = useState("")
@@ -508,10 +556,12 @@ const HomeworkHelperActive = ({
     const authState = useAppSelector(selectAuthState);
 
     const renderInlineCodeEditor = (id: string, code: CtCodeFile[]) => {
+        console.log("expanded code blocks: ", expandedCodeBlock)
+
         let selectedFileIdx = code.findIndex((f) => `${id}:${f.file_name}` === selectedFile)
 
         return (
-            <Box sx={{width: "100%"}}>
+            <Box sx={{ width: "100%" }}>
                 <Button
                     variant={"text"}
                     sx={{
@@ -519,10 +569,13 @@ const HomeworkHelperActive = ({
                         fontSize: "0.7rem"
                     }}
                     onClick={() => {
+                        console.log("clicked code button")
                         const idx = expandedCodeBlock.findIndex((x) => x === id);
                         if (idx >= 0) {
+                            console.log("removing id", id)
                             setExpandedCodeBlock((prev) => prev.filter((i) => i !== id));
                         } else {
+                            console.log("adding id: ", id)
                             setExpandedCodeBlock((prev) => prev.concat(id));
                         }
                     }}
@@ -530,12 +583,12 @@ const HomeworkHelperActive = ({
                     Code
                     {
                         expandedCodeBlock.findIndex((x) => x === id) > -1 ?
-                            (<KeyboardArrowUpIcon fontSize={"small"}/>) :
-                            (<KeyboardArrowDownIcon fontSize={"small"}/>)
+                            (<KeyboardArrowUpIcon fontSize={"small"} />) :
+                            (<KeyboardArrowDownIcon fontSize={"small"} />)
                     }
                 </Button>
                 {expandedCodeBlock.findIndex((x) => x === id) > -1 && selectedFileIdx == -1 && (
-                    <Box sx={{marginBottom: "10px", width: "100%"}}>
+                    <Box sx={{ marginBottom: "10px", width: "100%" }}>
                         <Carousel itemsShown={8} itemsToSlide={8} infiniteLoop={true}>
                             {code.map(
                                 (c, index) => (
@@ -548,13 +601,22 @@ const HomeworkHelperActive = ({
                                         <Card
                                             key={`${id}:${c.file_name}`}
                                             sx={{
-                                                maxWidth: "100px",
-                                                textOverflow: "elipses",
+                                                width: "130px",
                                                 p: 1,
                                                 boxShadow: "none"
                                             }}
                                         >
-                                            <Typography variant={"h6"} sx={{textTransform: "none"}}>
+                                            <Typography
+                                                variant={"body2"}
+                                                sx={{
+                                                    textTransform: "none",
+                                                    whiteSpace: "nowrap",
+                                                    overflow: "hidden",
+                                                    textOverflow: "ellipsis",
+                                                    width: "122px",
+                                                    textAlign: "center"
+                                                }}
+                                            >
                                                 {c.file_name}
                                             </Typography>
                                             <Typography variant={"caption"}>
@@ -568,7 +630,7 @@ const HomeworkHelperActive = ({
                     </Box>
                 )}
                 {expandedCodeBlock.findIndex((x) => x === id) > -1 && selectedFileIdx >= 0 && (
-                    <Box sx={{marginBottom: "60px", width: "100%"}}>
+                    <Box sx={{ marginBottom: "60px", width: "100%" }}>
                         <MarkdownRenderer
                             markdown={
                                 code ?
@@ -587,7 +649,7 @@ const HomeworkHelperActive = ({
                         />
                         <Box
                             display={"inline-flex"}
-                            sx={{width: "100%"}}
+                            sx={{ width: "100%" }}
                         >
                             <Button
                                 variant={"outlined"}
@@ -602,7 +664,7 @@ const HomeworkHelperActive = ({
                                 }}
                             >
                                 Close Preview
-                                <CloseIcon fontSize={"small"}/>
+                                <CloseIcon fontSize={"small"} />
                             </Button>
                             <Button
                                 variant={"outlined"}
@@ -617,7 +679,7 @@ const HomeworkHelperActive = ({
                                 }}
                             >
                                 Open In Editor
-                                <CodeIcon sx={{marginLeft: "8px"}} fontSize={"small"}/>
+                                <CodeIcon sx={{ marginLeft: "8px" }} fontSize={"small"} />
                             </Button>
                         </Box>
                     </Box>
@@ -628,7 +690,7 @@ const HomeworkHelperActive = ({
 
     const renderCodeExecResult = (_id: string, result: string) => {
         return (
-            <Box sx={{width: "calc(100% - 10px)"}}>
+            <Box sx={{ width: "calc(100% - 10px)" }}>
                 <Box
                     sx={{
                         // backgroundColor: alpha(grey[800], mode === "light" ? 0.1 : 0.25),
@@ -653,7 +715,7 @@ const HomeworkHelperActive = ({
                         }}
                     >
                         <AccordionSummary
-                            expandIcon={<ExpandMoreIcon/>}
+                            expandIcon={<ExpandMoreIcon />}
                             aria-controls="panel1a-content"
                             id={`exec-result-header-${_id}`}
                             sx={{
@@ -703,18 +765,18 @@ const HomeworkHelperActive = ({
                     gap: "0.7em",
                 }}
             >
-                <SheenPlaceholder height={"0.7rem"} width={"78%"}/>
-                <SheenPlaceholder height={"0.7rem"} width={"92%"}/>
-                <SheenPlaceholder height={"0.7rem"} width={"88%"}/>
-                <SheenPlaceholder height={"0.7rem"} width={"95%"}/>
-                <SheenPlaceholder height={"0.7rem"} width={"92%"}/>
+                <SheenPlaceholder height={"0.7rem"} width={"78%"} />
+                <SheenPlaceholder height={"0.7rem"} width={"92%"} />
+                <SheenPlaceholder height={"0.7rem"} width={"88%"} />
+                <SheenPlaceholder height={"0.7rem"} width={"95%"} />
+                <SheenPlaceholder height={"0.7rem"} width={"92%"} />
                 {/*<div style={{height: "calc(100vh - 450px)"}}/>*/}
             </Box>
         )
     }
 
     const renderUserMessage = (
-        {idx, text, files}:
+        { idx, text, files }:
             {
                 idx: number,
                 text: string,
@@ -722,7 +784,7 @@ const HomeworkHelperActive = ({
             }
     ) => {
         return (
-            <Box sx={{width: "calc(100% - 10px)"}}>
+            <Box sx={{ width: "calc(100% - 10px)" }}>
                 <Box
                     sx={{
                         backgroundColor: alpha(grey[800], mode === "light" ? 0.1 : 0.25),
@@ -746,7 +808,7 @@ const HomeworkHelperActive = ({
     }
 
     const renderAssistantMessage = (
-        {idx, text, loading, files, command, commandResult, codeExecResult}:
+        { idx, text, loading, files, command, commandResult, codeExecResult }:
             {
                 idx: number,
                 text: string,
@@ -758,8 +820,8 @@ const HomeworkHelperActive = ({
             }
     ) => {
         return (
-            <Box sx={{width: "calc(100% - 10px)"}}>
-                {loading && text.length === 0 && renderNoResponseLoading()}
+            <Box sx={{ width: "calc(100% - 10px)" }}>
+                {loading && text.trim().length === 0 && renderNoResponseLoading()}
                 {text.length > 0 && (
                     <Box
                         sx={{
@@ -781,8 +843,8 @@ const HomeworkHelperActive = ({
                 {!loading && files.length > 0 && renderInlineCodeEditor(`q:${idx}`, files)}
                 {!loading && codeExecResult.length > 0 && renderCodeExecResult(`${idx}`, codeExecResult)}
                 {loading && (
-                    <Box sx={{float: "right", right: "20px"}}>
-                        <CtCircularProgress size={18}/>
+                    <Box sx={{ float: "right", right: "20px" }}>
+                        <CtCircularProgress size={18} />
                     </Box>
                 )}
             </Box>
@@ -850,8 +912,59 @@ const HomeworkHelperActive = ({
         )
     }
 
+    const messagePairsMemo = React.useMemo(() => renderMessagePairs(), [messages, expandedCodeBlock, selectedFile])
+
+    const activeMessageMemo = React.useMemo(() => renderActiveMessage(), [activeResponse])
+
+    const textFieldMemo = React.useMemo(() => (
+        <StyledTextField
+            fullWidth
+            multiline
+            maxRows={16}
+            placeholder="Ask a follow up question..."
+            disabled={activeResponse !== undefined}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey && text.trim().length > 0) {
+                    e.preventDefault();
+                    sendMessage(text);
+                    setText("")
+                }
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    setText(text + '    ');
+                }
+            }}
+            value={text}
+            InputProps={{
+                sx: {
+                    padding: theme.spacing(3),
+                    fontSize: text.length > 0 ? "medium" : undefined,
+                    borderRadius: "20px",
+                },
+                endAdornment: (
+                    <InputAdornment position="end">
+                        <Tooltip title={"Add Code"}>
+                            <Button
+                                variant="outlined"
+                                color="primary"
+                                sx={{ borderRadius: "50%", minWidth: "0px", p: 1 }}
+                                onClick={(e) => {
+                                    toggleEditor()
+                                }}
+                            >
+                                <CodeIcon />
+                            </Button>
+                        </Tooltip>
+                    </InputAdornment>
+                ),
+                'aria-label': 'ask',
+            }}
+        />
+    ), [text, activeResponse, toggleEditor])
+
     return (
-        <ActiveStyledContainer maxWidth={"md"} sx={{position: "relative", height: "calc(100vh - 82px)"}}>
+        <ActiveStyledContainer maxWidth={"md"} sx={{ position: "relative", height: "calc(100vh - 82px)" }}>
             <Box
                 display={"flex"}
                 flexDirection={"column"}
@@ -863,9 +976,9 @@ const HomeworkHelperActive = ({
                 }}
                 ref={scrollContainerRef}
             >
-                {renderMessagePairs()}
-                {renderActiveMessage()}
-                <div ref={targetScrollRef}/>
+                {messagePairsMemo}
+                {activeMessageMemo}
+                <div ref={targetScrollRef} />
             </Box>
             <Box
                 display={"flex"}
@@ -890,57 +1003,9 @@ const HomeworkHelperActive = ({
                         </Typography>
                     </ButtonBase>
                 )}
-                <StyledTextField
-                    fullWidth
-                    multiline
-                    maxRows={16}
-                    placeholder="Ask a follow up question..."
-                    disabled={activeResponse !== undefined}
-                    onChange={(e) => setText(e.target.value)}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            sendMessage(text);
-                            setText("")
-                        }
-                        if (e.key === 'Tab') {
-                            e.preventDefault();
-                            setText(text + '    ');
-                        }
-                    }}
-                    value={text}
-                    // sx={{
-                    //     position: "absolute",
-                    //     bottom: 0,
-                    //     width: "calc(100% - 50px)"
-                    // }}
-                    InputProps={{
-                        sx: {
-                            padding: theme.spacing(3),
-                            fontSize: text.length > 0 ? "medium" : undefined,
-                            borderRadius: "20px",
-                        },
-                        endAdornment: (
-                            <InputAdornment position="end">
-                                <Tooltip title={"Add Code"}>
-                                    <Button
-                                        variant="outlined"
-                                        color="primary"
-                                        sx={{borderRadius: "50%", minWidth: "0px", p: 1}}
-                                        onClick={(e) => {
-                                            toggleEditor()
-                                        }}
-                                    >
-                                        <CodeIcon/>
-                                    </Button>
-                                </Tooltip>
-                            </InputAdornment>
-                        ),
-                        'aria-label': 'ask',
-                    }}
-                />
+                {textFieldMemo}
             </Box>
-            <GoProDisplay open={goProPopup} onClose={() => setGoProPopup(false)}/>
+            <GoProDisplay open={goProPopup} onClose={() => setGoProPopup(false)} />
         </ActiveStyledContainer>
     )
 }
@@ -955,6 +1020,7 @@ function HomeworkHelper() {
 
     const sendExecOutputToCT = React.useRef<boolean>(false)
     const [ctRequestingExec, setCTRequestingExec] = useState<boolean>(false)
+    const [ctRequestingShare, setCTRequestingShare] = useState<boolean>(false)
     const [connectButtonLoading, setConnectButtonLoading] = useState<boolean>(false)
     const [commandId, setCommandId] = useState("");
     const [executingCode, setExecutingCode] = useState<boolean>(false)
@@ -989,7 +1055,7 @@ function HomeworkHelper() {
 
     let globalWs = useGlobalWebSocket();
 
-    let {id} = useParams()
+    let { id } = useParams()
 
     useEffect(() => {
         if (id === "-1" || newChat)
@@ -1072,14 +1138,14 @@ function HomeworkHelper() {
         }
 
         ctWs.sendWebsocketMessage({
-                sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-                type: CtMessageType.WebSocketMessageTypeGetHHChatMessagesRequest,
-                origin: CtMessageOrigin.WebSocketMessageOriginClient,
-                created_at: Date.now(),
-                payload: {
-                    chat_id: selectedChat,
-                }
-            } satisfies CtMessage<CtGetHHChatMessagesRequest>,
+            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            type: CtMessageType.WebSocketMessageTypeGetHHChatMessagesRequest,
+            origin: CtMessageOrigin.WebSocketMessageOriginClient,
+            created_at: Date.now(),
+            payload: {
+                chat_id: selectedChat,
+            }
+        } satisfies CtMessage<CtGetHHChatMessagesRequest>,
             (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtGetHHChatMessagesResponse>): boolean => {
                 if (msg.type !== CtMessageType.WebSocketMessageTypeGetHHChatMessagesResponse) {
                     console.log("failed getting chat messages", msg)
@@ -1123,16 +1189,16 @@ function HomeworkHelper() {
         }
 
         ctWs.sendWebsocketMessage({
-                sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-                type: CtMessageType.WebSocketMessageTypeGetHHChatsRequest,
-                origin: CtMessageOrigin.WebSocketMessageOriginClient,
-                created_at: Date.now(),
-                payload: {
-                    partition: "default",
-                    offset: 0,
-                    limit: 100
-                }
-            } satisfies CtMessage<CtGetHHChatsRequest>,
+            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            type: CtMessageType.WebSocketMessageTypeGetHHChatsRequest,
+            origin: CtMessageOrigin.WebSocketMessageOriginClient,
+            created_at: Date.now(),
+            payload: {
+                partition: "default",
+                offset: 0,
+                limit: 100
+            }
+        } satisfies CtMessage<CtGetHHChatsRequest>,
             (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtGetHHChatsResponse>): boolean => {
                 if (msg.type !== CtMessageType.WebSocketMessageTypeGetHHChatsResponse) {
                     console.log("failed getting chats", msg)
@@ -1158,24 +1224,24 @@ function HomeworkHelper() {
                 files: code,
                 created_at: new Date(),
                 message_number: 0,
-                command: {command: "", lang: ""},
+                command: { command: "", lang: "" },
                 premium_llm: false,
                 free_credit_use: false
             }));
         }
 
         ctWs.sendWebsocketMessage({
-                sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-                type: CtMessageType.WebSocketMessageTypeUserHHChatMessage,
-                origin: CtMessageOrigin.WebSocketMessageOriginClient,
-                created_at: Date.now(),
-                payload: {
-                    chat_id: chatId,
-                    user_message: userMessage,
-                    files: code,
-                    code_exec_result: codeExec
-                }
-            } satisfies CtMessage<CtHhUserMessage>,
+            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            type: CtMessageType.WebSocketMessageTypeUserHHChatMessage,
+            origin: CtMessageOrigin.WebSocketMessageOriginClient,
+            created_at: Date.now(),
+            payload: {
+                chat_id: chatId,
+                user_message: userMessage,
+                files: code,
+                code_exec_result: codeExec
+            }
+        } satisfies CtMessage<CtHhUserMessage>,
             (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtHHAssistantMessage>): boolean => {
                 if (msg.type !== CtMessageType.WebSocketMessageTypeAssistantHHChatMessage) {
                     console.log("failed to send message", msg)
@@ -1203,8 +1269,33 @@ function HomeworkHelper() {
                     setActiveFile(res.active_file)
                     setEditorOpen(true)
 
+                    let activeFileLang = mapFilePathToLangOption(res.active_file)
+                    if (activeFileLang === undefined || !activeFileLang.execSupported) {
+                        // look for other files that have exec support
+                        for (let i = 0; i < files.length; i++) {
+                            activeFileLang = mapFilePathToLangOption(files[i].file_name)
+                            if (activeFileLang !== undefined && activeFileLang.execSupported) {
+                                setActiveFile(files[i].file_name)
+                                break
+                            }
+                        }
+                    }
+
                     if (res.done) {
-                        setCTRequestingExec(true)
+                        let activeFileLang = mapFilePathToLangOption(res.active_file)
+                        if (activeFileLang === undefined || !activeFileLang.execSupported) {
+                            // look for other files that have exec support
+                            for (let i = 0; i < files.length; i++) {
+                                activeFileLang = mapFilePathToLangOption(files[i].file_name)
+                                if (activeFileLang !== undefined && activeFileLang.execSupported) {
+                                    setActiveFile(files[i].file_name)
+                                    break
+                                }
+                            }
+                        }
+                        if (activeFileLang !== undefined && activeFileLang.execSupported) {
+                            setCTRequestingExec(true)
+                        }
                     }
                 }
 
@@ -1251,11 +1342,11 @@ function HomeworkHelper() {
             files: code,
             created_at: new Date(),
             message_number: 0,
-            command: {command: "", lang: ""},
+            command: { command: "", lang: "" },
             premium_llm: false,
             free_credit_use: false
         }]);
-        setActiveResponse({text: "", files: code, command: null});
+        setActiveResponse({ text: "", files: code, command: null });
 
         // create a new promise that will return the chat id or null to us
         let resolver: (value: string | null) => void;
@@ -1264,14 +1355,14 @@ function HomeworkHelper() {
         });
 
         ctWs.sendWebsocketMessage({
-                sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-                type: CtMessageType.WebSocketMessageTypeNewHHChatRequest,
-                origin: CtMessageOrigin.WebSocketMessageOriginClient,
-                created_at: Date.now(),
-                payload: {
-                    partition: "default"
-                }
-            } satisfies CtMessage<CtNewHhChatRequest>,
+            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            type: CtMessageType.WebSocketMessageTypeNewHHChatRequest,
+            origin: CtMessageOrigin.WebSocketMessageOriginClient,
+            created_at: Date.now(),
+            payload: {
+                partition: "default"
+            }
+        } satisfies CtMessage<CtNewHhChatRequest>,
             (msg: CtMessage<CtGenericErrorPayload | CtValidationErrorPayload | CtNewHhChatResponse>): boolean => {
                 if (msg.type !== CtMessageType.WebSocketMessageTypeNewHHChatResponse) {
                     console.log("failed to create new chat", msg)
@@ -1311,6 +1402,7 @@ function HomeworkHelper() {
                         setEditorOpen(state !== undefined ? state : !editorOpen)
                     }}
                     setEditorCode={(code, activeFile) => {
+                        setCode([])
                         setCode(code)
                         setActiveFile(activeFile)
                     }}
@@ -1318,6 +1410,7 @@ function HomeworkHelper() {
                         if (selectedChat === null || selectedChat === "-1" || content === "") {
                             return
                         }
+                        setActiveResponse({ text: "", files: code, command: null });
                         sendUserMessage(selectedChat, content)
                     }}
                 />
@@ -1358,7 +1451,7 @@ function HomeworkHelper() {
                 null,
                 null,
                 // @ts-ignore
-                {hh_id: chatId},
+                { hh_id: chatId },
                 null,
                 config.rootPath
             );
@@ -1424,6 +1517,7 @@ function HomeworkHelper() {
         if (sendExecOutputToCT.current) {
             sendExecOutputToCT.current = false
             if (selectedChat !== null) {
+                setActiveResponse({ text: "", files: code, command: null });
                 sendUserMessage(
                     selectedChat,
                     result.length > 0 ? result : "No Output",
@@ -1431,6 +1525,8 @@ function HomeworkHelper() {
                     true
                 )
             }
+        } else {
+            setCTRequestingShare(true)
         }
     }, [selectedChat]);
 
@@ -1440,9 +1536,11 @@ function HomeworkHelper() {
             return
         }
 
+        let files = code.filter((f) => f.file_name.trim().length > 0)
+
         let payloadContent: any = {
             lang: lang.languageId,
-            exec_files: code.map(c => ({
+            exec_files: files.map(c => ({
                 file_name: c.file_name,
                 code: c.code,
                 execute: c.file_name === activeFile
@@ -1469,10 +1567,10 @@ function HomeworkHelper() {
 
         setTerminalVisible(true)
         setOutput({
-            stdout: [{timestamp: Date.now() * 1000, content: "Running..."}],
+            stdout: [{ timestamp: Date.now() * 1000, content: "Running..." }],
             stderr: [],
             merged: "Running...",
-            mergedLines: [{timestamp: Date.now() * 1000, content: "Running...", error: false}],
+            mergedLines: [{ timestamp: Date.now() * 1000, content: "Running...", error: false }],
         });
         setExecutingCode(true)
         setCommandId("");
@@ -1509,6 +1607,26 @@ function HomeworkHelper() {
                             })
                             return true
                         }
+
+                        if (payload.code === 1) {
+                            setOutput({
+                                stdout: [],
+                                stderr: [{
+                                    timestamp: Date.now() * 1000,
+                                    content: "Unexpected Error Occurred: " + payload.error
+                                }],
+                                merged: "Unexpected Error Occurred: " + payload.error,
+                                mergedLines: [{
+                                    error: true,
+                                    timestamp: Date.now() * 1000,
+                                    content: "Unexpected Error Occurred: " + payload.error,
+                                }],
+                            })
+
+                            setConnectButtonLoading(false)
+                            setExecutingCode(false)
+                            return true
+                        }
                     }
                     return true;
                 }
@@ -1518,7 +1636,7 @@ function HomeworkHelper() {
                 if (payload.command_id_string) {
                     setCommandId(payload.command_id_string);
                 }
-                const {stdout, stderr, done} = payload;
+                const { stdout, stderr, done } = payload;
 
                 // skip the processing if this is the first response
                 if (stdout.length === 0 && stderr.length === 0 && !done) {
@@ -1593,8 +1711,96 @@ function HomeworkHelper() {
     };
 
     const renderCtExecRequestPopup = () => {
-        if (!ctRequestingExec) {
+        if (!ctRequestingExec && !ctRequestingShare) {
             return null
+        }
+
+        console.log("requesting: ", ctRequestingExec, ctRequestingShare)
+
+        let body = (
+            <>
+                <Typography variant={"body2"}>
+                    CT would like to run this code.
+                </Typography>
+                <Box
+                    display={'inline-flex'}
+                    justifyContent={'space-between'}
+                    sx={{ width: "100%", paddingTop: "8px" }}
+                >
+                    <LoadingButton
+                        color={"success"}
+                        variant={"outlined"}
+                        loading={executingCode}
+                        onClick={() => {
+                            sendExecOutputToCT.current = true
+                            executeCode()
+                        }}
+                    >
+                        Permit
+                    </LoadingButton>
+                    <Button
+                        color={"error"}
+                        variant={"outlined"}
+                        onClick={() => setCTRequestingExec(false)}
+                    >
+                        Deny
+                    </Button>
+                </Box>
+            </>
+        )
+
+        if (executingCode) {
+            body = (
+                <>
+                    <Box
+                        display={'inline-flex'}
+                        justifyContent={'space-between'}
+                        sx={{ width: "100%" }}
+                    >
+                        <Typography variant={"body2"}>
+                            CT is running the code
+                        </Typography>
+                        <CtCircularProgress size={18} />
+                    </Box>
+                </>
+            )
+        }
+
+        if (ctRequestingShare) {
+            body = (
+                <>
+                    <Typography variant={"body2"}>
+                        CT would like to see the output.
+                    </Typography>
+                    <Box
+                        display={'inline-flex'}
+                        justifyContent={'space-between'}
+                        sx={{ width: "100%", paddingTop: "8px" }}
+                    >
+                        <LoadingButton
+                            color={"success"}
+                            variant={"outlined"}
+                            loading={executingCode}
+                            onClick={() => {
+                                if (output !== null) {
+                                    sendExecOutputToCT.current = true
+                                    handleCtExecResult(output.merged)
+                                    setCTRequestingShare(false)
+                                }
+                            }}
+                        >
+                            Permit
+                        </LoadingButton>
+                        <Button
+                            color={"error"}
+                            variant={"outlined"}
+                            onClick={() => setCTRequestingShare(false)}
+                        >
+                            Deny
+                        </Button>
+                    </Box >
+                </>
+            )
         }
 
         return (
@@ -1617,54 +1823,11 @@ function HomeworkHelper() {
                             height: '35px',
                         }}
                     />
-                    <Typography variant={"h6"} sx={{paddingTop: "8px"}}>
+                    <Typography variant={"h6"} sx={{ paddingTop: "8px" }}>
                         Code Teacher
                     </Typography>
                 </Box>
-                {executingCode ? (
-                    <>
-                        <Box
-                            display={'inline-flex'}
-                            justifyContent={'space-between'}
-                            sx={{width: "100%"}}
-                        >
-                            <Typography variant={"body2"}>
-                                CT is running the code
-                            </Typography>
-                            <CtCircularProgress size={18}/>
-                        </Box>
-                    </>
-                ) : (
-                    <>
-                        <Typography variant={"body2"}>
-                            CT would like to run this code.
-                        </Typography>
-                        <Box
-                            display={'inline-flex'}
-                            justifyContent={'space-between'}
-                            sx={{width: "100%", paddingTop: "8px"}}
-                        >
-                            <LoadingButton
-                                color={"success"}
-                                variant={"outlined"}
-                                loading={executingCode}
-                                onClick={() => {
-                                    sendExecOutputToCT.current = true
-                                    executeCode()
-                                }}
-                            >
-                                Permit
-                            </LoadingButton>
-                            <Button
-                                color={"error"}
-                                variant={"outlined"}
-                                onClick={() => setCTRequestingExec(false)}
-                            >
-                                Deny
-                            </Button>
-                        </Box>
-                    </>
-                )}
+                {body}
             </CodeTeacherPopupPaper>
         )
     }
@@ -1738,7 +1901,7 @@ function HomeworkHelper() {
                 <DialogContent>
                     <Typography variant={"body2"}>
                         Are you sure you want to delete the file <b>{deleteFileRequest}</b>?
-                        <br/>
+                        <br />
                         This action cannot be undone.
                     </Typography>
                 </DialogContent>
@@ -1807,14 +1970,14 @@ function HomeworkHelper() {
                 </LoadingButton>
             </Box>
         )
-        let stateIcon = (<LinkOffIcon sx={{color: alpha(theme.palette.text.primary, 0.6)}}/>)
+        let stateIcon = (<LinkOffIcon sx={{ color: alpha(theme.palette.text.primary, 0.6) }} />)
         if (workspaceState !== null) {
             if (workspaceState === 1) {
                 stateTooltipTitle = "Connected To DevSpace"
-                stateIcon = (<LinkIcon sx={{color: theme.palette.success.main}}/>)
-            } else {
+                stateIcon = (<LinkIcon sx={{ color: theme.palette.success.main }} />)
+            } else if (workspaceState < 1) {
                 stateTooltipTitle = "Connecting To DevSpace"
-                stateIcon = (<CircularProgress size={24} sx={{color: alpha(theme.palette.text.primary, 0.6)}}/>)
+                stateIcon = (<CircularProgress size={24} sx={{ color: alpha(theme.palette.text.primary, 0.6) }} />)
             }
         }
 
@@ -1830,6 +1993,8 @@ function HomeworkHelper() {
             }
         }
         let lang = mapFilePathToLangOption(fileName)
+
+        console.log("editor lang id:", mapFilePathToLang(activeFile))
 
         return (
             <Slide direction="left" in={editorOpen} mountOnEnter unmountOnExit>
@@ -1859,9 +2024,9 @@ function HomeworkHelper() {
                             variant="scrollable"
                             scrollButtons="auto"
                             aria-label="file tabs"
-                            TabIndicatorProps={{sx: {display: "none"}}}
+                            TabIndicatorProps={{ sx: { display: "none" } }}
                         >
-                            <EditorTab icon={<Add/>} aria-label="New file"/>
+                            <EditorTab icon={<Add />} aria-label="New file" />
                             {code.map((file, index) => (
                                 <EditorTab
                                     key={file.file_name}
@@ -1875,9 +2040,9 @@ function HomeworkHelper() {
                                             <IconButton
                                                 size="small"
                                                 onClick={() => setDeleteFileRequest(file.file_name)}
-                                                sx={{marginLeft: 0.5, padding: '2px', fontSize: "12px"}}
+                                                sx={{ marginLeft: 0.5, padding: '2px', fontSize: "12px" }}
                                             >
-                                                <CloseIcon fontSize="inherit"/>
+                                                <CloseIcon fontSize="inherit" />
                                             </IconButton>
                                         </div>
                                     }
@@ -1920,14 +2085,14 @@ function HomeworkHelper() {
                                             executeCode(); // Indicate button click
                                         }}
                                     >
-                                        Run <PlayArrow fontSize={"small"}/>
+                                        Run <PlayArrow fontSize={"small"} />
                                     </LoadingButton>
                                 </Tooltip>
                             </Box>
                         )}
                     </Box>
                     <Box
-                        sx={{position: "relative"}}
+                        sx={{ position: "relative" }}
                     >
                         <Editor
                             // ref={editorRef}
@@ -1974,6 +2139,7 @@ function HomeworkHelper() {
                             onStop={() => cancelCodeExec(commandId)}
                             onInputSubmit={(input: string) => stdInExecRequest(commandId, input)}
                             isRunning={executingCode}
+                            fontSize="0.7rem"
                         />
                     )}
                 </Box>
@@ -1986,8 +2152,8 @@ function HomeworkHelper() {
             <>
                 <SpeedDial
                     ariaLabel="SpeedDial"
-                    sx={{position: 'fixed', bottom: 24, right: 16}}
-                    icon={<MenuIcon/>}
+                    sx={{ position: 'fixed', bottom: 24, right: 16 }}
+                    icon={<MenuIcon />}
                     open={speedDialOpen}
                     onOpen={() => setSpeedDialOpen(true)}
                     onClose={() => setSpeedDialOpen(false)}
@@ -1995,14 +2161,14 @@ function HomeworkHelper() {
                 >
                     <SpeedDialAction
                         key={"new"}
-                        icon={<Add/>}
+                        icon={<Add />}
                         tooltipTitle={"New Homework"}
                         onClick={clearChatState}
                     />
                     {chats.length > 0 && (
                         <SpeedDialAction
                             key={"history"}
-                            icon={<LibraryBooks/>}
+                            icon={<LibraryBooks />}
                             tooltipTitle={"Homework History"}
                             onClick={() => setChatSelectionOpen(prev => !prev)}
                         />
@@ -2044,7 +2210,7 @@ function HomeworkHelper() {
                                             {
                                                 Date.now() - parseISO(item.last_message_at).getTime() > 86400000 ?
                                                     format(parseISO(item.last_message_at), 'MMMM d, yyyy') :
-                                                    formatDistanceToNow(parseISO(item.last_message_at), {addSuffix: true})
+                                                    formatDistanceToNow(parseISO(item.last_message_at), { addSuffix: true })
                                             }
                                         </Typography>
                                     </Box>
@@ -2078,17 +2244,17 @@ function HomeworkHelper() {
                 <HelmetProvider>
                     <Helmet>
                         <title>GIGO Homework Helper</title>
-                        <meta property="og:title" content={"GIGO Homework Helper"} data-rh="true"/>
+                        <meta property="og:title" content={"GIGO Homework Helper"} data-rh="true" />
                     </Helmet>
                 </HelmetProvider>
                 <Box
-                    sx={{maxHeight: "calc(100vh - 72px)", overflow: "hidden", width: "100% !important"}}
+                    sx={{ maxHeight: "calc(100vh - 72px)", overflow: "hidden", width: "100% !important" }}
                 >
-                    <Grid container sx={{width: "100% !important"}}>
+                    <Grid container sx={{ width: "100% !important" }}>
                         <Grid item xs={bodySize}>
                             {renderBody()}
                         </Grid>
-                        <Grid item xs={editorOpen ? 6 : 0} sx={{height: "calc(100vh - 72px)", mt: 2, mb: 2}}>
+                        <Grid item xs={editorOpen ? 6 : 0} sx={{ height: "calc(100vh - 72px)", mt: 2, mb: 2 }}>
                             {renderEditor()}
                         </Grid>
                     </Grid>

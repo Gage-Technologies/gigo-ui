@@ -193,7 +193,7 @@
     "@monaco-editor/loader": "1.3.2"
   },
   "scripts": {
-    "start": "cd dev && docker compose up -d && cd .. && HTTPS=true SSL_CRT_FILE=dev/dev.crt SSL_KEY_FILE=dev/dev.key PORT=33000 craco start -s 0.0.0.0 --verbose",
+    "start": "cd dev && docker compose up -d && cd .. && HTTPS=true SSL_CRT_FILE=dev/dev.crt SSL_KEY_FILE=dev/dev.key PORT=33000 react-scripts start -s 0.0.0.0 --verbose",
     "build": "GENERATE_SOURCEMAP=false craco build",
     "test": "craco test",
     "eject": "react-scripts eject",

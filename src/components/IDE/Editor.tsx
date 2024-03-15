@@ -19,6 +19,7 @@ import {clojure} from '@nextjournal/lang-clojure';
 import {csharp} from '@replit/codemirror-lang-csharp';
 import {go} from '@codemirror/legacy-modes/mode/go';
 import {shell} from '@codemirror/legacy-modes/mode/shell';
+import {toml} from '@codemirror/legacy-modes/mode/toml';
 import {copilot} from '@uiw/codemirror-theme-copilot';
 import {quietlight} from '@uiw/codemirror-theme-quietlight';
 import useDynamicStyles from "../../hooks/dynamicStyles";
@@ -118,7 +119,7 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
                 return java();
             case "js":
             case "javascript":
-                return javascript();
+                return javascript({jsx: true});
             case "json":
                 return json();
             case "md":
@@ -148,6 +149,8 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
             case "shell":
             case "bash":
                 return StreamLanguage.define(shell);
+            case "toml":
+                return StreamLanguage.define(toml);
             // Additional cases for other languages and their extensions
             default:
                 return undefined;

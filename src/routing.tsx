@@ -51,6 +51,7 @@ const Unsubscribe = React.lazy(() => import("./pages/unsubscribe"));
 const ArticlesPage = React.lazy(() => import("./pages/articles"))
 const ArticlePage = React.lazy(() => import("./pages/article"))
 const HomeworkHelperPage = React.lazy(() => import("./pages/homeworkHelper"))
+const HomeworkHelperMobilePage = React.lazy(() => import("./pages/homeworkHelperMobile"))
 
 export default function Routing() {
     // initialize redux dispatcher
@@ -151,8 +152,8 @@ export default function Routing() {
                     <Route path="/byte/:id" element={<DesktopMobileRouter desktop={<Byte />} mobile={<ByteMobile />} />} />
                     <Route path={"/aboutBytes"} element={<AboutBytes />} />
                     <Route path={"/privacyPolicy"} element={<PrivacyPolicy/>} />
-                    <Route path={"/homework"} element={<HomeworkHelperPage />} />
-                    <Route path={"/homework/:id"} element={<HomeworkHelperPage />} />
+                    <Route path={"/homework"} element={<DesktopMobileRouter desktop={<HomeworkHelperPage />} mobile={<HomeworkHelperMobilePage />} />} />
+                    <Route path={"/homework/:id"} element={<DesktopMobileRouter desktop={<HomeworkHelperPage />} mobile={<HomeworkHelperMobilePage />} />} />
                     <Route element={<PrivateRoute />}>
                         {/*<Route path={"/journey"} element={<Journey />}/>*/}
                         {/*<Route path={"/journey/form"} element={<JourneyForm />}/>*/}
