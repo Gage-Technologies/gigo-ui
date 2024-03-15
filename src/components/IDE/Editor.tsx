@@ -1,33 +1,33 @@
-import React, {useEffect, useState} from "react";
-import CodeMirror, {Extension, ReactCodeMirrorRef, ViewUpdate} from '@uiw/react-codemirror';
-import {indentUnit, StreamLanguage} from '@codemirror/language';
-import {python} from '@codemirror/lang-python';
-import {cpp} from '@codemirror/lang-cpp';
-import {html} from '@codemirror/lang-html';
-import {java} from '@codemirror/lang-java';
-import {javascript} from '@codemirror/lang-javascript';
-import {json} from '@codemirror/lang-json';
-import {lezer} from '@codemirror/lang-lezer';
-import {markdown} from '@codemirror/lang-markdown';
-import {php} from '@codemirror/lang-php';
-import {rust} from '@codemirror/lang-rust';
-import {sql} from '@codemirror/lang-sql';
-import {xml} from '@codemirror/lang-xml';
-import {less} from '@codemirror/lang-less';
-import {sass} from '@codemirror/lang-sass';
-import {clojure} from '@nextjournal/lang-clojure';
-import {csharp} from '@replit/codemirror-lang-csharp';
-import {go} from '@codemirror/legacy-modes/mode/go';
-import {shell} from '@codemirror/legacy-modes/mode/shell';
-import {toml} from '@codemirror/legacy-modes/mode/toml';
-import {copilot} from '@uiw/codemirror-theme-copilot';
-import {quietlight} from '@uiw/codemirror-theme-quietlight';
+import React, { useEffect, useState } from "react";
+import CodeMirror, { Extension, ReactCodeMirrorRef, ViewUpdate } from '@uiw/react-codemirror';
+import { indentUnit, StreamLanguage } from '@codemirror/language';
+import { python } from '@codemirror/lang-python';
+import { cpp } from '@codemirror/lang-cpp';
+import { html } from '@codemirror/lang-html';
+import { java } from '@codemirror/lang-java';
+import { javascript } from '@codemirror/lang-javascript';
+import { json } from '@codemirror/lang-json';
+import { lezer } from '@codemirror/lang-lezer';
+import { markdown } from '@codemirror/lang-markdown';
+import { php } from '@codemirror/lang-php';
+import { rust } from '@codemirror/lang-rust';
+import { sql } from '@codemirror/lang-sql';
+import { xml } from '@codemirror/lang-xml';
+import { less } from '@codemirror/lang-less';
+import { sass } from '@codemirror/lang-sass';
+import { clojure } from '@nextjournal/lang-clojure';
+import { csharp } from '@replit/codemirror-lang-csharp';
+import { go } from '@codemirror/legacy-modes/mode/go';
+import { shell } from '@codemirror/legacy-modes/mode/shell';
+import { toml } from '@codemirror/legacy-modes/mode/toml';
+import { copilot } from '@uiw/codemirror-theme-copilot';
+import { quietlight } from '@uiw/codemirror-theme-quietlight';
 import useDynamicStyles from "../../hooks/dynamicStyles";
-import {alpha, Box, createTheme, PaletteMode} from "@mui/material";
-import {ctTextHighlightExtension, ctTextHighlightTheme} from "./Extensions/CtHighlightExtension";
-import {languageServer} from './Extensions/Lsp/Lsp';
+import { alpha, Box, createTheme, PaletteMode } from "@mui/material";
+import { ctTextHighlightExtension, ctTextHighlightTheme } from "./Extensions/CtHighlightExtension";
+import { languageServer } from './Extensions/Lsp/Lsp';
 import "./editor.css"
-import {useGlobalCtWebSocket} from "../../services/ct_websocket";
+import { useGlobalCtWebSocket } from "../../services/ct_websocket";
 import {
     CtGenericErrorPayload,
     CtMessage,
@@ -37,8 +37,8 @@ import {
     CtSemanticRankResponse,
     CtValidationErrorPayload
 } from "../../models/ct_websocket";
-import {ctCreateCodeActions} from "./Extensions/CtCodeActionExtension";
-import {getAllTokens} from "../../theme";
+import { ctCreateCodeActions } from "./Extensions/CtCodeActionExtension";
+import { getAllTokens } from "../../theme";
 
 export type EditorProps = {
     language: string;
@@ -119,7 +119,7 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
                 return java();
             case "js":
             case "javascript":
-                return javascript({jsx: true});
+                return javascript({ jsx: true });
             case "json":
                 return json();
             case "md":
@@ -203,6 +203,13 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
     useEffect(() => {
         if (!props.lspUrl) {
             return
+        }
+
+        // import the layout stylesheet dynamically
+        if (window.innerWidth > 1000) {
+            require('./Extensions/styles/lsp-computer.css');
+        } else {
+            require('./Extensions/styles/lsp-mobile.css');
         }
 
         // get fp for the language
@@ -296,7 +303,7 @@ const Editor = React.forwardRef<ReactCodeMirrorRef, EditorProps>((props: EditorP
                 onChange={onChange}
                 onUpdate={onUpdate}
                 readOnly={props.readonly}
-                
+
             />
             {PopupPortal}
         </Box>
