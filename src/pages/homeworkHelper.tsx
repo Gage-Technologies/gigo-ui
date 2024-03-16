@@ -1071,6 +1071,7 @@ function HomeworkHelper() {
         setTerminalVisible(false)
         setOutput(null)
         setCTRequestingExec(false)
+        setCTRequestingShare(false)
         setConnectButtonLoading(false)
         setExecutingCode(false)
         setCommandId("")
@@ -1258,11 +1259,8 @@ function HomeworkHelper() {
                 let files: CtCodeFile[] = [];
                 if (res.files !== null && res.files?.length > 0) {
                     files = code
-
-                    console.log("checking for ws creation: ", workspaceState, workspaceLaunched)
                     // launch the workspace if the bot is writing files and we don't have one
                     if (!workspaceLaunched && (workspaceState === null || workspaceState > 1)) {
-                        console.log("creating workspace")
                         createWorkspaceWithRetry(chatId);
                         workspaceLaunched = true;
                     }
@@ -1543,7 +1541,7 @@ function HomeworkHelper() {
         }
     }, [selectedChat]);
 
-    const sendExecRequest = (retryCount: number = 0) => {
+    const sendExecRequest = (code: CtCodeFile[], activeFile: string, retryCount: number = 0) => {
         let lang = mapFilePathToLangOption(activeFile)
         if (lang === undefined || !lang?.execSupported) {
             return
@@ -1616,7 +1614,7 @@ function HomeworkHelper() {
                             }
                             // wait 1s and try again
                             sleep(1000).then(() => {
-                                sendExecRequest(retryCount + 1)
+                                sendExecRequest(code, activeFile, retryCount + 1)
                             })
                             return true
                         }
@@ -1693,7 +1691,7 @@ function HomeworkHelper() {
         );
     };
 
-    const executeCode = async () => {
+    const executeCode = async (code: CtCodeFile[], activeFile: string) => {
         if (selectedChat === null) {
             return
         }
@@ -1720,14 +1718,12 @@ function HomeworkHelper() {
             }
         }
 
-        sendExecRequest();
+        sendExecRequest(code, activeFile);
     };
 
     const createWorkspaceWithRetry = async (chatId: string | null) => {
         let created = false;
-        console.log("checking if we can create ws: ", chatId)
         if (chatId) {
-            console.log("executing ws creation")
             setConnectButtonLoading(true)
             for (let i = 0; i < 5; i++) {
                 let created = await createWorkspace(chatId);
@@ -1765,7 +1761,7 @@ function HomeworkHelper() {
                         loading={executingCode}
                         onClick={() => {
                             sendExecOutputToCT.current = true
-                            executeCode()
+                            executeCode(code, activeFile)
                         }}
                     >
                         Permit
@@ -2097,7 +2093,7 @@ function HomeworkHelper() {
                                                 return
                                             }
 
-                                            executeCode(); // Indicate button click
+                                            executeCode(code, activeFile); // Indicate button click
                                         }}
                                     >
                                         Run <PlayArrow fontSize={"small"} />
