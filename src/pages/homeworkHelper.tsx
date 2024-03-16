@@ -564,8 +564,6 @@ const HomeworkHelperActive = ({
     const authState = useAppSelector(selectAuthState);
 
     const renderInlineCodeEditor = (id: string, code: CtCodeFile[]) => {
-        console.log("expanded code blocks: ", expandedCodeBlock)
-
         let selectedFileIdx = code.findIndex((f) => `${id}:${f.file_name}` === selectedFile)
 
         return (
@@ -577,13 +575,10 @@ const HomeworkHelperActive = ({
                         fontSize: "0.7rem"
                     }}
                     onClick={() => {
-                        console.log("clicked code button")
                         const idx = expandedCodeBlock.findIndex((x) => x === id);
                         if (idx >= 0) {
-                            console.log("removing id", id)
                             setExpandedCodeBlock((prev) => prev.filter((i) => i !== id));
                         } else {
-                            console.log("adding id: ", id)
                             setExpandedCodeBlock((prev) => prev.concat(id));
                         }
                     }}
@@ -1238,6 +1233,8 @@ function HomeworkHelper() {
             }));
         }
 
+        let workspaceLaunched = false;
+
         ctWs.sendWebsocketMessage({
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
             type: CtMessageType.WebSocketMessageTypeUserHHChatMessage,
@@ -1261,6 +1258,14 @@ function HomeworkHelper() {
                 let files: CtCodeFile[] = [];
                 if (res.files !== null && res.files?.length > 0) {
                     files = code
+
+                    console.log("checking for ws creation: ", workspaceState, workspaceLaunched)
+                    // launch the workspace if the bot is writing files and we don't have one
+                    if (!workspaceLaunched && (workspaceState === null || workspaceState > 1)) {
+                        console.log("creating workspace")
+                        createWorkspaceWithRetry(chatId);
+                        workspaceLaunched = true;
+                    }
 
                     // update the files
                     for (let i = 0; i < res.files.length; ++i) {
@@ -1718,12 +1723,31 @@ function HomeworkHelper() {
         sendExecRequest();
     };
 
+    const createWorkspaceWithRetry = async (chatId: string | null) => {
+        let created = false;
+        console.log("checking if we can create ws: ", chatId)
+        if (chatId) {
+            console.log("executing ws creation")
+            setConnectButtonLoading(true)
+            for (let i = 0; i < 5; i++) {
+                let created = await createWorkspace(chatId);
+                if (created) {
+                    break
+                }
+
+                if (i === 4) {
+                    break
+                }
+            }
+            setConnectButtonLoading(false)
+        }
+        return created
+    }
+
     const renderCtExecRequestPopup = () => {
         if (!ctRequestingExec && !ctRequestingShare) {
             return null
         }
-
-        console.log("requesting: ", ctRequestingExec, ctRequestingShare)
 
         let body = (
             <>
@@ -1957,22 +1981,7 @@ function HomeworkHelper() {
                         height: "18px",
                         m: 0.5
                     }}
-                    onClick={async () => {
-                        if (selectedChat) {
-                            setConnectButtonLoading(true)
-                            for (let i = 0; i < 5; i++) {
-                                let created = await createWorkspace(selectedChat);
-                                if (created) {
-                                    break
-                                }
-
-                                if (i === 4) {
-                                    break
-                                }
-                            }
-                            setConnectButtonLoading(false)
-                        }
-                    }}
+                    onClick={() => createWorkspaceWithRetry(selectedChat)}
                 >
                     Connect
                 </LoadingButton>
@@ -2001,8 +2010,6 @@ function HomeworkHelper() {
             }
         }
         let lang = mapFilePathToLangOption(fileName)
-
-        console.log("editor lang id:", mapFilePathToLang(activeFile))
 
         return (
             <Slide direction="left" in={editorOpen} mountOnEnter unmountOnExit>
