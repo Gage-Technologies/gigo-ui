@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import Button, { ButtonProps } from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
+import {LoadingButton, LoadingButtonProps} from "@mui/lab";
 
-interface MuiAwesomeButtonProps extends Omit<ButtonProps, 'color' | 'variant'> {
+interface MuiAwesomeButtonProps extends Omit<LoadingButtonProps, 'color' | 'variant'> {
     backgroundColor: string;
     hoverColor: string;
     secondaryColor: string;
     textColor: string;
 }
 
-const MuiAwesomeButtonStyled = styled(Button)<{
+const MuiAwesomeButtonStyled = styled(LoadingButton)<{
     bgcolor: string;
     textcolor: string;
     hoverColor: string;
@@ -47,6 +47,9 @@ const MuiAwesomeButtonStyled = styled(Button)<{
         backgroundColor: isClicked ? 'transparent' : bgcolor,
         boxShadow: "none",
     },
+    '&.MuiLoadingButton-loading': {
+        backgroundColor: isClicked ? 'transparent' : bgcolor,
+    }
 }));
 
 const MuiAwesomeButton: React.FC<MuiAwesomeButtonProps> = ({

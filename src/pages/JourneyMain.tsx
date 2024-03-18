@@ -58,6 +58,8 @@ function JourneyMain() {
         }),
         [mode],
     );
+
+    const [loadingMapData, setLoadingMapData] = useState(false);
     
     const userId = useAppSelector(selectAuthStateId) as string
 
@@ -246,6 +248,8 @@ function JourneyMain() {
             return
         };
 
+        setLoadingMapData(true)
+
         const res = await call(
             "/api/journey/addUnitToMap",
             "POST",
@@ -262,7 +266,7 @@ function JourneyMain() {
 
         if (res && res.success) {
             console.log("Unit added successfully!");
-            getTasks();
+            getTasks().then(() => {setLoadingMapData(false)});
         } else {
             console.error("Failed to add unit to map");
             return
@@ -1027,11 +1031,14 @@ function JourneyMain() {
                                 justifyContent: 'center',
                                 alignItems: 'center',
                             }}>
-                                <MuiAwesomeButton backgroundColor={theme.palette.secondary.main}
-                                                  hoverColor={theme.palette.secondary.light}
-                                                  secondaryColor={theme.palette.secondary.dark}
-                                                  textColor={theme.palette.secondary.dark}
-                                                  onClick={handleAddUnitToMap}>
+                                <MuiAwesomeButton
+                                    backgroundColor={theme.palette.secondary.main}
+                                    hoverColor={theme.palette.secondary.light}
+                                    secondaryColor={theme.palette.secondary.dark}
+                                    textColor={theme.palette.secondary.dark}
+                                    loading={loadingMapData}
+                                    onClick={handleAddUnitToMap}
+                                >
                                     <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
                                         Add Unit to Map
                                     </h1>
