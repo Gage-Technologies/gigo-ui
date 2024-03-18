@@ -11,16 +11,26 @@ import journeySide5 from "./journey-side-5.svg";
 function JourneyPortals({ currentIndex }) {  // Assume currentIndex is passed as a prop based on the map data
 
     const [animationData, setAnimationData] = useState("");
+    let userPref = localStorage.getItem('theme')
 
     useEffect(() => {
-        // TODO add light theme portal
-        fetch(`${config.rootPath}/static/ui/lottie/general/journey-portal-dark.json`, { credentials: 'include' })
-            .then(data => {
-                data.json().then(json => {
-                    setAnimationData(json);
-                });
-            })
-            .catch(error => console.error(error));
+        if (userPref === 'dark') {
+            fetch(`${config.rootPath}/static/ui/lottie/general/journey-portal-dark.json`, { credentials: 'include' })
+                .then(data => {
+                    data.json().then(json => {
+                        setAnimationData(json);
+                    });
+                })
+                .catch(error => console.error(error));
+        } else {
+            fetch(`${config.rootPath}/static/ui/lottie/general/journey-portal-light.json`, { credentials: 'include' })
+                .then(data => {
+                    data.json().then(json => {
+                        setAnimationData(json);
+                    });
+                })
+                .catch(error => console.error(error));
+        }
     }, []);
 
     const images = [journeySide1, journeySide2, journeySide3, journeySide4, journeySide5];
@@ -31,7 +41,7 @@ function JourneyPortals({ currentIndex }) {  // Assume currentIndex is passed as
         autoplay: true,
         animationData: animationData,
         rendererSettings: {
-            preserveAspectRatio: 'xMidYMid slice'
+            preserveAspectRatio: 'xMidYMid slice',
         },
     };
 
@@ -42,7 +52,7 @@ function JourneyPortals({ currentIndex }) {  // Assume currentIndex is passed as
                 top: 0,
                 left: 0,
                 width: '410px',
-                height: '420px',
+                height: '425px',
                 zIndex: 3,
                 overflow: "visible"
             }}/>
