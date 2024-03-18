@@ -961,39 +961,39 @@ function JourneyMain() {
                                 <Typography variant={'h5'}>{nextUnit.name}</Typography>
                             </Box>
                             {JourneyStops(nextUnit.tasks)}
-                            <Box sx={{p: 2}}>
-                                <AwesomeButton style={{
-                                    width: "auto",
-                                    // @ts-ignore
-                                    '--button-primary-color': theme.palette.tertiary.dark,
-                                    '--button-primary-color-dark': "#afa33d",
-                                    '--button-primary-color-light': "#dfce53",
-                                    // @ts-ignore
-                                    '--button-primary-color-active': theme.palette.tertiary.dark,
-                                    // @ts-ignore
-                                    '--button-primary-color-hover': theme.palette.tertiary.main,
-                                    '--button-default-border-radius': "24px",
-                                    '--button-hover-pressure': "1",
-                                    height: "10vh",
-                                    '--button-raise-level': "10px"
-                                }} type="primary">
-                                    <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
-                                        Unit Project
-                                    </h1>
-                                    <div style={{
-                                        height: "80px",
-                                        width: "80px",
-                                    }}>
-                                        <img
-                                            src={completed}
-                                            style={{
-                                                height: "100%",
-                                                width: "100%",
-                                            }}
-                                            alt="py"/>
-                                    </div>
-                                </AwesomeButton>
-                            </Box>
+                            {/*<Box sx={{p: 2}}>*/}
+                            {/*    <AwesomeButton style={{*/}
+                            {/*        width: "auto",*/}
+                            {/*        // @ts-ignore*/}
+                            {/*        '--button-primary-color': theme.palette.tertiary.dark,*/}
+                            {/*        '--button-primary-color-dark': "#afa33d",*/}
+                            {/*        '--button-primary-color-light': "#dfce53",*/}
+                            {/*        // @ts-ignore*/}
+                            {/*        '--button-primary-color-active': theme.palette.tertiary.dark,*/}
+                            {/*        // @ts-ignore*/}
+                            {/*        '--button-primary-color-hover': theme.palette.tertiary.main,*/}
+                            {/*        '--button-default-border-radius': "24px",*/}
+                            {/*        '--button-hover-pressure': "1",*/}
+                            {/*        height: "10vh",*/}
+                            {/*        '--button-raise-level': "10px"*/}
+                            {/*    }} type="primary">*/}
+                            {/*        <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>*/}
+                            {/*            Unit Project*/}
+                            {/*        </h1>*/}
+                            {/*        <div style={{*/}
+                            {/*            height: "80px",*/}
+                            {/*            width: "80px",*/}
+                            {/*        }}>*/}
+                            {/*            <img*/}
+                            {/*                src={completed}*/}
+                            {/*                style={{*/}
+                            {/*                    height: "100%",*/}
+                            {/*                    width: "100%",*/}
+                            {/*                }}*/}
+                            {/*                alt="py"/>*/}
+                            {/*        </div>*/}
+                            {/*    </AwesomeButton>*/}
+                            {/*</Box>*/}
                         </Grid>
                         <Grid item xl={4}/>
                             <Box sx={{
@@ -1149,39 +1149,39 @@ function JourneyMain() {
                                     <Typography variant={'h5'}>{unit.name}</Typography>
                                 </Box>
                                 {JourneyStops(unit.tasks)}
-                                <Box sx={{p: 2}}>
-                                    <AwesomeButton style={{
-                                        width: "auto",
-                                        //@ts-ignore
-                                        '--button-primary-color': theme.palette.tertiary.dark,
-                                        '--button-primary-color-dark': "#afa33d",
-                                        '--button-primary-color-light': "#dfce53",
-                                        //@ts-ignore
-                                        '--button-primary-color-active': theme.palette.tertiary.dark,
-                                        //@ts-ignore
-                                        '--button-primary-color-hover': theme.palette.tertiary.main,
-                                        '--button-default-border-radius': "24px",
-                                        '--button-hover-pressure': "1",
-                                        height: "10vh",
-                                        '--button-raise-level': "10px"
-                                    }} type="primary">
-                                        <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
-                                            Unit Project
-                                        </h1>
-                                        <div style={{
-                                            height: "80px",
-                                            width: "80px",
-                                        }}>
-                                            <img
-                                                src={completed}
-                                                style={{
-                                                    height: "100%",
-                                                    width: "100%",
-                                                }}
-                                                alt="py"/>
-                                        </div>
-                                    </AwesomeButton>
-                                </Box>
+                                {/*<Box sx={{p: 2}}>*/}
+                                {/*    <AwesomeButton style={{*/}
+                                {/*        width: "auto",*/}
+                                {/*        //@ts-ignore*/}
+                                {/*        '--button-primary-color': theme.palette.tertiary.dark,*/}
+                                {/*        '--button-primary-color-dark': "#afa33d",*/}
+                                {/*        '--button-primary-color-light': "#dfce53",*/}
+                                {/*        //@ts-ignore*/}
+                                {/*        '--button-primary-color-active': theme.palette.tertiary.dark,*/}
+                                {/*        //@ts-ignore*/}
+                                {/*        '--button-primary-color-hover': theme.palette.tertiary.main,*/}
+                                {/*        '--button-default-border-radius': "24px",*/}
+                                {/*        '--button-hover-pressure': "1",*/}
+                                {/*        height: "10vh",*/}
+                                {/*        '--button-raise-level': "10px"*/}
+                                {/*    }} type="primary">*/}
+                                {/*        <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>*/}
+                                {/*            Unit Project*/}
+                                {/*        </h1>*/}
+                                {/*        <div style={{*/}
+                                {/*            height: "80px",*/}
+                                {/*            width: "80px",*/}
+                                {/*        }}>*/}
+                                {/*            <img*/}
+                                {/*                src={completed}*/}
+                                {/*                style={{*/}
+                                {/*                    height: "100%",*/}
+                                {/*                    width: "100%",*/}
+                                {/*                }}*/}
+                                {/*                alt="py"/>*/}
+                                {/*        </div>*/}
+                                {/*    </AwesomeButton>*/}
+                                {/*</Box>*/}
                             </Grid>
                             {index % 2 === 0 ?
                                 (<Grid item xl={4} sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: 'column', textAlign: "justify" }}>
