@@ -208,8 +208,7 @@ function JourneyMain() {
         });
 
         const allUnits = await Promise.all(fetchedTasks);
-//setUnitData(allUnits.slice(0, -1));
-        setUnitData(allUnits);
+        setUnitData(allUnits.slice(0, -1));
         setNextUnit(allUnits[allUnits.length - 1]);
         setActiveJourney(true)
         setLoading(false)
