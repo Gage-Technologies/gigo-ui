@@ -179,7 +179,7 @@ function JourneyMain() {
         });
 
         // check if we need to get a random unit
-        if (sortedUnitData.length < 2 || sortedUnitData[sortedUnitData.length-2].unit_below === null) {
+        if (sortedUnitData.length === 0 || sortedUnitData[sortedUnitData.length-1].unit_below === null) {
             // Fetch next unit and append it to sortedUnitData if successful
             const nextUnitRes = await call(
                 "/api/journey/tempNextUnit",
