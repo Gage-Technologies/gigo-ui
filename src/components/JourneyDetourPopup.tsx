@@ -29,10 +29,10 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({ open, onClose, 
 
     const [showFullDescription, setShowFullDescription] = useState(false);
     //@ts-ignore
-    const isLongDescription = unit.description && unit.description.length > 100;
+    const isLongDescription = unit.description && unit.description.length > 150;
     const toggleDescription = () => setShowFullDescription(!showFullDescription);
     //@ts-ignore
-    const displayedDescription = showFullDescription || !isLongDescription ? unit.description : unit.description.substring(0, 100) + '...';
+    const displayedDescription = showFullDescription || !isLongDescription ? unit.description : unit.description.substring(0, 150) + '...';
 
     const reduxIdState = useAppSelector(selectJourneysId);
 
@@ -108,19 +108,18 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({ open, onClose, 
                                 //@ts-ignore
                                 unit._id} alt="Top Image"
                                  style={{
-                                     maxHeight: '150px',
+                                     maxHeight: '200px',
                                      borderRadius: '30px',
-                                     width: "300px",
                                      padding: "10px",
                                      marginRight: "20px"
                                  }}/>
-                            <div style={{display: "flex", flexDirection: "column", textAlign: "left"}}>
-                                <Typography variant="subtitle1" style={{marginBottom: '8px'}}>
+                            <div style={{display: "flex", flexDirection: "column", textAlign: "left", height: "100%"}}>
+                                <Typography variant="h5" style={{marginBottom: '8px'}}>
                                     {
                                         //@ts-ignore
                                         unit.name}
                                 </Typography>
-                                <Typography variant="h6">
+                                <Typography variant="body2">
                                     {displayedDescription}
                                 </Typography>
                                 <div style={{
@@ -140,30 +139,21 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({ open, onClose, 
                 <Grid container spacing={2} alignItems="center" style={{display: "flex", flexDirection: "row"}}>
                     <Grid item xs={6} style={{position: "relative", left: "2vw", top: "3vh"}}>
                         <Box style={{
+                            backgroundColor: `${
+                                //@ts-ignore
+                                unit.color}`,
+                            borderRadius: "50px",
+                            width: "100%", // 100% to fill up the outer Box
+                            height: "100%", // If you need to set a specific height
+                            minHeight: "275px",
+                            paddingBottom: "10px",
+                            maxHeight: "45vh",
                             border: '2px solid white', // This creates a thin white line around the box
-                            borderRadius: "50px", // Match the border-radius of the inner box
-                            padding: '10px', // Adjust the space between the border and the inner box
-                            height: "auto",
-                            minHeight: "300px",
-                            maxHeight: "45vh"
+                            overflowY: "scroll", overflowX: "hidden"
                         }}>
-                            <Box style={{
-                                backgroundColor: `${
-                                    //@ts-ignore
-                                    unit.color}`,
-                                borderRadius: "50px",
-                                width: "100%", // 100% to fill up the outer Box
-                                height: "100%", // If you need to set a specific height
-                                minHeight: "275px",
-                                paddingBottom: "10px",
-                                maxHeight: "45vh"
-                            }}>
-                                <div style={{paddingTop: "5px", height: "auto", maxHeight: "40vh", overflowY: "scroll", overflowX: "hidden"}}>
-                                    <JourneyMap unitId={
-                                        //@ts-ignore
-                                        unit._id}/>
-                                </div>
-                            </Box>
+                            <JourneyMap unitId={
+                                //@ts-ignore
+                                unit._id}/>
                         </Box>
                     </Grid>
                     <Grid item xs={6} style={{ display: 'flex', flexDirection: 'column', paddingRight: "20px", justifyContent: "space-between", alignItems: 'center' }}>

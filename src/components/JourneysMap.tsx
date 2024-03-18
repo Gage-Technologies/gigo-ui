@@ -3,7 +3,17 @@ import CheckIcon from "@mui/icons-material/Check";
 import python from "./Icons/joruneyMainAssets/journey-python-no-cirlce.svg";
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import React, {useEffect, useState} from "react";
-import {Box, Button, createTheme, Grid, PaletteMode, Popover, SpeedDial, Typography} from "@mui/material";
+import {
+    Box,
+    Button,
+    CircularProgress,
+    createTheme,
+    Grid,
+    PaletteMode,
+    Popover,
+    SpeedDial,
+    Typography
+} from "@mui/material";
 import DetourCard from "./Icons/joruneyMainAssets/DetourCard";
 import {SpeedDialAction} from "@mui/lab";
 import ArticleIcon from "@mui/icons-material/Article";
@@ -247,7 +257,7 @@ function JourneyMap({ unitId }: JourneyMapProps) {
         }).join(' ');
 
         return (
-            <svg style={{ width: '35vw', height: '35vh', overflow: 'visible', position: 'absolute', left: 0, top: 0 }}>
+            <svg style={{ overflow: 'visible', position: 'absolute', left: 0, top: 0, paddingTop: "20px" }}>
                 <path d={d} stroke="#008866" strokeWidth="4" fill="none" strokeDasharray="30,10" />
             </svg>
         );
@@ -411,7 +421,8 @@ function JourneyMap({ unitId }: JourneyMapProps) {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: "center",
-                margin: "10px"
+                margin: "10px",
+                paddingTop: "20px"
             }}>
                 <CurvedPath points={points}/>
                 {metadata.map((item, index) => (
@@ -440,9 +451,16 @@ function JourneyMap({ unitId }: JourneyMapProps) {
                     {JourneyStops(tasks)}
                 </div>
             ) : (
-                <Typography component={"div"} sx={{display: "flex", justifyContent: "center", height: "50vh", alignItems: "center"}}>
-                    <ThreeDots/>
-                </Typography>
+                <Box sx={{
+                    position: "relative",
+                    display: "flex",
+                    justifyContent: "center",
+                    height: "35vh",
+                    alignItems: "center",
+                    alignContent: "center"
+                }}>
+                    <CircularProgress />
+                </Box>
             )}
         </>
     )

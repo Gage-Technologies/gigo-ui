@@ -2,7 +2,7 @@ import React, {createRef, useEffect, useRef, useState} from 'react';
 import {getAllTokens} from "../theme";
 import {
     Box, Button,
-    Card,
+    Card, CircularProgress,
     createTheme,
     CssBaseline,
     Grid,
@@ -33,7 +33,6 @@ import config from "../config";
 import {initialAuthStateUpdate, selectAuthStateId, updateAuthState} from "../reducers/auth/auth";
 import JourneyPortals from "../components/Icons/joruneyMainAssets/JourneyPortals";
 import {initialJourneyDetourStateUpdate, updateJourneyDetourState} from "../reducers/journeyDetour/journeyDetour";
-import {ThreeDots} from "react-loading-icons";
 import Carousel from "../components/Carousel2";
 import LazyLoad from "react-lazyload";
 import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
@@ -579,9 +578,18 @@ function JourneyMain() {
                                         </div>
                                     )
                                 }) : (
-                                    <>
-                                        <ThreeDots/>
-                                    </>
+                                    <Box
+                                        display={"flex"}
+                                        sx={{
+                                            width: "100%",
+                                            marginTop: "36px",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            alignContent: "center",
+                                        }}
+                                    >
+                                        <CircularProgress size={48}/>
+                                    </Box>
                                 )
                         }
                     </Carousel>
@@ -1073,7 +1081,7 @@ function JourneyMain() {
                                             position: 'relative',
                                         }}>
                                             <div style={{
-                                                backgroundColor: 'rgb(255,255,255,0.5)',
+                                                backgroundColor: 'rgb(255,255,255,0.15)',
                                                 color: 'black',
                                                 textAlign: 'center',
                                             }}>
