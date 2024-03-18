@@ -181,26 +181,6 @@ function JourneyMain() {
             return a.node_above - b.node_above;
         });
 
-        // check if we need to get a random unit
-        if (sortedUnitData.length === 0 || sortedUnitData[sortedUnitData.length-1].unit_below === null) {
-            // Fetch next unit and append it to sortedUnitData if successful
-            const nextUnitRes = await call(
-                "/api/journey/tempNextUnit",
-                "POST",
-                null,
-                null,
-                null,
-                // @ts-ignore
-                {},
-                null,
-                config.rootPath
-            );
-
-            if (nextUnitRes !== undefined && nextUnitRes["success"] === true && nextUnitRes["unit"]) {
-                sortedUnitData.push(nextUnitRes["unit"]);
-            }
-        }
-
         // @ts-ignore
         const fetchedTasks = sortedUnitData.map(async (unit: any) => {
             let res = await call(
@@ -231,6 +211,7 @@ function JourneyMain() {
         });
 
         const allUnits = await Promise.all(fetchedTasks);
+
         setNextUnit(allUnits[allUnits.length - 1]);
         setUnitData(allUnits.slice(0, -1));
         setActiveJourney(true)
