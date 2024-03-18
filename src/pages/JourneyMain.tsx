@@ -39,6 +39,7 @@ import LazyLoad from "react-lazyload";
 import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import MuiAwesomeButton from "../components/MuiAwesomeButton";
 
 function JourneyMain() {
     const sidebarOpen = useAppSelector(selectAppWrapperSidebarOpen);
@@ -240,7 +241,10 @@ function JourneyMain() {
     }, []);
 
     const handleAddUnitToMap = async () => {
-        if (!nextUnit) return;
+        if (!nextUnit) {
+            console.log("Next Unit Invalid: ", nextUnit)
+            return
+        };
 
         const res = await call(
             "/api/journey/addUnitToMap",
@@ -258,6 +262,7 @@ function JourneyMain() {
 
         if (res && res.success) {
             console.log("Unit added successfully!");
+            getTasks();
         } else {
             console.error("Failed to add unit to map");
             return
@@ -1022,22 +1027,15 @@ function JourneyMain() {
                                 justifyContent: 'center',
                                 alignItems: 'center',
                             }}>
-                                <AwesomeButton style={{
-                                    width: "auto",
-                                    '--button-primary-color': theme.palette.secondary.main,
-                                    '--button-primary-color-dark': theme.palette.secondary.dark,
-                                    '--button-primary-color-light': theme.palette.secondary.dark,
-                                    '--button-primary-color-active': theme.palette.secondary.dark,
-                                    '--button-primary-color-hover': theme.palette.secondary.main,
-                                    '--button-default-border-radius': "24px",
-                                    '--button-hover-pressure': "1",
-                                    height: "10vh",
-                                    '--button-raise-level': "10px"
-                                }} type="primary" onPress={handleAddUnitToMap}>
+                                <MuiAwesomeButton backgroundColor={theme.palette.secondary.main}
+                                                  hoverColor={theme.palette.secondary.light}
+                                                  secondaryColor={theme.palette.secondary.dark}
+                                                  textColor={theme.palette.secondary.dark}
+                                                  onClick={handleAddUnitToMap}>
                                     <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
                                         Add Unit to Map
                                     </h1>
-                                </AwesomeButton>
+                                </MuiAwesomeButton>
                             </Box>
                     </Grid>
                 )}
