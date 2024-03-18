@@ -2,7 +2,7 @@ import React from 'react';
 import {alpha, Box, styled, useTheme} from '@mui/material';
 
 const SheenAnimation = styled(Box)(({ theme }) => ({
-  backgroundColor: theme.palette.action.hover,
+  backgroundColor: theme.palette.action.focus,
   borderRadius: theme.shape.borderRadius,
   position: 'relative',
   overflow: 'hidden',
@@ -17,9 +17,9 @@ const SheenAnimation = styled(Box)(({ theme }) => ({
     background: `linear-gradient(
       to right,
       transparent, 
-      ${alpha(theme.palette.grey[100], 0.1)} 5%, 
-      ${theme.palette.grey[100]} 50%, 
-      ${alpha(theme.palette.grey[100], 0.1)} 95%, 
+      ${theme.palette.mode === "dark" ? alpha(theme.palette.grey[100], 0.1) : alpha(theme.palette.grey[600], 0.1)} 5%, 
+      ${theme.palette.mode === "dark" ? theme.palette.grey[100] : theme.palette.grey[600]} 50%, 
+      ${theme.palette.mode === "dark" ? alpha(theme.palette.grey[100], 0.1): alpha(theme.palette.grey[600], 0.1)} 95%, 
       transparent
     )`,
     opacity: 0.5,

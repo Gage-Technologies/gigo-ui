@@ -15,11 +15,11 @@ import type * as LSP from 'vscode-languageserver-protocol';
 import type {PublishDiagnosticsParams} from 'vscode-languageserver-protocol';
 import {CompletionItemKind, CompletionTriggerKind, DiagnosticSeverity,} from 'vscode-languageserver-protocol';
 import {Transport} from '@open-rpc/client-js/build/transports/Transport';
-import "../styles/lsp.css"
 import {tooltips} from '@uiw/react-codemirror';
 import {sleep} from '../../../../services/utils';
 import {createPortal} from "./LspRenderer";
 import {CtSemanticRankResponse} from "../../../../models/ct_websocket";
+import "../styles/lsp.css"
 
 const timeout = 10000;
 const changesDelay = 300;

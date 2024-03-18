@@ -21,7 +21,17 @@ interface OutputState {
 // NOTE: DO NOT REMOVE THE million-ignore comment!!!!
 
 // million-ignore
-const ByteTerminal = ({ output, onClose, onStop, isRunning, onInputSubmit }: { output: OutputState, onClose: () => void, onStop: () => void, isRunning: boolean, onInputSubmit: (input: string) => void }) => {
+const ByteTerminal = (
+    { output, onClose, onStop, isRunning, onInputSubmit, fontSize }: 
+    { 
+        output: OutputState, 
+        onClose: () => void, 
+        onStop: () => void, 
+        isRunning: boolean, 
+        onInputSubmit: (input: string) => void,
+        fontSize?: string
+    }
+) => {
     const [terminalContent, setTerminalContent] = useState<JSX.Element[]>([]);
     const inputRef = useRef<HTMLDivElement>(null);
     const theme = useTheme();
@@ -35,7 +45,8 @@ const ByteTerminal = ({ output, onClose, onStop, isRunning, onInputSubmit }: { o
         backgroundColor: isLightMode ? "#f4f5f4" : "#232a2f",
         color: isLightMode ? "black" : "white",
         fontFamily: "monospace",
-        fontSize: "0.9rem",
+        fontSize: fontSize === undefined ? "0.9rem" : fontSize,
+        lineHeight: "1rem",
         padding: "10px",
         marginTop: isMobile ? "0" : "20px",
         borderRadius: "5px",

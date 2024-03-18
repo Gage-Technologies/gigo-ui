@@ -72,7 +72,7 @@ import {
     updateAuthState,
 } from "../reducers/auth/auth";
 import { isChrome } from "react-device-detect";
-import { LocalFireDepartment } from "@mui/icons-material";
+import {LocalFireDepartment, Quiz} from "@mui/icons-material";
 import { Icon as IconifyIcon } from "@iconify/react";
 import { persistStore } from "redux-persist";
 import { store } from "../app/store"
@@ -843,19 +843,6 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                         </Box>
                     </Button>
                     <TopSearchBar />
-                    {loggedIn ? (
-                        <Button onClick={async () => {
-                            navigate("/premium")
-                        }} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '18%', height: '55px', left: '8% ', color: holiday === "Christmas" && mode === "light" ? theme.palette.text.primary : theme.palette.primary.contrastText }}>
-                            Your Pro Perks
-                        </Button>
-                    ) : (
-                        <Button onClick={async () => {
-                            navigate("/signup?forward="+encodeURIComponent(window.location.pathname))
-                        }} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '18%', height: '55px', left: '8% ', color: holiday === "Christmas" && mode === "light" ? theme.palette.text.primary : theme.palette.primary.contrastText }}>
-                            New accounts get 1 month of Pro!
-                        </Button>
-                    )}
                     <Box sx={{ flexGrow: 1 }} />
                     {loggedIn ? (
                         <Box>
@@ -1200,14 +1187,6 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                             </Typography>
                         </Box>
                     </Button>
-
-                    {/*<Button onClick={async () => {*/}
-                    {/*    navigate("/premium")*/}
-                    {/*}} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '18%', height: '55px', left: '8% ', color: theme.palette.primary.contrastText }}>*/}
-                    {/*    Your Pro Perks*/}
-                    {/*</Button>*/}
-
-
                     {loggedIn ? renderDevSpaceControls() : (
                         <Button onClick={async () => {
                             navigate("/signup?forward="+encodeURIComponent(window.location.pathname))
@@ -1720,192 +1699,218 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                 anchor="left"
                 open={leftOpen || homePageLockedDrawer}
             >
-                <DrawerHeader />
-                <List>
-                    <ListItem disablePadding>
-                        <ListItemButton color={"primary"} sx={{
-                            borderRadius: 2,
-                        }} href={"/home"}>
-                            <ListItemIcon>
-                                <HomeIcon style={{ color: theme.palette.text.primary, }} />
-                            </ListItemIcon>
-                            <Typography
-                                component={"div"}
-                                variant={"body1"}
-                                sx={{ fontSize: "0.8em" }}
-                            >
-                                Home
-                            </Typography>
-                        </ListItemButton>
-                    </ListItem>
-                    <ListItem disablePadding>
-                        <ListItemButton color={"primary"} sx={{
-                            borderRadius: 2,
-                        }} href={"/active"}>
-                            <ListItemIcon>
-                                <FolderIcon style={{ color: theme.palette.text.primary, }} />
-                            </ListItemIcon>
-                            <Typography
-                                component={"div"}
-                                variant={"body1"}
-                                sx={{ fontSize: "0.8em" }}
-                            >
-                                Active
-                            </Typography>
-                        </ListItemButton>
-                    </ListItem>
-                    <ListItem disablePadding>
-                        <ListItemButton color={"primary"} sx={{
-                            borderRadius: 2,
-                        }} href={"/following"}>
-                            <ListItemIcon>
-                                <BookmarkIcon style={{ color: theme.palette.text.primary, }} />
-                            </ListItemIcon>
-                            <Typography
-                                component={"div"}
-                                variant={"body1"}
-                                sx={{ fontSize: "0.8em" }}
-                            >
-                                Following
-                            </Typography>
-                        </ListItemButton>
-                    </ListItem>
-                    <ListItem disablePadding>
-                        <ListItemButton color={"primary"} sx={{
-                            borderRadius: 2,
-                        }} href={"/profile"}>
-                            <ListItemIcon>
-                                <AccountBoxIcon style={{ color: theme.palette.text.primary, }} />
-                            </ListItemIcon>
-                            <Typography
-                                component={"div"}
-                                variant={"body1"}
-                                sx={{ fontSize: "0.8em" }}
-                            >
-                                Profile
-                            </Typography>
-                        </ListItemButton>
-                    </ListItem>
-                    <ListItem disablePadding>
-                        <ListItemButton color={"primary"} sx={{
-                            borderRadius: 2,
-                        }} href={"/streak"}>
-                            <ListItemIcon>
-                                <LocalFireDepartment style={{ color: theme.palette.text.primary, }} />
-                            </ListItemIcon>
-                            <Typography
-                                component={"div"}
-                                variant={"body1"}
-                                sx={{ fontSize: "0.8em" }}
-                            >
-                                Stats
-                            </Typography>
-                        </ListItemButton>
-                    </ListItem>
-                    {/*<ListItem disablePadding>*/}
-                    {/*    <ListItemButton color={"primary"} sx={{*/}
-                    {/*        borderRadius: 2,*/}
-                    {/*    }} href={"/nemesis"}>*/}
-                    {/*        <ListItemIcon>*/}
-                    {/*            <IconifyIcon icon="mdi:sword-cross" color={theme.palette.text.primary} width="25"*/}
-                    {/*                         height="25"/>*/}
-                    {/*        </ListItemIcon>*/}
-                    {/*        <Typography*/}
-                    {/*            component={"div"}*/}
-                    {/*            variant={"body1"}*/}
-                    {/*            sx={{fontSize: "0.8em"}}*/}
-                    {/*        >*/}
-                    {/*            Nemesis*/}
-                    {/*        </Typography>*/}
-                    {/*    </ListItemButton>*/}
-                    {/*</ListItem>*/}
-                    <ListItem disablePadding>
-                        <ListItemButton color={"primary"} sx={{
-                            borderRadius: 2,
-                        }} href={"/documentation"}>
-                            <ListItemIcon>
-                                <FeedIcon style={{ color: theme.palette.text.primary, }} />
-                            </ListItemIcon>
-                            <Typography
-                                component={"div"}
-                                variant={"body1"}
-                                sx={{ fontSize: "0.8em" }}
-                            >
-                                Docs
-                            </Typography>
-                        </ListItemButton>
-                    </ListItem>
-                    <ListItem disablePadding>
-                        <ListItemButton color={"primary"} sx={{
-                            borderRadius: 2,
-                        }} href={"/about"}>
-                            <ListItemIcon>
-                                <IconifyIcon icon="mdi:about" color={theme.palette.text.primary} width="25"
-                                    height="25" />
-                            </ListItemIcon>
-                            <Typography
-                                component={"div"}
-                                variant={"body1"}
-                                sx={{ fontSize: "0.8em" }}
-                            >
-                                About
-                            </Typography>
-                        </ListItemButton>
-                    </ListItem>
-                    <ListItem disablePadding>
-                        <ListItemButton color={"primary"} sx={{
-                            borderRadius: 2,
-                        }} href={"/configs"}>
-                            <ListItemIcon>
-                                <CalculateIcon style={{ color: theme.palette.text.primary }} />
-                            </ListItemIcon>
-                            <Typography
-                                component={"div"}
-                                variant={"body1"}
-                                sx={{ fontSize: "0.8em" }}
-                            >
-                                Configs
-                            </Typography>
-                        </ListItemButton>
-                    </ListItem>
-                    <ListItem disablePadding>
-                        <ListItemButton color={"primary"} sx={{
-                            borderRadius: 2,
-                        }} href={"/create-challenge"}>
-                            <ListItemIcon>
-                                <AddIcon style={{ color: theme.palette.text.primary }} />
-                            </ListItemIcon>
-                            <Typography
-                                component={"div"}
-                                variant={"body1"}
-                                sx={{ fontSize: "0.8em" }}
-                            >
-                                Create
-                            </Typography>
-                        </ListItemButton>
-                    </ListItem>
-                    <ListItem disablePadding>
-                        <ListItemButton color={"primary"} sx={{
-                            borderRadius: 2,
-                        }} href={"/articles"}>
-                            <ListItemIcon>
-                                <AutoStoriesIcon style={{ color: theme.palette.text.primary }} />
-                            </ListItemIcon>
-                            <Typography
-                                component={"div"}
-                                variant={"body1"}
-                                sx={{ fontSize: "0.8em" }}
-                            >
-                                Articles
-                            </Typography>
-                        </ListItemButton>
-                    </ListItem>
-                </List>
-                <DrawerFooter>
-                    <div style={{ display: "flex", flexDirection: "column" }}>
-                        {authState.role.toString() === "0" ? (
-                            <div>
-                                <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+                <Box
+                    display={"flex"}
+                    flexDirection={"column"}
+                    sx={{
+                        flexGrow: 1
+                    }}
+                >
+                    <DrawerHeader />
+                    <List
+                        sx={{
+                            flexGrow: 1
+                        }}
+                    >
+                        <ListItem disablePadding>
+                            <ListItemButton color={"primary"} sx={{
+                                borderRadius: 2,
+                            }} href={"/home"}>
+                                <ListItemIcon>
+                                    <HomeIcon style={{ color: theme.palette.text.primary, }} />
+                                </ListItemIcon>
+                                <Typography
+                                    component={"div"}
+                                    variant={"body1"}
+                                    sx={{ fontSize: "0.8em" }}
+                                >
+                                    Home
+                                </Typography>
+                            </ListItemButton>
+                        </ListItem>
+                        <ListItem disablePadding>
+                            <ListItemButton color={"primary"} sx={{
+                                borderRadius: 2,
+                            }} href={"/active"}>
+                                <ListItemIcon>
+                                    <FolderIcon style={{ color: theme.palette.text.primary, }} />
+                                </ListItemIcon>
+                                <Typography
+                                    component={"div"}
+                                    variant={"body1"}
+                                    sx={{ fontSize: "0.8em" }}
+                                >
+                                    Active
+                                </Typography>
+                            </ListItemButton>
+                        </ListItem>
+                        <ListItem disablePadding>
+                            <ListItemButton color={"primary"} sx={{
+                                borderRadius: 2,
+                            }} href={"/following"}>
+                                <ListItemIcon>
+                                    <BookmarkIcon style={{ color: theme.palette.text.primary, }} />
+                                </ListItemIcon>
+                                <Typography
+                                    component={"div"}
+                                    variant={"body1"}
+                                    sx={{ fontSize: "0.8em" }}
+                                >
+                                    Following
+                                </Typography>
+                            </ListItemButton>
+                        </ListItem>
+                        <ListItem disablePadding>
+                            <ListItemButton color={"primary"} sx={{
+                                borderRadius: 2,
+                            }} href={"/profile"}>
+                                <ListItemIcon>
+                                    <AccountBoxIcon style={{ color: theme.palette.text.primary, }} />
+                                </ListItemIcon>
+                                <Typography
+                                    component={"div"}
+                                    variant={"body1"}
+                                    sx={{ fontSize: "0.8em" }}
+                                >
+                                    Profile
+                                </Typography>
+                            </ListItemButton>
+                        </ListItem>
+                        <ListItem disablePadding>
+                            <ListItemButton color={"primary"} sx={{
+                                borderRadius: 2,
+                            }} href={"/streak"}>
+                                <ListItemIcon>
+                                    <LocalFireDepartment style={{ color: theme.palette.text.primary, }} />
+                                </ListItemIcon>
+                                <Typography
+                                    component={"div"}
+                                    variant={"body1"}
+                                    sx={{ fontSize: "0.8em" }}
+                                >
+                                    Stats
+                                </Typography>
+                            </ListItemButton>
+                        </ListItem>
+                        {/*<ListItem disablePadding>*/}
+                        {/*    <ListItemButton color={"primary"} sx={{*/}
+                        {/*        borderRadius: 2,*/}
+                        {/*    }} href={"/nemesis"}>*/}
+                        {/*        <ListItemIcon>*/}
+                        {/*            <IconifyIcon icon="mdi:sword-cross" color={theme.palette.text.primary} width="25"*/}
+                        {/*                         height="25"/>*/}
+                        {/*        </ListItemIcon>*/}
+                        {/*        <Typography*/}
+                        {/*            component={"div"}*/}
+                        {/*            variant={"body1"}*/}
+                        {/*            sx={{fontSize: "0.8em"}}*/}
+                        {/*        >*/}
+                        {/*            Nemesis*/}
+                        {/*        </Typography>*/}
+                        {/*    </ListItemButton>*/}
+                        {/*</ListItem>*/}
+                        <ListItem disablePadding>
+                            <ListItemButton color={"primary"} sx={{
+                                borderRadius: 2,
+                            }} href={"/documentation"}>
+                                <ListItemIcon>
+                                    <FeedIcon style={{ color: theme.palette.text.primary, }} />
+                                </ListItemIcon>
+                                <Typography
+                                    component={"div"}
+                                    variant={"body1"}
+                                    sx={{ fontSize: "0.8em" }}
+                                >
+                                    Docs
+                                </Typography>
+                            </ListItemButton>
+                        </ListItem>
+                        <ListItem disablePadding>
+                            <ListItemButton color={"primary"} sx={{
+                                borderRadius: 2,
+                            }} href={"/about"}>
+                                <ListItemIcon>
+                                    <IconifyIcon icon="mdi:about" color={theme.palette.text.primary} width="25"
+                                        height="25" />
+                                </ListItemIcon>
+                                <Typography
+                                    component={"div"}
+                                    variant={"body1"}
+                                    sx={{ fontSize: "0.8em" }}
+                                >
+                                    About
+                                </Typography>
+                            </ListItemButton>
+                        </ListItem>
+                        <ListItem disablePadding>
+                            <ListItemButton color={"primary"} sx={{
+                                borderRadius: 2,
+                            }} href={"/configs"}>
+                                <ListItemIcon>
+                                    <CalculateIcon style={{ color: theme.palette.text.primary }} />
+                                </ListItemIcon>
+                                <Typography
+                                    component={"div"}
+                                    variant={"body1"}
+                                    sx={{ fontSize: "0.8em" }}
+                                >
+                                    Configs
+                                </Typography>
+                            </ListItemButton>
+                        </ListItem>
+                        <ListItem disablePadding>
+                            <ListItemButton color={"primary"} sx={{
+                                borderRadius: 2,
+                            }} href={"/create-challenge"}>
+                                <ListItemIcon>
+                                    <AddIcon style={{ color: theme.palette.text.primary }} />
+                                </ListItemIcon>
+                                <Typography
+                                    component={"div"}
+                                    variant={"body1"}
+                                    sx={{ fontSize: "0.8em" }}
+                                >
+                                    Create
+                                </Typography>
+                            </ListItemButton>
+                        </ListItem>
+                        <ListItem disablePadding>
+                            <ListItemButton color={"primary"} sx={{
+                                borderRadius: 2,
+                            }} href={"/articles"}>
+                                <ListItemIcon>
+                                    <AutoStoriesIcon style={{ color: theme.palette.text.primary }} />
+                                </ListItemIcon>
+                                <Typography
+                                    component={"div"}
+                                    variant={"body1"}
+                                    sx={{ fontSize: "0.8em" }}
+                                >
+                                    Articles
+                                </Typography>
+                            </ListItemButton>
+                        </ListItem>
+                        {/* <ListItem disablePadding>
+                            <ListItemButton color={"primary"} sx={{
+                                borderRadius: 2,
+                            }} href={"/homework"}>
+                                <ListItemIcon>
+                                    <Quiz style={{ color: theme.palette.text.primary }} />
+                                </ListItemIcon>
+                                <Typography
+                                    component={"div"}
+                                    variant={"body1"}
+                                    sx={{ fontSize: "0.8em" }}
+                                >
+                                    Homework
+                                </Typography>
+                            </ListItemButton>
+                        </ListItem> */}
+                    </List>
+                    <DrawerFooter>
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                            {authState.role.toString() === "0" ? (
+                                <div style={{ width: "100%", display: "flex", justifyContent: "center", marginBottom: "5vh", marginTop: "5vh" }}>
                                     <AwesomeButton style={{
                                         width: "100%",
                                         '--button-primary-color': theme.palette.primary.main,
@@ -1917,28 +1922,27 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                         <img src={premiumImage} />
                                     </AwesomeButton>
                                 </div>
-                                <div style={{ height: "5vh" }} />
-                            </div>
-                        ) : null}
-                        {renderTutorialButton()}
-                        <Button onClick={() => setReportPopup(true)}>
-                            Report Issue
-                        </Button>
-                        <Modal open={reportPopup} onClose={() => setReportPopup(false)}>
-                            {reportIssueMemo}
-                        </Modal>
-                        <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
-                            <Button sx={{ ml: 1, mb: 1 }} size={"small"} onClick={handleTheme} color="primary" variant="text">
-                                <Typography sx={{ textTransform: "capitalize", fontSize: "1.0em", mr: 1 }}>
-                                    {theme.palette.mode} mode
-                                </Typography>
-                                {theme.palette.mode === 'dark' ? <Brightness7Icon /> :
-                                    <Brightness4Icon />}
+                            ) : null}
+                            {renderTutorialButton()}
+                            <Button onClick={() => setReportPopup(true)}>
+                                Report Issue
                             </Button>
+                            <Modal open={reportPopup} onClose={() => setReportPopup(false)}>
+                                {reportIssueMemo}
+                            </Modal>
+                            <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+                                <Button sx={{ ml: 1, mb: 1 }} size={"small"} onClick={handleTheme} color="primary" variant="text">
+                                    <Typography sx={{ textTransform: "capitalize", fontSize: "1.0em", mr: 1 }}>
+                                        {theme.palette.mode} mode
+                                    </Typography>
+                                    {theme.palette.mode === 'dark' ? <Brightness7Icon /> :
+                                        <Brightness4Icon />}
+                                </Button>
+                            </div>
+                            {renderSocials()}
                         </div>
-                        {renderSocials()}
-                    </div>
-                </DrawerFooter>
+                    </DrawerFooter>
+                </Box>
             </Drawer>
         )
     }
@@ -2028,6 +2032,22 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 sx={{ fontSize: "0.8em" }}
                             >
                                 Articles
+                            </Typography>
+                        </ListItemButton>
+                    </ListItem>
+                    <ListItem disablePadding>
+                        <ListItemButton color={"primary"} sx={{
+                            borderRadius: 2,
+                        }} href={"/homework"}>
+                            <ListItemIcon>
+                                <Quiz style={{ color: theme.palette.text.primary }} />
+                            </ListItemIcon>
+                            <Typography
+                                component={"div"}
+                                variant={"body1"}
+                                sx={{ fontSize: "0.8em" }}
+                            >
+                                Homework
                             </Typography>
                         </ListItemButton>
                     </ListItem>

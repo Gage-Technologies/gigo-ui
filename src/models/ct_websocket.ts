@@ -23,6 +23,26 @@ export enum CtMessageType {
     WebSocketMessageTypeCloseByteChatThreadResponse = 53,
     WebSocketMessageTypeSemanticRankRequest = 54,
     WebSocketMessageTypeSemanticRankResponse = 55,
+    WebSocketMessageTypeNewHHChatRequest = 56,
+    WebSocketMessageTypeNewHHChatResponse = 57,
+    WebSocketMessageTypeGetHHChatNameRequest = 58,
+    WebSocketMessageTypeGetHHChatNameResponse = 59,
+    WebSocketMessageTypeGetHHChatsRequest = 60,
+    WebSocketMessageTypeGetHHChatsResponse = 61,
+    WebSocketMessageTypeGetHHChatMessagesRequest = 62,
+    WebSocketMessageTypeGetHHChatMessagesResponse = 63,
+    WebSocketMessageTypeDeleteHHChatRequest = 64,
+    WebSocketMessageTypeDeleteHHChatResponse = 65,
+    WebSocketMessageTypeUserHHChatMessage = 66,
+    WebSocketMessageTypeAssistantHHChatMessage = 67,
+}
+
+export enum CtChatMessageType {
+    User,
+    Assistant,
+    CommandRequest,
+    CommandResponse,
+    CodeExecutionResult
 }
 
 export enum CtResponseCode {
@@ -229,6 +249,119 @@ export interface CtSemanticScores {
 export interface CtSemanticRankResponse {
     scores: CtSemanticScores,
     ranks: string[]
+}
+
+export interface CtNewHhChatRequest {
+    partition: string;
+}
+
+export interface CtNewHhChatResponse {
+    chat_id: string;
+    assistant_id: string;
+    assistant_name: string;
+    user_id: string;
+}
+
+export interface CtHhUserMessage {
+    chat_id: string;
+    user_message: string;
+    files: CtCodeFile[];
+    code_exec_result: boolean;
+}
+
+export interface CtExecCommand {
+    command: string;
+    lang: string;
+}
+
+export interface CtCodeFile {
+    file_name: string;
+    code: string;
+}
+
+export interface CtHHAssistantMessage {
+    user_message_id: string;
+    assistant_message_id: string;
+    token: string;
+    complete_message: string;
+    files: CtCodeFile[];
+    active_file: string;
+    message_type: CtChatMessageType;
+    command: CtExecCommand;
+    done: boolean;
+    premium_llm: boolean;
+    free_credit_use: boolean;
+}
+
+export interface GetHHChatNameRequest {
+    chat_id: string;
+}
+
+export interface GetHHChatNameResponse {
+    success: boolean;
+    name: string;
+}
+
+export interface CtGetHHChatsRequest {
+    partition: string;
+    offset: number;
+    limit: number;
+}
+
+export interface CtGetHHChatsResponse {
+    chats: CtGetHHChatsResponseChat[];
+    total: number;
+    remaining: number;
+    returned: number;
+}
+
+export interface CtGetHHChatsResponseChat {
+    _id: string;
+    assistant_id: string;
+    assistant_name: string;
+    owner_id: string;
+    last_message_at: string;
+    name: string;
+    message_count: number;
+    user_message_count: number;
+    assistant_message_count: number;
+    created_at: string;
+    repo_id: string;
+    partition: string;
+}
+
+export interface CtGetHHChatMessagesRequest {
+    chat_id: string;
+}
+
+export interface CtGetHHChatMessagesResponse {
+    messages: CtGetHHChatMessagesResponseMessage[];
+    total: number;
+    last_message_at: Date;
+}
+
+export interface CtGetHHChatMessagesResponseMessage {
+    _id: string;
+    chat_id: string;
+    assistant_id: string;
+    assistant_name: string;
+    user_id: string;
+    message_type: CtChatMessageType;
+    content: string;
+    files: CtCodeFile[];
+    created_at: Date;
+    message_number: number;
+    command: CtExecCommand;
+    premium_llm: boolean;
+    free_credit_use: boolean;
+}
+
+export interface CtDeleteHHChatRequest {
+    chatID: string;
+}
+
+export interface CtDeleteHHChatResponse {
+    success: boolean;
 }
 
 export enum SymbolType {
