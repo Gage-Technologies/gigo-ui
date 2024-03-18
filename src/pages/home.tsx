@@ -1562,98 +1562,6 @@ function Home() {
         )
     }
 
-    const header = React.useMemo(() => {
-        // Generate a random index based on the length of byteContent
-        let project: any = undefined;
-        if (byteContent.length > 0) {
-            const randomIndex = Math.floor(Math.random() * byteContent.length);
-            project = byteContent[randomIndex];
-        }
-
-        // Now use this project to render your component
-        return (
-            <Box sx={{
-                width: "100%",
-                height: "600px",
-                backgroundColor: theme.palette.primary.light,
-                zIndex: 3,
-                m: 2,
-                borderRadius: "12px",
-                position: "relative"
-            }}>
-                <Box style={{
-                    width: "100%",
-                    display: "flex",
-                    flexDirection: "row",
-                    position: "relative",
-                    paddingLeft: "10%",
-                    paddingRight: "10%"
-                }}>
-                    <Box style={{position: "relative", top: "100px", width: '50%'}}>
-                        <Typography variant={"h1"}
-                                    sx={{color: theme.palette.background.default, textTransform: 'none'}}>
-                            Take a Byte Today
-                        </Typography>
-                        <Typography variant={"subtitle1"}
-                                    sx={{color: theme.palette.text.primary, textTransform: "none", m: 3, ml: 0}}>
-                            Bite-sized coding challenges that are deeply integrated with Code Teacher, offering a
-                            personalized learning experience.
-                        </Typography>
-                    </Box>
-                    <Box sx={{pt: 5, position: "absolute", right: "10%"}}>
-                        {project ? (
-                            <LazyLoad once scroll unmountIfInvisible>
-                                <BytesCard
-                                    height={"550px"}
-                                    imageHeight={"450px"}
-                                    width={'auto'}
-                                    imageWidth={"auto"}
-                                    bytesId={project["_id"]}
-                                    bytesTitle={project["name"]}
-                                    bytesDesc={project["description_medium"]}
-                                    bytesThumb={config.rootPath + "/static/bytes/t/" + project["_id"]}
-                                    onClick={() => navigate("/byte/" + project["_id"])}
-                                    role={authState.role}
-                                    completedEasy={project["completed_easy"]}
-                                    completedMedium={project["completed_medium"]}
-                                    completedHard={project["completed_hard"]}
-                                    language={programmingLanguages[project["lang"]]}
-                                />
-                            </LazyLoad>
-                        ) : (
-                            <SheenPlaceholder width="253px" height={"450px"}/>
-                        )}
-                    </Box>
-                </Box>
-                <Box
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        position: "absolute",
-                        bottom: "40px",
-                        left: "calc(50% - 83px)"
-                    }}
-                >
-                    {project ? (
-                        <AwesomeButton style={{
-                            width: "auto",
-                            height: "50px",
-                            '--button-primary-color': theme.palette.primary.main,
-                            '--button-primary-color-dark': theme.palette.primary.dark,
-                            '--button-primary-color-light': "white",
-                            '--button-primary-color-hover': theme.palette.primary.main,
-                            fontSize: "28px"
-                        }} type="primary" href={`/byte/${project["_id"]}`}>
-                            <span>Take a Byte</span>
-                        </AwesomeButton>
-                    ) : (
-                        <SheenPlaceholder width="196px" height={"46px"}/>
-                    )}
-                </Box>
-            </Box>
-        )
-    }, [byteContent])
-
     const headerMobile = React.useMemo(() => {
         let project: any = undefined;
         if (byteContent.length > 0) {
@@ -1828,7 +1736,7 @@ function Home() {
                             }}
                         >
                             {JourneyHeader()}
-                            {(window.innerWidth > 1000) ? header : headerMobile}
+                            {(window.innerWidth < 1000) && headerMobile}
                         </Box>
                         <Box
                             sx={{
