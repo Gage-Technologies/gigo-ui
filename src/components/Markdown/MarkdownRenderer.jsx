@@ -13,6 +13,7 @@ import {Check, ContentCopy} from "@mui/icons-material";
 import {styled} from "@mui/material/styles";
 import {visit} from 'unist-util-visit';
 import config from "../../config";
+import "./css/MarkdownRenderer.css";
 
 const syntaxHighlightingSchema = merge(defaultSchema, {
   attributes: {
