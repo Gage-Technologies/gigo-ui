@@ -624,7 +624,7 @@ function Byte() {
     };
 
     // Function to fetch the full metadata of a byte
-    const getByte = async (byteId: string) => {
+    const getByte = async (byteId: string): Promise<any | null> => {
         try {
             const response = await call("/api/bytes/getByte",
                 "POST",
@@ -649,12 +649,14 @@ function Byte() {
                 setHardCode(res["rec_bytes"]["outline_content_hard"])
 
                 setByteData(res["rec_bytes"])
+                return res["rec_bytes"]
             } else {
                 swal("Byte Not Found", "The requested byte could not be found.");
             }
         } catch (error) {
             swal("Error", "An error occurred while fetching the byte data.");
         }
+        return null
     };
 
     const startByteAttempt = async (byteId: string) => {
@@ -784,9 +786,23 @@ function Byte() {
         setLoading(true);
         setSuggestionRange(null);
         getRecommendedBytes();
-        getByte(id).then(() => {
-            if (authState.authenticated && id) {
-                startByteAttempt(id);
+        getByte(id).then((byteData: any | null) => {
+            if (authState.authenticated && id && byteData !== null) {
+                startByteAttempt(id).then(async () => {
+                    // auto connect to the workspace if this is a journey task
+                    if (isJourneyVersion) {
+                        for (let i = 0; i < 5; i++) {
+                            let created = await createWorkspace(byteData._id);
+                            if (created) {
+                                break
+                            }
+
+                            if (i === 4) {
+                                break
+                            }
+                        }
+                    }
+                });
             }
         }).finally(() => {
             setLoading(false);
@@ -1213,7 +1229,7 @@ function Byte() {
             if (workspaceState === 1) {
                 stateTooltipTitle = "Connected To DevSpace"
                 stateIcon = (<LinkIcon sx={{color: theme.palette.success.main}} />)
-            } else {
+            } else if (workspaceState === 0) {
                 stateTooltipTitle = "Connecting To DevSpace"
                 stateIcon = (<CircularProgress size={24} sx={{color: alpha(theme.palette.text.primary, 0.6)}} />)
             }
