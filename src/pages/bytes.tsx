@@ -487,7 +487,12 @@ function Byte() {
                 byte_attempt_id: byteAttemptId,
                 payload: {
                     lang: byteData ? byteData.lang : 5,
-                    code: code
+                    code: code,
+                    exec_files: [{
+                        file_name: "main" + (byteData && byteData.lang === 5 ? ".py" : ".go"),
+                        code: code,
+                        execute: true
+                    }]
                 }
             }
         };
@@ -1470,7 +1475,7 @@ function Byte() {
                                             sx={{
                                                 position: 'absolute',
                                                 right: '8px',
-                                                bottom: '18px',
+                                                bottom: terminalVisible ? '228px' : '18px',
                                                 zIndex: 3,
                                                 minWidth: 0,
                                             }}
@@ -1641,7 +1646,7 @@ function Byte() {
                                             sx={{
                                                 position: 'absolute',
                                                 right: '8px',
-                                                bottom: '18px',
+                                                bottom: terminalVisible ? '228px' : '18px',
                                                 zIndex: 3,
                                                 minWidth: 0,
                                             }}
