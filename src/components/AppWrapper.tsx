@@ -1890,7 +1890,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                 </Typography>
                             </ListItemButton>
                         </ListItem>
-                        {/* <ListItem disablePadding>
+                        <ListItem disablePadding>
                             <ListItemButton color={"primary"} sx={{
                                 borderRadius: 2,
                             }} href={"/homework"}>
@@ -1905,7 +1905,7 @@ export default function AppWrapper(props: React.PropsWithChildren<IProps>) {
                                     Homework
                                 </Typography>
                             </ListItemButton>
-                        </ListItem> */}
+                        </ListItem>
                     </List>
                     <DrawerFooter>
                         <div style={{ display: "flex", flexDirection: "column" }}>
