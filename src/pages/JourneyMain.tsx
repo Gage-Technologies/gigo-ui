@@ -178,22 +178,24 @@ function JourneyMain() {
             return a.node_above - b.node_above;
         });
 
-        // Fetch next unit and append it to sortedUnitData if successful
-        const nextUnitRes = await call(
-            "/api/journey/tempNextUnit",
-            "POST",
-            null,
-            null,
-            null,
-            // @ts-ignore
-            {},
-            null,
-            config.rootPath
-        );
+        // check if we need to get a random unit
+        if (sortedUnitData.length < 2 || sortedUnitData[sortedUnitData.length-2].unit_below === null) {
+            // Fetch next unit and append it to sortedUnitData if successful
+            const nextUnitRes = await call(
+                "/api/journey/tempNextUnit",
+                "POST",
+                null,
+                null,
+                null,
+                // @ts-ignore
+                {},
+                null,
+                config.rootPath
+            );
 
-        if (nextUnitRes !== undefined && nextUnitRes["success"] === true && nextUnitRes["unit"]) {
-            setNextUnit(nextUnitRes["unit"]);
-            sortedUnitData.push(nextUnitRes["unit"]);
+            if (nextUnitRes !== undefined && nextUnitRes["success"] === true && nextUnitRes["unit"]) {
+                sortedUnitData.push(nextUnitRes["unit"]);
+            }
         }
 
         // @ts-ignore
