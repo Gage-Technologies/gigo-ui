@@ -1,17 +1,24 @@
 import * as React from "react";
 import {useEffect, useRef, useState} from "react";
 import {
+    alpha,
+    Box,
+    CircularProgress,
     Container,
-    createTheme, CssBaseline,
+    createTheme,
+    CssBaseline,
+    Dialog,
+    DialogContent,
+    DialogTitle,
     PaletteMode,
     ThemeProvider,
-    Typography,
-    Box, Tooltip, CircularProgress, alpha, Button, Dialog, DialogContent, DialogTitle
+    Tooltip,
+    Typography
 } from "@mui/material";
 import XpPopup from "../components/XpPopup";
-import { getAllTokens } from "../theme";
-import { Close, PlayArrow } from "@material-ui/icons";
-import { useAppDispatch, useAppSelector } from "../app/hooks";
+import {getAllTokens} from "../theme";
+import {PlayArrow} from "@material-ui/icons";
+import {useAppDispatch, useAppSelector} from "../app/hooks";
 import {useLocation, useNavigate} from "react-router-dom";
 import swal from "sweetalert";
 import call from "../services/api-call";
@@ -19,29 +26,26 @@ import 'ace-builds';
 import 'ace-builds/webpack-resolver';
 import ByteSelectionMenu from "../components/ByteSelectionMenu";
 import config from "../config";
-import { useParams } from "react-router";
-import { useGlobalWebSocket } from "../services/websocket";
-import { WsGenericErrorPayload, WsMessage, WsMessageType } from "../models/websocket";
-import {
-    ExecResponsePayload,
-    OutputRow
-} from "../models/bytes";
-import { programmingLanguages } from "../services/vars";
-import { useGlobalCtWebSocket } from "../services/ct_websocket";
+import {useParams} from "react-router";
+import {useGlobalWebSocket} from "../services/websocket";
+import {WsGenericErrorPayload, WsMessage, WsMessageType} from "../models/websocket";
+import {ExecResponsePayload, OutputRow} from "../models/bytes";
+import {programmingLanguages} from "../services/vars";
+import {useGlobalCtWebSocket} from "../services/ct_websocket";
 import ByteNextStep from "../components/CodeTeacher/ByteNextStep";
 import ByteChat from "../components/CodeTeacher/ByteChat";
-import { LoadingButton } from "@mui/lab";
+import {LoadingButton} from "@mui/lab";
 import ByteNextOutputMessage from "../components/CodeTeacher/ByteNextOutputMessage";
 import Editor from "../components/IDE/Editor";
 import chroma from 'chroma-js';
 import SheenPlaceholder from "../components/Loading/SheenPlaceholder";
-import { sleep } from "../services/utils";
-import { Extension, ReactCodeMirrorRef } from "@uiw/react-codemirror";
+import {sleep} from "../services/utils";
+import {Extension, ReactCodeMirrorRef} from "@uiw/react-codemirror";
 import DifficultyAdjuster from "../components/ByteDifficulty";
-import { selectAuthState } from "../reducers/auth/auth";
-import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../reducers/bytes/bytes";
+import {selectAuthState} from "../reducers/auth/auth";
+import {initialBytesStateUpdate, selectBytesState, updateBytesState} from "../reducers/bytes/bytes";
 import ByteTerminal from "../components/Terminal";
-import { debounce } from "lodash";
+import {debounce} from "lodash";
 import {LaunchLspRequest} from "../models/launch_lsp";
 import {Workspace} from "../models/workspace";
 import CodeSource from "../models/codeSource";
@@ -49,16 +53,18 @@ import {
     CtGenericErrorPayload,
     CtMessage,
     CtMessageOrigin,
-    CtMessageType, CtParseFileRequest,
+    CtMessageType,
+    CtParseFileRequest,
     CtParseFileResponse,
     CtValidationErrorPayload,
     Node as CtParseNode
 } from "../models/ct_websocket";
 import LinkIcon from '@mui/icons-material/Link';
 import LinkOffIcon from '@mui/icons-material/LinkOff';
-import { CtPopupExtensionEngine, createCtPopupExtension } from "../components/IDE/Extensions/CtPopupExtension";
+import {createCtPopupExtension, CtPopupExtensionEngine} from "../components/IDE/Extensions/CtPopupExtension";
 import {ctCreateCodeActions} from "../components/IDE/Extensions/CtCodeActionExtension";
-import ByteSuggestions2, {splitStringByLines} from "../components/CodeTeacher/ByteSuggestions2";
+import ByteSuggestions2 from "../components/CodeTeacher/ByteSuggestions2";
+import BytesLanguage from "../components/Icons/bytes/BytesLanguage";
 
 
 interface MergedOutputRow {
@@ -293,17 +299,17 @@ function Byte() {
 
     const [lastParse, setLastParse] = useState("")
     const [parsedSymbols, setParsedSymbols] = useState<CtParseFileResponse | null>(null)
-    const [codeActionPortals, setCodeActionPortals] = useState<{id: string, portal: React.ReactPortal}[]>([])
+    const [codeActionPortals, setCodeActionPortals] = useState<{ id: string, portal: React.ReactPortal }[]>([])
 
     const [loadingCodeCleanup, setLoadingCodeCleanup] = React.useState<string | null>(null);
 
-    const [suggestionRange, setSuggestionRange] = useState<{start_line: number, end_line: number} | null>(null);
+    const [suggestionRange, setSuggestionRange] = useState<{ start_line: number, end_line: number } | null>(null);
     const [isHarderVersionPopupVisible, setIsHarderVersionPopupVisible] = useState(false);
 
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
 
-    let { id } = useParams();
+    let {id} = useParams();
 
     let ctWs = useGlobalCtWebSocket();
 
@@ -489,10 +495,10 @@ function Byte() {
         setIsReceivingData(true);
         setTerminalVisible(true)
         setOutput({
-            stdout: [{ timestamp: Date.now() * 1000, content: "Running..." }],
+            stdout: [{timestamp: Date.now() * 1000, content: "Running..."}],
             stderr: [],
             merged: "Running...",
-            mergedLines: [{ timestamp: Date.now() * 1000, content: "Running...", error: false }],
+            mergedLines: [{timestamp: Date.now() * 1000, content: "Running...", error: false}],
         });
         setExecutingCode(true)
         setCommandId("");
@@ -537,7 +543,7 @@ function Byte() {
                 if (payload.command_id_string) {
                     setCommandId(payload.command_id_string);
                 }
-                const { stdout, stderr, done } = payload;
+                const {stdout, stderr, done} = payload;
 
                 // skip the processing if this is the first response
                 if (stdout.length === 0 && stderr.length === 0 && !done) {
@@ -632,7 +638,7 @@ function Byte() {
                 null,
                 null,
                 // @ts-ignore
-                { byte_id: byteId },
+                {byte_id: byteId},
                 null,
                 config.rootPath);
             const [res] = await Promise.all([response]);
@@ -668,7 +674,7 @@ function Byte() {
                 null,
                 null,
                 // @ts-ignore
-                { byte_id: byteId },
+                {byte_id: byteId},
                 null,
                 config.rootPath
             );
@@ -704,7 +710,7 @@ function Byte() {
                 null,
                 null,
                 // @ts-ignore
-                { byte_id: byteId },
+                {byte_id: byteId},
                 null,
                 config.rootPath
             );
@@ -740,7 +746,7 @@ function Byte() {
             null,
             // @ts-ignore
             {
-                byte_id: byteAttemptId ,
+                byte_id: byteAttemptId,
                 difficulty: difficultyToString(determineDifficulty()),
             },
             null,
@@ -772,7 +778,7 @@ function Byte() {
         const shouldSetToEasy = isJourneyVersion && !journeySetupDone && bytesState.byteDifficulty !== 0;
 
         if (shouldSetToEasy) {
-            dispatch(updateBytesState({ ...bytesState, byteDifficulty: 0, initialized: true }));
+            dispatch(updateBytesState({...bytesState, byteDifficulty: 0, initialized: true}));
             setJourneySetupDone(true); // Mark the journey setup as completed to prevent re-execution.
         }
 
@@ -963,8 +969,8 @@ function Byte() {
                     setCodeActionPortals((prevState) => {
                         // update the portal if it has a prior state or add it if new
                         return prevState.some((x) => x.id === id) ?
-                            prevState.map((item) => item.id === id ? { ...item, portal } : item) :
-                            [...prevState, { id, portal }];
+                            prevState.map((item) => item.id === id ? {...item, portal} : item) :
+                            [...prevState, {id, portal}];
                     })
                 },
                 (node: CtParseNode) => triggerCodeCleanup(node)
@@ -1094,7 +1100,7 @@ function Byte() {
         if (!outputPopup && buttonClickedRef.current) {
             buttonClickedRef.current = false;
             if (!authState.authenticated) {
-                navigate("/signup?forward="+encodeURIComponent(window.location.pathname))
+                navigate("/signup?forward=" + encodeURIComponent(window.location.pathname))
                 return
             }
             executeCode();
@@ -1190,7 +1196,6 @@ function Byte() {
     };
 
 
-
     const renderEditorSideBar = () => {
         let stateTooltipTitle: string | React.ReactElement = (
             <Box>
@@ -1228,10 +1233,10 @@ function Byte() {
         if (workspaceState !== null) {
             if (workspaceState === 1) {
                 stateTooltipTitle = "Connected To DevSpace"
-                stateIcon = (<LinkIcon sx={{color: theme.palette.success.main}} />)
+                stateIcon = (<LinkIcon sx={{color: theme.palette.success.main}}/>)
             } else if (workspaceState === 0) {
                 stateTooltipTitle = "Connecting To DevSpace"
-                stateIcon = (<CircularProgress size={24} sx={{color: alpha(theme.palette.text.primary, 0.6)}} />)
+                stateIcon = (<CircularProgress size={24} sx={{color: alpha(theme.palette.text.primary, 0.6)}}/>)
             }
         }
 
@@ -1271,7 +1276,9 @@ function Byte() {
                 {(activeSidebarTab === null || activeSidebarTab === "debugOutput") && (
                     <ByteNextOutputMessage
                         trigger={outputPopup}
-                        acceptedCallback={() => { setOutputPopup(false) }}
+                        acceptedCallback={() => {
+                            setOutputPopup(false)
+                        }}
                         onExpand={() => setActiveSidebarTab("debugOutput")}
                         onHide={() => setActiveSidebarTab(null)}
                         onSuccess={() => {
@@ -1398,7 +1405,7 @@ function Byte() {
                         ) : (
                             <Box sx={titlePlaceholderContainerStyle}>
                                 <Box sx={titlePlaceholderStyle}>
-                                    <SheenPlaceholder width="400px" height={"45px"} />
+                                    <SheenPlaceholder width="400px" height={"45px"}/>
                                 </Box>
                             </Box>
                         )}
@@ -1446,15 +1453,30 @@ function Byte() {
                                                 setOutputPopup(false);
                                                 buttonClickedRef.current = true;
                                                 if (!authState.authenticated) {
-                                                    navigate("/signup?forward="+encodeURIComponent(window.location.pathname))
+                                                    navigate("/signup?forward=" + encodeURIComponent(window.location.pathname))
                                                     return
                                                 }
 
                                                 executeCode(); // Indicate button click
                                             }}
                                         >
-                                            <PlayArrow />
+                                            <PlayArrow/>
                                         </LoadingButton>
+                                    </Tooltip>
+                                )}
+                                {byteData && (
+                                    <Tooltip title={programmingLanguages[byteData.lang]}>
+                                        <Box
+                                            sx={{
+                                                position: 'absolute',
+                                                right: '8px',
+                                                bottom: '18px',
+                                                zIndex: 3,
+                                                minWidth: 0,
+                                            }}
+                                        >
+                                            <BytesLanguage language={programmingLanguages[byteData.lang]}/>
+                                        </Box>
                                     </Tooltip>
                                 )}
                                 <Editor
@@ -1465,7 +1487,10 @@ function Byte() {
                                     theme={mode}
                                     readonly={!authState.authenticated}
                                     onChange={(val, view) => handleEditorChange(val)}
-                                    onCursorChange={(bytePosition, line, column) => setCursorPosition({ row: line, column: column })}
+                                    onCursorChange={(bytePosition, line, column) => setCursorPosition({
+                                        row: line,
+                                        column: column
+                                    })}
                                     lspUrl={byteData && lspActive ? `wss://${byteData._id}-lsp.${config.coderPath.replace("https://", "")}` : undefined}
                                     diagnosticLevel={selectDiagnosticLevel()}
                                     extensions={popupExtRef.current ? editorExtensions.concat(popupExtRef.current) : editorExtensions}
@@ -1476,10 +1501,10 @@ function Byte() {
                                         ...(
                                             // default
                                             workspaceState === null ? {} :
-                                            // starting or active
-                                            workspaceState === 1 ?
-                                                {border: `1px solid ${theme.palette.primary.main}`} :
-                                                {border: `1px solid grey`}
+                                                // starting or active
+                                                workspaceState === 1 ?
+                                                    {border: `1px solid ${theme.palette.primary.main}`} :
+                                                    {border: `1px solid grey`}
                                         )
                                     }}
                                 />
@@ -1496,7 +1521,8 @@ function Byte() {
                             {renderEditorSideBar()}
                         </div>
                         <div style={byteSelectionMenuStyle}>
-                            {recommendedBytes && <ByteSelectionMenu bytes={recommendedBytes} onSelectByte={handleSelectByte}/>}
+                            {recommendedBytes &&
+                              <ByteSelectionMenu bytes={recommendedBytes} onSelectByte={handleSelectByte}/>}
                         </div>
                     </div>
                 </Container>
@@ -1516,7 +1542,7 @@ function Byte() {
                                      reward={xpData["level_up_reward"]}
                     //@ts-ignore
                                      renown={xpData["xp_update"]["current_renown"]} popupClose={null}
-                                     homePage={true} />) : null}
+                                     homePage={true}/>) : null}
             </>
         )
     }
@@ -1538,7 +1564,7 @@ function Byte() {
                         ) : (
                             <Box sx={titlePlaceholderContainerStyle}>
                                 <Box sx={titlePlaceholderStyle}>
-                                    <SheenPlaceholder width="400px" height={"45px"} />
+                                    <SheenPlaceholder width="400px" height={"45px"}/>
                                 </Box>
                             </Box>
                         )}
@@ -1605,8 +1631,23 @@ function Byte() {
                                                 executeCode(); // Indicate button click
                                             }}
                                         >
-                                            <PlayArrow />
+                                            <PlayArrow/>
                                         </LoadingButton>
+                                    </Tooltip>
+                                )}
+                                {byteData && (
+                                    <Tooltip title={programmingLanguages[byteData.lang]}>
+                                        <Box
+                                            sx={{
+                                                position: 'absolute',
+                                                right: '8px',
+                                                bottom: '18px',
+                                                zIndex: 3,
+                                                minWidth: 0,
+                                            }}
+                                        >
+                                            <BytesLanguage language={programmingLanguages[byteData.lang]}/>
+                                        </Box>
                                     </Tooltip>
                                 )}
                                 <Editor
@@ -1617,7 +1658,10 @@ function Byte() {
                                     theme={mode}
                                     readonly={!authState.authenticated}
                                     onChange={(val, view) => handleEditorChange(val)}
-                                    onCursorChange={(bytePosition, line, column) => setCursorPosition({ row: line, column: column })}
+                                    onCursorChange={(bytePosition, line, column) => setCursorPosition({
+                                        row: line,
+                                        column: column
+                                    })}
                                     lspUrl={byteData && lspActive ? `wss://${byteData._id}-lsp.${config.coderPath.replace("https://", "")}` : undefined}
                                     diagnosticLevel={selectDiagnosticLevel()}
                                     extensions={popupExtRef.current ? editorExtensions.concat(popupExtRef.current) : editorExtensions}
@@ -1665,7 +1709,7 @@ function Byte() {
                                      reward={xpData["level_up_reward"]}
                     //@ts-ignore
                                      renown={xpData["xp_update"]["current_renown"]} popupClose={null}
-                                     homePage={true} />) : null}
+                                     homePage={true}/>) : null}
             </>
         )
     }
@@ -1675,7 +1719,7 @@ function Byte() {
             <CssBaseline>
                 {(queryParams.has('journey')) ? journeyBytesPage() : bytesPage()}
             </CssBaseline>
-        </ThemeProvider >
+        </ThemeProvider>
     );
 }
 

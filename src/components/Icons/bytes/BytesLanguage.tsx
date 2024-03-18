@@ -10,16 +10,20 @@ export type ByteBadgeProps = {
 function BytesLanguage(props: ByteBadgeProps) {
 
     const handleLanguage = () => {
-        switch (props.language) {
-            case "Python":
+        switch (props.language.toLowerCase()) {
+            case "python":
+            case "py":
                 return pythonLogo
-            case "Go":
+            case "golang":
+            case "go":
                 return golangLogo
         }
     }
 
     const size = props.language === "Go" ? "30px" : "20px"
     const containerPadding = props.language === "Go" ? "5px" : "10px"
+
+    console.log("ByteBadge Props: ", props)
     return (
         <div style={{
             textAlign: "right", 
