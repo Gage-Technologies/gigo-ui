@@ -178,6 +178,24 @@ function JourneyMain() {
             return a.node_above - b.node_above;
         });
 
+        // Fetch next unit and append it to sortedUnitData if successful
+        const nextUnitRes = await call(
+            "/api/journey/tempNextUnit",
+            "POST",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {},
+            null,
+            config.rootPath
+        );
+
+        if (nextUnitRes !== undefined && nextUnitRes["success"] === true && nextUnitRes["unit"]) {
+            setNextUnit(nextUnitRes["unit"]);
+            sortedUnitData.push(nextUnitRes["unit"]);
+        }
+
         // @ts-ignore
         const fetchedTasks = sortedUnitData.map(async (unit: any) => {
             let res = await call(
@@ -208,8 +226,8 @@ function JourneyMain() {
         });
 
         const allUnits = await Promise.all(fetchedTasks);
-        setUnitData(allUnits.slice(0, -1));
         setNextUnit(allUnits[allUnits.length - 1]);
+        setUnitData(allUnits.slice(0, -1));
         setActiveJourney(true)
         setLoading(false)
         unitRefs.current = allUnits.map((_, i) => unitRefs.current[i] ?? createRef<HTMLDivElement>());
@@ -218,6 +236,31 @@ function JourneyMain() {
     useEffect(() => {
         getTasks()
     }, []);
+
+    const handleAddUnitToMap = async () => {
+        if (!nextUnit) return;
+
+        const res = await call(
+            "/api/journey/addUnitToMap",
+            "POST",
+            null,
+            null,
+            null,
+            // @ts-ignore
+            {
+                unit_id: nextUnit._id
+            },
+            null,
+            config.rootPath
+        );
+
+        if (res && res.success) {
+            console.log("Unit added successfully!");
+        } else {
+            console.error("Failed to add unit to map");
+            return
+        }
+    };
 
     const smoothScrollTo = (element: Element, duration: number): void => {
         let targetPosition = element.getBoundingClientRect().top;
@@ -270,7 +313,7 @@ function JourneyMain() {
             if (ref?.current) {
                 requestAnimationFrame(() => {
                     if (ref && ref?.current) {
-                        smoothScrollTo(ref.current, 2500);
+                        smoothScrollTo(ref.current, 1250);
                     }
                 });
             }
@@ -340,6 +383,25 @@ function JourneyMain() {
         }
         setPopupLoading(false)
     };
+
+    // const handleNextUnit = async () => {
+    //     let res = await call(
+    //         "/api/journey/tempNextUnit",
+    //         "POST",
+    //         null,
+    //         null,
+    //         null,
+    //         // @ts-ignore
+    //         {},
+    //         null,
+    //         config.rootPath
+    //     );
+    //
+    //     if (res !== undefined && res["success"] !== undefined && res["success"] === true && res["unit"]) {
+    //
+    //         setNextUnit(res["unit"]);
+    //     }
+    // };
 
     const [taskDescription, setTaskDescription] = useState("")
     const [taskTitle, setTaskTitle] = useState("")
@@ -969,7 +1031,7 @@ function JourneyMain() {
                                     '--button-hover-pressure': "1",
                                     height: "10vh",
                                     '--button-raise-level': "10px"
-                                }} type="primary">
+                                }} type="primary" onPress={handleAddUnitToMap}>
                                     <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
                                         Add Unit to Map
                                     </h1>
