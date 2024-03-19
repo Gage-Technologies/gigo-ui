@@ -1540,7 +1540,7 @@ function Byte() {
                     //@ts-ignore
                                      newXP={(xpData["xp_update"]["new_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]}
                     //@ts-ignore
-                                     nextLevel={xpData["xp_update"]["old_level"] !== undefined ? xpData["xp_update"]["new_level"] : xpData["xp_update"]["next_level"]}
+                                     nextLevel={xpData["xp_update"]["old_level"] !== null ? xpData["xp_update"]["new_level"] : xpData["xp_update"]["next_level"]}
                     //@ts-ignore
                                      gainedXP={xpData["xp_update"]["new_xp"] - xpData["xp_update"]["old_xp"]}
                     //@ts-ignore
@@ -1707,7 +1707,7 @@ function Byte() {
                     //@ts-ignore
                                      newXP={(xpData["xp_update"]["new_xp"] * 100) / xpData["xp_update"]["max_xp_for_lvl"]}
                     //@ts-ignore
-                                     nextLevel={xpData["xp_update"]["old_level"] !== undefined ? xpData["xp_update"]["new_level"] : xpData["xp_update"]["next_level"]}
+                                     nextLevel={xpData["xp_update"]["old_level"] !== null ? xpData["xp_update"]["new_level"] : xpData["xp_update"]["next_level"]}
                     //@ts-ignore
                                      gainedXP={xpData["xp_update"]["new_xp"] - xpData["xp_update"]["old_xp"]}
                     //@ts-ignore
