@@ -1049,6 +1049,8 @@ function JourneyMain() {
         }
     };
 
+    const [isHovered, setIsHovered] = useState(false);
+
     const userJourney = () => {
         return (
             <Box sx={{ overflow: 'hidden', position: "relative" }}>
@@ -1061,7 +1063,7 @@ function JourneyMain() {
                     <div key={unit._id}>
                         <Grid container>
                             {index % 2 === 0 ?
-                                (<Grid item xl={4} sx={{ display: "flex", justifyContent: "start", paddingTop: '20vh', flexDirection: "column", alignItems: "center" }}>
+                                (<Grid item xl={4} sx={{ display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
                                     {<JourneyPortals currentIndex={index} />}
                                 </Grid>)
                                 :
@@ -1072,7 +1074,8 @@ function JourneyMain() {
                                             borderRadius: "30px",
                                             backgroundColor: hexToRGBA(unit.color, 0.5),
                                             overflow: "hidden",
-                                            position: 'relative',
+                                            position: 'absolute',
+                                            zIndex: 99,
                                             boxShadow: (expandedCard === index) ? '' : `inset 0px -50px 75px -25px ${hexToRGBA(unit.color, 0.5)}`,
                                         }}>
                                         <div style={{
@@ -1108,14 +1111,16 @@ function JourneyMain() {
                                             justifyContent: 'center',
                                             alignItems: 'center',
                                             backdropFilter: (expandedCard === index) ? '' : 'blur(1px)'
-                                        }}>
+                                        }}
+                                             onMouseEnter={() => setIsHovered(true)}
+                                             onMouseLeave={() => setIsHovered(false)}
+                                        >
                                             <Button
                                                 variant={"contained"}
                                                 onClick={() => handleToggleClick(index)}
                                                 sx={{
                                                     zIndex: 2,
-                                                    opacity: (expandedCard === index) ? 0 : 0.7,
-                                                    '&:hover': { opacity: 0.7},
+                                                    opacity: isHovered ? 0.7 : (expandedCard === index ? 0 : 0.7),
                                                     backgroundColor: 'rgba(255, 255, 255, 0.5)',
                                                     borderRadius: '50%',
                                                     color: 'black',
@@ -1185,7 +1190,8 @@ function JourneyMain() {
                                             borderRadius: "30px",
                                             backgroundColor: hexToRGBA(unit.color, 0.5),
                                             overflow: "hidden",
-                                            position: 'relative',
+                                            position: 'absolute',
+                                            zIndex: 99,
                                             boxShadow: (expandedCard === index) ? '' : `inset 0px -50px 75px -25px ${hexToRGBA(unit.color, 0.5)}`,
                                         }}>
                                         <div style={{
@@ -1222,14 +1228,16 @@ function JourneyMain() {
                                             justifyContent: 'center',
                                             alignItems: 'center',
                                             backdropFilter: (expandedCard === index) ? '' : 'blur(1px)'
-                                        }}>
+                                        }}
+                                             onMouseEnter={() => setIsHovered(true)}
+                                             onMouseLeave={() => setIsHovered(false)}
+                                        >
                                             <Button
                                                 variant={"contained"}
                                                 onClick={() => handleToggleClick(index)}
                                                 sx={{
                                                     zIndex: 2,
-                                                    opacity: (expandedCard === index) ? 0 : 0.7,
-                                                    '&:hover': { opacity: 0.7},
+                                                    opacity: isHovered ? 0.7 : (expandedCard === index ? 0 : 0.7),
                                                     backgroundColor: 'rgba(255, 255, 255, 0.5)',
                                                     borderRadius: '50%',
                                                     color: 'black',
@@ -1244,11 +1252,12 @@ function JourneyMain() {
                                     </Card>
                                 </Grid>)
                                 :
-                                (<Grid item xl={4} sx={{ display: "flex", justifyContent: "start", paddingTop: '20vh', flexDirection: "column", alignItems: "center" }}>
+                                (<Grid item xl={4} sx={{ display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
                                     {<JourneyPortals currentIndex={index} />}
                                 </Grid>)
                             }
                         </Grid>
+                        <Box sx={{p: 5}}></Box>
                     </div>
                 ))}
                 {nextUnitPreview()}
