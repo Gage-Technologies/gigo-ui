@@ -1,5 +1,5 @@
 import React, {createRef, useEffect, useRef, useState} from 'react';
-import {getAllTokens} from "../theme";
+import {getAllTokens, themeHelpers} from "../theme";
 import {
     Box, Button,
     Card, CircularProgress,
@@ -1052,71 +1052,81 @@ function JourneyMain() {
     const [isHovered, setIsHovered] = useState(false);
 
     const userJourney = () => {
+        const cardStyles = (index: number, unitColor: string) => ({
+            borderRadius: '30px',
+            ...themeHelpers.frostedGlass,
+            backgroundColor: hexToRGBA(unitColor, 1),
+            borderColor: 'none',
+            overflow: 'hidden',
+            position: 'absolute',
+            zIndex: expandedCard === index ? 99 : 10,
+            boxShadow: expandedCard === index ? '' : `inset 0px -50px 75px -25px ${hexToRGBA(unitColor, 0.5)}`,
+        });
+
+        function getTextColor(backgroundColor: string): string {
+            // This function assumes the background color is in hex format (e.g., #ffffff)
+
+            // Convert hex to RGB
+            const rgb = parseInt(backgroundColor.substring(1), 16); // Convert hex to decimal
+            const r = (rgb >> 16) & 0xff;
+            const g = (rgb >> 8) & 0xff;
+            const b = (rgb >> 0) & 0xff;
+
+            // Calculate the luminance
+            const luminance = 0.2126 * (r / 255) ** 2.2 + 0.7152 * (g / 255) ** 2.2 + 0.0722 * (b / 255) ** 2.2;
+
+            // Return white for dark backgrounds and black for light backgrounds
+            return luminance < 0.5 ? 'white' : 'black';
+        }
+
         return (
-            <Box sx={{ overflow: 'hidden', position: "relative" }}>
-                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", m: 2 }}>
-                    <Typography variant="h2" sx={{ color: theme.palette.text.primary }}>
-                        Your Journey
-                    </Typography>
+            <Box sx={{ overflow: 'hidden', position: 'relative' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', m: 2 }}>
+                    <Typography variant="h2" sx={{ color: 'text.primary' }}>Your Journey</Typography>
                 </Box>
                 {unitData.map((unit, index) => (
                     <div key={unit._id}>
-                        <Grid container>
-                            {index % 2 === 0 ?
-                                (<Grid item xl={4} sx={{ display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
-                                    {<JourneyPortals currentIndex={index} />}
-                                </Grid>)
-                                :
-                                (<Grid item xl={4} sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: 'column', textAlign: "justify" }}>
-
-                                    <Card
-                                        sx={{
-                                            borderRadius: "30px",
-                                            backgroundColor: hexToRGBA(unit.color, 0.5),
-                                            overflow: "hidden",
-                                            position: 'absolute',
-                                            zIndex: 99,
-                                            boxShadow: (expandedCard === index) ? '' : `inset 0px -50px 75px -25px ${hexToRGBA(unit.color, 0.5)}`,
-                                        }}>
-                                        <div style={{
-                                            maxHeight: (expandedCard === index) ? 'none' : '60vh',
-                                            overflow: 'hidden',
-                                            position: 'relative',
-                                        }}>
-                                            <div style={{
-                                                backgroundColor: 'rgb(255,255,255,0.15)',
-                                                color: 'black',
-                                                textAlign: 'center',
-                                            }}>
-                                                <Typography variant={'h4'}>Handout</Typography>
-                                            </div>
+                        <Grid container spacing={2}>
+                            {index % 2 === 0
+                                ?
+                                <Grid item xl={4} sx={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
+                                    <JourneyPortals currentIndex={index} />
+                                </Grid>
+                                : (
+                                <Grid item xl={4} sx={{ display: 'flex', justifyContent: 'start', flexDirection: 'column', alignItems: 'center' }}>
+                                    <Card sx={cardStyles(index, unit.color)}>
+                                        <Box sx={{ maxHeight: expandedCard === index ? 'none' : '50vh', overflow: 'hidden' }}>
+                                            <Box sx={{ backgroundColor: 'rgba(255,255,255,0.8)', textAlign: 'center' }}>
+                                                <Typography variant="h4" sx={{color: 'black'}}>Handout</Typography>
+                                            </Box>
                                             <MarkdownRenderer
-                                                //markdown={unit.handout.replace(/^.*\n/, "# <p style=\"text-align: center;\">Handout</p>")}
                                                 markdown={unit.handout}
                                                 style={{
+                                                    color: getTextColor(unit.color),
                                                     margin: "20px",
-                                                    fontSize: "1rem",
+                                                    fontSize: "0.8rem",
                                                     width: "fit-content",
                                                     maxWidth: "475px",
                                                 }}
                                             />
-                                        </div>
-                                        <div style={{
-                                            position: 'absolute',
-                                            bottom: 0,
-                                            left: 0,
-                                            width: '100%',
-                                            height: '43px',
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            backdropFilter: (expandedCard === index) ? '' : 'blur(1px)'
-                                        }}
-                                             onMouseEnter={() => setIsHovered(true)}
-                                             onMouseLeave={() => setIsHovered(false)}
+                                        </Box>
+                                        <Box
+                                            sx={{
+                                                position: 'absolute',
+                                                bottom: 0,
+                                                left: 0,
+                                                width: '100%',
+                                                height: 43,
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                backdropFilter: expandedCard === index ? 'none' : 'blur(1px)',
+                                            }}
+                                            onMouseEnter={() => setIsHovered(true)}
+                                            onMouseLeave={() => setIsHovered(false)}
                                         >
                                             <Button
-                                                variant={"contained"}
+                                                variant="contained"
                                                 onClick={() => handleToggleClick(index)}
                                                 sx={{
                                                     zIndex: 2,
@@ -1124,145 +1134,88 @@ function JourneyMain() {
                                                     backgroundColor: 'rgba(255, 255, 255, 0.5)',
                                                     borderRadius: '50%',
                                                     color: 'black',
-                                                    minWidth: '30px',
-                                                    height: '30px',
+                                                    minWidth: 30,
+                                                    height: 30,
                                                     padding: '5px',
                                                 }}
                                             >
-                                                {(expandedCard === index) ? <KeyboardArrowUpIcon/> : <KeyboardArrowDownIcon/>}
+                                                {expandedCard === index ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                                             </Button>
-                                        </div>
+                                        </Box>
                                     </Card>
-                                </Grid>)
-                            }
-                            <Grid item xl={4} sx={{
-                                display: "flex",
-                                justifyContent: "center",
-                                flexDirection: "column",
-                                alignItems: "center",
-                                borderRadius: "30px",
-                                mt: 2,
-                                backgroundColor: unit.color
-                            }}>
-                                <Box sx={{p: 2}}>
-                                    <Typography variant={'h5'}>{unit.name}</Typography>
+                                </Grid>
+                            )}
+                            <Grid item xl={4} sx={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center', mt: 2, backgroundColor: unit.color, borderRadius: '30px' }}>
+                                <Box sx={{ p: 2 }}>
+                                    <Typography variant="h5" sx={{color: getTextColor(unit.color)}}>{unit.name}</Typography>
                                 </Box>
                                 {JourneyStops(unit.tasks)}
-                                {/*<Box sx={{p: 2}}>*/}
-                                {/*    <AwesomeButton style={{*/}
-                                {/*        width: "auto",*/}
-                                {/*        //@ts-ignore*/}
-                                {/*        '--button-primary-color': theme.palette.tertiary.dark,*/}
-                                {/*        '--button-primary-color-dark': "#afa33d",*/}
-                                {/*        '--button-primary-color-light': "#dfce53",*/}
-                                {/*        //@ts-ignore*/}
-                                {/*        '--button-primary-color-active': theme.palette.tertiary.dark,*/}
-                                {/*        //@ts-ignore*/}
-                                {/*        '--button-primary-color-hover': theme.palette.tertiary.main,*/}
-                                {/*        '--button-default-border-radius': "24px",*/}
-                                {/*        '--button-hover-pressure': "1",*/}
-                                {/*        height: "10vh",*/}
-                                {/*        '--button-raise-level': "10px"*/}
-                                {/*    }} type="primary">*/}
-                                {/*        <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>*/}
-                                {/*            Unit Project*/}
-                                {/*        </h1>*/}
-                                {/*        <div style={{*/}
-                                {/*            height: "80px",*/}
-                                {/*            width: "80px",*/}
-                                {/*        }}>*/}
-                                {/*            <img*/}
-                                {/*                src={completed}*/}
-                                {/*                style={{*/}
-                                {/*                    height: "100%",*/}
-                                {/*                    width: "100%",*/}
-                                {/*                }}*/}
-                                {/*                alt="py"/>*/}
-                                {/*        </div>*/}
-                                {/*    </AwesomeButton>*/}
-                                {/*</Box>*/}
                             </Grid>
-                            {index % 2 === 0 ?
-                                (<Grid item xl={4} sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: 'column', textAlign: "justify" }}>
-
-                                    <Card
-                                        sx={{
-                                            borderRadius: "30px",
-                                            backgroundColor: hexToRGBA(unit.color, 0.5),
-                                            overflow: "hidden",
-                                            position: 'absolute',
-                                            zIndex: 99,
-                                            boxShadow: (expandedCard === index) ? '' : `inset 0px -50px 75px -25px ${hexToRGBA(unit.color, 0.5)}`,
-                                        }}>
-                                        <div style={{
-                                            maxHeight: (expandedCard === index) ? 'none' : '60vh',
-                                            overflow: 'hidden',
-                                            position: 'relative',
-                                            textAlign: 'justify',
-                                        }}>
-                                            <div style={{
-                                                backgroundColor: 'rgb(255,255,255,0.5)',
-                                                color: 'black',
-                                                textAlign: 'center',
-                                            }}>
-                                                <Typography variant={'h4'}>Handout</Typography>
-                                            </div>
-                                            <MarkdownRenderer
-                                                //markdown={unit.handout.replace(/^.*\n/, "# <p style=\"text-align: center;\">Handout</p>")}
-                                                markdown={unit.handout}
-                                                style={{
-                                                    margin: "20px",
-                                                    fontSize: "1rem",
-                                                    width: "fit-content",
-                                                    maxWidth: "475px",
-                                                }}
-                                            />
-                                        </div>
-                                        <div style={{
-                                            position: 'absolute',
-                                            bottom: 0,
-                                            left: 0,
-                                            width: '100%',
-                                            height: '43px',
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            backdropFilter: (expandedCard === index) ? '' : 'blur(1px)'
-                                        }}
-                                             onMouseEnter={() => setIsHovered(true)}
-                                             onMouseLeave={() => setIsHovered(false)}
-                                        >
-                                            <Button
-                                                variant={"contained"}
-                                                onClick={() => handleToggleClick(index)}
+                                {index % 2 !== 0
+                                    ?
+                                    <Grid item xl={4} sx={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
+                                        <JourneyPortals currentIndex={index} />
+                                    </Grid>
+                                    : (
+                                    <Grid item xl={4} sx={{ display: 'flex', justifyContent: 'start', flexDirection: 'column', alignItems: 'center' }}>
+                                        <Card sx={cardStyles(index, unit.color)}>
+                                            <Box sx={{ maxHeight: expandedCard === index ? 'none' : '50vh', overflow: 'hidden' }}>
+                                                <Box sx={{ backgroundColor: 'rgba(255,255,255,0.8)', textAlign: 'center' }}>
+                                                    <Typography variant="h4" sx={{color: 'black'}}>Handout</Typography>
+                                                </Box>
+                                                <MarkdownRenderer
+                                                    markdown={unit.handout}
+                                                    style={{
+                                                        color: getTextColor(unit.color),
+                                                        margin: "20px",
+                                                        fontSize: "0.8rem",
+                                                        width: "fit-content",
+                                                        maxWidth: "475px",
+                                                    }}
+                                                />
+                                            </Box>
+                                            <Box
                                                 sx={{
-                                                    zIndex: 2,
-                                                    opacity: isHovered ? 0.7 : (expandedCard === index ? 0 : 0.7),
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                                                    borderRadius: '50%',
-                                                    color: 'black',
-                                                    minWidth: '30px',
-                                                    height: '30px',
-                                                    padding: '5px',
+                                                    position: 'absolute',
+                                                    bottom: 0,
+                                                    left: 0,
+                                                    width: '100%',
+                                                    height: 43,
+                                                    display: 'flex',
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center',
+                                                    backdropFilter: expandedCard === index ? 'none' : 'blur(1px)',
                                                 }}
+                                                onMouseEnter={() => setIsHovered(true)}
+                                                onMouseLeave={() => setIsHovered(false)}
                                             >
-                                                {(expandedCard === index) ? <KeyboardArrowUpIcon/> : <KeyboardArrowDownIcon/>}
-                                            </Button>
-                                        </div>
-                                    </Card>
-                                </Grid>)
-                                :
-                                (<Grid item xl={4} sx={{ display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
-                                    {<JourneyPortals currentIndex={index} />}
-                                </Grid>)
-                            }
+                                                <Button
+                                                    variant="contained"
+                                                    onClick={() => handleToggleClick(index)}
+                                                    sx={{
+                                                        zIndex: 2,
+                                                        opacity: isHovered ? 0.7 : (expandedCard === index ? 0 : 0.7),
+                                                        backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                                                        borderRadius: '50%',
+                                                        color: 'black',
+                                                        minWidth: 30,
+                                                        height: 30,
+                                                        padding: '5px',
+                                                    }}
+                                                >
+                                                    {expandedCard === index ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                                                </Button>
+                                            </Box>
+                                        </Card>
+                                    </Grid>
+                                )}
                         </Grid>
-                        <Box sx={{p: 5}}></Box>
+                        <Box sx={{ padding: '5vh' }} />
                     </div>
                 ))}
                 {nextUnitPreview()}
             </Box>
-        )
+        );
     }
 
     const pageContent = () => {
