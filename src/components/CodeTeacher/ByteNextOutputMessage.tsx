@@ -501,8 +501,8 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                                 variant="contained"
                                 href={"/journey/main"}
                                 sx={{
-                                    mt: 2,
-                                    fontSize: '0.875rem',
+                                    mt: 1,
+                                    fontSize: '0.8rem',
                                     padding: '6px 16px',
                                 }}
                             >
@@ -512,8 +512,8 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                                 variant="contained"
                                 onClick={() => props.onTryHarderVersionClick?.()}
                                 sx={{
-                                    mt: 2,
-                                    fontSize: '0.875rem',
+                                    mt: 1,
+                                    fontSize: '0.8rem',
                                     padding: '6px 16px',
                                 }}
                             >
