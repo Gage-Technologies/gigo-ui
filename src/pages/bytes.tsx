@@ -488,7 +488,6 @@ function Byte() {
                 byte_attempt_id: byteAttemptId,
                 payload: {
                     lang: byteData ? byteData.lang : 5,
-                    code: code,
                     exec_files: [{
                         file_name: "main" + (byteData && byteData.lang === 5 ? ".py" : ".go"),
                         code: code,
