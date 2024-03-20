@@ -123,6 +123,7 @@ function Byte() {
     const theme = React.useMemo(() => createTheme(getAllTokens(mode)), [mode]);
     const [xpPopup, setXpPopup] = React.useState(false)
     const [xpData, setXpData] = React.useState(null)
+    const [nodeBelow, setNodeBelow] = React.useState(null)
 
     const authState = useAppSelector(selectAuthState);
     const bytesState = useAppSelector(selectBytesState)
@@ -743,6 +744,16 @@ function Byte() {
     };
 
     const markComplete = async () => {
+        let params = {
+            byte_id: byteAttemptId,
+            difficulty: difficultyToString(determineDifficulty()),
+        }
+        const isJourneyVersion = queryParams.has('journey');
+
+        if (isJourneyVersion) {
+            //@ts-ignore
+            params["journey"] = true
+        }
         let res = await call(
             "/api/bytes/setCompleted",
             "POST",
@@ -750,10 +761,7 @@ function Byte() {
             null,
             null,
             // @ts-ignore
-            {
-                byte_id: byteAttemptId,
-                difficulty: difficultyToString(determineDifficulty()),
-            },
+            params,
             null,
             config.rootPath
         );
@@ -771,6 +779,10 @@ function Byte() {
         if (res["xp"] !== undefined) {
             setXpData(res["xp"])
             setXpPopup(true)
+        }
+
+        if (res["nodeBelow"] !== undefined && res["nodeBelow"] !== null){
+            setNodeBelow(res["nodeBelow"])
         }
     }
 
@@ -1308,6 +1320,7 @@ function Byte() {
                         journey={queryParams.has('journey')}
                         currentDifficulty={determineDifficulty()}
                         onTryHarderVersionClick={handleTryHarderVersionClick}
+                        nodeBelowId={nodeBelow}
                     />
                 )}
                 {(activeSidebarTab === null || activeSidebarTab === "codeSuggestion") && (

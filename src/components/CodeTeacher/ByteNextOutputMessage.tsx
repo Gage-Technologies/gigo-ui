@@ -57,6 +57,7 @@ export type ByteNextOutputMessageProps = {
     journey: boolean
     containerRef: React.MutableRefObject<null>;
     onTryHarderVersionClick?: () => void;
+    nodeBelowId: string | null;
 };
 
 enum State {
@@ -484,22 +485,54 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                         '--button-hover-pressure': "4",
                         height: "10vh",
                         '--button-raise-level': "10px"
-                    }} type="primary" href={"/journey/main"}>
+                    }} type="primary" href={props.nodeBelowId !== undefined && props.nodeBelowId !== null ? `/byte/${props.nodeBelowId}?journey` : "/journey/main"}>
                         <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
                             Continue
                         </h1>
                     </AwesomeButton>
-                    <Button
-                        variant="contained"
-                        onClick={() => props.onTryHarderVersionClick?.()}
-                        sx={{
-                            mt: 2,
-                            fontSize: '0.875rem',
-                            padding: '6px 16px',
-                        }}
-                    >
-                        Try a harder version 🌊
-                    </Button>
+                    {props.nodeBelowId !== undefined && props.nodeBelowId !== null ? (
+                        <div style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            width: "100%",
+                            justifyContent: "space-evenly"
+                        }}>
+                            <Button
+                                variant="contained"
+                                href={"/journey/main"}
+                                sx={{
+                                    mt: 2,
+                                    fontSize: '0.875rem',
+                                    padding: '6px 16px',
+                                }}
+                            >
+                                Return to Journey 🧭
+                            </Button>
+                            <Button
+                                variant="contained"
+                                onClick={() => props.onTryHarderVersionClick?.()}
+                                sx={{
+                                    mt: 2,
+                                    fontSize: '0.875rem',
+                                    padding: '6px 16px',
+                                }}
+                            >
+                                Try a harder version 🌊
+                            </Button>
+                        </div>
+                    ) : (
+                        <Button
+                            variant="contained"
+                            onClick={() => props.onTryHarderVersionClick?.()}
+                            sx={{
+                                mt: 2,
+                                fontSize: '0.875rem',
+                                padding: '6px 16px',
+                            }}
+                        >
+                            Try a harder version 🌊
+                        </Button>
+                    )}
                 </Box>
             </Box>
         )
