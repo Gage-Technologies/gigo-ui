@@ -284,6 +284,7 @@ function JourneyMain() {
             mutations.forEach((mutation) => {
                 if (mutation.addedNodes.length > 0) {
                     scrollToItem("currentUnit");
+                    observer.disconnect();
                 }
             });
         });
