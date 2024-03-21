@@ -1145,7 +1145,23 @@ function JourneyMain() {
 
     const [isHovered, setIsHovered] = useState(false);
 
-    const userJourney = () => {
+    function getTextColor(backgroundColor: string): string {
+        // This function assumes the background color is in hex format (e.g., #ffffff)
+
+        // Convert hex to RGB
+        const rgb = parseInt(backgroundColor.substring(1), 16); // Convert hex to decimal
+        const r = (rgb >> 16) & 0xff;
+        const g = (rgb >> 8) & 0xff;
+        const b = (rgb >> 0) & 0xff;
+
+        // Calculate the luminance
+        const luminance = 0.2126 * (r / 255) ** 2.2 + 0.7152 * (g / 255) ** 2.2 + 0.0722 * (b / 255) ** 2.2;
+
+        // Return white for dark backgrounds and black for light backgrounds
+        return luminance < 0.5 ? 'white' : 'black';
+    }
+
+    const unitHandout = (unit: any, index: any) => {
         const cardStyles = (index: number, unitColor: string) => ({
             borderRadius: '30px',
             ...themeHelpers.frostedGlass,
@@ -1157,21 +1173,61 @@ function JourneyMain() {
             boxShadow: expandedCard === index ? '' : `inset 0px -50px 75px -25px ${hexToRGBA(unitColor, 0.5)}`,
         });
 
-        function getTextColor(backgroundColor: string): string {
-            // This function assumes the background color is in hex format (e.g., #ffffff)
+        return(
+            <Card sx={cardStyles(index, unit.color)}>
+                <Box sx={{ maxHeight: expandedCard === index ? 'none' : '50vh', overflow: 'hidden' }}>
+                    <Box sx={{ backgroundColor: 'rgba(255,255,255,0.8)', textAlign: 'center' }}>
+                        <Typography variant="h4" sx={{color: 'black'}}>Handout</Typography>
+                    </Box>
+                    <MarkdownRenderer
+                        markdown={unit.handout}
+                        style={{
+                            color: getTextColor(unit.color),
+                            margin: "20px",
+                            fontSize: "0.8rem",
+                            width: "fit-content",
+                            maxWidth: "475px",
+                        }}
+                    />
+                </Box>
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        width: '100%',
+                        height: 43,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backdropFilter: expandedCard === index ? 'none' : 'blur(1px)',
+                    }}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                >
+                    <Button
+                        variant="contained"
+                        onClick={() => handleToggleClick(index)}
+                        sx={{
+                            zIndex: 2,
+                            opacity: isHovered ? 0.7 : (expandedCard === index ? 0 : 0.7),
+                            backgroundColor: 'rgba(255, 255, 255, 0.5)',
+                            borderRadius: '50%',
+                            color: 'black',
+                            minWidth: 30,
+                            height: 30,
+                            padding: '5px',
+                        }}
+                    >
+                        {expandedCard === index ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                    </Button>
+                </Box>
+            </Card>
+        )
+    }
 
-            // Convert hex to RGB
-            const rgb = parseInt(backgroundColor.substring(1), 16); // Convert hex to decimal
-            const r = (rgb >> 16) & 0xff;
-            const g = (rgb >> 8) & 0xff;
-            const b = (rgb >> 0) & 0xff;
-
-            // Calculate the luminance
-            const luminance = 0.2126 * (r / 255) ** 2.2 + 0.7152 * (g / 255) ** 2.2 + 0.0722 * (b / 255) ** 2.2;
-
-            // Return white for dark backgrounds and black for light backgrounds
-            return luminance < 0.5 ? 'white' : 'black';
-        }
+    const userJourney = () => {
+        const allCompleted = (tasks: Task[]) => tasks.every(task => task.completed);
 
         return (
             <Box sx={{ overflow: 'hidden', position: 'relative' }}>
@@ -1188,58 +1244,15 @@ function JourneyMain() {
                                 </Grid>
                                 : (
                                 <Grid item xl={4} sx={{ display: 'flex', justifyContent: 'start', flexDirection: 'column', alignItems: 'center' }}>
-                                    <Card sx={cardStyles(index, unit.color)}>
-                                        <Box sx={{ maxHeight: expandedCard === index ? 'none' : '50vh', overflow: 'hidden' }}>
-                                            <Box sx={{ backgroundColor: 'rgba(255,255,255,0.8)', textAlign: 'center' }}>
-                                                <Typography variant="h4" sx={{color: 'black'}}>Handout</Typography>
-                                            </Box>
-                                            <MarkdownRenderer
-                                                markdown={unit.handout}
-                                                style={{
-                                                    color: getTextColor(unit.color),
-                                                    margin: "20px",
-                                                    fontSize: "0.8rem",
-                                                    width: "fit-content",
-                                                    maxWidth: "475px",
-                                                }}
-                                            />
-                                        </Box>
-                                        <Box
-                                            sx={{
-                                                position: 'absolute',
-                                                bottom: 0,
-                                                left: 0,
-                                                width: '100%',
-                                                height: 43,
-                                                display: 'flex',
-                                                justifyContent: 'center',
-                                                alignItems: 'center',
-                                                backdropFilter: expandedCard === index ? 'none' : 'blur(1px)',
-                                            }}
-                                            onMouseEnter={() => setIsHovered(true)}
-                                            onMouseLeave={() => setIsHovered(false)}
-                                        >
-                                            <Button
-                                                variant="contained"
-                                                onClick={() => handleToggleClick(index)}
-                                                sx={{
-                                                    zIndex: 2,
-                                                    opacity: isHovered ? 0.7 : (expandedCard === index ? 0 : 0.7),
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                                                    borderRadius: '50%',
-                                                    color: 'black',
-                                                    minWidth: 30,
-                                                    height: 30,
-                                                    padding: '5px',
-                                                }}
-                                            >
-                                                {expandedCard === index ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                                            </Button>
-                                        </Box>
-                                    </Card>
+                                    {(allCompleted(unit.tasks))
+                                        ?
+                                        <></>
+                                        :
+                                        unitHandout(unit, index)
+                                    }
                                 </Grid>
                             )}
-                            <Grid item xl={4} sx={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center', mt: 2, backgroundColor: unit.color, borderRadius: '30px' }}>
+                            <Grid item xl={4} sx={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center', mt: 2, backgroundColor: unit.color, borderRadius: '30px'}}>
                                 <Box sx={{ p: 2 }}>
                                     <Typography variant="h5" sx={{color: getTextColor(unit.color)}}>{unit.name}</Typography>
                                 </Box>
@@ -1252,55 +1265,12 @@ function JourneyMain() {
                                     </Grid>
                                     : (
                                     <Grid item xl={4} sx={{ display: 'flex', justifyContent: 'start', flexDirection: 'column', alignItems: 'center' }}>
-                                        <Card sx={cardStyles(index, unit.color)}>
-                                            <Box sx={{ maxHeight: expandedCard === index ? 'none' : '50vh', overflow: 'hidden' }}>
-                                                <Box sx={{ backgroundColor: 'rgba(255,255,255,0.8)', textAlign: 'center' }}>
-                                                    <Typography variant="h4" sx={{color: 'black'}}>Handout</Typography>
-                                                </Box>
-                                                <MarkdownRenderer
-                                                    markdown={unit.handout}
-                                                    style={{
-                                                        color: getTextColor(unit.color),
-                                                        margin: "20px",
-                                                        fontSize: "0.8rem",
-                                                        width: "fit-content",
-                                                        maxWidth: "475px",
-                                                    }}
-                                                />
-                                            </Box>
-                                            <Box
-                                                sx={{
-                                                    position: 'absolute',
-                                                    bottom: 0,
-                                                    left: 0,
-                                                    width: '100%',
-                                                    height: 43,
-                                                    display: 'flex',
-                                                    justifyContent: 'center',
-                                                    alignItems: 'center',
-                                                    backdropFilter: expandedCard === index ? 'none' : 'blur(1px)',
-                                                }}
-                                                onMouseEnter={() => setIsHovered(true)}
-                                                onMouseLeave={() => setIsHovered(false)}
-                                            >
-                                                <Button
-                                                    variant="contained"
-                                                    onClick={() => handleToggleClick(index)}
-                                                    sx={{
-                                                        zIndex: 2,
-                                                        opacity: isHovered ? 0.7 : (expandedCard === index ? 0 : 0.7),
-                                                        backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                                                        borderRadius: '50%',
-                                                        color: 'black',
-                                                        minWidth: 30,
-                                                        height: 30,
-                                                        padding: '5px',
-                                                    }}
-                                                >
-                                                    {expandedCard === index ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                                                </Button>
-                                            </Box>
-                                        </Card>
+                                        {(allCompleted(unit.tasks))
+                                        ?
+                                            <></>
+                                        :
+                                            unitHandout(unit, index)
+                                        }
                                     </Grid>
                                 )}
                         </Grid>
