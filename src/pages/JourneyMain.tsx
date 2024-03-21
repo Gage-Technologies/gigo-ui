@@ -91,6 +91,7 @@ function JourneyMain() {
     const [nextUnit, setNextUnit] = useState<Unit>()
     const [taskData, setTaskData] = useState<Task[]>([])
     const unitRefs = useRef<React.RefObject<HTMLDivElement>[]>([]);
+    const [currentUnit, setCurrentUnit] = useState(null)
 
     // const getTasks = async () => {
     //     let res = await call(
@@ -135,6 +136,26 @@ function JourneyMain() {
     //     }
     // }
     //
+
+    function extractIdFromUrl(urlString: string): string | null {
+        const url = new URL(urlString);
+        const pathSegments = url.pathname.split('/');
+        // Assuming the ID is directly after 'main?' in the URL, which means it's part of the path, not a query parameter
+        const lastSegment = pathSegments[pathSegments.length - 1];
+        if (lastSegment === 'main') {
+            // Extract ID from the search part of the URL, assuming there's no specific key for the ID
+            const searchParams = new URLSearchParams(url.search);
+            // This assumes there's only one parameter and takes its value directly
+            let id = searchParams.toString();
+            if (id.endsWith('=')) {
+                id = id.slice(0, -1); // Removes the last character if it's an "="
+            }
+            if (id) {
+                return id;
+            }
+        }
+        return null;
+    }
 
     const [activeJourney, setActiveJourney] = useState(false)
     const [loading, setLoading] = useState(true)
@@ -199,10 +220,25 @@ function JourneyMain() {
 
             const tasks = res.data.tasks
 
+
+            const currentUrl = window.location.href;
+            let usedUrl = extractIdFromUrl(currentUrl)
+            console.log("used url: ", usedUrl)
+
             //@ts-ignore
             const sortedTaskData = tasks.sort((a, b) => {
                 if (a.node_above === null) return -1;
                 if (b.node_above === null) return 1;
+                console.log("a is: ", a)
+                console.log("b is: ", b)
+                if (usedUrl !== null && a.code_source_id === usedUrl){
+                    console.log("unit id is: ", unit._id)
+                    setCurrentUnit(unit._id)
+                }
+                if (usedUrl !== null && b.code_source_id === usedUrl){
+                    console.log("unit id is: ", unit._id)
+                    setCurrentUnit(unit._id)
+                }
                 // @ts-ignore
                 return a.node_above - b.node_above;
             });
@@ -217,6 +253,45 @@ function JourneyMain() {
         setLoading(false)
         unitRefs.current = allUnits.map((_, i) => unitRefs.current[i] ?? createRef<HTMLDivElement>());
     }
+    // function scrollToItem(itemId: string): void {
+    //     const element = document.getElementById(itemId);
+    //     if (element) {
+    //         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    //     } else {
+    //         console.log(`Element with ID ${itemId} not found.`);
+    //     }
+    // }
+
+    function scrollToItem(itemId: string): void {
+        const element = document.getElementById(itemId);
+        if (element) {
+            const yOffset = -50; // Your desired offset
+            const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+            window.scrollTo({ top: y, behavior: 'smooth' });
+        } else {
+            console.log(`Element with ID ${itemId} not found.`);
+        }
+    }
+
+
+    // useEffect(() => {
+    //     scrollToItem("currentUnit")
+    // }, [currentUnit]);
+
+    useEffect(() => {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.addedNodes.length > 0) {
+                    scrollToItem("currentUnit");
+                }
+            });
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        return () => observer.disconnect(); // Clean up observer on component unmount
+    }, [currentUnit]);
 
     useEffect(() => {
         getTasks()
@@ -253,28 +328,28 @@ function JourneyMain() {
         }
     };
 
-    const smoothScrollTo = (element: Element, duration: number): void => {
-        let targetPosition = element.getBoundingClientRect().top;
-        let startPosition = window.pageYOffset;
-        let startTime: number | null = null;
-
-        const ease = (t: number, b: number, c: number, d: number): number => {
-            t /= d / 2;
-            if (t < 1) return c / 2 * t * t + b;
-            t--;
-            return -c / 2 * (t * (t - 2) - 1) + b;
-        };
-
-        const animation = (currentTime: number): void => {
-            if (startTime === null) startTime = currentTime;
-            let timeElapsed = currentTime - startTime;
-            let run = ease(timeElapsed, startPosition, targetPosition - startPosition, duration);
-            window.scrollTo(0, run);
-            if (timeElapsed < duration) requestAnimationFrame(animation);
-        };
-
-        requestAnimationFrame(animation);
-    };
+    // const smoothScrollTo = (element: Element, duration: number): void => {
+    //     let targetPosition = element.getBoundingClientRect().top;
+    //     let startPosition = window.pageYOffset;
+    //     let startTime: number | null = null;
+    //
+    //     const ease = (t: number, b: number, c: number, d: number): number => {
+    //         t /= d / 2;
+    //         if (t < 1) return c / 2 * t * t + b;
+    //         t--;
+    //         return -c / 2 * (t * (t - 2) - 1) + b;
+    //     };
+    //
+    //     const animation = (currentTime: number): void => {
+    //         if (startTime === null) startTime = currentTime;
+    //         let timeElapsed = currentTime - startTime;
+    //         let run = ease(timeElapsed, startPosition, targetPosition - startPosition, duration);
+    //         window.scrollTo(0, run);
+    //         if (timeElapsed < duration) requestAnimationFrame(animation);
+    //     };
+    //
+    //     requestAnimationFrame(animation);
+    // };
 
     // todo: works properly, but scrolls super fast. Keeping in case the smooth scroll causes too many issues.
     // useEffect(() => {
@@ -294,22 +369,22 @@ function JourneyMain() {
     // }, [unitData]);
 
 
-    useEffect(() => {
-        const lastUnitWithCompletedTaskIndex = unitData.reduce((acc, unit, index) =>
-            unit.tasks.some(task => task.completed) ? index : acc, -1
-        );
-
-        if (lastUnitWithCompletedTaskIndex !== -1) {
-            const ref = unitRefs.current[lastUnitWithCompletedTaskIndex];
-            if (ref?.current) {
-                requestAnimationFrame(() => {
-                    if (ref && ref?.current) {
-                        smoothScrollTo(ref.current, 1250);
-                    }
-                });
-            }
-        }
-    }, [unitData]);
+    // useEffect(() => {
+    //     const lastUnitWithCompletedTaskIndex = unitData.reduce((acc, unit, index) =>
+    //         unit.tasks.some(task => task.completed) ? index : acc, -1
+    //     );
+    //
+    //     if (lastUnitWithCompletedTaskIndex !== -1) {
+    //         const ref = unitRefs.current[lastUnitWithCompletedTaskIndex];
+    //         if (ref?.current) {
+    //             requestAnimationFrame(() => {
+    //                 if (ref && ref?.current) {
+    //                     smoothScrollTo(ref.current, 1250);
+    //                 }
+    //             });
+    //         }
+    //     }
+    // }, [unitData]);
 
     const items = [1, 2];
 
@@ -1085,7 +1160,7 @@ function JourneyMain() {
                     <Typography variant="h2" sx={{ color: 'text.primary' }}>Your Journey</Typography>
                 </Box>
                 {unitData.map((unit, index) => (
-                    <div key={unit._id}>
+                    <div key={unit._id} id={currentUnit === unit._id ? "currentUnit": "null"}>
                         <Grid container spacing={2}>
                             {index % 2 === 0
                                 ?

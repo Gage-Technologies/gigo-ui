@@ -437,6 +437,31 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
         )
     }
 
+    function extractIdFromUrl(urlString: string): string | null {
+        try {
+            // Create a URL object from the urlString
+            const url = new URL(urlString);
+
+            // Split the pathname part of the URL into segments
+            const pathSegments = url.pathname.split('/');
+
+            // Find the index of the segment 'byte'
+            const byteIndex = pathSegments.findIndex(segment => segment === 'byte');
+
+            // Check if 'byte' segment is found and it's not the last segment
+            if (byteIndex >= 0 && byteIndex < pathSegments.length - 1) {
+                // The ID should be the segment immediately after 'byte'
+                return pathSegments[byteIndex + 1];
+            }
+        } catch (error) {
+            console.error("Error parsing the URL:", error);
+        }
+        return null; // Return null if the ID couldn't be extracted
+    }
+    const currentUrl = window.location.href;
+    let byteId = extractIdFromUrl(currentUrl)
+    console.log("byte id: ", byteId)
+
     const renderSuccesPageJourney = () => {
         return (
             <Box
@@ -485,7 +510,7 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                         '--button-hover-pressure': "4",
                         height: "10vh",
                         '--button-raise-level': "10px"
-                    }} type="primary" href={props.nodeBelowId !== undefined && props.nodeBelowId !== null ? `/byte/${props.nodeBelowId}?journey` : "/journey/main"}>
+                    }} type="primary" href={props.nodeBelowId !== undefined && props.nodeBelowId !== null ? `/byte/${props.nodeBelowId}?journey` : `/journey/main?${byteId}`}>
                         <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
                             Continue
                         </h1>
@@ -499,7 +524,7 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                         }}>
                             <Button
                                 variant="contained"
-                                href={"/journey/main"}
+                                href={`/journey/main?${byteId}`}
                                 sx={{
                                     mt: 1,
                                     fontSize: '0.8rem',
