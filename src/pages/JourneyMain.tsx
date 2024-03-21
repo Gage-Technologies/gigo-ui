@@ -513,7 +513,7 @@ function JourneyMain() {
                     '--button-raise-level': '12px',
                     '--button-hover-pressure': '3',
                     '--transform-speed': '0.275s',
-                }} type="primary">
+                }} type="primary" href={`/byte/${item.code_source_id}?journey`}>
                     <CheckIcon fontSize="large" sx={{width: '2em', height: '2em'}}/>
                 </AwesomeButton>
 
@@ -688,7 +688,7 @@ function JourneyMain() {
                     alignItems: "center",
                     flexDirection: "column",
                     pt: 4,
-                    height: "225px"
+                    height: "125px"
                 }}>
                     <Typography sx={{textTransform: "none", textAlign: 'justify', marginLeft: '28px', marginRight: '28px'}} variant={"h6"}>
                         {taskDescription}
@@ -718,7 +718,25 @@ function JourneyMain() {
                             </h1>
                         </AwesomeButton>
                     :
-                    <></>}
+                        <AwesomeButton style={{
+                            width: "auto",
+                            //@ts-ignore
+                            '--button-primary-color': theme.palette.secondary.main,
+                            '--button-primary-color-dark': theme.palette.secondary.dark,
+                            '--button-primary-color-light': theme.palette.secondary.dark,
+                            //@ts-ignore
+                            '--button-primary-color-active': theme.palette.secondary.dark,
+                            //@ts-ignore
+                            '--button-primary-color-hover': theme.palette.secondary.main,
+                            '--button-default-border-radius': "24px",
+                            '--button-hover-pressure': "4",
+                            height: "10vh",
+                            '--button-raise-level': "10px"
+                        }} type="primary" href={`/byte/${taskId}?journey`}>
+                            <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
+                                Review
+                            </h1>
+                        </AwesomeButton>}
                 </Box>
             </>
 
@@ -777,7 +795,7 @@ function JourneyMain() {
                         }
                     }}
                 >
-                    <Box sx={{width: "30vw", height: '45vh', m: 3}}>
+                    <Box sx={{width: "25vw", height: '35vh', m: 3}}>
                         <Box sx={{display: "flex", justifyContent: "right", alignItems: "right"}}>
                             <Button onClick={handleDescClose}>
                                 <CloseIcon/>
