@@ -490,6 +490,15 @@ function JourneyMain() {
     };
 
     const handleIcon = (item: any, index: any, firstIncomplete: any) => {
+        const codeImage = () => {
+            switch (item.lang) {
+                case "Python":
+                    return python
+                case "Go":
+                    return golang
+            }
+        }
+
         if (item.completed) {
             return (
                 <AwesomeButton style={{
@@ -499,15 +508,11 @@ function JourneyMain() {
                     justifyContent: 'center',
                     textAlign: 'center',
                     '--button-default-height': '70px',
-                    //@ts-ignore
-                    '--button-primary-color': theme.palette.tertiary.dark,
-                    //@ts-ignore
+                    '--button-primary-color': "#ffef62",
                     '--button-primary-color-dark': "#afa33d",
                     '--button-primary-color-light': "#dfce53",
-                    //@ts-ignore
-                    '--button-primary-color-active': theme.palette.tertiary.dark,
-                    //@ts-ignore
-                    '--button-primary-color-hover': theme.palette.tertiary.main,
+                    '--button-primary-color-active': "#ffef62",
+                    '--button-primary-color-hover': "#FFFCAB",
                     '--button-default-font-size': '14px',
                     '--button-default-border-radius': '80%',
                     '--button-horizontal-padding': '3px',
@@ -528,11 +533,11 @@ function JourneyMain() {
                     justifyContent: 'center',
                     textAlign: 'center',
                     '--button-default-height': '70px',
-                    '--button-primary-color': theme.palette.secondary.main,
-                    '--button-primary-color-dark': theme.palette.secondary.dark,
-                    '--button-primary-color-light': theme.palette.secondary.dark,
-                    '--button-primary-color-active': theme.palette.secondary.dark,
-                    '--button-primary-color-hover': theme.palette.secondary.main,
+                    '--button-primary-color': "#29C18C",
+                    '--button-primary-color-dark': "#1c8762",
+                    '--button-primary-color-light': "#1c8762",
+                    '--button-primary-color-active': "#1c8762",
+                    '--button-primary-color-hover': "#29C18C",
                     '--button-default-font-size': '14px',
                     '--button-default-border-radius': '80%',
                     '--button-horizontal-padding': '3px',
@@ -547,7 +552,7 @@ function JourneyMain() {
                         width: "80px",
                     }}>
                         <img
-                            src={python}
+                            src={codeImage()}
                             style={{
                                 height: "100%",
                                 width: "100%",
@@ -1252,9 +1257,30 @@ function JourneyMain() {
                                     }
                                 </Grid>
                             )}
-                            <Grid item xl={4} sx={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center', mt: 2, backgroundColor: unit.color, borderRadius: '30px'}}>
+                            <Grid item xl={4} sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 2,
+                                backgroundColor: unit.color, borderRadius: '30px', position: 'relative',
+                            }}>
+                                {(allCompleted(unit.tasks))
+                                ?
+                                    <Box sx={{
+                                        position: 'absolute',
+                                        bottom: 8,
+                                        right: 8,
+                                        borderRadius: '50%',
+                                        backgroundColor: "#41c18c",
+                                        width: 55,
+                                        height: 55,
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center'
+                                    }}>
+                                        <CheckIcon style={{ color: 'white' }}/>
+                                    </Box>
+                                :
+                                    <></>
+                                }
                                 <Box sx={{ p: 2 }}>
-                                    <Typography variant="h5" sx={{color: getTextColor(unit.color)}}>{unit.name}</Typography>
+                                    <Typography variant="h5" sx={{ color: getTextColor(unit.color) }}>{unit.name}</Typography>
                                 </Box>
                                 {JourneyStops(unit.tasks)}
                             </Grid>
