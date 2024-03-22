@@ -367,25 +367,74 @@ function JourneyMain() {
 
     useEffect(() => {
         const currentUrl = window.location.href;
-        let usedUrl = extractIdFromUrl(currentUrl)
+        const usedUrl = extractIdFromUrl(currentUrl);
+        const lastVisit = localStorage.getItem('lastVisitTime');
+        const now = new Date();
+
+        // Check if lastVisit is recorded and calculate time difference in hours
+        let hoursSinceLastVisit = lastVisit ? (now.getTime() - new Date(lastVisit).getTime()) / (1000 * 60 * 60) : null;
+
+        // Update last visit time
+        localStorage.setItem('lastVisitTime', now.toISOString());
+
         if (usedUrl === null){
-            const lastUnitWithCompletedTaskIndex = unitData.reduce((acc, unit, index) =>
-                unit.tasks.some(task => task.completed) ? index : acc, -1
-            );
+            if (hoursSinceLastVisit === null || hoursSinceLastVisit > 5){
+                // Your logic when the user hasn't been on the page for more than 5 hours or never visited
+                const lastUnitWithCompletedTaskIndex = unitData.reduce((acc, unit, index) =>
+                    unit.tasks.some(task => task.completed) ? index : acc, -1
+                );
 
+                if (lastUnitWithCompletedTaskIndex !== -1) {
+                    const ref = unitRefs.current[lastUnitWithCompletedTaskIndex];
+                    if (ref?.current) {
+                        requestAnimationFrame(() => {
+                            if (ref && ref?.current) {
+                                smoothScrollTo(ref.current, 1250);
+                            }
+                        });
+                    }
+                }
+            } else if (hoursSinceLastVisit !== null && hoursSinceLastVisit <= 5){
+                // Your logic when the user has been on the page within the last 5 hours
+                const lastUnitWithCompletedTaskIndex = unitData.reduce((acc, unit, index) =>
+                    unit.tasks.some(task => task.completed) ? index : acc, -1
+                );
 
-            if (lastUnitWithCompletedTaskIndex !== -1) {
-                const ref = unitRefs.current[lastUnitWithCompletedTaskIndex];
-                if (ref?.current) {
-                    requestAnimationFrame(() => {
-                        if (ref && ref?.current) {
-                            smoothScrollTo(ref.current, 1250);
-                        }
+                // Scroll to the last unit with a completed task, if found
+                if (lastUnitWithCompletedTaskIndex !== -1) {
+                    const ref = unitRefs.current[lastUnitWithCompletedTaskIndex];
+                    ref?.current?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start',
                     });
                 }
             }
         }
     }, [unitData]);
+
+
+
+    // useEffect(() => {
+    //     const currentUrl = window.location.href;
+    //     let usedUrl = extractIdFromUrl(currentUrl)
+    //     if (usedUrl === null){
+    //         const lastUnitWithCompletedTaskIndex = unitData.reduce((acc, unit, index) =>
+    //             unit.tasks.some(task => task.completed) ? index : acc, -1
+    //         );
+    //
+    //
+    //         if (lastUnitWithCompletedTaskIndex !== -1) {
+    //             const ref = unitRefs.current[lastUnitWithCompletedTaskIndex];
+    //             if (ref?.current) {
+    //                 requestAnimationFrame(() => {
+    //                     if (ref && ref?.current) {
+    //                         smoothScrollTo(ref.current, 1250);
+    //                     }
+    //                 });
+    //             }
+    //         }
+    //     }
+    // }, [unitData]);
 
     const items = [1, 2];
 
