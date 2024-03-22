@@ -223,20 +223,15 @@ function JourneyMain() {
 
             const currentUrl = window.location.href;
             let usedUrl = extractIdFromUrl(currentUrl)
-            console.log("used url: ", usedUrl)
 
             //@ts-ignore
             const sortedTaskData = tasks.sort((a, b) => {
                 if (a.node_above === null) return -1;
                 if (b.node_above === null) return 1;
-                console.log("a is: ", a)
-                console.log("b is: ", b)
                 if (usedUrl !== null && a.code_source_id === usedUrl){
-                    console.log("unit id is: ", unit._id)
                     setCurrentUnit(unit._id)
                 }
                 if (usedUrl !== null && b.code_source_id === usedUrl){
-                    console.log("unit id is: ", unit._id)
                     setCurrentUnit(unit._id)
                 }
                 // @ts-ignore
@@ -329,30 +324,30 @@ function JourneyMain() {
         }
     };
 
-    // const smoothScrollTo = (element: Element, duration: number): void => {
-    //     let targetPosition = element.getBoundingClientRect().top;
-    //     let startPosition = window.pageYOffset;
-    //     let startTime: number | null = null;
-    //
-    //     const ease = (t: number, b: number, c: number, d: number): number => {
-    //         t /= d / 2;
-    //         if (t < 1) return c / 2 * t * t + b;
-    //         t--;
-    //         return -c / 2 * (t * (t - 2) - 1) + b;
-    //     };
-    //
-    //     const animation = (currentTime: number): void => {
-    //         if (startTime === null) startTime = currentTime;
-    //         let timeElapsed = currentTime - startTime;
-    //         let run = ease(timeElapsed, startPosition, targetPosition - startPosition, duration);
-    //         window.scrollTo(0, run);
-    //         if (timeElapsed < duration) requestAnimationFrame(animation);
-    //     };
-    //
-    //     requestAnimationFrame(animation);
-    // };
+    const smoothScrollTo = (element: Element, duration: number): void => {
+        let targetPosition = element.getBoundingClientRect().top;
+        let startPosition = window.pageYOffset;
+        let startTime: number | null = null;
 
-    // todo: works properly, but scrolls super fast. Keeping in case the smooth scroll causes too many issues.
+        const ease = (t: number, b: number, c: number, d: number): number => {
+            t /= d / 2;
+            if (t < 1) return c / 2 * t * t + b;
+            t--;
+            return -c / 2 * (t * (t - 2) - 1) + b;
+        };
+
+        const animation = (currentTime: number): void => {
+            if (startTime === null) startTime = currentTime;
+            let timeElapsed = currentTime - startTime;
+            let run = ease(timeElapsed, startPosition, targetPosition - startPosition, duration);
+            window.scrollTo(0, run);
+            if (timeElapsed < duration) requestAnimationFrame(animation);
+        };
+
+        requestAnimationFrame(animation);
+    };
+
+    // // todo: works properly, but scrolls super fast. Keeping in case the smooth scroll causes too many issues.
     // useEffect(() => {
     //     // Find the index of the last unit with at least one completed task
     //     const lastUnitWithCompletedTaskIndex = unitData.reduce((acc, unit, index) =>
@@ -370,22 +365,27 @@ function JourneyMain() {
     // }, [unitData]);
 
 
-    // useEffect(() => {
-    //     const lastUnitWithCompletedTaskIndex = unitData.reduce((acc, unit, index) =>
-    //         unit.tasks.some(task => task.completed) ? index : acc, -1
-    //     );
-    //
-    //     if (lastUnitWithCompletedTaskIndex !== -1) {
-    //         const ref = unitRefs.current[lastUnitWithCompletedTaskIndex];
-    //         if (ref?.current) {
-    //             requestAnimationFrame(() => {
-    //                 if (ref && ref?.current) {
-    //                     smoothScrollTo(ref.current, 1250);
-    //                 }
-    //             });
-    //         }
-    //     }
-    // }, [unitData]);
+    useEffect(() => {
+        const currentUrl = window.location.href;
+        let usedUrl = extractIdFromUrl(currentUrl)
+        if (usedUrl === null){
+            const lastUnitWithCompletedTaskIndex = unitData.reduce((acc, unit, index) =>
+                unit.tasks.some(task => task.completed) ? index : acc, -1
+            );
+
+
+            if (lastUnitWithCompletedTaskIndex !== -1) {
+                const ref = unitRefs.current[lastUnitWithCompletedTaskIndex];
+                if (ref?.current) {
+                    requestAnimationFrame(() => {
+                        if (ref && ref?.current) {
+                            smoothScrollTo(ref.current, 1250);
+                        }
+                    });
+                }
+            }
+        }
+    }, [unitData]);
 
     const items = [1, 2];
 
@@ -1240,7 +1240,7 @@ function JourneyMain() {
                     <Typography variant="h2" sx={{ color: 'text.primary' }}>Your Journey</Typography>
                 </Box>
                 {unitData.map((unit, index) => (
-                    <div key={unit._id} id={currentUnit === unit._id ? "currentUnit": "null"}>
+                    <div key={unit._id} id={currentUnit === unit._id ? "currentUnit": "null"} ref={unitRefs.current[index]}>
                         <Grid container spacing={2}>
                             {index % 2 === 0
                                 ?
