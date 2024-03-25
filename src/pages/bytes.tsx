@@ -1874,6 +1874,8 @@ function Byte() {
     }
 
     const journeyBytesPage = () => {
+        let lang = mapFilePathToLangOption(activeFile)
+
         return (
             <>
                 <Container maxWidth="xl" style={containerStyle}>
@@ -1940,35 +1942,6 @@ function Byte() {
                                 style={editorAndTerminalStyle}
                                 ref={editorContainerRef}
                             >
-                                {activeFileIdx >= 0 && code[activeFileIdx] && code[activeFileIdx].content.length > 0 && (
-                                    <Tooltip title="Run Code">
-                                        <LoadingButton
-                                            loading={executingCode}
-                                            variant="text"
-                                            color={"success"}
-                                            style={{
-                                                position: 'absolute',
-                                                right: '8px',
-                                                top: '8px',
-                                                zIndex: 3,
-                                                borderRadius: "50%",
-                                                minWidth: 0,
-                                            }}
-                                            onClick={() => {
-                                                setOutputPopup(false);
-                                                buttonClickedRef.current = true;
-                                                if (!authState.authenticated) {
-                                                    navigate("/signup")
-                                                    return
-                                                }
-
-                                                executeCode(); // Indicate button click
-                                            }}
-                                        >
-                                            <PlayArrow/>
-                                        </LoadingButton>
-                                    </Tooltip>
-                                )}
                                 {byteData && (
                                     <Tooltip title={programmingLanguages[byteData.lang]}>
                                         <Box
@@ -1984,6 +1957,83 @@ function Byte() {
                                         </Box>
                                     </Tooltip>
                                 )}
+                                <Box
+                                    display={"inline-flex"}
+                                    justifyContent={"space-between"}
+                                    sx={{
+                                        width: "100%",
+                                        marginBottom: "8px"
+                                    }}
+                                >
+                                    <EditorTabs
+                                        value={activeFileIdx + 1}
+                                        onChange={(e, idx) => {
+                                            if (idx === 0) {
+                                                setNewFilePopup(true)
+                                                return
+                                            }
+                                            setActiveFile(code[idx - 1].file_name)
+                                        }}
+                                        variant="scrollable"
+                                        scrollButtons="auto"
+                                        aria-label="file tabs"
+                                        TabIndicatorProps={{sx: {display: "none"}}}
+                                    >
+                                        <EditorTab icon={<Add/>} aria-label="New file"/>
+                                        {code.map((file, index) => (
+                                            <EditorTab
+                                                key={file.file_name}
+                                                label={
+                                                    <div style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'space-between'
+                                                    }}>
+                                                        {file.file_name}
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => setDeleteFileRequest(file.file_name)}
+                                                            sx={{marginLeft: 0.5, padding: '2px', fontSize: "12px"}}
+                                                        >
+                                                            <CloseIcon fontSize="inherit"/>
+                                                        </IconButton>
+                                                    </div>
+                                                }
+                                            />
+                                        ))}
+                                    </EditorTabs>
+                                    {activeFileIdx >= 0 && code[activeFileIdx] && code[activeFileIdx].content.length > 0 && lang?.execSupported && (
+                                        <Box
+                                            display={"inline-flex"}
+                                        >
+                                            <Tooltip title="Run Code">
+                                                <LoadingButton
+                                                    loading={executingCode}
+                                                    variant="outlined"
+                                                    color={"success"}
+                                                    sx={{
+                                                        zIndex: 3,
+                                                        m: 0,
+                                                        p: 0,
+                                                        fontSize: "0.7rem !important",
+                                                    }}
+                                                    onClick={() => {
+                                                        setOutputPopup(false);
+                                                        buttonClickedRef.current = true;
+                                                        if (!authState.authenticated) {
+                                                            navigate("/signup?forward=" + encodeURIComponent(window.location.pathname))
+                                                            return
+                                                        }
+
+                                                        executeCode(); // Indicate button click
+                                                    }}
+                                                >
+                                                    Run <PlayArrow fontSize={"small"}/>
+                                                </LoadingButton>
+                                            </Tooltip>
+                                        </Box>
+                                    )}
+                                </Box>
                                 <Editor
                                     ref={editorRef}
                                     parentStyles={editorStyle}
