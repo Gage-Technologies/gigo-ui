@@ -2,52 +2,54 @@ import * as React from "react";
 import {useEffect, useRef, useState} from "react";
 import {
     alpha,
-    Box, Button,
+    Box,
+    Button,
     CircularProgress,
     Container,
     createTheme,
     CssBaseline,
-    Dialog, DialogActions,
+    Dialog,
+    DialogActions,
     DialogContent,
-    DialogTitle, IconButton,
-    PaletteMode, TextField,
-    ThemeProvider, Tooltip,
+    DialogTitle,
+    IconButton,
+    PaletteMode,
+    TextField,
+    ThemeProvider,
+    Tooltip,
     Typography,
 } from "@mui/material";
 import XpPopup from "../components/XpPopup";
 import {getAllTokens} from "../theme";
 import {Add, PlayArrow} from "@material-ui/icons";
 import {useAppDispatch, useAppSelector} from "../app/hooks";
-import {useLocation, useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import swal from "sweetalert";
 import call from "../services/api-call";
 import 'ace-builds';
 import 'ace-builds/webpack-resolver';
 import ByteSelectionMenu from "../components/ByteSelectionMenu";
 import config from "../config";
-import { useParams } from "react-router";
-import { useGlobalWebSocket } from "../services/websocket";
-import { WsGenericErrorPayload, WsMessage, WsMessageType } from "../models/websocket";
-import {
-    ExecResponsePayload,
-    OutputRow
-} from "../models/bytes";
-import { programmingLanguages } from "../services/vars";
-import { useGlobalCtWebSocket } from "../services/ct_websocket";
+import {useParams} from "react-router";
+import {useGlobalWebSocket} from "../services/websocket";
+import {WsGenericErrorPayload, WsMessage, WsMessageType} from "../models/websocket";
+import {ExecResponsePayload, OutputRow} from "../models/bytes";
+import {programmingLanguages} from "../services/vars";
+import {useGlobalCtWebSocket} from "../services/ct_websocket";
 import ByteNextStep from "../components/CodeTeacher/ByteNextStep";
 import ByteChat from "../components/CodeTeacher/ByteChat";
-import { LoadingButton } from "@mui/lab";
+import {LoadingButton} from "@mui/lab";
 import ByteNextOutputMessage from "../components/CodeTeacher/ByteNextOutputMessage";
 import Editor from "../components/IDE/Editor";
 import chroma from 'chroma-js';
 import SheenPlaceholder from "../components/Loading/SheenPlaceholder";
-import { sleep } from "../services/utils";
-import { Extension, ReactCodeMirrorRef } from "@uiw/react-codemirror";
+import {sleep} from "../services/utils";
+import {Extension, ReactCodeMirrorRef} from "@uiw/react-codemirror";
 import DifficultyAdjuster from "../components/ByteDifficulty";
-import { selectAuthState } from "../reducers/auth/auth";
-import { initialBytesStateUpdate, selectBytesState, updateBytesState } from "../reducers/bytes/bytes";
+import {selectAuthState} from "../reducers/auth/auth";
+import {initialBytesStateUpdate, selectBytesState, updateBytesState} from "../reducers/bytes/bytes";
 import ByteTerminal from "../components/Terminal";
-import { debounce } from "lodash";
+import {debounce} from "lodash";
 import {LaunchLspRequest} from "../models/launch_lsp";
 import {Workspace} from "../models/workspace";
 import CodeSource from "../models/codeSource";
@@ -55,14 +57,15 @@ import {
     CtGenericErrorPayload,
     CtMessage,
     CtMessageOrigin,
-    CtMessageType, CtParseFileRequest,
+    CtMessageType,
+    CtParseFileRequest,
     CtParseFileResponse,
     CtValidationErrorPayload,
     Node as CtParseNode
 } from "../models/ct_websocket";
 import LinkIcon from '@mui/icons-material/Link';
 import LinkOffIcon from '@mui/icons-material/LinkOff';
-import { CtPopupExtensionEngine, createCtPopupExtension } from "../components/IDE/Extensions/CtPopupExtension";
+import {createCtPopupExtension, CtPopupExtensionEngine} from "../components/IDE/Extensions/CtPopupExtension";
 import {ctCreateCodeActions} from "../components/IDE/Extensions/CtCodeActionExtension";
 import ByteSuggestions2 from "../components/CodeTeacher/ByteSuggestions2";
 import BytesLanguage from "../components/Icons/bytes/BytesLanguage";
@@ -128,24 +131,24 @@ interface LanguageOption {
 }
 
 const languages: LanguageOption[] = [
-    { name: 'Go', extensions: ['go'], languageId: 6, execSupported: true },
-    { name: 'Python', extensions: ['py', 'pytho', 'pyt'], languageId: 5, execSupported: true },
-    { name: 'C++', extensions: ['cpp', 'cc', 'cxx', 'hpp', 'c++', 'h'], languageId: 8, execSupported: false },
-    { name: 'HTML', extensions: ['html', 'htm'], languageId: 27, execSupported: false },
-    { name: 'Java', extensions: ['java'], languageId: 2, execSupported: false },
-    { name: 'JavaScript', extensions: ['js'], languageId: 3, execSupported: false },
-    { name: 'JSON', extensions: ['json'], languageId: 1, execSupported: false },
-    { name: 'Markdown', extensions: ['md'], languageId: 1, execSupported: false },
-    { name: 'PHP', extensions: ['php'], languageId: 13, execSupported: false },
-    { name: 'Rust', extensions: ['rs'], languageId: 14, execSupported: false },
-    { name: 'SQL', extensions: ['sql'], languageId: 34, execSupported: false },
-    { name: 'XML', extensions: ['xml'], languageId: 1, execSupported: false },
-    { name: 'LESS', extensions: ['less'], languageId: 1, execSupported: false },
-    { name: 'SASS', extensions: ['sass', 'scss'], languageId: 1, execSupported: false },
-    { name: 'Clojure', extensions: ['clj'], languageId: 21, execSupported: false },
-    { name: 'C#', extensions: ['cs'], languageId: 10, execSupported: false },
-    { name: 'Shell', extensions: ['bash', 'sh'], languageId: 38, execSupported: false },
-    { name: 'Toml', extensions: ['toml'], languageId: 14, execSupported: false }
+    {name: 'Go', extensions: ['go'], languageId: 6, execSupported: true},
+    {name: 'Python', extensions: ['py', 'pytho', 'pyt'], languageId: 5, execSupported: true},
+    {name: 'C++', extensions: ['cpp', 'cc', 'cxx', 'hpp', 'c++', 'h'], languageId: 8, execSupported: false},
+    {name: 'HTML', extensions: ['html', 'htm'], languageId: 27, execSupported: false},
+    {name: 'Java', extensions: ['java'], languageId: 2, execSupported: false},
+    {name: 'JavaScript', extensions: ['js'], languageId: 3, execSupported: false},
+    {name: 'JSON', extensions: ['json'], languageId: 1, execSupported: false},
+    {name: 'Markdown', extensions: ['md'], languageId: 1, execSupported: false},
+    {name: 'PHP', extensions: ['php'], languageId: 13, execSupported: false},
+    {name: 'Rust', extensions: ['rs'], languageId: 14, execSupported: false},
+    {name: 'SQL', extensions: ['sql'], languageId: 34, execSupported: false},
+    {name: 'XML', extensions: ['xml'], languageId: 1, execSupported: false},
+    {name: 'LESS', extensions: ['less'], languageId: 1, execSupported: false},
+    {name: 'SASS', extensions: ['sass', 'scss'], languageId: 1, execSupported: false},
+    {name: 'Clojure', extensions: ['clj'], languageId: 21, execSupported: false},
+    {name: 'C#', extensions: ['cs'], languageId: 10, execSupported: false},
+    {name: 'Shell', extensions: ['bash', 'sh'], languageId: 38, execSupported: false},
+    {name: 'Toml', extensions: ['toml'], languageId: 14, execSupported: false}
 ];
 
 const mapToLang = (l: string) => {
@@ -312,7 +315,7 @@ function Byte() {
     };
 
     const editorStyle: React.CSSProperties = {
-        height: terminalVisible ? "calc(100% - 200px)" : "100%",
+        height: terminalVisible ? "calc(100% - 236px)" : "calc(100% - 36px)",
     };
 
     const terminalOutputStyle: React.CSSProperties = {
@@ -417,14 +420,14 @@ function Byte() {
 
     const [lastParse, setLastParse] = useState("")
     const [parsedSymbols, setParsedSymbols] = useState<CtParseFileResponse | null>(null)
-    const [codeActionPortals, setCodeActionPortals] = useState<{id: string, portal: React.ReactPortal}[]>([])
+    const [codeActionPortals, setCodeActionPortals] = useState<{ id: string, portal: React.ReactPortal }[]>([])
 
     const [loadingCodeCleanup, setLoadingCodeCleanup] = React.useState<string | null>(null);
 
-    const [suggestionRange, setSuggestionRange] = useState<{start_line: number, end_line: number} | null>(null);
+    const [suggestionRange, setSuggestionRange] = useState<{ start_line: number, end_line: number } | null>(null);
 
 
-    let { id } = useParams();
+    let {id} = useParams();
 
     let ctWs = useGlobalCtWebSocket();
 
@@ -466,7 +469,7 @@ function Byte() {
         setActiveFileIdx(code.findIndex((x: CodeFile) => x.file_name === activeFile));
     }, [activeFile, code]);
 
-    const updateCode = React.useCallback((newCode: CodeFile[]) => {
+    const debouncedUpdateCode = React.useCallback(debounce((newCode: CodeFile[]) => {
         globalWs.sendWebsocketMessage({
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
             type: WsMessageType.ByteUpdateCode,
@@ -476,11 +479,9 @@ function Byte() {
                 content_difficulty: bytesState ? bytesState.byteDifficulty : 0
             }
         }, null);
-    }, [globalWs, byteAttemptId, bytesState]);
-
-    const debouncedUpdateCode = React.useCallback(debounce(updateCode, 1000, {
+    }, 1000, {
         trailing: true
-    }), [updateCode]);
+    }), [globalWs, byteAttemptId, bytesState.byteDifficulty]);
 
     const parseSymbols = React.useCallback((newCode: string) => {
         if (byteData === null) {
@@ -617,10 +618,10 @@ function Byte() {
 
         setTerminalVisible(true)
         setOutput({
-            stdout: [{ timestamp: Date.now() * 1000, content: "Running..." }],
+            stdout: [{timestamp: Date.now() * 1000, content: "Running..."}],
             stderr: [],
             merged: "Running...",
-            mergedLines: [{ timestamp: Date.now() * 1000, content: "Running...", error: false }],
+            mergedLines: [{timestamp: Date.now() * 1000, content: "Running...", error: false}],
         });
         setExecutingCode(true)
         setCommandId("");
@@ -665,7 +666,7 @@ function Byte() {
                 if (payload.command_id_string) {
                     setCommandId(payload.command_id_string);
                 }
-                const { stdout, stderr, done } = payload;
+                const {stdout, stderr, done} = payload;
 
                 // skip the processing if this is the first response
                 if (stdout.length === 0 && stderr.length === 0 && !done) {
@@ -758,7 +759,7 @@ function Byte() {
                 null,
                 null,
                 // @ts-ignore
-                { byte_id: byteId },
+                {byte_id: byteId},
                 null,
                 config.rootPath);
             const [res] = await Promise.all([response]);
@@ -794,7 +795,7 @@ function Byte() {
                 null,
                 null,
                 // @ts-ignore
-                { byte_id: byteId },
+                {byte_id: byteId},
                 null,
                 config.rootPath
             );
@@ -830,7 +831,7 @@ function Byte() {
                 null,
                 null,
                 // @ts-ignore
-                { byte_id: byteId },
+                {byte_id: byteId},
                 null,
                 config.rootPath
             );
@@ -866,7 +867,7 @@ function Byte() {
             null,
             // @ts-ignore
             {
-                byte_id: byteAttemptId ,
+                byte_id: byteAttemptId,
                 difficulty: difficultyToString(determineDifficulty()),
             },
             null,
@@ -933,12 +934,18 @@ function Byte() {
         switch (bytesState.byteDifficulty) {
             case 0:
                 setCode(easyCode);
+                setActiveFile(easyCode.length > 0 ? easyCode[0].file_name : "")
+                setActiveFileIdx(easyCode.length > 0 ? 0 : -1)
                 break
             case 1:
                 setCode(mediumCode);
+                setActiveFile(mediumCode.length > 0 ? mediumCode[0].file_name : "")
+                setActiveFileIdx(mediumCode.length > 0 ? 0 : -1)
                 break
             case 2:
-                setCode(hardCode)
+                setCode(hardCode);
+                setActiveFile(hardCode.length > 0 ? hardCode[0].file_name : "")
+                setActiveFileIdx(hardCode.length > 0 ? 0 : -1)
                 break
         }
     }, [bytesState.byteDifficulty])
@@ -1065,8 +1072,8 @@ function Byte() {
                     setCodeActionPortals((prevState) => {
                         // update the portal if it has a prior state or add it if new
                         return prevState.some((x) => x.id === id) ?
-                            prevState.map((item) => item.id === id ? { ...item, portal } : item) :
-                            [...prevState, { id, portal }];
+                            prevState.map((item) => item.id === id ? {...item, portal} : item) :
+                            [...prevState, {id, portal}];
                     })
                 },
                 (node: CtParseNode) => triggerCodeCleanup(node)
@@ -1195,7 +1202,7 @@ function Byte() {
         if (!outputPopup && buttonClickedRef.current) {
             buttonClickedRef.current = false;
             if (!authState.authenticated) {
-                navigate("/signup?forward="+encodeURIComponent(window.location.pathname))
+                navigate("/signup?forward=" + encodeURIComponent(window.location.pathname))
                 return
             }
             executeCode();
@@ -1339,10 +1346,10 @@ function Byte() {
         if (workspaceState !== null) {
             if (workspaceState === 1) {
                 stateTooltipTitle = "Connected To DevSpace"
-                stateIcon = (<LinkIcon sx={{color: theme.palette.success.main}} />)
+                stateIcon = (<LinkIcon sx={{color: theme.palette.success.main}}/>)
             } else {
                 stateTooltipTitle = "Connecting To DevSpace"
-                stateIcon = (<CircularProgress size={24} sx={{color: alpha(theme.palette.text.primary, 0.6)}} />)
+                stateIcon = (<CircularProgress size={24} sx={{color: alpha(theme.palette.text.primary, 0.6)}}/>)
             }
         }
 
@@ -1382,7 +1389,9 @@ function Byte() {
                 {(activeSidebarTab === null || activeSidebarTab === "debugOutput") && activeFileIdx >= 0 && code[activeFileIdx] && (
                     <ByteNextOutputMessage
                         trigger={outputPopup}
-                        acceptedCallback={() => { setOutputPopup(false) }}
+                        acceptedCallback={() => {
+                            setOutputPopup(false)
+                        }}
                         onExpand={() => setActiveSidebarTab("debugOutput")}
                         onHide={() => setActiveSidebarTab(null)}
                         onSuccess={() => {
@@ -1478,12 +1487,14 @@ function Byte() {
                             if (e.code == "Enter") {
                                 e.preventDefault()
                                 e.stopPropagation()
-                                setCode(prev =>
-                                    prev.concat({
+                                setCode(prev => {
+                                    let newCode = prev.concat({
                                         file_name: newFileName,
                                         content: "",
                                     })
-                                )
+                                    debouncedUpdateCode(newCode)
+                                    return newCode
+                                })
                                 setActiveFile(newFileName)
                                 setNewFilePopup(false)
                             }
@@ -1506,12 +1517,14 @@ function Byte() {
                         variant={"outlined"}
                         disabled={newFileName === ""}
                         onClick={() => {
-                            setCode(prev =>
-                                prev.concat({
+                            setCode(prev => {
+                                let newCode = prev.concat({
                                     file_name: newFileName,
                                     content: "",
                                 })
-                            )
+                                debouncedUpdateCode(newCode)
+                                return newCode
+                            })
                             setActiveFile(newFileName)
                             setNewFilePopup(false)
                         }}
@@ -1530,7 +1543,7 @@ function Byte() {
                 <DialogContent>
                     <Typography variant={"body2"}>
                         Are you sure you want to delete the file <b>{deleteFileRequest}</b>?
-                        <br />
+                        <br/>
                         This action cannot be undone.
                     </Typography>
                 </DialogContent>
@@ -1556,7 +1569,11 @@ function Byte() {
                                     setActiveFile(code.filter((f) => f.file_name !== deleteFileRequest)[0].file_name)
                                 }
                             }
-                            setCode(prev => prev.filter((f) => f.file_name !== deleteFileRequest))
+                            setCode(prev => {
+                                let newCode = prev.filter((f) => f.file_name !== deleteFileRequest)
+                                debouncedUpdateCode(newCode)
+                                return newCode
+                            })
                             setDeleteFileRequest(null)
                         }}
                     >
@@ -1590,7 +1607,7 @@ function Byte() {
                         ) : (
                             <Box sx={titlePlaceholderContainerStyle}>
                                 <Box sx={titlePlaceholderStyle}>
-                                    <SheenPlaceholder width="400px" height={"45px"} />
+                                    <SheenPlaceholder width="400px" height={"45px"}/>
                                 </Box>
                             </Box>
                         )}
@@ -1609,10 +1626,17 @@ function Byte() {
                                         difficulty={difficultyToString(determineDifficulty())}
                                         // @ts-ignore
                                         questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
-                                        code={code.map(x => ({
-                                            code: x.content,
-                                            file_name: x.file_name
-                                        }))}
+                                        code={code.map(x => {
+                                            let content = x.content
+                                            if (activeFile === x.file_name) {
+                                                content = codeBeforeCursor + "<<CURSOR>>" + codeAfterCursor
+                                            }
+
+                                            return {
+                                                code: content,
+                                                file_name: x.file_name
+                                            }
+                                        })}
                                         containerRef={containerRef}
                                     />
                                 )}
@@ -1656,9 +1680,9 @@ function Byte() {
                                         variant="scrollable"
                                         scrollButtons="auto"
                                         aria-label="file tabs"
-                                        TabIndicatorProps={{ sx: { display: "none" } }}
+                                        TabIndicatorProps={{sx: {display: "none"}}}
                                     >
-                                        <EditorTab icon={<Add />} aria-label="New file" />
+                                        <EditorTab icon={<Add/>} aria-label="New file"/>
                                         {code.map((file, index) => (
                                             <EditorTab
                                                 key={file.file_name}
@@ -1672,9 +1696,9 @@ function Byte() {
                                                         <IconButton
                                                             size="small"
                                                             onClick={() => setDeleteFileRequest(file.file_name)}
-                                                            sx={{ marginLeft: 0.5, padding: '2px', fontSize: "12px" }}
+                                                            sx={{marginLeft: 0.5, padding: '2px', fontSize: "12px"}}
                                                         >
-                                                            <CloseIcon fontSize="inherit" />
+                                                            <CloseIcon fontSize="inherit"/>
                                                         </IconButton>
                                                     </div>
                                                 }
@@ -1707,7 +1731,7 @@ function Byte() {
                                                         executeCode(); // Indicate button click
                                                     }}
                                                 >
-                                                    Run <PlayArrow fontSize={"small"} />
+                                                    Run <PlayArrow fontSize={"small"}/>
                                                 </LoadingButton>
                                             </Tooltip>
                                         </Box>
@@ -1721,7 +1745,10 @@ function Byte() {
                                     theme={mode}
                                     readonly={!authState.authenticated}
                                     onChange={(val, view) => handleEditorChange(val)}
-                                    onCursorChange={(bytePosition, line, column) => setCursorPosition({ row: line, column: column })}
+                                    onCursorChange={(bytePosition, line, column) => setCursorPosition({
+                                        row: line,
+                                        column: column
+                                    })}
                                     lspUrl={byteData && lspActive ? `wss://${byteData._id}-lsp.${config.coderPath.replace("https://", "")}` : undefined}
                                     diagnosticLevel={selectDiagnosticLevel()}
                                     extensions={popupExtRef.current ? editorExtensions.concat(popupExtRef.current) : editorExtensions}
@@ -1732,10 +1759,10 @@ function Byte() {
                                         ...(
                                             // default
                                             workspaceState === null ? {} :
-                                            // starting or active
-                                            workspaceState === 1 ?
-                                                {border: `1px solid ${theme.palette.primary.main}`} :
-                                                {border: `1px solid grey`}
+                                                // starting or active
+                                                workspaceState === 1 ?
+                                                    {border: `1px solid ${theme.palette.primary.main}`} :
+                                                    {border: `1px solid grey`}
                                         )
                                     }}
                                 />
@@ -1752,7 +1779,8 @@ function Byte() {
                             {renderEditorSideBar()}
                         </div>
                         <div style={byteSelectionMenuStyle}>
-                            {recommendedBytes && <ByteSelectionMenu bytes={recommendedBytes} onSelectByte={handleSelectByte}/>}
+                            {recommendedBytes &&
+                              <ByteSelectionMenu bytes={recommendedBytes} onSelectByte={handleSelectByte}/>}
                         </div>
                     </div>
                 </Container>
@@ -1772,11 +1800,11 @@ function Byte() {
                                      reward={xpData["level_up_reward"]}
                     //@ts-ignore
                                      renown={xpData["xp_update"]["current_renown"]} popupClose={null}
-                                     homePage={true} />) : null}
+                                     homePage={true}/>) : null}
                 {renderNewFilePopup()}
                 {renderDeleteFilePopup()}
             </CssBaseline>
-        </ThemeProvider >
+        </ThemeProvider>
     );
 }
 

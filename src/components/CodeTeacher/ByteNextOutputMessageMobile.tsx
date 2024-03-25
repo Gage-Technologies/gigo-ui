@@ -469,7 +469,7 @@ export default function ByteNextOutputMessageMobile(props: ByteNextOutputMessage
                     zIndex: 5,
                     boxShadow: "none",
                     backgroundColor: "transparent",
-                    width: "100%",
+                    // width: "100%",
                     height: "100%"
                 }}
             >

@@ -150,8 +150,7 @@ export default function Routing() {
                     <Route path={"/premium"} element={<PremiumDescription />} />
                     <Route path={"/buyingExclusive"} element={<BuyingExclusiveContent />} />
                     <Route path={"/aboutExclusive"} element={<ExclusiveContent />} />
-                    {/*<Route path="/byte/:id" element={<DesktopMobileRouter desktop={<Byte />} mobile={<ByteMobile />} />} />*/}
-                    <Route path="/byte/:id" element={<BytesMaintenancePage />} />
+                    <Route path="/byte/:id" element={<DesktopMobileRouter desktop={<Byte />} mobile={<ByteMobile />} />} />
                     <Route path={"/aboutBytes"} element={<AboutBytes />} />
                     <Route path={"/privacyPolicy"} element={<PrivacyPolicy/>} />
                     <Route path={"/homework"} element={<DesktopMobileRouter desktop={<HomeworkHelperPage />} mobile={<HomeworkHelperMobilePage />} />} />
