@@ -52,6 +52,7 @@ const ArticlesPage = React.lazy(() => import("./pages/articles"))
 const ArticlePage = React.lazy(() => import("./pages/article"))
 const HomeworkHelperPage = React.lazy(() => import("./pages/homeworkHelper"))
 const HomeworkHelperMobilePage = React.lazy(() => import("./pages/homeworkHelperMobile"))
+const BytesMaintenancePage = React.lazy(() => import("./pages/bytesUnavailable"))
 
 export default function Routing() {
     // initialize redux dispatcher
@@ -149,7 +150,8 @@ export default function Routing() {
                     <Route path={"/premium"} element={<PremiumDescription />} />
                     <Route path={"/buyingExclusive"} element={<BuyingExclusiveContent />} />
                     <Route path={"/aboutExclusive"} element={<ExclusiveContent />} />
-                    <Route path="/byte/:id" element={<DesktopMobileRouter desktop={<Byte />} mobile={<ByteMobile />} />} />
+                    {/*<Route path="/byte/:id" element={<DesktopMobileRouter desktop={<Byte />} mobile={<ByteMobile />} />} />*/}
+                    <Route path="/byte/:id" element={<BytesMaintenancePage />} />
                     <Route path={"/aboutBytes"} element={<AboutBytes />} />
                     <Route path={"/privacyPolicy"} element={<PrivacyPolicy/>} />
                     <Route path={"/homework"} element={<DesktopMobileRouter desktop={<HomeworkHelperPage />} mobile={<HomeworkHelperMobilePage />} />} />

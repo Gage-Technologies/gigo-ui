@@ -100,9 +100,8 @@ export interface CtByteNextOutputRequest {
     byte_id: string;
     byte_description: string;
     byte_development_steps: string;
-    code: string;
+    code: CtCodeFile[];
     byte_output: string;
-    code_language: string;
 }
 
 export interface CtByteNextOutputResponse {
@@ -156,9 +155,7 @@ export interface CtByteNewOrGetChatResponse {
 export interface CtByteUserMessage {
     byte_id: string;
     user_message: string;
-    code_prefix: string;
-    code_suffix: string;
-    code_language: string;
+    code: CtCodeFile[];
     byte_description: string;
     difficulty: string;
     byte_development_steps: string;
