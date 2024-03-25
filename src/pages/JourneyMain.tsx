@@ -39,6 +39,7 @@ import MarkdownRenderer from "../components/Markdown/MarkdownRenderer";
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import MuiAwesomeButton from "../components/MuiAwesomeButton";
+import {Circle} from "@mui/icons-material";
 
 function JourneyMain() {
     const sidebarOpen = useAppSelector(selectAppWrapperSidebarOpen);
@@ -59,6 +60,7 @@ function JourneyMain() {
     );
 
     const [loadingMapData, setLoadingMapData] = useState(false);
+    const [contentLoaded, setContentLoaded] = useState(true)
     
     const userId = useAppSelector(selectAuthStateId) as string
 
@@ -159,6 +161,30 @@ function JourneyMain() {
 
     const [activeJourney, setActiveJourney] = useState(false)
     const [loading, setLoading] = useState(true)
+    let skip = 0
+
+
+    useEffect(() => {
+        const handleScroll = () => {
+            console.log("loading is: ", loading)
+            // Check if the user has scrolled to the top of the page
+            if (window.pageYOffset === 0) {
+                setLoading(true)
+                // Call your API function here
+                getTasks()
+            }
+        };
+
+        // Add scroll event listener
+        window.addEventListener('scroll', handleScroll);
+
+        // Clean up
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
+
+
     const getTasks = async () => {
         let map = await call(
             "/api/journey/determineStart",
@@ -171,6 +197,8 @@ function JourneyMain() {
             null,
             config.rootPath
         )
+
+        console.log("map journey: ", map['started_journey'])
 
         if (map['started_journey'] === false) {
             setActiveJourney(false)
@@ -187,12 +215,16 @@ function JourneyMain() {
             // @ts-ignore
             {
                 user_id: userId,
+                skip: skip,
+                limit: 5
             },
             null,
             config.rootPath
         )
 
         const units = (res['user_map']['units'])
+
+        console.log("units: ", units)
         //@ts-ignore
         const sortedUnitData = units.sort((a, b) => {
             if (a.node_above === null) return -1;
@@ -242,11 +274,28 @@ function JourneyMain() {
 
         const allUnits = await Promise.all(fetchedTasks);
 
-        setNextUnit(allUnits[allUnits.length - 1]);
-        setUnitData(allUnits.slice(0, -1));
+        if (skip === 0){
+            const slicedAndReversedUnits = allUnits.slice(0, -1).reverse();
+            setNextUnit(allUnits[allUnits.length - 1]);
+            setUnitData(slicedAndReversedUnits);
+            unitRefs.current = slicedAndReversedUnits.slice(0, -1).map((_, i) => unitRefs.current[i] ?? createRef<HTMLDivElement>());
+        } else {
+            const reversedAllUnits = [...allUnits].reverse();
+            setUnitData(prevUnitData => [...reversedAllUnits, ...prevUnitData]);
+            unitRefs.current = [...reversedAllUnits.map(() => createRef<HTMLDivElement>()), ...unitRefs.current];
+        }
+
+        skip += 5
+
+        console.log("all units: ", allUnits.slice(0, -1))
+
+        // setUnitData(allUnits.slice(0, -1));
         setActiveJourney(true)
         setLoading(false)
-        unitRefs.current = allUnits.map((_, i) => unitRefs.current[i] ?? createRef<HTMLDivElement>());
+        if (contentLoaded === false){
+            setContentLoaded(true)
+        }
+        // unitRefs.current = allUnits.map((_, i) => unitRefs.current[i] ?? createRef<HTMLDivElement>());
     }
     // function scrollToItem(itemId: string): void {
     //     const element = document.getElementById(itemId);
@@ -274,20 +323,20 @@ function JourneyMain() {
     //     scrollToItem("currentUnit")
     // }, [currentUnit]);
 
-    useEffect(() => {
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.addedNodes.length > 0) {
-                    scrollToItem("currentUnit");
-                    observer.disconnect();
-                }
-            });
-        });
-
-        observer.observe(document.body, { childList: true, subtree: true });
-
-        return () => observer.disconnect(); // Clean up observer on component unmount
-    }, [currentUnit]);
+    // useEffect(() => {
+    //     const observer = new MutationObserver((mutations) => {
+    //         mutations.forEach((mutation) => {
+    //             if (mutation.addedNodes.length > 0) {
+    //                 scrollToItem("currentUnit");
+    //                 observer.disconnect();
+    //             }
+    //         });
+    //     });
+    //
+    //     observer.observe(document.body, { childList: true, subtree: true });
+    //
+    //     return () => observer.disconnect(); // Clean up observer on component unmount
+    // }, [currentUnit]);
 
     useEffect(() => {
         getTasks()
@@ -365,52 +414,62 @@ function JourneyMain() {
     // }, [unitData]);
 
 
+    // useEffect(() => {
+    //     const currentUrl = window.location.href;
+    //     const usedUrl = extractIdFromUrl(currentUrl);
+    //     const lastVisit = localStorage.getItem('lastVisitTime');
+    //     const now = new Date();
+    //
+    //     // Check if lastVisit is recorded and calculate time difference in hours
+    //     let hoursSinceLastVisit = lastVisit ? (now.getTime() - new Date(lastVisit).getTime()) / (1000 * 60 * 60) : null;
+    //
+    //     // Update last visit time
+    //     localStorage.setItem('lastVisitTime', now.toISOString());
+    //
+    //     if (usedUrl === null){
+    //         if (hoursSinceLastVisit === null || hoursSinceLastVisit > 5){
+    //             // Your logic when the user hasn't been on the page for more than 5 hours or never visited
+    //             const lastUnitWithCompletedTaskIndex = unitData.reduce((acc, unit, index) =>
+    //                 unit.tasks.some(task => task.completed) ? index : acc, -1
+    //             );
+    //
+    //             if (lastUnitWithCompletedTaskIndex !== -1) {
+    //                 const ref = unitRefs.current[lastUnitWithCompletedTaskIndex];
+    //                 if (ref?.current) {
+    //                     requestAnimationFrame(() => {
+    //                         if (ref && ref?.current) {
+    //                             smoothScrollTo(ref.current, 1250);
+    //                         }
+    //                     });
+    //                 }
+    //             }
+    //         } else if (hoursSinceLastVisit !== null && hoursSinceLastVisit <= 5){
+    //             // Your logic when the user has been on the page within the last 5 hours
+    //             const lastUnitWithCompletedTaskIndex = unitData.reduce((acc, unit, index) =>
+    //                 unit.tasks.some(task => task.completed) ? index : acc, -1
+    //             );
+    //
+    //             // Scroll to the last unit with a completed task, if found
+    //             if (lastUnitWithCompletedTaskIndex !== -1) {
+    //                 const ref = unitRefs.current[lastUnitWithCompletedTaskIndex];
+    //                 ref?.current?.scrollIntoView({
+    //                     behavior: 'smooth',
+    //                     block: 'start',
+    //                 });
+    //             }
+    //         }
+    //     }
+    // }, [unitData]);
+
     useEffect(() => {
-        const currentUrl = window.location.href;
-        const usedUrl = extractIdFromUrl(currentUrl);
-        const lastVisit = localStorage.getItem('lastVisitTime');
-        const now = new Date();
-
-        // Check if lastVisit is recorded and calculate time difference in hours
-        let hoursSinceLastVisit = lastVisit ? (now.getTime() - new Date(lastVisit).getTime()) / (1000 * 60 * 60) : null;
-
-        // Update last visit time
-        localStorage.setItem('lastVisitTime', now.toISOString());
-
-        if (usedUrl === null){
-            if (hoursSinceLastVisit === null || hoursSinceLastVisit > 5){
-                // Your logic when the user hasn't been on the page for more than 5 hours or never visited
-                const lastUnitWithCompletedTaskIndex = unitData.reduce((acc, unit, index) =>
-                    unit.tasks.some(task => task.completed) ? index : acc, -1
-                );
-
-                if (lastUnitWithCompletedTaskIndex !== -1) {
-                    const ref = unitRefs.current[lastUnitWithCompletedTaskIndex];
-                    if (ref?.current) {
-                        requestAnimationFrame(() => {
-                            if (ref && ref?.current) {
-                                smoothScrollTo(ref.current, 1250);
-                            }
-                        });
-                    }
-                }
-            } else if (hoursSinceLastVisit !== null && hoursSinceLastVisit <= 5){
-                // Your logic when the user has been on the page within the last 5 hours
-                const lastUnitWithCompletedTaskIndex = unitData.reduce((acc, unit, index) =>
-                    unit.tasks.some(task => task.completed) ? index : acc, -1
-                );
-
-                // Scroll to the last unit with a completed task, if found
-                if (lastUnitWithCompletedTaskIndex !== -1) {
-                    const ref = unitRefs.current[lastUnitWithCompletedTaskIndex];
-                    ref?.current?.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start',
-                    });
-                }
-            }
+        console.log("content loaded: ", contentLoaded)
+        if(contentLoaded){
+            window.scrollTo({
+                top: document.documentElement.scrollHeight,
+                behavior: 'smooth',
+            });
         }
-    }, [unitData]);
+    }, [contentLoaded]);
 
 
 
@@ -1288,79 +1347,87 @@ function JourneyMain() {
                 <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', m: 2 }}>
                     <Typography variant="h2" sx={{ color: 'text.primary' }}>Your Journey</Typography>
                 </Box>
-                {unitData.map((unit, index) => (
-                    <div key={unit._id} id={currentUnit === unit._id ? "currentUnit": "null"} ref={unitRefs.current[index]}>
-                        <Grid container spacing={2}>
-                            {index % 2 === 0
-                                ?
-                                <Grid item xl={4} sx={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
-                                    <JourneyPortals currentIndex={index} />
-                                </Grid>
-                                : (
-                                <Grid item xl={4} sx={{ display: 'flex', justifyContent: 'start', flexDirection: 'column', alignItems: 'center' }}>
+                {loading && (
+                    <div style={{width: "100%", display: "flex", justifyContent: "center"}}>
+                        <Circle style={{ fontSize: "100px" }} />
+                    </div>
+                )}
+                <LazyLoad once scroll unmountIfInvisible>
+                    {unitData.map((unit, index) => (
+                        <div key={unit._id} id={currentUnit === unit._id ? "currentUnit": "null"} ref={unitRefs.current[index]}>
+                            <Grid container spacing={2}>
+                                {index % 2 === 0
+                                    ?
+                                    <Grid item xl={4} sx={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
+                                        <JourneyPortals currentIndex={index} />
+                                    </Grid>
+                                    : (
+                                        <Grid item xl={4} sx={{ display: 'flex', justifyContent: 'start', flexDirection: 'column', alignItems: 'center' }}>
+                                            {(allCompleted(unit.tasks))
+                                                ?
+                                                <></>
+                                                :
+                                                unitHandout(unit, index)
+                                            }
+                                        </Grid>
+                                    )}
+                                <Grid item xl={4} sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 2,
+                                    backgroundColor: unit.color, borderRadius: '30px', position: 'relative',
+                                }}>
                                     {(allCompleted(unit.tasks))
                                         ?
-                                        <></>
+                                        <Box sx={{
+                                            position: 'absolute',
+                                            bottom: 8,
+                                            right: 8,
+                                            borderRadius: '50%',
+                                            backgroundColor: "#41c18c",
+                                            width: 55,
+                                            height: 55,
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center'
+                                        }}>
+                                            <CheckIcon style={{ color: 'white' }}/>
+                                        </Box>
                                         :
-                                        unitHandout(unit, index)
+                                        <></>
                                     }
-                                </Grid>
-                            )}
-                            <Grid item xl={4} sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 2,
-                                backgroundColor: unit.color, borderRadius: '30px', position: 'relative',
-                            }}>
-                                {(allCompleted(unit.tasks))
-                                ?
-                                    <Box sx={{
-                                        position: 'absolute',
-                                        bottom: 8,
-                                        right: 8,
-                                        borderRadius: '50%',
-                                        backgroundColor: "#41c18c",
-                                        width: 55,
-                                        height: 55,
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        alignItems: 'center'
-                                    }}>
-                                        <CheckIcon style={{ color: 'white' }}/>
+                                    <Box sx={{ p: 2 }}>
+                                        <Typography variant="h5" sx={{ color: getTextColor(unit.color) }}>{unit.name}</Typography>
                                     </Box>
-                                :
-                                    <></>
-                                }
-                                <Box sx={{ p: 2 }}>
-                                    <Typography variant="h5" sx={{ color: getTextColor(unit.color) }}>{unit.name}</Typography>
-                                </Box>
-                                {JourneyStops(unit.tasks)}
-                            </Grid>
+                                    {JourneyStops(unit.tasks)}
+                                </Grid>
                                 {index % 2 !== 0
                                     ?
                                     <Grid item xl={4} sx={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', alignItems: 'center' }}>
                                         <JourneyPortals currentIndex={index} />
                                     </Grid>
                                     : (
-                                    <Grid item xl={4} sx={{ display: 'flex', justifyContent: 'start', flexDirection: 'column', alignItems: 'center' }}>
-                                        {(allCompleted(unit.tasks))
-                                        ?
-                                            <></>
-                                        :
-                                            unitHandout(unit, index)
-                                        }
-                                    </Grid>
-                                )}
-                        </Grid>
-                        <Box sx={{ padding: '5vh' }} />
-                    </div>
-                ))}
+                                        <Grid item xl={4} sx={{ display: 'flex', justifyContent: 'start', flexDirection: 'column', alignItems: 'center' }}>
+                                            {(allCompleted(unit.tasks))
+                                                ?
+                                                <></>
+                                                :
+                                                unitHandout(unit, index)
+                                            }
+                                        </Grid>
+                                    )}
+                            </Grid>
+                            <Box sx={{ padding: '5vh' }} />
+                        </div>
+                    ))}
+                </LazyLoad>
                 {nextUnitPreview()}
             </Box>
         );
     }
 
     const pageContent = () => {
-        if (loading) {
-            return null;
-        }
+        // if (loading) {
+        //     return null;
+        // }
+        console.log("active journey: ", activeJourney)
         if (activeJourney) {
             return userJourney();
         }
