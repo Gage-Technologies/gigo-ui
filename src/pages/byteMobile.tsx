@@ -12,13 +12,13 @@ import {
     ListItemText,
     PaletteMode,
     SpeedDial,
-    SpeedDialAction,
+    SpeedDialAction, TextField,
     ThemeProvider,
     Tooltip,
     Typography,
 } from "@mui/material";
 import {getAllTokens} from "../theme";
-import {KeyboardArrowUp, PlayArrow} from "@material-ui/icons";
+import {Add, KeyboardArrowUp, PlayArrow} from "@material-ui/icons";
 import {useAppDispatch, useAppSelector} from "../app/hooks";
 import {useNavigate} from "react-router-dom";
 import swal from "sweetalert";
@@ -75,6 +75,8 @@ import { Circle } from "@mui/icons-material";
 import ConstructionIcon from '@mui/icons-material/Construction';
 import BlockIcon from '@mui/icons-material/Block';
 import { setHelpPopupClosedByUser, selectHelpPopupClosedByUser } from '../reducers/bytes/bytes';
+import {CodeFile} from "../models/code_file";
+import {EditorTab, EditorTabs} from "../components/IDE/EditorTabs";
 
 
 interface MergedOutputRow {
@@ -110,6 +112,122 @@ interface BytesData {
     dev_steps_hard: string;
 }
 
+interface LanguageOption {
+    name: string;
+    extensions: string[];
+    languageId: number;
+    execSupported: boolean;
+}
+
+const languages: LanguageOption[] = [
+    { name: 'Go', extensions: ['go'], languageId: 6, execSupported: true },
+    { name: 'Python', extensions: ['py', 'pytho', 'pyt'], languageId: 5, execSupported: true },
+    { name: 'C++', extensions: ['cpp', 'cc', 'cxx', 'hpp', 'c++', 'h'], languageId: 8, execSupported: false },
+    { name: 'HTML', extensions: ['html', 'htm'], languageId: 27, execSupported: false },
+    { name: 'Java', extensions: ['java'], languageId: 2, execSupported: false },
+    { name: 'JavaScript', extensions: ['js'], languageId: 3, execSupported: false },
+    { name: 'JSON', extensions: ['json'], languageId: 1, execSupported: false },
+    { name: 'Markdown', extensions: ['md'], languageId: 1, execSupported: false },
+    { name: 'PHP', extensions: ['php'], languageId: 13, execSupported: false },
+    { name: 'Rust', extensions: ['rs'], languageId: 14, execSupported: false },
+    { name: 'SQL', extensions: ['sql'], languageId: 34, execSupported: false },
+    { name: 'XML', extensions: ['xml'], languageId: 1, execSupported: false },
+    { name: 'LESS', extensions: ['less'], languageId: 1, execSupported: false },
+    { name: 'SASS', extensions: ['sass', 'scss'], languageId: 1, execSupported: false },
+    { name: 'Clojure', extensions: ['clj'], languageId: 21, execSupported: false },
+    { name: 'C#', extensions: ['cs'], languageId: 10, execSupported: false },
+    { name: 'Shell', extensions: ['bash', 'sh'], languageId: 38, execSupported: false },
+    { name: 'Toml', extensions: ['toml'], languageId: 14, execSupported: false }
+];
+
+const mapToLang = (l: string) => {
+    l = l.trim()
+    for (let i = 0; i < languages.length; i++) {
+        if (l.toLowerCase() == languages[i].name.toLowerCase()) {
+            return languages[i].name.toLowerCase()
+        }
+
+        for (let j = 0; j < languages[i].extensions.length; j++) {
+            if (l.toLowerCase() === languages[i].extensions[j]) {
+                return languages[i].name.toLowerCase()
+            }
+        }
+    }
+    return l
+}
+
+const mapToLangId = (l: string) => {
+    l = l.trim()
+    for (let i = 0; i < languages.length; i++) {
+        if (l.toLowerCase() == languages[i].name.toLowerCase()) {
+            return languages[i].languageId
+        }
+
+        for (let j = 0; j < languages[i].extensions.length; j++) {
+            if (l.toLowerCase() === languages[i].extensions[j]) {
+                return languages[i].languageId
+            }
+        }
+    }
+    return 5
+}
+
+const mapToLangMarkdown = (l: string) => {
+    l = l.trim()
+    for (let i = 0; i < languages.length; i++) {
+        if (l.toLowerCase() == languages[i].name.toLowerCase()) {
+            return languages[i].extensions[0]
+        }
+
+        for (let j = 0; j < languages[i].extensions.length; j++) {
+            if (l.toLowerCase() === languages[i].extensions[j]) {
+                return languages[i].extensions[0]
+            }
+        }
+    }
+    return ""
+}
+
+const mapFilePathToLang = (l: string) => {
+    let parts = l.trim().split('.');
+    l = parts[parts.length - 1];
+    if (l === undefined) {
+        return ""
+    }
+    for (let i = 0; i < languages.length; i++) {
+        if (l.toLowerCase() == languages[i].name.toLowerCase()) {
+            return languages[i].extensions[0]
+        }
+
+        for (let j = 0; j < languages[i].extensions.length; j++) {
+            if (l.toLowerCase() === languages[i].extensions[j]) {
+                return languages[i].extensions[0]
+            }
+        }
+    }
+    return l
+}
+
+const mapFilePathToLangOption = (l: string): LanguageOption | undefined => {
+    let parts = l.trim().split('.');
+    l = parts[parts.length - 1];
+    if (l === undefined) {
+        return undefined
+    }
+    for (let i = 0; i < languages.length; i++) {
+        if (l.toLowerCase() == languages[i].name.toLowerCase()) {
+            return languages[i]
+        }
+
+        for (let j = 0; j < languages[i].extensions.length; j++) {
+            if (l.toLowerCase() === languages[i].extensions[j]) {
+                return languages[i]
+            }
+        }
+    }
+    return undefined
+}
+
 function ByteMobile() {
     let userPref = localStorage.getItem('theme');
     const [mode, _] = useState<PaletteMode>(userPref === 'light' ? 'light' : 'dark');
@@ -134,9 +252,12 @@ function ByteMobile() {
         overflowY: "hidden",
         flexDirection: 'row',
         justifyContent: 'center',
+        alignItems: 'center',
+        alignContent: 'center',
         width: '100%',
         height: "100%",
-        marginTop: '5px'
+        paddingTop: "4px",
+        paddingBottom: "4px",
     };
 
     const titlePlaceholderContainerStyle: React.CSSProperties = {
@@ -150,14 +271,14 @@ function ByteMobile() {
         textAlign: 'center',
         width: "100%",
         fontSize: '0.8rem',
-        marginTop: "-3%",
+        lineHeight: '0px'
     };
 
     const titlePlaceholderStyle: React.CSSProperties = {
         margin: "auto"
     }
 
-    const fixedElementsHeight = 48;
+    const fixedElementsHeight = 40;
 
     const editorAndTerminalStyle: React.CSSProperties = {
         display: 'flex',
@@ -188,16 +309,10 @@ function ByteMobile() {
     // Define the state for your data and loading state
     const [byteData, setByteData] = useState<BytesData | null>(null);
     const [recommendedBytes, setRecommendedBytes] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [initialCode, setInitialCode] = useState("// Write your code here...");
-    const [code, setCode] = useState("// Write your code here...");
-    const [longLine, setLongLine] = useState(false);
-    const [isButtonActive, setIsButtonActive] = useState(false);
-    const [isReceivingData, setIsReceivingData] = useState(false);
+    const [code, setCode] = useState<CodeFile[]>([]);
 
     const [output, setOutput] = useState<OutputState | null>(null);
 
-    const [loadingCodeCleanup, setLoadingCodeCleanup] = React.useState<string | null>(null);
     const [lspActive, setLspActive] = React.useState(false)
     const [workspaceCreated, setWorkspaceCreated] = useState(false);
     const [containerStyle, setContainerSyle] = useState<React.CSSProperties>(containerStyleDefault)
@@ -206,19 +321,24 @@ function ByteMobile() {
     const [codeAfterCursor, setCodeAfterCursor] = useState("");
     const [outputPopup, setOutputPopup] = useState(false);
     const [byteAttemptId, setByteAttemptId] = useState("");
-    const [easyCode, setEasyCode] = useState("");
-    const [mediumCode, setMediumCode] = useState("");
-    const [hardCode, setHardCode] = useState("");
+    const [easyCode, setEasyCode] = useState<CodeFile[]>([]);
+    const [mediumCode, setMediumCode] = useState<CodeFile[]>([]);
+    const [hardCode, setHardCode] = useState<CodeFile[]>([]);
+    const [activeFile, setActiveFile] = useState("");
+    const [activeFileIdx, setActiveFileIdx] = useState(-1);
     const typingTimerRef = useRef(null);
     const [suggestionPopup, setSuggestionPopup] = useState(false);
     const [nextStepsPopup, setNextStepsPopup] = useState(false);
     const [commandId, setCommandId] = useState("");
+    const [newFilePopup, setNewFilePopup] = React.useState(false);
+    const [newFileName, setNewFileName] = React.useState("");
+    const [deleteFileRequest, setDeleteFileRequest] = React.useState<string | null>(null);
+
+
     const [isDifficultyPopupOpen, setIsDifficultyPopupOpen] = useState(false);
     const [executingCode, setExecutingCode] = useState<boolean>(false)
-    const [suggestionRange, setSuggestionRange] = useState<{start_line: number, end_line: number} | null>(null);
     const [userHasModified, setUserHasModified] = React.useState(false)
     const [parsedSymbols, setParsedSymbols] = useState<CtParseFileResponse | null>(null)
-    const [lastParse, setLastParse] = useState("")
     const [editorExtensions, setEditorExtensions] = useState<Extension[]>([])
     const popupEngineRef = React.useRef<CtPopupExtensionEngine | null>(null);
     const popupExtRef = React.useRef<Extension | null>(null);
@@ -275,19 +395,21 @@ function ByteMobile() {
         return "hard"
     }
 
-    const updateCode = (newCode: string) => {
-        const message = {
+    const updateCode = React.useCallback((newCode: CodeFile[]) => {
+        globalWs.sendWebsocketMessage({
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
             type: WsMessageType.ByteUpdateCode,
             payload: {
                 byte_attempt_id: byteAttemptId,
-                content: newCode,
+                files: newCode,
                 content_difficulty: bytesState ? bytesState.byteDifficulty : 0
             }
-        };
+        }, null);
+    }, [globalWs, byteAttemptId, bytesState]);
 
-        globalWs.sendWebsocketMessage(message, null);
-    };
+    useEffect(() => {
+        setActiveFileIdx(code.findIndex((x: CodeFile) => x.file_name === activeFile));
+    }, [activeFile, code]);
 
     const cancelCodeExec = (commandId: string) => {
 
@@ -386,7 +508,6 @@ function ByteMobile() {
             }
         };
 
-        setIsReceivingData(true);
         setTerminalVisible(true)
         setOutput({
             stdout: [{timestamp: Date.now() * 1000, content: "Running..."}],
@@ -477,7 +598,6 @@ function ByteMobile() {
                 return done
             }
         );
-        setIsReceivingData(false)
     };
 
 
@@ -536,15 +656,17 @@ function ByteMobile() {
             const [res] = await Promise.all([response]);
 
             if (res && res["rec_bytes"]) {
-                let outlineContent = res["rec_bytes"][`outline_content_${difficultyToString(determineDifficulty())}`]
-                setInitialCode(outlineContent);
+                let outlineContent = res["rec_bytes"][`files_${difficultyToString(determineDifficulty())}`]
                 setCode(outlineContent);
+                let afi = outlineContent.length >= 1 ? 0 : -1;
+                setActiveFileIdx(afi)
+                setActiveFile(afi >= 0 ? outlineContent[afi].file_name : "")
                 setCodeBeforeCursor("")
                 setCodeAfterCursor(outlineContent)
                 setCursorPosition({row: 0, column: 0})
-                setEasyCode(res["rec_bytes"]["outline_content_easy"])
-                setMediumCode(res["rec_bytes"]["outline_content_medium"])
-                setHardCode(res["rec_bytes"]["outline_content_hard"])
+                setEasyCode(res["rec_bytes"]["files_easy"])
+                setMediumCode(res["rec_bytes"]["files_medium"])
+                setHardCode(res["rec_bytes"]["files_hard"])
 
                 setByteData(res["rec_bytes"])
                 setWorkspaceCreated(false);
@@ -578,13 +700,13 @@ function ByteMobile() {
             }
 
             if (res["byte_attempt"] !== undefined) {
-                // Apply new line formatting
-                let content = res["byte_attempt"]["content_medium"]
-
-                setEasyCode(res["byte_attempt"]["content_easy"])
-                setMediumCode(res["byte_attempt"]["content_medium"])
-                setHardCode(res["byte_attempt"]["content_hard"])
-                setCode(res["byte_attempt"][`content_${difficultyToString(determineDifficulty())}`]);
+                setEasyCode(res["byte_attempt"]["files_easy"])
+                setMediumCode(res["byte_attempt"]["files_medium"])
+                setHardCode(res["byte_attempt"]["files_hard"])
+                setCode(res["byte_attempt"][`files_${difficultyToString(determineDifficulty())}`]);
+                let afi = res["byte_attempt"][`files_${difficultyToString(determineDifficulty())}`].length >= 1 ? 0 : -1;
+                setActiveFileIdx(afi)
+                setActiveFile(afi >= 0 ? res["byte_attempt"][`files_${difficultyToString(determineDifficulty())}`][afi].file_name : "")
                 setByteAttemptId(res["byte_attempt"]["_id"]);
             }
         } catch (error) {
@@ -744,14 +866,11 @@ function ByteMobile() {
         setOutput(null)
         setExecutingCode(false)
         setTerminalVisible(false)
-        setLoading(true);
         getRecommendedBytes()
         getByte(id).then(() => {
             if (authState.authenticated && id) {
                 startByteAttempt(id);
             }
-        }).finally(() => {
-            setLoading(false);
         });
     }, [id]);
 
@@ -838,8 +957,6 @@ function ByteMobile() {
                     return true
                 }
                 setParsedSymbols(msg.payload as CtParseFileResponse)
-                console.log("Symbol set " + msg.payload)
-                setLastParse(newCode);
                 return true
             }
         )
@@ -850,40 +967,42 @@ function ByteMobile() {
     }), [parseSymbols]);
 
     useEffect(() => {
+        if (activeFileIdx < 0 || code[activeFileIdx] === undefined) {
+            return
+        }
         setParsedSymbols(null)
-        debouncedParseSymbols(code)
-    }, [code]);
+        debouncedParseSymbols(code[activeFileIdx].content)
+    }, [code, activeFileIdx]);
 
     // Handle changes in the editor and activate the button
     const handleEditorChange = async (newCode: string) => {
+        const updateFunc = (prevState: CodeFile[]) => {
+            let idx = prevState.findIndex((x) => x.file_name === activeFile);
+            if (idx !== -1) {
+                prevState[idx].content = newCode;
+            }
+            return prevState
+        }
+
+        debouncedUpdateCode(updateFunc(code));
+
         // Update the code state with the new content
-        setCode(newCode);
+        setCode(updateFunc);
         switch (bytesState.byteDifficulty) {
             case 0:
-                setEasyCode(newCode);
+                setEasyCode(updateFunc);
                 break
             case 1:
-                setMediumCode(newCode);
+                setMediumCode(updateFunc);
                 break
             case 2:
-                setHardCode(newCode)
+                setHardCode(updateFunc)
                 break
         }
         startTypingTimer();
 
-        debouncedUpdateCode(newCode);
-
-        if (newCode && newCode !== "// Write your code here..." && newCode !== initialCode) {
-            setIsButtonActive(true);
-
-            updateCode(newCode);
-        } else {
-            setIsButtonActive(false);
-        }
-
         if (!userHasModified) {
             setUserHasModified(true)
-            setIsButtonActive(true);
             if (byteData) {
                 for (let i = 0; i < 5; i++) {
                     let created = await createWorkspace(byteData._id);
@@ -969,12 +1088,13 @@ function ByteMobile() {
     }, [outputPopup]);
 
     useEffect(() => {
-        const lines = code.split("\n");
+        if (activeFileIdx < 0 || code[activeFileIdx] === undefined) {
+            return
+        }
+
+        const lines = code[activeFileIdx].content.split("\n");
 
         // detect if any lines extend beyond 80 chars
-        let ll = lines.filter(x => x.length >= 80);
-        setLongLine(ll.length > 0)
-
         if (cursorPosition === null) {
             return
         }
@@ -1147,7 +1267,7 @@ function ByteMobile() {
     }, [workspaceState])
 
     const launchLsp = async () => {
-        if (!byteData) {
+        if (!byteData || activeFileIdx < 0 || code[activeFileIdx] === undefined) {
             return
         }
 
@@ -1159,7 +1279,8 @@ function ByteMobile() {
                     byte_attempt_id: byteAttemptId,
                     payload: {
                         lang: byteData.lang,
-                        content: code,
+                        content: code[activeFileIdx].content,
+                        file_name: code[activeFileIdx].file_name,
                     } satisfies LaunchLspRequest
                 }
             }, (msg: WsMessage<any>): boolean => {
@@ -1170,10 +1291,10 @@ function ByteMobile() {
                     }, 1000);
                     return true
                 }
-                // wait 3s to link the lsp to ensure the startup completes
+                // wait 1s to link the lsp to ensure the startup completes
                 setTimeout(() => {
                     setLspActive(true)
-                }, 3000);
+                }, 1000);
                 return true
             }
         )
@@ -1191,29 +1312,13 @@ function ByteMobile() {
         setWorkspaceId("")
         setWorkspaceState(null)
         setLspActive(false)
-        setLoading(true);
-        setSuggestionRange(null)
         getRecommendedBytes()
         getByte(id).then(() => {
             if (authState.authenticated && id) {
                 startByteAttempt(id);
             }
-        }).finally(() => {
-            setLoading(false);
         });
     }, [id]);
-
-    const triggerCodeCleanup = React.useCallback((node: CtParseNode) => {
-        console.log("triggerCodeCleanup called")
-        if (!editorRef.current?.view) {
-            return
-        }
-        setLoadingCodeCleanup(node.id)
-
-
-        // set range here
-        setSuggestionRange({start_line: node.position.start_line, end_line: node.position.end_line})
-    }, [editorRef.current])
 
     // useEffect(() => {
     //     console.log("called useEffect")
@@ -1319,6 +1424,110 @@ function ByteMobile() {
         }
         return "hint"
     }, [bytesState.byteDifficulty])
+
+    const renderNewFilePopup = () => {
+        return (
+            <Dialog open={newFilePopup} maxWidth={'sm'} onClose={() => setNewFilePopup(false)}>
+                <DialogTitle>Create New File</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        placeholder={"File Name"}
+                        value={newFileName}
+                        onChange={(event) => {
+                            setNewFileName(event.target.value)
+                        }}
+                        onKeyDown={(e) => {
+                            if (e.code == "Enter") {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                setCode(prev =>
+                                    prev.concat({
+                                        file_name: newFileName,
+                                        content: "",
+                                    })
+                                )
+                                setActiveFile(newFileName)
+                                setNewFilePopup(false)
+                            }
+                        }}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        color={"error"}
+                        variant={"outlined"}
+                        onClick={() => {
+                            setNewFilePopup(false)
+                            setNewFileName("")
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        color={"success"}
+                        variant={"outlined"}
+                        disabled={newFileName === ""}
+                        onClick={() => {
+                            setCode(prev =>
+                                prev.concat({
+                                    file_name: newFileName,
+                                    content: "",
+                                })
+                            )
+                            setActiveFile(newFileName)
+                            setNewFilePopup(false)
+                        }}
+                    >
+                        Create
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        )
+    }
+
+    const renderDeleteFilePopup = () => {
+        return (
+            <Dialog open={deleteFileRequest !== null} maxWidth={'sm'} onClose={() => setDeleteFileRequest(null)}>
+                <DialogTitle>Delete File</DialogTitle>
+                <DialogContent>
+                    <Typography variant={"body2"}>
+                        Are you sure you want to delete the file <b>{deleteFileRequest}</b>?
+                        <br />
+                        This action cannot be undone.
+                    </Typography>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        color={"inherit"}
+                        variant={"outlined"}
+                        onClick={() => {
+                            setDeleteFileRequest(null)
+                        }}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        color={"error"}
+                        variant={"outlined"}
+                        onClick={() => {
+                            if (activeFile === deleteFileRequest) {
+                                if (code.length === 1) {
+                                    setActiveFile("")
+                                    setActiveFileIdx(-1)
+                                } else {
+                                    setActiveFile(code.filter((f) => f.file_name !== deleteFileRequest)[0].file_name)
+                                }
+                            }
+                            setCode(prev => prev.filter((f) => f.file_name !== deleteFileRequest))
+                            setDeleteFileRequest(null)
+                        }}
+                    >
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        )
+    }
 
     const WaitingButton = styled(Button)`
         animation: nextStepsButtonAuraEffect 2s infinite alternate;
@@ -1475,6 +1684,8 @@ function ByteMobile() {
         )
     };
 
+    let lang = mapFilePathToLangOption(activeFile)
+
     // @ts-ignore
     return (
         <ThemeProvider theme={theme}>
@@ -1483,7 +1694,7 @@ function ByteMobile() {
                     {helpPopup()}
                     {tabValue === 0 && (
                         <>
-                            {activeSidebarTab !== "nextSteps" && activeSidebarTab !== "codeSuggestion" &&(
+                            {activeSidebarTab !== "nextSteps" && activeSidebarTab !== "codeSuggestion" && activeFileIdx >= 0 && code[activeFileIdx] && (
                                 <ByteNextOutputMessageMobile
                                     trigger={outputPopup}
                                     acceptedCallback={() => {
@@ -1494,8 +1705,10 @@ function ByteMobile() {
                                     onSuccess={() => {
                                         markComplete()
                                     }}
-                                    lang={programmingLanguages[byteData ? byteData.lang : 5]}
-                                    code={code}
+                                    code={code.map(x => ({
+                                        code: x.content,
+                                        file_name: x.file_name
+                                    }))}
                                     byteId={id || ""}
                                     //@ts-ignore
                                     description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}
@@ -1516,14 +1729,14 @@ function ByteMobile() {
                                     }}
                                 />
                             )}
-                            {/*{activeSidebarTab !== "nextSteps" && activeSidebarTab !== "debugOutput" && (*/}
+                            {/*{activeSidebarTab !== "nextSteps" && activeSidebarTab !== "debugOutput" && activeFileIdx >= 0 && code[activeFileIdx] && (*/}
                             {/*    <ByteSuggestions2*/}
                             {/*        range={suggestionRange}*/}
                             {/*        editorRef={editorRef}*/}
                             {/*        onExpand={() => setActiveSidebarTab("codeSuggestion")}*/}
                             {/*        onHide={() => setActiveSidebarTab(null)}*/}
                             {/*        lang={programmingLanguages[byteData ? byteData.lang : 5]}*/}
-                            {/*        code={code}*/}
+                            {/*        code={code[activeFileIdx].content}*/}
                             {/*        byteId={id || ""}*/}
                             {/*        // @ts-ignore*/}
                             {/*        description={byteData ? byteData[`description_${difficultyToString(determineDifficulty())}`] : ""}*/}
@@ -1542,6 +1755,8 @@ function ByteMobile() {
                             {/*        }}*/}
                             {/*    />*/}
                             {/*)}*/}
+                            {/* placeholder to center the title */}
+                            <Box sx={{width: "40px"}} />
                             {activeSidebarTab === null && (
                                 byteData ? (
                                     <Typography variant="h4" component="h1" style={titleStyle}>
@@ -1558,14 +1773,13 @@ function ByteMobile() {
                             {activeSidebarTab === null && (
                                 <Box
                                     style={{
-                                        marginRight: "3%",
-                                        marginTop: "1%"
+                                        marginRight: "16px",
                                     }}
                                 >
                                     {renderStateIndicator()}
                                 </Box>
                             )}
-                            {activeSidebarTab !== "debugOutput" && activeSidebarTab !== "codeSuggestion" && (
+                            {activeSidebarTab !== "debugOutput" && activeSidebarTab !== "codeSuggestion" && activeFileIdx >= 0 && code[activeFileIdx] && (
                                 <ByteNextStepMobile
                                     trigger={nextStepsPopup}
                                     acceptedCallback={() => {
@@ -1573,7 +1787,7 @@ function ByteMobile() {
                                     }}
                                     onExpand={() => setActiveSidebarTab("nextSteps")}
                                     onHide={() => setActiveSidebarTab(null)}
-                                    currentCode={code}
+                                    currentCode={code[activeFileIdx].content}
                                     maxWidth="100%"
                                     bytesID={id || ""}
                                     //@ts-ignore
@@ -1601,39 +1815,89 @@ function ByteMobile() {
                         />
                         {activeView === 'editor' && (
                             <>
-                                {code.length > 0 && (
-                                    <Tooltip title="Run Code">
-                                        <LoadingButton
-                                            loading={executingCode}
-                                            variant="text"
-                                            color={"success"}
-                                            style={{
-                                                position: 'absolute',
-                                                right: '8px',
-                                                top: '8px',
-                                                zIndex: 3,
-                                                borderRadius: "50%",
-                                                minWidth: 0,
-                                            }}
-                                            onClick={() => {
-                                                setOutputPopup(false);
-                                                buttonClickedRef.current = true;
-                                                if (!authState.authenticated) {
-                                                    navigate("/signup?forward="+encodeURIComponent(window.location.pathname))
-                                                    return;
+                                <Box
+                                    display={"inline-flex"}
+                                    justifyContent={"space-between"}
+                                    sx={{
+                                        width: "100%",
+                                        marginBottom: "8px"
+                                    }}
+                                >
+                                    <EditorTabs
+                                        value={activeFileIdx + 1}
+                                        onChange={(e, idx) => {
+                                            if (idx === 0) {
+                                                setNewFilePopup(true)
+                                                return
+                                            }
+                                            setActiveFile(code[idx - 1].file_name)
+                                        }}
+                                        variant="scrollable"
+                                        scrollButtons="auto"
+                                        aria-label="file tabs"
+                                        TabIndicatorProps={{ sx: { display: "none" } }}
+                                    >
+                                        <EditorTab icon={<Add />} aria-label="New file" />
+                                        {code.map((file, index) => (
+                                            <EditorTab
+                                                key={file.file_name}
+                                                label={
+                                                    <div style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'space-between'
+                                                    }}>
+                                                        {file.file_name}
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => setDeleteFileRequest(file.file_name)}
+                                                            sx={{ marginLeft: 0.5, padding: '2px', fontSize: "12px" }}
+                                                        >
+                                                            <CloseIcon fontSize="inherit" />
+                                                        </IconButton>
+                                                    </div>
                                                 }
-                                                executeCode();
-                                            }}
+                                            />
+                                        ))}
+                                    </EditorTabs>
+                                    {activeFileIdx >= 0 && code[activeFileIdx] && code[activeFileIdx].content.length > 0 && lang?.execSupported && (
+                                        <Box
+                                            display={"inline-flex"}
                                         >
-                                            <PlayArrow/>
-                                        </LoadingButton>
-                                    </Tooltip>
-                                )}
+                                            <Tooltip title="Run Code">
+                                                <LoadingButton
+                                                    loading={executingCode}
+                                                    variant="outlined"
+                                                    color={"success"}
+                                                    sx={{
+                                                        zIndex: 3,
+                                                        m: 0,
+                                                        p: 0,
+                                                        mr: 1,
+                                                        fontSize: "0.7rem !important",
+                                                    }}
+                                                    onClick={() => {
+                                                        setOutputPopup(false);
+                                                        buttonClickedRef.current = true;
+                                                        if (!authState.authenticated) {
+                                                            navigate("/signup?forward=" + encodeURIComponent(window.location.pathname))
+                                                            return
+                                                        }
+
+                                                        executeCode(); // Indicate button click
+                                                    }}
+                                                >
+                                                    Run <PlayArrow fontSize={"small"} />
+                                                </LoadingButton>
+                                            </Tooltip>
+                                        </Box>
+                                    )}
+                                </Box>
                                 <Editor
                                     ref={editorRef}
                                     parentStyles={editorStyle}
                                     language={programmingLanguages[byteData ? byteData.lang : 5]}
-                                    code={code}
+                                    code={activeFileIdx >= 0 && code[activeFileIdx] ? code[activeFileIdx].content : ""}
                                     theme={mode}
                                     readonly={!authState.authenticated}
                                     onChange={(val, view) => handleEditorChange(val)}
@@ -1649,14 +1913,6 @@ function ByteMobile() {
                                         width: '100%',
                                         height: '100%',
                                         borderRadius: "10px",
-                                        ...(
-                                            // default
-                                            workspaceState === null ? {} :
-                                                // starting or active
-                                                workspaceState === 1 ?
-                                                    {border: `1px solid ${theme.palette.primary.main}`} :
-                                                    {border: `1px solid grey`}
-                                        )
                                     }}
                                 />
                                 {terminalVisible && output && (
@@ -1695,9 +1951,10 @@ function ByteMobile() {
                                 difficulty={difficultyToString(determineDifficulty())}
                                 // @ts-ignore
                                 questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
-                                codePrefix={codeBeforeCursor}
-                                codeSuffix={codeAfterCursor}
-                                codeLanguage={programmingLanguages[byteData ? byteData.lang : 5]}
+                                code={code.map(x => ({
+                                    code: x.content,
+                                    file_name: x.file_name
+                                }))}
                                 setSpeedDialVisibility={setSpeedDialVisibility}
                             />
                         )}
@@ -1731,6 +1988,8 @@ function ByteMobile() {
                     onClose={() => setNextByteDrawerOpen(false)}
                     onNextByte={handleNextByte}
                 />
+                {renderNewFilePopup()}
+                {renderDeleteFilePopup()}
             </CssBaseline>
         </ThemeProvider>
     );

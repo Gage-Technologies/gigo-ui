@@ -22,7 +22,7 @@ import {
     CtByteMessageMessageType,
     CtByteNewOrGetChatRequest,
     CtByteNewOrGetChatResponse,
-    CtByteUserMessage, CtCloseByteChatThreadRequest, CtCloseByteChatThreadResponse,
+    CtByteUserMessage, CtCloseByteChatThreadRequest, CtCloseByteChatThreadResponse, CtCodeFile,
     CtGenericErrorPayload,
     CtMessage,
     CtMessageOrigin,
@@ -82,9 +82,7 @@ export type ByteChatProps = {
     description: string;
     devSteps: string;
     difficulty: string;
-    codePrefix: string;
-    codeSuffix: string;
-    codeLanguage: string;
+    code: CtCodeFile[];
     questions: [];
 };
 
@@ -381,9 +379,7 @@ export default function ByteChatMobile(props: ByteChatProps & { setSpeedDialVisi
             payload: {
                 byte_id: props.byteID,
                 user_message: messageContent,
-                code_prefix: props.codePrefix,
-                code_suffix: props.codeSuffix,
-                code_language: props.codeLanguage,
+                code: props.code,
                 byte_description: props.difficulty,
                 difficulty: props.devSteps,
                 byte_development_steps: props.devSteps,
