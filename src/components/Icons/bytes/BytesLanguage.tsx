@@ -23,7 +23,6 @@ function BytesLanguage(props: ByteBadgeProps) {
     const size = props.language === "Go" ? "30px" : "20px"
     const containerPadding = props.language === "Go" ? "5px" : "10px"
 
-    console.log("ByteBadge Props: ", props)
     return (
         <div style={{
             textAlign: "right", 

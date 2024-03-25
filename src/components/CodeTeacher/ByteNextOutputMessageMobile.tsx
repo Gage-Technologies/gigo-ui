@@ -13,7 +13,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { getAllTokens, themeHelpers } from "../../theme";
 import { useGlobalCtWebSocket } from "../../services/ct_websocket";
 import {
-    CtByteNextOutputRequest, CtByteNextOutputResponse,
+    CtByteNextOutputRequest, CtByteNextOutputResponse, CtCodeFile,
     CtGenericErrorPayload,
     CtMessage,
     CtMessageOrigin,
@@ -43,8 +43,7 @@ export type ByteNextOutputMessageMobileProps = {
     onExpand: () => void;
     onHide: () => void;
     onSuccess: () => void;
-    lang: string;
-    code: string;
+    code: CtCodeFile[];
     byteId: string;
     description: string;
     dev_steps: string;
@@ -201,7 +200,6 @@ export default function ByteNextOutputMessageMobile(props: ByteNextOutputMessage
                 byte_id: props.byteId,
                 byte_description: props.description,
                 byte_development_steps: props.dev_steps,
-                code_language: props.lang,
                 // @ts-ignore
                 byte_output: props.codeOutput, // changed from codeOutput["stdout"][0] because of an error
                 code: props.code
@@ -471,7 +469,7 @@ export default function ByteNextOutputMessageMobile(props: ByteNextOutputMessage
                     zIndex: 5,
                     boxShadow: "none",
                     backgroundColor: "transparent",
-                    width: "100%",
+                    // width: "100%",
                     height: "100%"
                 }}
             >

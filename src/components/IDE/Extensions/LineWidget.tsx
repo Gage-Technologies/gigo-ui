@@ -25,9 +25,9 @@ function buildLineDecorations<T extends LineWidgetSpec = LineWidgetSpec>(
     spec.forEach(_spec => {
         const { lineNumber, position } = _spec
         const lines = doc.lines
-        const lineInfo = doc.line(lineNumber)
 
         if (lineNumber <= lines) {
+            const lineInfo = doc.line(lineNumber)
             const decoration = Decoration.widget({
                 widget: widgetFor(_spec),
                 block: true,

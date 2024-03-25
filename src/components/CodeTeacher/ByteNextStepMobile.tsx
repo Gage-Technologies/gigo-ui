@@ -284,12 +284,13 @@ export default function ByteNextStepMobile(props: ByteNextStepProps) {
             <Box
                 sx={{
                     overflow: "auto",
-                    pl: 1,
+                    pl: 0.5,
                     height: "100%",
                     backgroundColor: "transparent",
                     border: "none",
                     boxShadow: "none",
-                    width: "100%"
+                    width: "100%",
+                    minWidth: "100%"
                 }}
             >
                 <Box
