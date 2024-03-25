@@ -395,18 +395,6 @@ function ByteMobile() {
         return "hard"
     }
 
-    const updateCode = React.useCallback((newCode: CodeFile[]) => {
-        globalWs.sendWebsocketMessage({
-            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-            type: WsMessageType.ByteUpdateCode,
-            payload: {
-                byte_attempt_id: byteAttemptId,
-                files: newCode,
-                content_difficulty: bytesState ? bytesState.byteDifficulty : 0
-            }
-        }, null);
-    }, [globalWs, byteAttemptId, bytesState]);
-
     useEffect(() => {
         setActiveFileIdx(code.findIndex((x: CodeFile) => x.file_name === activeFile));
     }, [activeFile, code]);
@@ -503,7 +491,11 @@ function ByteMobile() {
                 byte_attempt_id: byteAttemptId,
                 payload: {
                     lang: byteData ? byteData.lang : 5,
-                    code: code
+                    exec_files: code.map(x => ({
+                        file_name: x.file_name,
+                        code: x.content,
+                        execute: x.file_name === activeFile
+                    }))
                 }
             }
         };
@@ -907,17 +899,22 @@ function ByteMobile() {
         }, 15000);
     };
 
-
     useEffect(() => {
         switch (bytesState.byteDifficulty) {
             case 0:
                 setCode(easyCode);
+                setActiveFile(easyCode.length > 0 ? easyCode[0].file_name : "")
+                setActiveFileIdx(easyCode.length > 0 ? 0 : -1)
                 break
             case 1:
                 setCode(mediumCode);
+                setActiveFile(mediumCode.length > 0 ? mediumCode[0].file_name : "")
+                setActiveFileIdx(mediumCode.length > 0 ? 0 : -1)
                 break
             case 2:
-                setCode(hardCode)
+                setCode(hardCode);
+                setActiveFile(hardCode.length > 0 ? hardCode[0].file_name : "")
+                setActiveFileIdx(hardCode.length > 0 ? 0 : -1)
                 break
         }
     }, [bytesState.byteDifficulty])
@@ -931,9 +928,19 @@ function ByteMobile() {
         popupEngineRef.current = engine;
     }, [])
 
-    const debouncedUpdateCode = React.useCallback(debounce(updateCode, 1000, {
+    const debouncedUpdateCode = React.useCallback(debounce((newCode: CodeFile[]) => {
+        globalWs.sendWebsocketMessage({
+            sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+            type: WsMessageType.ByteUpdateCode,
+            payload: {
+                byte_attempt_id: byteAttemptId,
+                files: newCode,
+                content_difficulty: bytesState ? bytesState.byteDifficulty : 0
+            }
+        }, null);
+    }, 1000, {
         trailing: true
-    }), [updateCode]);
+    }), [globalWs, byteAttemptId, bytesState.byteDifficulty]);
 
     const parseSymbols = React.useCallback((newCode: string) => {
         if (byteData === null) {
@@ -1440,12 +1447,14 @@ function ByteMobile() {
                             if (e.code == "Enter") {
                                 e.preventDefault()
                                 e.stopPropagation()
-                                setCode(prev =>
-                                    prev.concat({
+                                setCode(prev => {
+                                    let newCode = prev.concat({
                                         file_name: newFileName,
                                         content: "",
                                     })
-                                )
+                                    debouncedUpdateCode(newCode)
+                                    return newCode
+                                })
                                 setActiveFile(newFileName)
                                 setNewFilePopup(false)
                             }
@@ -1468,12 +1477,14 @@ function ByteMobile() {
                         variant={"outlined"}
                         disabled={newFileName === ""}
                         onClick={() => {
-                            setCode(prev =>
-                                prev.concat({
+                            setCode(prev => {
+                                let newCode = prev.concat({
                                     file_name: newFileName,
                                     content: "",
                                 })
-                            )
+                                debouncedUpdateCode(newCode)
+                                return newCode
+                            })
                             setActiveFile(newFileName)
                             setNewFilePopup(false)
                         }}
@@ -1518,7 +1529,11 @@ function ByteMobile() {
                                     setActiveFile(code.filter((f) => f.file_name !== deleteFileRequest)[0].file_name)
                                 }
                             }
-                            setCode(prev => prev.filter((f) => f.file_name !== deleteFileRequest))
+                            setCode(prev => {
+                                let newCode = prev.filter((f) => f.file_name !== deleteFileRequest)
+                                debouncedUpdateCode(newCode)
+                                return newCode
+                            })
                             setDeleteFileRequest(null)
                         }}
                     >
@@ -1951,10 +1966,17 @@ function ByteMobile() {
                                 difficulty={difficultyToString(determineDifficulty())}
                                 // @ts-ignore
                                 questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
-                                code={code.map(x => ({
-                                    code: x.content,
-                                    file_name: x.file_name
-                                }))}
+                                code={code.map(x => {
+                                    let content = x.content
+                                    if (activeFile === x.file_name) {
+                                        content = codeBeforeCursor + "<<CURSOR>>" + codeAfterCursor
+                                    }
+
+                                    return {
+                                        code: content,
+                                        file_name: x.file_name
+                                    }
+                                })}
                                 setSpeedDialVisibility={setSpeedDialVisibility}
                             />
                         )}

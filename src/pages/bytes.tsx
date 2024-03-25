@@ -2,31 +2,35 @@ import * as React from "react";
 import {useEffect, useRef, useState} from "react";
 import {
     alpha,
-    Box, Button,
+    Box,
+    Button,
     CircularProgress,
     Container,
     createTheme,
     CssBaseline,
-    Dialog, DialogActions,
+    Dialog,
+    DialogActions,
     DialogContent,
-    DialogTitle, IconButton,
-    PaletteMode, TextField,
+    DialogTitle,
+    IconButton,
+    PaletteMode,
+    TextField,
     ThemeProvider,
     Tooltip,
-    Typography
+    Typography,
 } from "@mui/material";
 import XpPopup from "../components/XpPopup";
 import {getAllTokens} from "../theme";
 import {Add, PlayArrow} from "@material-ui/icons";
 import {useAppDispatch, useAppSelector} from "../app/hooks";
-import {useLocation, useNavigate} from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import swal from "sweetalert";
 import call from "../services/api-call";
 import 'ace-builds';
 import 'ace-builds/webpack-resolver';
 import ByteSelectionMenu from "../components/ByteSelectionMenu";
 import config from "../config";
-import {useParams} from "react-router";
+import {useLocation, useParams} from "react-router";
 import {useGlobalWebSocket} from "../services/websocket";
 import {WsGenericErrorPayload, WsMessage, WsMessageType} from "../models/websocket";
 import {ExecResponsePayload, OutputRow} from "../models/bytes";
@@ -127,24 +131,24 @@ interface LanguageOption {
 }
 
 const languages: LanguageOption[] = [
-    { name: 'Go', extensions: ['go'], languageId: 6, execSupported: true },
-    { name: 'Python', extensions: ['py', 'pytho', 'pyt'], languageId: 5, execSupported: true },
-    { name: 'C++', extensions: ['cpp', 'cc', 'cxx', 'hpp', 'c++', 'h'], languageId: 8, execSupported: false },
-    { name: 'HTML', extensions: ['html', 'htm'], languageId: 27, execSupported: false },
-    { name: 'Java', extensions: ['java'], languageId: 2, execSupported: false },
-    { name: 'JavaScript', extensions: ['js'], languageId: 3, execSupported: false },
-    { name: 'JSON', extensions: ['json'], languageId: 1, execSupported: false },
-    { name: 'Markdown', extensions: ['md'], languageId: 1, execSupported: false },
-    { name: 'PHP', extensions: ['php'], languageId: 13, execSupported: false },
-    { name: 'Rust', extensions: ['rs'], languageId: 14, execSupported: false },
-    { name: 'SQL', extensions: ['sql'], languageId: 34, execSupported: false },
-    { name: 'XML', extensions: ['xml'], languageId: 1, execSupported: false },
-    { name: 'LESS', extensions: ['less'], languageId: 1, execSupported: false },
-    { name: 'SASS', extensions: ['sass', 'scss'], languageId: 1, execSupported: false },
-    { name: 'Clojure', extensions: ['clj'], languageId: 21, execSupported: false },
-    { name: 'C#', extensions: ['cs'], languageId: 10, execSupported: false },
-    { name: 'Shell', extensions: ['bash', 'sh'], languageId: 38, execSupported: false },
-    { name: 'Toml', extensions: ['toml'], languageId: 14, execSupported: false }
+    {name: 'Go', extensions: ['go'], languageId: 6, execSupported: true},
+    {name: 'Python', extensions: ['py', 'pytho', 'pyt'], languageId: 5, execSupported: true},
+    {name: 'C++', extensions: ['cpp', 'cc', 'cxx', 'hpp', 'c++', 'h'], languageId: 8, execSupported: false},
+    {name: 'HTML', extensions: ['html', 'htm'], languageId: 27, execSupported: false},
+    {name: 'Java', extensions: ['java'], languageId: 2, execSupported: false},
+    {name: 'JavaScript', extensions: ['js'], languageId: 3, execSupported: false},
+    {name: 'JSON', extensions: ['json'], languageId: 1, execSupported: false},
+    {name: 'Markdown', extensions: ['md'], languageId: 1, execSupported: false},
+    {name: 'PHP', extensions: ['php'], languageId: 13, execSupported: false},
+    {name: 'Rust', extensions: ['rs'], languageId: 14, execSupported: false},
+    {name: 'SQL', extensions: ['sql'], languageId: 34, execSupported: false},
+    {name: 'XML', extensions: ['xml'], languageId: 1, execSupported: false},
+    {name: 'LESS', extensions: ['less'], languageId: 1, execSupported: false},
+    {name: 'SASS', extensions: ['sass', 'scss'], languageId: 1, execSupported: false},
+    {name: 'Clojure', extensions: ['clj'], languageId: 21, execSupported: false},
+    {name: 'C#', extensions: ['cs'], languageId: 10, execSupported: false},
+    {name: 'Shell', extensions: ['bash', 'sh'], languageId: 38, execSupported: false},
+    {name: 'Toml', extensions: ['toml'], languageId: 14, execSupported: false}
 ];
 
 const mapToLang = (l: string) => {
@@ -312,7 +316,7 @@ function Byte() {
     };
 
     const editorStyle: React.CSSProperties = {
-        height: terminalVisible ? "calc(100% - 200px)" : "100%",
+        height: terminalVisible ? "calc(100% - 236px)" : "calc(100% - 36px)",
     };
 
     const terminalOutputStyle: React.CSSProperties = {
@@ -470,7 +474,7 @@ function Byte() {
         setActiveFileIdx(code.findIndex((x: CodeFile) => x.file_name === activeFile));
     }, [activeFile, code]);
 
-    const updateCode = React.useCallback((newCode: CodeFile[]) => {
+    const debouncedUpdateCode = React.useCallback(debounce((newCode: CodeFile[]) => {
         globalWs.sendWebsocketMessage({
             sequence_id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
             type: WsMessageType.ByteUpdateCode,
@@ -480,11 +484,9 @@ function Byte() {
                 content_difficulty: bytesState ? bytesState.byteDifficulty : 0
             }
         }, null);
-    }, [globalWs, byteAttemptId, bytesState]);
-
-    const debouncedUpdateCode = React.useCallback(debounce(updateCode, 1000, {
+    }, 1000, {
         trailing: true
-    }), [updateCode]);
+    }), [globalWs, byteAttemptId, bytesState.byteDifficulty]);
 
     const parseSymbols = React.useCallback((newCode: string) => {
         if (byteData === null) {
@@ -972,12 +974,18 @@ function Byte() {
         switch (bytesState.byteDifficulty) {
             case 0:
                 setCode(easyCode);
+                setActiveFile(easyCode.length > 0 ? easyCode[0].file_name : "")
+                setActiveFileIdx(easyCode.length > 0 ? 0 : -1)
                 break
             case 1:
                 setCode(mediumCode);
+                setActiveFile(mediumCode.length > 0 ? mediumCode[0].file_name : "")
+                setActiveFileIdx(mediumCode.length > 0 ? 0 : -1)
                 break
             case 2:
-                setCode(hardCode)
+                setCode(hardCode);
+                setActiveFile(hardCode.length > 0 ? hardCode[0].file_name : "")
+                setActiveFileIdx(hardCode.length > 0 ? 0 : -1)
                 break
         }
     }, [bytesState.byteDifficulty])
@@ -1547,12 +1555,14 @@ function Byte() {
                             if (e.code == "Enter") {
                                 e.preventDefault()
                                 e.stopPropagation()
-                                setCode(prev =>
-                                    prev.concat({
+                                setCode(prev => {
+                                    let newCode = prev.concat({
                                         file_name: newFileName,
                                         content: "",
                                     })
-                                )
+                                    debouncedUpdateCode(newCode)
+                                    return newCode
+                                })
                                 setActiveFile(newFileName)
                                 setNewFilePopup(false)
                             }
@@ -1575,12 +1585,14 @@ function Byte() {
                         variant={"outlined"}
                         disabled={newFileName === ""}
                         onClick={() => {
-                            setCode(prev =>
-                                prev.concat({
+                            setCode(prev => {
+                                let newCode = prev.concat({
                                     file_name: newFileName,
                                     content: "",
                                 })
-                            )
+                                debouncedUpdateCode(newCode)
+                                return newCode
+                            })
                             setActiveFile(newFileName)
                             setNewFilePopup(false)
                         }}
@@ -1599,7 +1611,7 @@ function Byte() {
                 <DialogContent>
                     <Typography variant={"body2"}>
                         Are you sure you want to delete the file <b>{deleteFileRequest}</b>?
-                        <br />
+                        <br/>
                         This action cannot be undone.
                     </Typography>
                 </DialogContent>
@@ -1625,7 +1637,11 @@ function Byte() {
                                     setActiveFile(code.filter((f) => f.file_name !== deleteFileRequest)[0].file_name)
                                 }
                             }
-                            setCode(prev => prev.filter((f) => f.file_name !== deleteFileRequest))
+                            setCode(prev => {
+                                let newCode = prev.filter((f) => f.file_name !== deleteFileRequest)
+                                debouncedUpdateCode(newCode)
+                                return newCode
+                            })
                             setDeleteFileRequest(null)
                         }}
                     >
@@ -1678,10 +1694,17 @@ function Byte() {
                                         difficulty={difficultyToString(determineDifficulty())}
                                         // @ts-ignore
                                         questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
-                                        code={code.map(x => ({
-                                            code: x.content,
-                                            file_name: x.file_name
-                                        }))}
+                                        code={code.map(x => {
+                                            let content = x.content
+                                            if (activeFile === x.file_name) {
+                                                content = codeBeforeCursor + "<<CURSOR>>" + codeAfterCursor
+                                            }
+
+                                            return {
+                                                code: content,
+                                                file_name: x.file_name
+                                            }
+                                        })}
                                         containerRef={containerRef}
                                     />
                                 )}
@@ -1725,9 +1748,9 @@ function Byte() {
                                         variant="scrollable"
                                         scrollButtons="auto"
                                         aria-label="file tabs"
-                                        TabIndicatorProps={{ sx: { display: "none" } }}
+                                        TabIndicatorProps={{sx: {display: "none"}}}
                                     >
-                                        <EditorTab icon={<Add />} aria-label="New file" />
+                                        <EditorTab icon={<Add/>} aria-label="New file"/>
                                         {code.map((file, index) => (
                                             <EditorTab
                                                 key={file.file_name}
@@ -1741,9 +1764,9 @@ function Byte() {
                                                         <IconButton
                                                             size="small"
                                                             onClick={() => setDeleteFileRequest(file.file_name)}
-                                                            sx={{ marginLeft: 0.5, padding: '2px', fontSize: "12px" }}
+                                                            sx={{marginLeft: 0.5, padding: '2px', fontSize: "12px"}}
                                                         >
-                                                            <CloseIcon fontSize="inherit" />
+                                                            <CloseIcon fontSize="inherit"/>
                                                         </IconButton>
                                                     </div>
                                                 }
@@ -1776,7 +1799,7 @@ function Byte() {
                                                         executeCode(); // Indicate button click
                                                     }}
                                                 >
-                                                    Run <PlayArrow fontSize={"small"} />
+                                                    Run <PlayArrow fontSize={"small"}/>
                                                 </LoadingButton>
                                             </Tooltip>
                                         </Box>
@@ -1898,10 +1921,17 @@ function Byte() {
                                         difficulty={difficultyToString(determineDifficulty())}
                                         // @ts-ignore
                                         questions={byteData ? byteData[`questions_${difficultyToString(determineDifficulty())}`] : []}
-                                        code={code.map(x => ({
-                                            code: x.content,
-                                            file_name: x.file_name
-                                        }))}
+                                        code={code.map(x => {
+                                            let content = x.content
+                                            if (activeFile === x.file_name) {
+                                                content = codeBeforeCursor + "<<CURSOR>>" + codeAfterCursor
+                                            }
+
+                                            return {
+                                                code: content,
+                                                file_name: x.file_name
+                                            }
+                                        })}
                                         containerRef={containerRef}
                                     />
                                 )}
