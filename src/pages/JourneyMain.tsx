@@ -186,24 +186,26 @@ function JourneyMain() {
 
 
     const getTasks = async () => {
-        let map = await call(
-            "/api/journey/determineStart",
-            "post",
-            null,
-            null,
-            null,
-            // @ts-ignore
-            {},
-            null,
-            config.rootPath
-        )
+        if (skip === 0){
+            let map = await call(
+                "/api/journey/determineStart",
+                "post",
+                null,
+                null,
+                null,
+                // @ts-ignore
+                {},
+                null,
+                config.rootPath
+            )
 
-        console.log("map journey: ", map['started_journey'])
+            console.log("map journey: ", map['started_journey'])
 
-        if (map['started_journey'] === false) {
-            setActiveJourney(false)
-            setLoading(false)
-            return
+            if (map['started_journey'] === false) {
+                setActiveJourney(false)
+                setLoading(false)
+                return
+            }
         }
 
         let res = await call(
@@ -1349,7 +1351,7 @@ function JourneyMain() {
                 </Box>
                 {loading && (
                     <div style={{width: "100%", display: "flex", justifyContent: "center"}}>
-                        <Circle style={{ fontSize: "100px" }} />
+                        <CircularProgress size={48}/>
                     </div>
                 )}
                 <LazyLoad once scroll unmountIfInvisible>
