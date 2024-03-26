@@ -789,13 +789,13 @@ function JourneyMain() {
                             detours && detours.length > 0 ?
                                 detours.map((unit, index) => {
                                     return (
-                                        <div style={{paddingBottom: "20px", paddingLeft: "5vw"}}>
-                                            <LazyLoad once scroll unmountIfInvisible>
+                                        <LazyLoad once scroll unmountIfInvisible>
+                                            <div style={{paddingBottom: "20px", paddingLeft: "5vw"}}>
                                                 <Grid item xs={6}>
                                                     <DetourCard data={unit} width={"20vw"}/>
                                                 </Grid>
-                                            </LazyLoad>
-                                        </div>
+                                            </div>
+                                        </LazyLoad>
                                     )
                                 }) : (
                                     <Box
