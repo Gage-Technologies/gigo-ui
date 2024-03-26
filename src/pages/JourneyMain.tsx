@@ -289,15 +289,14 @@ function JourneyMain() {
         const allUnits = await Promise.all(fetchedTasks);
 
         if (skip === 0){
-            const slicedAndReversedUnits = allUnits.slice(0, -1).reverse();
+            const slicedUnits = allUnits.slice(0, -1);
             setNextUnit(allUnits[allUnits.length - 1]);
-            setUnitData(slicedAndReversedUnits);
-            unitRefs.current = slicedAndReversedUnits.slice(0, -1).map((_, i) => unitRefs.current[i] ?? createRef<HTMLDivElement>());
+            setUnitData(slicedUnits);
+            unitRefs.current = slicedUnits.slice(0, -1).map((_, i) => unitRefs.current[i] ?? createRef<HTMLDivElement>());
             setLoadingMainPage(false)
         } else {
-            const reversedAllUnits = [...allUnits].reverse();
-            setUnitData(prevUnitData => [...reversedAllUnits, ...prevUnitData]);
-            unitRefs.current = [...reversedAllUnits.map(() => createRef<HTMLDivElement>()), ...unitRefs.current];
+            setUnitData(prevUnitData => [...allUnits, ...prevUnitData]);
+            unitRefs.current = [...allUnits.map(() => createRef<HTMLDivElement>()), ...unitRefs.current];
         }
 
         skip += 5
