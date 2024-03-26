@@ -225,6 +225,17 @@ function JourneyMain() {
             config.rootPath
         )
 
+        console.log("res is: ", res)
+        if (res["success"] !== true){
+            // setUnitData(allUnits.slice(0, -1));
+            setActiveJourney(true)
+            setLoading(false)
+            if (contentLoaded === false){
+                setContentLoaded(true)
+            }
+            return
+        }
+
         const units = (res['user_map']['units'])
 
         console.log("units: ", units)
