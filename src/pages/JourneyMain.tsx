@@ -161,6 +161,7 @@ function JourneyMain() {
 
     const [activeJourney, setActiveJourney] = useState(false)
     const [loading, setLoading] = useState(true)
+    const [loadingMainPage, setLoadingMainPage] = useState(true)
     let skip = 0
 
 
@@ -281,6 +282,7 @@ function JourneyMain() {
             setNextUnit(allUnits[allUnits.length - 1]);
             setUnitData(slicedAndReversedUnits);
             unitRefs.current = slicedAndReversedUnits.slice(0, -1).map((_, i) => unitRefs.current[i] ?? createRef<HTMLDivElement>());
+            setLoadingMainPage(false)
         } else {
             const reversedAllUnits = [...allUnits].reverse();
             setUnitData(prevUnitData => [...reversedAllUnits, ...prevUnitData]);
@@ -1426,9 +1428,9 @@ function JourneyMain() {
     }
 
     const pageContent = () => {
-        // if (loading) {
-        //     return null;
-        // }
+        if (loadingMainPage) {
+            return null;
+        }
         console.log("active journey: ", activeJourney)
         if (activeJourney) {
             return userJourney();
