@@ -508,7 +508,7 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                         '--button-hover-pressure': "4",
                         height: "10vh",
                         '--button-raise-level': "10px"
-                    }} type="primary" href={props.nodeBelowId !== undefined && props.nodeBelowId !== null ? `/byte/${props.nodeBelowId}?journey` : `/journey/main?${byteId}`}>
+                    }} type="primary" href={props.nodeBelowId !== undefined && props.nodeBelowId !== null ? `/byte/${props.nodeBelowId}?journey` : `/journey/main`}>
                         <h1 style={{fontSize: "2vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
                             Continue
                         </h1>
@@ -522,7 +522,7 @@ export default function ByteNextOutputMessage(props: ByteNextOutputMessageProps)
                         }}>
                             <Button
                                 variant="contained"
-                                href={`/journey/main?${byteId}`}
+                                href={`/journey/main`}
                                 sx={{
                                     mt: 1,
                                     fontSize: '0.8rem',

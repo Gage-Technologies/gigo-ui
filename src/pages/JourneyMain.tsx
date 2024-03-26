@@ -465,15 +465,30 @@ function JourneyMain() {
     //     }
     // }, [unitData]);
 
+    // useEffect(() => {
+    //     console.log("content loaded: ", contentLoaded)
+    //     if(contentLoaded){
+    //         window.scrollTo({
+    //             top: document.documentElement.scrollHeight,
+    //             behavior: 'smooth',
+    //         });
+    //     }
+    // }, [contentLoaded]);
+
     useEffect(() => {
-        console.log("content loaded: ", contentLoaded)
-        if(contentLoaded){
+        // Function to scroll to the bottom of the page
+        const scrollToBottom = () => {
             window.scrollTo({
                 top: document.documentElement.scrollHeight,
                 behavior: 'smooth',
             });
+        };
+
+        if (!loadingMainPage && activeJourney) {
+            // Use a timeout to ensure the DOM has updated
+            setTimeout(scrollToBottom, 0);
         }
-    }, [contentLoaded]);
+    }, [loadingMainPage, activeJourney]);
 
 
 
