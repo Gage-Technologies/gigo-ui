@@ -620,6 +620,7 @@ function JourneyMain() {
         setAnchorElDesc(event.currentTarget);
     };
     const handleDetourClose = () => {
+        setDetours([])
         setAnchorElDetour(null);
     };
 
