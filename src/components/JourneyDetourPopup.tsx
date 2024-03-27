@@ -11,6 +11,7 @@ import {useAppSelector} from "../app/hooks";
 import {selectAuthStateId} from "../reducers/auth/auth";
 import {selectJourneysId} from "../reducers/journeyDetour/journeyDetour"; // Adjust import based on actual location
 import swal from "sweetalert";
+import MuiAwesomeButton from "./MuiAwesomeButton";
 
 interface JourneyDetourPopupProps {
     open: boolean;
@@ -198,8 +199,21 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({ open, onClose, 
                             </div>
                         </Box>
                     </Grid>
-                    <div style={{width: "100%", display: "flex", justifyContent: "center"}}>
-                        <AwesomeButton style={{width: "30%", top: "9vh", "--button-default-border-radius": "20px" }} onPress={TakeDetour}>Take Detour</AwesomeButton>
+                    <div style={{width: "100%", display: "flex", justifyContent: "center", paddingTop: "50px"}}>
+                        {/*<AwesomeButton style={{width: "30%", top: "9vh", "--button-default-border-radius": "20px" }} onPress={TakeDetour}>*/}
+                        {/*    Take Detour*/}
+                        {/*</AwesomeButton>*/}
+                        <MuiAwesomeButton
+                            backgroundColor={theme.palette.secondary.main}
+                            hoverColor={theme.palette.secondary.light}
+                            secondaryColor={theme.palette.secondary.dark}
+                            textColor={theme.palette.secondary.dark}
+                            onClick={TakeDetour}
+                        >
+                            <h1 style={{fontSize: "1vw", paddingRight: "1vw", paddingLeft: "1vw"}}>
+                                Take Detour
+                            </h1>
+                        </MuiAwesomeButton>
                     </div>
                 </Grid>
 
